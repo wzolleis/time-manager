@@ -1,11 +1,12 @@
 // Layout.tsx
-import React, { useState } from 'react';
-import { Theme, Grid, Flex, Box, Heading, Text, Button } from '@radix-ui/themes';
+import React, {useState} from 'react';
+import {Box, Flex, Grid, Heading, Theme} from '@radix-ui/themes';
 import '@radix-ui/themes/styles.css';
-import { LayoutDashboard, Settings, Users, Bell, Menu } from 'lucide-react';
+import {LayoutDashboard, Settings, Users} from 'lucide-react';
 import {type NavItem, SidebarNav} from "@layout/compoents/sidebar-nav.tsx";
-import {UserDropdown} from "@user/components/user-dropdown.tsx";
 import Content from "@layout/compoents/content.tsx";
+import type {User} from "@user/types.ts";
+import {Header} from "@layout/compoents/header.tsx";
 
 // Eigene Komponenten importieren
 
@@ -16,7 +17,7 @@ const NAVIGATION_ITEMS: NavItem[] = [
     { id: 'settings', label: 'Einstellungen', icon: Settings },
 ];
 
-const CURRENT_USER = {
+const CURRENT_USER: User = {
     name: 'Jack Schmidt',
     email: 'admin@example.com',
     avatarUrl: 'https://unsplash.com'
@@ -25,10 +26,7 @@ const CURRENT_USER = {
 export default function ApplicationLayout(): React.JSX.Element {
     const [activeTab, setActiveTab] = useState<string>('dashboard');
 
-    const handleLogout = (): void => {
-        console.log('Benutzer loggt sich aus...');
-        // Logik für Authentifizierungs-Reset hier einfügen
-    };
+
 
     const activeLabel = NAVIGATION_ITEMS.find(item => item.id === activeTab)?.label || 'Übersicht';
 
@@ -46,38 +44,10 @@ export default function ApplicationLayout(): React.JSX.Element {
 
                 {/* CONTAINER FÜR NAVBAR + CONTENT */}
                 <Flex direction="column" style={{ background: 'var(--gray-2)' }}>
+                    <Header activeLabel={activeLabel} currentUser={CURRENT_USER}/>
 
                     {/* TOP NAVBAR */}
-                    <Flex
-                        justify="between"
-                        align="center"
-                        px="4"
-                        py="3"
-                        style={{ background: 'var(--color-background)', borderBottom: '1px solid var(--gray-4)' }}
-                    >
-                        <Flex align="center" gap="3">
-                            <Box display={{ md: 'none' }}>
-                                <Button variant="ghost" size="2">
-                                    <Menu size={20} />
-                                </Button>
-                            </Box>
-                            <Box display={{ initial: 'none', sm: 'block' }}>
-                                <Heading size="3" color="gray">
-                                    {activeLabel}
-                                </Heading>
-                            </Box>
 
-                        </Flex>
-
-                        <Flex align="center" gap="3">
-                            <Button variant="ghost" size="2" radius="full">
-                                <Bell size={18} />
-                            </Button>
-
-                            {/* 2. Wiederverwendbares Dropdown */}
-                            <UserDropdown user={CURRENT_USER} onLogout={handleLogout} />
-                        </Flex>
-                    </Flex>
 
                     {/* CONTENT BEREICH */}
                     <Box p="6" style={{ flexGrow: 1, overflowY: 'auto' }}>
