@@ -6,6 +6,7 @@ import {StartEnd} from "@/components/common/start-end.tsx";
 import {MenuButton} from "@/components/common/menu-button.tsx";
 import {Breadcrumb} from "@/application/breadcrumb/components/breadcrumb.tsx";
 import type {NavItem} from "@/application/navigation/types.ts";
+import {useNavigate} from "@tanstack/react-router";
 
 export interface HeaderProps {
     activeItem: NavItem
@@ -13,11 +14,16 @@ export interface HeaderProps {
 }
 
 export const Header = (props: HeaderProps) => {
+    const navigate = useNavigate();
     const {activeItem, currentUser} = props;
     const handleLogout = (): void => {
         console.log('Benutzer loggt sich aus...');
         // Logik für Authentifizierungs-Reset hier einfügen
     };
+
+    const onItemSelected = (item: NavItem): void => {
+        navigate(item.link)
+    }
 
     return (
         <Flex
@@ -45,7 +51,7 @@ export const Header = (props: HeaderProps) => {
                 </Button>
 
                 {/* 2. Wiederverwendbares Dropdown */}
-                <UserDropdown user={currentUser} onLogout={handleLogout}/>
+                <UserDropdown onItemSelected={onItemSelected} user={currentUser} onLogout={handleLogout}/>
             </Flex>
         </Flex>
     )

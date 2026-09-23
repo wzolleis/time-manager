@@ -11,4 +11,10 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     {id: 'timemanagement', label: 'Arbeitszeiten', icon: WorkflowIcon, link: {to: '/time-management'}},
 ];
 
-export const DEFAULT_NAVIGATION_ITEM: NavItem = NAVIGATION_ITEMS.find(item => item.id === 'dashboard')!
+
+
+export const findNavigationItem = (id: string): NavItem => {
+    return NAVIGATION_ITEMS.find(item => item.id === id)!
+}
+
+export const DEFAULT_NAVIGATION_ITEM: NavItem = findNavigationItem('dashboard')

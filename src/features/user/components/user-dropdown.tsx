@@ -1,27 +1,28 @@
 // components/UserDropdown.tsx
 import React from 'react';
 import { DropdownMenu, Avatar } from '@radix-ui/themes';
-import { LogOut, User, Settings as SettingsIcon } from 'lucide-react';
+import { LogOut, User as UserIcon } from 'lucide-react';
+import type {User} from "@user/types.ts";
+import {findNavigationItem} from "@/application/navigation/nav-items.ts";
+import type {NavItem} from "@/application/navigation/types.ts";
 
-// Interface für den Benutzer
-interface UserProfile {
-    name: string;
-    email: string;
-    avatarUrl?: string;
-}
 
 // Interface für die Component Props
 interface UserDropdownProps {
-    user: UserProfile;
+    user: User
     onLogout: () => void;
+    onItemSelected: (item: NavItem) => void;
 }
 
-export const UserDropdown: React.FC<UserDropdownProps> = ({ user, onLogout }) => {
+export const UserDropdown: React.FC<UserDropdownProps> = ({ user, onItemSelected, onLogout }) => {
     const fallbackInitials = user.name
         .split(' ')
         .map((n) => n[0])
         .join('')
         .toUpperCase();
+
+    const settngsNavItem = findNavigationItem('settings')!
+    const {icon: SettingsIcon} = settngsNavItem
 
     return (
         <DropdownMenu.Root>
@@ -39,10 +40,10 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({ user, onLogout }) =>
 
             <DropdownMenu.Content variant="soft">
                 <DropdownMenu.Item>
-                    <User size={14} style={{ marginRight: '6px' }} /> Mein Profil
+                    <UserIcon size={14} style={{ marginRight: '6px' }} /> Mein Profil
                 </DropdownMenu.Item>
-                <DropdownMenu.Item>
-                    <SettingsIcon size={14} style={{ marginRight: '6px' }} /> Einstellungen
+                <DropdownMenu.Item onClick={() => onItemSelected(settngsNavItem)}>
+                    <SettingsIcon size={14} style={{ marginRight: '6px' }} /> {settngsNavItem.label}
                 </DropdownMenu.Item>
                 <DropdownMenu.Separator />
                 <DropdownMenu.Item color="red" onClick={onLogout}>
