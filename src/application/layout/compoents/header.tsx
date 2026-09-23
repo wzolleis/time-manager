@@ -1,15 +1,19 @@
-import {Box, Button, Flex, Heading } from "@radix-ui/themes";
+import {Box, Button, Flex, Text} from "@radix-ui/themes";
 import {UserDropdown} from "@user/components/user-dropdown.tsx";
-import {Bell, Menu } from "lucide-react";
+import {Bell} from "lucide-react";
 import type {User} from "@user/types.ts";
+import {StartEnd} from "@/components/common/start-end.tsx";
+import {MenuButton} from "@/components/common/menu-button.tsx";
+import {Breadcrumb} from "@/application/breadcrumb/components/breadcrumb.tsx";
+import type {NavItem} from "@/application/navigation/types.ts";
 
 export interface HeaderProps {
-    activeLabel: string
+    activeItem: NavItem
     currentUser: User
 }
 
 export const Header = (props: HeaderProps) => {
-    const {activeLabel, currentUser} = props;
+    const {activeItem, currentUser} = props;
     const handleLogout = (): void => {
         console.log('Benutzer loggt sich aus...');
         // Logik für Authentifizierungs-Reset hier einfügen
@@ -23,18 +27,16 @@ export const Header = (props: HeaderProps) => {
             py="3"
             style={{background: 'var(--color-background)', borderBottom: '1px solid var(--gray-4)'}}
         >
-            <Flex align="center" gap="3">
+            <Flex align="center" gap="3" width={'100%'}>
+                {/* Hamburger */}
                 <Box display={{md: 'none'}}>
-                    <Button variant="ghost" size="2">
-                        <Menu size={20}/>
-                    </Button>
+                    <MenuButton/>
                 </Box>
-                <Box display={{initial: 'none', sm: 'block'}}>
-                    <Heading size="3" color="gray">
-                        {activeLabel}
-                    </Heading>
-                </Box>
-
+                <StartEnd>
+                    {/** TODO: Hier muss noch der Pfad für die Breadcrumb verwendet werden */}
+                    <Breadcrumb path={[activeItem]} />
+                    <Text color="gray">{`Hallo ${currentUser.name}`}</Text>
+                </StartEnd>
             </Flex>
 
             <Flex align="center" gap="3">

@@ -1,15 +1,30 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+import {StrictMode} from 'react'
+import {createRoot} from 'react-dom/client'
 import './index.css'
 import "@radix-ui/themes/styles.css";
 
-import App from './App.tsx'
 import {Theme} from "@radix-ui/themes";
+import {createRouter, RouterProvider} from "@tanstack/react-router";
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-      <Theme>
-            <App />
-      </Theme>
-  </StrictMode>,
+// Wird vom Router-Plugin automatisch aus src/routes/ generiert
+import {routeTree} from './routeTree.gen'
+
+const router = createRouter({routeTree})
+
+// Typsicherheit für <Link>, useNavigate usw.
+declare module '@tanstack/react-router' {
+    interface Register {
+        router: typeof router
+    }
+}
+
+const rootElement = document.getElementById('root')!
+
+
+createRoot(rootElement).render(
+    <StrictMode>
+        <Theme>
+            <RouterProvider router={router}/>
+        </Theme>
+    </StrictMode>,
 )
