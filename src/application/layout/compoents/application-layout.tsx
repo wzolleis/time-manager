@@ -6,9 +6,9 @@ import {SidebarNav} from "@/application/layout/compoents/sidebar-nav.tsx";
 import Content from "@/application/layout/compoents/content.tsx";
 import {Header} from "@/application/layout/compoents/header.tsx";
 import {DEFAULT_NAVIGATION_ITEM, NAVIGATION_ITEMS} from "@/application/navigation/nav-items.ts";
-import {CURRENT_USER} from "@user/constants.ts";
 import {useNavigate} from "@tanstack/react-router";
 import type {NavItem} from "@/application/navigation/types.ts";
+import {CURRENT_USER} from "@user/types.ts";
 
 export default function ApplicationLayout(): React.JSX.Element {
     const [activeTab, setActiveTab] = useState<string>('dashboard');
