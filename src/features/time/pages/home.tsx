@@ -1,8 +1,9 @@
 import {ActionCard} from "@/common/components/dashboard-action/action-card.tsx";
-import {actions} from "@features/time-management/types.ts";
+import {actions} from "@features/time/dashboard-actions.ts";
 
 
-export function TimeManagementHome() {
+export function Home() {
+
     const handleConfirm = (id: string) => {
         // Hier den eigentlichen API-Aufruf einbauen
         console.log("Bestätigt:", id);

@@ -3,7 +3,8 @@ import type {ValuesOf} from "@/common/types.ts";
 const navItemIds = [
     "settings",
     "dashboard",
-    "timemanagement"
+    "timemanagement",
+    "time-new"
 ] as const
 
 export function isNavItemId(value: string): value is NavItemId {

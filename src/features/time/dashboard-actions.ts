@@ -1,7 +1,7 @@
 import {BarChart3, PlusCircle, Trash2} from "lucide-react";
 import type {DashboardAction} from "@/common/components/dashboard-action/types.ts";
 
-export const actions = [
+export const actions: DashboardAction[] = [
     {
         id: "report",
         kind: "link",
@@ -9,7 +9,7 @@ export const actions = [
         description: "Auswertungen und Kennzahlen der letzten 30 Tage ansehen.",
         label: "Report öffnen",
         icon: BarChart3,
-        href: "/reports",
+        to: "/time/reports",
     },
     {
         id: "create-item",
@@ -18,7 +18,7 @@ export const actions = [
         description: "Ein neues Item mit allen Angaben anlegen.",
         label: "Item anlegen",
         icon: PlusCircle,
-        href: "/items/new",
+        to: "/time/new",
     },
     {
         id: "delete-items",
@@ -31,7 +31,7 @@ export const actions = [
         confirmText:
             "Die ausgewählten Items werden dauerhaft gelöscht. Das lässt sich nicht rückgängig machen.",
     },
-] as const satisfies readonly DashboardAction[];
+] as const
 
 // Union der Ids: "report" | "create-item" | "delete-items"
 export type ActionId = (typeof actions)[number]["id"];

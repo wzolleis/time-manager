@@ -1,6 +1,7 @@
 /* ---------- Typen ---------- */
 
 import type {LucideIcon} from "lucide-react";
+import type {LinkProps} from "@tanstack/react-router";
 
 export type ActionBase = {
     id: string;
@@ -11,10 +12,9 @@ export type ActionBase = {
 };
 
 // Springt zu einer anderen Seite
-export type LinkAction = ActionBase & {
+export type LinkAction = ActionBase & LinkProps & {
     kind: "link";
-    href: string;
-};
+}
 
 // Braucht eine Bestätigung, bevor etwas passiert
 export type ConfirmAction = ActionBase & {
@@ -24,3 +24,11 @@ export type ConfirmAction = ActionBase & {
 };
 
 export type DashboardAction = LinkAction | ConfirmAction;
+
+export const isLinkAction = (action: unknown | undefined): action is LinkAction => {
+    return (action as LinkAction).kind === "link";
+}
+
+export const isConfirmAction = (action: unknown | undefined): action is ConfirmAction => {
+    return (action as ConfirmAction).kind === "confirm";
+}

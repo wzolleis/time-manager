@@ -1,10 +1,13 @@
 import type {LucideIcon} from "lucide-react";
-import type {ValidateLinkOptions} from "@tanstack/react-router";
 import type {NavItemId} from "@/application/navigation/nav-item-id.ts";
+import type {LinkProps} from "@tanstack/react-router";
 
-export interface NavItem {
+export type NavItem = {
     id: NavItemId;
     label: string;
     icon: LucideIcon;
-    link: ValidateLinkOptions
+} & LinkProps
+
+export type  NavNode = NavItem & {
+    childItems: NavNode[]
 }

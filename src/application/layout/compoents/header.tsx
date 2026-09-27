@@ -9,20 +9,19 @@ import type {NavItem} from "@/application/navigation/types.ts";
 import {useNavigate} from "@tanstack/react-router";
 
 export interface HeaderProps {
-    activeItem: NavItem
     currentUser: User
 }
 
 export const Header = (props: HeaderProps) => {
     const navigate = useNavigate();
-    const {activeItem, currentUser} = props;
+    const {currentUser} = props;
     const handleLogout = (): void => {
         console.log('Benutzer loggt sich aus...');
         // Logik für Authentifizierungs-Reset hier einfügen
     };
 
     const onItemSelected = (item: NavItem): void => {
-        navigate(item.link)
+        navigate({to: item.to})
     }
 
     return (
@@ -40,7 +39,7 @@ export const Header = (props: HeaderProps) => {
                 </Box>
                 <StartEnd>
                     {/** TODO: Hier muss noch der Pfad für die Breadcrumb verwendet werden */}
-                    <Breadcrumb path={[activeItem]} />
+                    <Breadcrumb/>
                     <Text color="gray">{`Hallo ${currentUser.name}`}</Text>
                 </StartEnd>
             </Flex>

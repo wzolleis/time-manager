@@ -12,6 +12,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger
 } from "@/components/ui/alert-dialog.tsx";
+import {Link} from "@tanstack/react-router";
 
 export function ActionCard({
                                action,
@@ -43,7 +44,7 @@ export function ActionCard({
                 {action.kind === "link" ? (
                     // asChild: Der Button rendert den Link, so bleibt es ein echtes <a>
                     <Button asChild className="w-full">
-                        <a href={action.href}>{action.label}</a>
+                        <Link to={action.to}>{action.label}</Link>
                     </Button>
                 ) : (
                     <AlertDialog>
