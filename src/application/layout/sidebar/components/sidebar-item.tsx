@@ -1,24 +1,15 @@
-import {ChevronDown} from "lucide-react";
-import {Link} from "@tanstack/react-router";
+import type {NavNode} from "@/application/navigation/types.ts";
 import {useState} from "react";
-import type {NavItem, NavNode} from "@/application/navigation/types.ts";
-import {buildNavTree} from "@/application/navigation/nav-utils.ts";
+import {Link} from "@tanstack/react-router";
+import {ChevronDown} from "lucide-react";
+import {toNavNodeLinkProps} from "@/application/navigation/nav-utils.ts";
 
-export function Sidebar({items}: { items: NavItem[] }) {
-    const tree = buildNavTree(items);
-    return (
-        <nav className="flex flex-col gap-1 w-64 p-2">
-            {tree.map((node) => (
-                <SidebarItem key={node.id} node={node}/>
-            ))}
-        </nav>
-    );
-}
-
-function SidebarItem({node, depth = 0}: { node: NavNode; depth?: number }) {
-    const {label, icon: Icon, childItems, ...linkProps} = node;
+export function SidebarItem({node}: { node: NavNode }) {
+    const {label, icon: Icon, childItems} = node;
     const hasChildren = childItems.length > 0;
     const [open, setOpen] = useState(true);
+
+    const linkProps = toNavNodeLinkProps(node);
 
     return (
         <div>
@@ -48,7 +39,7 @@ function SidebarItem({node, depth = 0}: { node: NavNode; depth?: number }) {
             {hasChildren && open && (
                 <div className="ml-6 mt-1 flex flex-col gap-1 border-l pl-3">
                     {childItems.map((child) => (
-                        <SidebarItem key={child.id} node={child} depth={depth + 1}/>
+                        <SidebarItem key={child.id} node={child}/>
                     ))}
                 </div>
             )}

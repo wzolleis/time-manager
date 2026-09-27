@@ -1,10 +1,10 @@
 // components/UserDropdown.tsx
 import React from 'react';
-import { DropdownMenu, Avatar } from '@radix-ui/themes';
-import { LogOut, User as UserIcon } from 'lucide-react';
+import {Avatar, DropdownMenu} from '@radix-ui/themes';
+import {LogOut, User as UserIcon} from 'lucide-react';
 import type {User} from "@user/types.ts";
-import {findNavigationItem} from "@/application/navigation/nav-items.ts";
 import type {NavItem} from "@/application/navigation/types.ts";
+import {findNavigationItem} from "@/application/navigation/nav-utils.ts";
 
 
 // Interface für die Component Props
@@ -21,8 +21,8 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({ user, onItemSelected
         .join('')
         .toUpperCase();
 
-    const settngsNavItem = findNavigationItem('settings')!
-    const {icon: SettingsIcon} = settngsNavItem
+    const settingsNavItem = findNavigationItem('settings')!
+    const {icon: SettingsIcon} = settingsNavItem
 
     return (
         <DropdownMenu.Root>
@@ -42,8 +42,8 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({ user, onItemSelected
                 <DropdownMenu.Item>
                     <UserIcon size={14} style={{ marginRight: '6px' }} /> Mein Profil
                 </DropdownMenu.Item>
-                <DropdownMenu.Item onClick={() => onItemSelected(settngsNavItem)}>
-                    <SettingsIcon size={14} style={{ marginRight: '6px' }} /> {settngsNavItem.label}
+                <DropdownMenu.Item onClick={() => onItemSelected(settingsNavItem)}>
+                    <SettingsIcon size={14} style={{marginRight: '6px'}}/> {settingsNavItem.label}
                 </DropdownMenu.Item>
                 <DropdownMenu.Separator />
                 <DropdownMenu.Item color="red" onClick={onLogout}>

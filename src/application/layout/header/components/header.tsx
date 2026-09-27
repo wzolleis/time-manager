@@ -7,6 +7,7 @@ import {MenuButton} from "@/components/common/menu-button.tsx";
 import {Breadcrumb} from "@/application/breadcrumb/components/breadcrumb.tsx";
 import type {NavItem} from "@/application/navigation/types.ts";
 import {useNavigate} from "@tanstack/react-router";
+import {NAVIGATION_ITEMS} from "@/application/navigation/nav-items.ts";
 
 export interface HeaderProps {
     currentUser: User
@@ -38,8 +39,7 @@ export const Header = (props: HeaderProps) => {
                     <MenuButton/>
                 </Box>
                 <StartEnd>
-                    {/** TODO: Hier muss noch der Pfad für die Breadcrumb verwendet werden */}
-                    <Breadcrumb/>
+                    <Breadcrumb items={NAVIGATION_ITEMS}/> {/* dieselbe flache Liste wie für buildNavTree(navItems) */}
                     <Text color="gray">{`Hallo ${currentUser.name}`}</Text>
                 </StartEnd>
             </Flex>
