@@ -1,5 +1,5 @@
 import {LayoutDashboard, Settings, Timer, WorkflowIcon} from "lucide-react";
-import type {NavItem} from "@/application/navigation/types.ts";
+import type {NavItem} from "@/common/navigation/types.ts";
 
 export const NAVIGATION_ITEMS: NavItem[] = [
     {id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, to: '/dashboard', children: []},

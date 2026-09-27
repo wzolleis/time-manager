@@ -4,7 +4,7 @@ import {Box, Flex, Grid, Theme} from '@radix-ui/themes';
 import '@radix-ui/themes/styles.css';
 import Content from "@/application/layout/compoents/content.tsx";
 import {Header} from "@/application/layout/header/components/header.tsx";
-import {NAVIGATION_ITEMS} from "@/application/navigation/nav-items.ts";
+import {NAVIGATION_ITEMS} from "@/common/navigation/nav-items.ts";
 import {CURRENT_USER} from "@user/types.ts";
 import {Sidebar} from "@/application/layout/sidebar/components/sidebar.tsx";
 

@@ -3,8 +3,8 @@ import React from 'react';
 import {Avatar, DropdownMenu} from '@radix-ui/themes';
 import {LogOut, User as UserIcon} from 'lucide-react';
 import type {User} from "@user/types.ts";
-import type {NavItem} from "@/application/navigation/types.ts";
-import {findNavigationItem} from "@/application/navigation/nav-utils.ts";
+import type {NavItem} from "@/common/navigation/types.ts";
+import {findNavigationItem} from "@/common/navigation/nav-utils.ts";
 
 
 // Interface für die Component Props

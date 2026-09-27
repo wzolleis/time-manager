@@ -1,5 +1,5 @@
 import type {LucideIcon} from "lucide-react";
-import type {NavItemId} from "@/application/navigation/nav-item-id.ts";
+import type {NavItemId} from "@/common/navigation/nav-item-id.ts";
 import type {LinkProps} from "@tanstack/react-router";
 
 export type NavItem = {
