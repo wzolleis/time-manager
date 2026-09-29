@@ -5,7 +5,7 @@ import '@radix-ui/themes/styles.css';
 import Content from "@/application/layout/compoents/content.tsx";
 import {Header} from "@/application/layout/header/components/header.tsx";
 import {NAVIGATION_ITEMS} from "@/common/navigation/nav-items.ts";
-import {CURRENT_USER} from "@user/types.ts";
+import {CURRENT_USER} from "@features/users/types.ts";
 import {Sidebar} from "@/application/layout/sidebar/components/sidebar.tsx";
 
 export default function ApplicationLayout(): React.JSX.Element {

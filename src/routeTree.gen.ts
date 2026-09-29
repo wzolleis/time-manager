@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as UsersRouteImport } from './routes/users'
 import { Route as TimeIndexRouteImport } from './routes/time/index'
 import { Route as TimeNewRouteImport } from './routes/time/new'
 import { Route as TimeReportsRouteImport } from './routes/time/reports'
@@ -29,6 +30,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsersRoute = UsersRouteImport.update({
+  id: '/users',
+  path: '/users',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TimeIndexRoute = TimeIndexRouteImport.update({
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/settings': typeof SettingsRoute
+  '/users': typeof UsersRoute
   '/time/new': typeof TimeNewRoute
   '/time/reports': typeof TimeReportsRoute
   '/time/': typeof TimeIndexRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/settings': typeof SettingsRoute
+  '/users': typeof UsersRoute
   '/time/new': typeof TimeNewRoute
   '/time/reports': typeof TimeReportsRoute
   '/time': typeof TimeIndexRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/settings': typeof SettingsRoute
+  '/users': typeof UsersRoute
   '/time/new': typeof TimeNewRoute
   '/time/reports': typeof TimeReportsRoute
   '/time/': typeof TimeIndexRoute
@@ -75,14 +84,28 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/dashboard' | '/settings' | '/time/new' | '/time/reports' | '/time/'
+    | '/'
+    | '/dashboard'
+    | '/settings'
+    | '/users'
+    | '/time/new'
+    | '/time/reports'
+    | '/time/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/settings' | '/time/new' | '/time/reports' | '/time'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/settings'
+    | '/users'
+    | '/time/new'
+    | '/time/reports'
+    | '/time'
   id:
     | '__root__'
     | '/'
     | '/dashboard'
     | '/settings'
+    | '/users'
     | '/time/new'
     | '/time/reports'
     | '/time/'
@@ -92,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
   SettingsRoute: typeof SettingsRoute
+  UsersRoute: typeof UsersRoute
   TimeNewRoute: typeof TimeNewRoute
   TimeReportsRoute: typeof TimeReportsRoute
   TimeIndexRoute: typeof TimeIndexRoute
@@ -118,6 +142,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/users': {
+      id: '/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/time/': {
@@ -148,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
   SettingsRoute: SettingsRoute,
+  UsersRoute: UsersRoute,
   TimeNewRoute: TimeNewRoute,
   TimeReportsRoute: TimeReportsRoute,
   TimeIndexRoute: TimeIndexRoute,

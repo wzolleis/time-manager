@@ -15,6 +15,9 @@ dist-ssr
 #env
 .env
 
+#netlify
+deno.lock
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

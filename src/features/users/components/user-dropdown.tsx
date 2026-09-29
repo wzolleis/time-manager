@@ -2,7 +2,7 @@
 import React from 'react';
 import {Avatar, DropdownMenu} from '@radix-ui/themes';
 import {LogOut, User as UserIcon} from 'lucide-react';
-import type {User} from "@user/types.ts";
+import type {User} from "@features/users/types.ts";
 import {findNavigationItem} from "@/common/navigation/nav-utils.ts";
 import type {NavItem} from "@/common/navigation/nav-items.ts";
 
