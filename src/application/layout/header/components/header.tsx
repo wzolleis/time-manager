@@ -5,9 +5,8 @@ import type {User} from "@user/types.ts";
 import {StartEnd} from "@/components/common/start-end.tsx";
 import {MenuButton} from "@/components/common/menu-button.tsx";
 import {Breadcrumb} from "@/application/breadcrumb/components/breadcrumb.tsx";
-import type {NavItem} from "@/common/navigation/types.ts";
 import {useNavigate} from "@tanstack/react-router";
-import {NAVIGATION_ITEMS} from "@/common/navigation/nav-items.ts";
+import {NAVIGATION_ITEMS, type NavItem} from "@/common/navigation/nav-items.ts";
 
 export interface HeaderProps {
     currentUser: User

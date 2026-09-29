@@ -1,6 +1,6 @@
-import type {NavItem} from "@/common/navigation/types.ts";
 import {buildNavTree} from "@/common/navigation/nav-utils.ts";
 import {SidebarItem} from "@/application/layout/sidebar/components/sidebar-item.tsx";
+import type {NavItem} from "@/common/navigation/nav-items.ts";
 
 export function Sidebar({items}: { items: NavItem[] }) {
     const tree = buildNavTree(items);
