@@ -8,6 +8,9 @@
       "path": "./tsconfig.node.json"
     }
   ],
+  "exclude": [
+    "netlify/edge-functions"
+  ],
   "compilerOptions": {
     "types": [
       "node"

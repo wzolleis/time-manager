@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@netlify/edge-functions": "^4.0.0",
     "@netlify/functions": "^6.0.0",
     "@tanstack/router-plugin": "^1.168.40",
     "@types/node": "^24.13.6",

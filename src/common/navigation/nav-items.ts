@@ -1,4 +1,4 @@
-import {ClockPlus, LayoutDashboard, type LucideIcon, Settings, Summary, WorkflowIcon} from "lucide-react";
+import {ClockPlus, LayoutDashboard, type LucideIcon, Settings, Summary, User, WorkflowIcon} from "lucide-react";
 import type {ValuesOf} from "@/common/types.ts";
 import type {LinkProps} from "@tanstack/react-router";
 
@@ -7,7 +7,8 @@ export const navItemIds = [
     "dashboard",
     "time",
     "time-new",
-    "time-reports"
+    "time-reports",
+    "users"
 ] as const
 export type NavItemId = ValuesOf<typeof navItemIds>;
 
@@ -34,5 +35,7 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     {id: 'time', label: 'Arbeitszeiten', icon: WorkflowIcon, to: '/time', children: []},
     {id: 'time-reports', label: 'Zeit-Report', icon: Summary, to: '/time/reports', children: []},
     {id: 'time-new', label: 'Neue Zeit eintragen', icon: ClockPlus, to: '/time/new', children: []},
+    {id: 'users', label: 'Benutzer verwalten', icon: User, to: '/users', children: []},
+
 ] as const
 
