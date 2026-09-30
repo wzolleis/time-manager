@@ -34,5 +34,8 @@
       "@layout/*": ["./src/features/layout/*"]
     }
   },
-  "include": ["src"]
+  "include": [
+    "src",
+    "shared"
+  ]
 }

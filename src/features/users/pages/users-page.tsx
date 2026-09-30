@@ -1,7 +1,8 @@
 import {useState} from "react";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {createUser, deleteUser, fetchUsers} from "@//api/users";
-import {UserRow} from "@features/users/pages/user-row.tsx";
+import {UserTable} from "@features/users/pages/user-table.tsx";
+import type {User} from "@shared/user.ts";
 
 export function UsersPage() {
     const qc = useQueryClient();
@@ -33,8 +34,9 @@ export function UsersPage() {
         );
     };
 
-    const handleDelete = (id: string, userName: string) => {
-        if (window.confirm(`${userName} wirklich löschen?`)) remove.mutate(id);
+    // in UsersPage: handleDelete nimmt jetzt den ganzen User
+    const handleDelete = (user: User) => {
+        if (window.confirm(`${user.name} wirklich löschen?`)) remove.mutate(user.id);
     };
 
     return (
@@ -75,16 +77,9 @@ export function UsersPage() {
             )}
 
             {users && (
-                <ul>
-                    {users.map((u) => (
-                        <UserRow
-                            key={u.id}
-                            user={u}
-                            onDelete={handleDelete}
-                            deleting={remove.isPending && remove.variables === u.id}
-                        />
-                    ))}
-                </ul>
+                <UserTable users={users}
+                           onDelete={handleDelete}
+                           deletingId={remove.isPending ? remove.variables : undefined}/>
             )}
             {remove.isError && <p role="alert">{remove.error.message}</p>}
         </div>
