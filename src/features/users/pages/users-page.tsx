@@ -1,7 +1,7 @@
-// src/routes/users.tsx
 import {useState} from "react";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {createUser, deleteUser, fetchUsers} from "@//api/users";
+import {UserRow} from "@features/users/pages/user-row.tsx";
 
 export function UsersPage() {
     const qc = useQueryClient();
@@ -77,15 +77,12 @@ export function UsersPage() {
             {users && (
                 <ul>
                     {users.map((u) => (
-                        <li key={u.id}>
-                            <strong>{u.name}</strong> ({u.email}){" "}
-                            <button
-                                onClick={() => handleDelete(u.id, u.name)}
-                                disabled={remove.isPending && remove.variables === u.id}
-                            >
-                                Löschen
-                            </button>
-                        </li>
+                        <UserRow
+                            key={u.id}
+                            user={u}
+                            onDelete={handleDelete}
+                            deleting={remove.isPending && remove.variables === u.id}
+                        />
                     ))}
                 </ul>
             )}

@@ -16,8 +16,13 @@
       "node"
     ],
     "paths": {
+      "@project/*": [
+        "."
+      ],
       "@/*": ["./src/*"],
-      "@/features/*": ["./features/*"],
+      "@/features/*": [
+        "./src/features/*"
+      ],
       "@user/*": ["./src/features/user/*"],
       "@layout/*": ["./src/features/layout/*"]
     }
