@@ -1,8 +1,8 @@
 import {useState} from "react";
 import {Link} from "@tanstack/react-router";
 import {ChevronDown} from "lucide-react";
-import {toNavNodeLinkProps} from "@/common/navigation/nav-utils.ts";
-import type {NavNode} from "@/common/navigation/nav-items.ts";
+import {toNavNodeLinkProps} from "@/application/navigation/nav-utils.ts";
+import type {NavNode} from "@/application/navigation/nav-items.ts";
 
 export function SidebarItem({node}: { node: NavNode }) {
     const {label, icon: Icon, childItems} = node;

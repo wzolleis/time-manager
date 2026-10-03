@@ -32,10 +32,10 @@ export type  NavNode = NavItem & {
 export const NAVIGATION_ITEMS: NavItem[] = [
     {id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, to: '/dashboard', children: []},
     {id: 'settings', label: 'Einstellungen', icon: Settings, to: '/settings', children: []},
+    {id: 'users', label: 'Benutzer verwalten', icon: User, to: '/users', children: []},
     {id: 'time', label: 'Arbeitszeiten', icon: WorkflowIcon, to: '/time', children: []},
     {id: 'time-reports', label: 'Zeit-Report', icon: Summary, to: '/time/reports', children: []},
     {id: 'time-new', label: 'Neue Zeit eintragen', icon: ClockPlus, to: '/time/new', children: []},
-    {id: 'users', label: 'Benutzer verwalten', icon: User, to: '/users', children: []},
 
 ] as const
 

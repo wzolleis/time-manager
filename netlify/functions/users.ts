@@ -6,23 +6,13 @@ import {z} from "zod";
 import {db} from "./lib/db";
 import {users} from "../../db/schema";
 import {UserCreateSchema, UserUpdateSchema} from "../../shared/user";
+import {hasDbCode} from "./lib/db-errors";
 
 const IdSchema = z.string().uuid();
 
 const getUser = async (id: string) => {
     const [row] = await db.select().from(users).where(eq(users.id, id)).limit(1);
     return row ?? null;
-};
-
-// Drizzle verpackt DB-Fehler teils in "cause", deshalb die Kette durchsuchen
-const isDuplicate = (err: unknown): boolean => {
-    let e: unknown = err;
-    while (typeof e === "object" && e !== null) {
-        const {code, cause} = e as { code?: unknown; cause?: unknown };
-        if (code === "ER_DUP_ENTRY") return true;
-        e = cause;
-    }
-    return false;
 };
 
 const readBody = async (req: Request): Promise<unknown> => {
@@ -81,8 +71,14 @@ export default async (req: Request, context: Context) => {
         if (err instanceof z.ZodError) {
             return Response.json({errors: err.issues}, {status: 400});
         }
-        if (isDuplicate(err)) {
+        if (hasDbCode(err, "ER_DUP_ENTRY")) {
             return Response.json({error: "Diese E-Mail existiert bereits"}, {status: 409});
+        }
+        if (hasDbCode(err, "ER_ROW_IS_REFERENCED_2")) {
+            return Response.json(
+                {error: "User hat noch Zeitbuchungen und kann nicht gelöscht werden"},
+                {status: 409},
+            );
         }
         console.error(err);
         return Response.json({error: "Interner Fehler"}, {status: 500});
