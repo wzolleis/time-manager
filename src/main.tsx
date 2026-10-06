@@ -10,6 +10,7 @@ import {createRouter, RouterProvider} from "@tanstack/react-router";
 import {routeTree} from './routeTree.gen'
 
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
+import {UserProvider} from "./components/user-provider";
 
 const queryClient = new QueryClient();
 
@@ -29,7 +30,9 @@ createRoot(rootElement).render(
     <StrictMode>
         <Theme>
             <QueryClientProvider client={queryClient}>
-                <RouterProvider router={router}/>
+                <UserProvider>
+                    <RouterProvider router={router}/>
+                </UserProvider>
             </QueryClientProvider>
         </Theme>
     </StrictMode>,

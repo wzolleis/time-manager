@@ -5,7 +5,6 @@ import '@radix-ui/themes/styles.css';
 import Content from "@/application/layout/compoents/content.tsx";
 import {Header} from "@/application/layout/header/components/header.tsx";
 import {NAVIGATION_ITEMS} from "@/application/navigation/nav-items.ts";
-import {CURRENT_USER} from "@features/users/types.ts";
 import {Sidebar} from "@/application/layout/sidebar/components/sidebar.tsx";
 
 export default function ApplicationLayout(): React.JSX.Element {
@@ -21,7 +20,7 @@ export default function ApplicationLayout(): React.JSX.Element {
 
                     {/* CONTAINER FÜR NAVBAR + CONTENT */}
                     <Flex direction="column" style={{background: 'var(--gray-2)'}}>
-                        <Header currentUser={CURRENT_USER}/>
+                        <Header/>
 
                         {/* CONTENT BEREICH */}
                         <Box p="6" style={{flexGrow: 1, overflowY: 'auto'}}>

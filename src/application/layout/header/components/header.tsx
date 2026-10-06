@@ -1,20 +1,18 @@
 import {Box, Button, Flex, Text} from "@radix-ui/themes";
 import {UserDropdown} from "@features/users/components/user-dropdown.tsx";
 import {Bell} from "lucide-react";
-import type {User} from "@features/users/types.ts";
 import {StartEnd} from "@/components/common/start-end.tsx";
 import {MenuButton} from "@/components/common/menu-button.tsx";
 import {Breadcrumb} from "@/application/breadcrumb/components/breadcrumb.tsx";
 import {useNavigate} from "@tanstack/react-router";
 import {NAVIGATION_ITEMS, type NavItem} from "@/application/navigation/nav-items.ts";
+import {UserSelect} from "@/components/user-select.tsx";
+import {useCurrentUser} from "@/lib/user-context.ts";
+import type {User} from "@shared/user.ts";
 
-export interface HeaderProps {
-    currentUser: User
-}
-
-export const Header = (props: HeaderProps) => {
+export const Header = () => {
     const navigate = useNavigate();
-    const {currentUser} = props;
+    const userContext = useCurrentUser()
     const handleLogout = (): void => {
         console.log('Benutzer loggt sich aus...');
         // Logik für Authentifizierungs-Reset hier einfügen
@@ -23,6 +21,9 @@ export const Header = (props: HeaderProps) => {
     const onItemSelected = (item: NavItem): void => {
         navigate({to: item.to})
     }
+
+
+    const currentUser: User | null = userContext.currentUser;
 
     return (
         <Flex
@@ -39,7 +40,7 @@ export const Header = (props: HeaderProps) => {
                 </Box>
                 <StartEnd>
                     <Breadcrumb items={NAVIGATION_ITEMS}/> {/* dieselbe flache Liste wie für buildNavTree(navItems) */}
-                    <Text color="gray">{`Hallo ${currentUser.name}`}</Text>
+                    <Text color="gray">{`Hallo ${currentUser?.name}`}</Text>
                 </StartEnd>
             </Flex>
 
@@ -48,6 +49,7 @@ export const Header = (props: HeaderProps) => {
                     <Bell size={18}/>
                 </Button>
 
+                <UserSelect/>
                 {/* 2. Wiederverwendbares Dropdown */}
                 <UserDropdown onItemSelected={onItemSelected} user={currentUser} onLogout={handleLogout}/>
             </Flex>

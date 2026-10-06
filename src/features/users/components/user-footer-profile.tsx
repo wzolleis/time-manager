@@ -1,5 +1,5 @@
 import {Avatar, Box, Flex, Text} from "@radix-ui/themes";
-import type {User} from "@features/users/types.ts";
+import type {User} from "@shared/user.ts";
 
 export interface UserFooterProfileProps {
     user: User;
@@ -12,7 +12,7 @@ export const UserFooterProfile = (props: UserFooterProfileProps) => {
     return (
         <Flex gap="3" align="center" style={{borderTop: '1px solid var(--gray-4)', paddingTop: '16px'}}>
             <Avatar
-                src={user.avatarUrl}
+                src={user.avatarUrl ?? ''}
                 fallback={fallbackInitials}
                 size="2"
                 radius="full"
