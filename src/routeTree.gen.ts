@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as UsersRouteImport } from './routes/users'
+import { Route as TimeStampIndexRouteImport } from './routes/time-stamp/index'
 import { Route as TimeIndexRouteImport } from './routes/time/index'
 import { Route as TimeNewRouteImport } from './routes/time/new'
 import { Route as TimeReportsRouteImport } from './routes/time/reports'
@@ -35,6 +36,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const UsersRoute = UsersRouteImport.update({
   id: '/users',
   path: '/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TimeStampIndexRoute = TimeStampIndexRouteImport.update({
+  id: '/time-stamp/',
+  path: '/time-stamp/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TimeIndexRoute = TimeIndexRouteImport.update({
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/users': typeof UsersRoute
   '/time/new': typeof TimeNewRoute
   '/time/reports': typeof TimeReportsRoute
+  '/time-stamp/': typeof TimeStampIndexRoute
   '/time/': typeof TimeIndexRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/users': typeof UsersRoute
   '/time/new': typeof TimeNewRoute
   '/time/reports': typeof TimeReportsRoute
+  '/time-stamp': typeof TimeStampIndexRoute
   '/time': typeof TimeIndexRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/users': typeof UsersRoute
   '/time/new': typeof TimeNewRoute
   '/time/reports': typeof TimeReportsRoute
+  '/time-stamp/': typeof TimeStampIndexRoute
   '/time/': typeof TimeIndexRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/time/new'
     | '/time/reports'
+    | '/time-stamp/'
     | '/time/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/time/new'
     | '/time/reports'
+    | '/time-stamp'
     | '/time'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/time/new'
     | '/time/reports'
+    | '/time-stamp/'
     | '/time/'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +130,7 @@ export interface RootRouteChildren {
   UsersRoute: typeof UsersRoute
   TimeNewRoute: typeof TimeNewRoute
   TimeReportsRoute: typeof TimeReportsRoute
+  TimeStampIndexRoute: typeof TimeStampIndexRoute
   TimeIndexRoute: typeof TimeIndexRoute
 }
 
@@ -151,6 +164,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/time-stamp/': {
+      id: '/time-stamp/'
+      path: '/time-stamp'
+      fullPath: '/time-stamp/'
+      preLoaderRoute: typeof TimeStampIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/time/': {
       id: '/time/'
       path: '/time'
@@ -182,6 +202,7 @@ const rootRouteChildren: RootRouteChildren = {
   UsersRoute: UsersRoute,
   TimeNewRoute: TimeNewRoute,
   TimeReportsRoute: TimeReportsRoute,
+  TimeStampIndexRoute: TimeStampIndexRoute,
   TimeIndexRoute: TimeIndexRoute,
 }
 export const routeTree = rootRouteImport

@@ -21,8 +21,6 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({user, onItemSelected,
 
     fallbackInitials = fallbackInitials.substring(0, 1)
 
-    console.log('->>>', fallbackInitials);
-
     const settingsNavItem = findNavigationItem('settings')!
     const {icon: SettingsIcon} = settingsNavItem
 

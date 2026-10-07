@@ -6,7 +6,7 @@ export const navItemIds = [
     "settings",
     "dashboard",
     "time",
-    "time-new",
+    "time-stamp",
     "time-reports",
     "users"
 ] as const
@@ -35,7 +35,7 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     {id: 'users', label: 'Benutzer verwalten', icon: User, to: '/users', children: []},
     {id: 'time', label: 'Arbeitszeiten', icon: WorkflowIcon, to: '/time', children: []},
     {id: 'time-reports', label: 'Zeit-Report', icon: Summary, to: '/time/reports', children: []},
-    {id: 'time-new', label: 'Neue Zeit eintragen', icon: ClockPlus, to: '/time/new', children: []},
+    {id: 'time-stamp', label: 'Zeiterfassung', icon: ClockPlus, to: '/time-stamp', children: []},
 
 ] as const
 

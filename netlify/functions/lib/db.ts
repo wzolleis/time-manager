@@ -10,7 +10,8 @@ const pool = mysql.createPool({
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    connectionLimit: 1, // Shared Hosting erlaubt oft nur wenige Verbindungen
+    connectionLimit: 10, // Shared Hosting erlaubt oft nur wenige Verbindungen
+    connectTimeout: 30000
 });
 
 export const db = drizzle(pool, {schema, mode: "default"});
