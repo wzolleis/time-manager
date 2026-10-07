@@ -1,14 +1,13 @@
 import {ActionCard} from "@/common/components/dashboard-action/action-card.tsx";
-import {actions} from "@features/time/dashboard-actions.ts";
+import type {DashboardAction} from "@/common/components/dashboard-action/types.ts";
 
+export interface DashboardActionCardDashboardProps {
+    onActionConfirm: (id: string) => void;
+    actions: DashboardAction[]
+}
 
-export function Home() {
-
-    const handleConfirm = (id: string) => {
-        // Hier den eigentlichen API-Aufruf einbauen
-        console.log("Bestätigt:", id);
-    };
-
+export const ActionCardDashboard = (props: DashboardActionCardDashboardProps) => {
+    const {onActionConfirm, actions} = props;
     return (
         <main className="mx-auto max-w-5xl p-6">
             <header className="mb-8">
@@ -21,7 +20,7 @@ export function Home() {
                     <ActionCard
                         key={action.id}
                         action={action}
-                        onConfirm={handleConfirm}
+                        onConfirm={onActionConfirm}
                     />
                 ))}
             </section>

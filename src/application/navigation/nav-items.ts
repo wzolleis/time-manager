@@ -1,14 +1,16 @@
-import {ClockPlus, LayoutDashboard, type LucideIcon, Settings, Summary, User, WorkflowIcon} from "lucide-react";
+import {ClockPlus, LayoutDashboard, type LucideIcon, Settings, User, WorkflowIcon} from "lucide-react";
 import type {ValuesOf} from "@/common/types.ts";
 import type {LinkProps} from "@tanstack/react-router";
 
 export const navItemIds = [
     "settings",
     "dashboard",
-    "time",
+    "time-report",
+    "time-report-new",
     "time-stamp",
-    "time-reports",
-    "users"
+    "users",
+    "projects",
+    "projects-new"
 ] as const
 export type NavItemId = ValuesOf<typeof navItemIds>;
 
@@ -33,8 +35,10 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     {id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, to: '/dashboard', children: []},
     {id: 'settings', label: 'Einstellungen', icon: Settings, to: '/settings', children: []},
     {id: 'users', label: 'Benutzer verwalten', icon: User, to: '/users', children: []},
-    {id: 'time', label: 'Arbeitszeiten', icon: WorkflowIcon, to: '/time', children: []},
-    {id: 'time-reports', label: 'Zeit-Report', icon: Summary, to: '/time/reports', children: []},
+    {id: 'projects', label: 'Projekte verwalten', icon: ClockPlus, to: '/projects', children: []},
+    {id: 'projects-new', label: 'Neues Projekt anlegen', icon: ClockPlus, to: '/projects/new', children: []},
+    {id: 'time-report', label: 'Reports verwalten', icon: WorkflowIcon, to: '/time-report', children: []},
+    {id: 'time-report-new', label: 'Neuen Report anlegen', icon: WorkflowIcon, to: '/time-report/new', children: []},
     {id: 'time-stamp', label: 'Zeiterfassung', icon: ClockPlus, to: '/time-stamp', children: []},
 
 ] as const
