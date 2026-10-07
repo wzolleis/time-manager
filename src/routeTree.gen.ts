@@ -8,17 +8,16 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as UsersRouteImport } from './routes/users'
-import { Route as ProjectsIndexRouteImport } from './routes/projects/index'
-import { Route as ProjectsNewRouteImport } from './routes/projects/new'
-import { Route as TimeReportIndexRouteImport } from './routes/time-report/index'
-import { Route as TimeReportNewRouteImport } from './routes/time-report/new'
-import { Route as TimeReportReportsRouteImport } from './routes/time-report/reports'
-import { Route as TimeStampIndexRouteImport } from './routes/time-stamp/index'
+import {Route as rootRouteImport} from './routes/__root'
+import {Route as IndexRouteImport} from './routes/index'
+import {Route as DashboardRouteImport} from './routes/dashboard'
+import {Route as SettingsRouteImport} from './routes/settings'
+import {Route as UsersRouteImport} from './routes/users'
+import {Route as ProjectsIndexRouteImport} from './routes/projects/index'
+import {Route as ProjectsNewRouteImport} from './routes/projects/new'
+import {Route as TimeReportIndexRouteImport} from './routes/time-report/index'
+import {Route as TimeReportNewRouteImport} from './routes/time-report/new'
+import {Route as TimeStampIndexRouteImport} from './routes/time-stamp/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -60,11 +59,6 @@ const TimeReportNewRoute = TimeReportNewRouteImport.update({
   path: '/time-report/new',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TimeReportReportsRoute = TimeReportReportsRouteImport.update({
-  id: '/time-report/reports',
-  path: '/time-report/reports',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const TimeStampIndexRoute = TimeStampIndexRouteImport.update({
   id: '/time-stamp/',
   path: '/time-stamp/',
@@ -78,7 +72,6 @@ export interface FileRoutesByFullPath {
   '/users': typeof UsersRoute
   '/projects/new': typeof ProjectsNewRoute
   '/time-report/new': typeof TimeReportNewRoute
-  '/time-report/reports': typeof TimeReportReportsRoute
   '/projects/': typeof ProjectsIndexRoute
   '/time-report/': typeof TimeReportIndexRoute
   '/time-stamp/': typeof TimeStampIndexRoute
@@ -90,7 +83,6 @@ export interface FileRoutesByTo {
   '/users': typeof UsersRoute
   '/projects/new': typeof ProjectsNewRoute
   '/time-report/new': typeof TimeReportNewRoute
-  '/time-report/reports': typeof TimeReportReportsRoute
   '/projects': typeof ProjectsIndexRoute
   '/time-report': typeof TimeReportIndexRoute
   '/time-stamp': typeof TimeStampIndexRoute
@@ -103,7 +95,6 @@ export interface FileRoutesById {
   '/users': typeof UsersRoute
   '/projects/new': typeof ProjectsNewRoute
   '/time-report/new': typeof TimeReportNewRoute
-  '/time-report/reports': typeof TimeReportReportsRoute
   '/projects/': typeof ProjectsIndexRoute
   '/time-report/': typeof TimeReportIndexRoute
   '/time-stamp/': typeof TimeStampIndexRoute
@@ -117,7 +108,6 @@ export interface FileRouteTypes {
     | '/users'
     | '/projects/new'
     | '/time-report/new'
-    | '/time-report/reports'
     | '/projects/'
     | '/time-report/'
     | '/time-stamp/'
@@ -129,7 +119,6 @@ export interface FileRouteTypes {
     | '/users'
     | '/projects/new'
     | '/time-report/new'
-    | '/time-report/reports'
     | '/projects'
     | '/time-report'
     | '/time-stamp'
@@ -141,7 +130,6 @@ export interface FileRouteTypes {
     | '/users'
     | '/projects/new'
     | '/time-report/new'
-    | '/time-report/reports'
     | '/projects/'
     | '/time-report/'
     | '/time-stamp/'
@@ -154,7 +142,6 @@ export interface RootRouteChildren {
   UsersRoute: typeof UsersRoute
   ProjectsNewRoute: typeof ProjectsNewRoute
   TimeReportNewRoute: typeof TimeReportNewRoute
-  TimeReportReportsRoute: typeof TimeReportReportsRoute
   ProjectsIndexRoute: typeof ProjectsIndexRoute
   TimeReportIndexRoute: typeof TimeReportIndexRoute
   TimeStampIndexRoute: typeof TimeStampIndexRoute
@@ -218,13 +205,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TimeReportNewRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/time-report/reports': {
-      id: '/time-report/reports'
-      path: '/time-report/reports'
-      fullPath: '/time-report/reports'
-      preLoaderRoute: typeof TimeReportReportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/time-stamp/': {
       id: '/time-stamp/'
       path: '/time-stamp'
@@ -242,7 +222,6 @@ const rootRouteChildren: RootRouteChildren = {
   UsersRoute: UsersRoute,
   ProjectsNewRoute: ProjectsNewRoute,
   TimeReportNewRoute: TimeReportNewRoute,
-  TimeReportReportsRoute: TimeReportReportsRoute,
   ProjectsIndexRoute: ProjectsIndexRoute,
   TimeReportIndexRoute: TimeReportIndexRoute,
   TimeStampIndexRoute: TimeStampIndexRoute,
