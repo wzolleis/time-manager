@@ -19,7 +19,6 @@ export function ProjectTable({projects, onDelete, deletingId}: ProjectTableProps
                 <TableHeader>
                     <TableRow>
                         <TableHead>Name</TableHead>
-                        <TableHead>E-Mail</TableHead>
                         <TableHead className="text-right">Aktionen</TableHead>
                     </TableRow>
                 </TableHeader>
