@@ -25,6 +25,7 @@ import {Label} from "@/components/ui/label";
 import {TableCell, TableRow} from "@/components/ui/table";
 import {updateUser} from "@/api/users";
 import type {User, UserUpdate} from "@shared/user";
+import {EditButton} from "@/components/buttons/edit-button.tsx";
 
 type UserRowProps = {
     user: User;
@@ -83,9 +84,7 @@ export function UserRow({user, onDelete, deleting}: UserRowProps) {
             <TableCell className="font-medium">{user.name}</TableCell>
             <TableCell>{user.email}</TableCell>
             <TableCell className="space-x-2 text-right">
-                <Button variant="outline" size="sm" onClick={() => handleOpenChange(true)}>
-                    Bearbeiten
-                </Button>
+                <EditButton handleOpenChange={handleOpenChange}/>
 
                 <AlertDialog>
                     <AlertDialogTrigger asChild>

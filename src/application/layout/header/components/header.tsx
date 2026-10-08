@@ -1,8 +1,8 @@
 import {Box, Button, Flex, Text} from "@radix-ui/themes";
 import {UserDropdown} from "@features/users/components/user-dropdown.tsx";
 import {Bell} from "lucide-react";
-import {StartEnd} from "@/components/common/start-end.tsx";
-import {MenuButton} from "@/components/common/menu-button.tsx";
+import {StartEnd} from "@/components/utils/start-end.tsx";
+import {MenuButton} from "@/components/buttons/menu-button.tsx";
 import {Breadcrumb} from "@/application/breadcrumb/components/breadcrumb.tsx";
 import {useNavigate} from "@tanstack/react-router";
 import {NAVIGATION_ITEMS, type NavItem} from "@/application/navigation/nav-items.ts";

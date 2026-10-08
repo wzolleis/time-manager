@@ -1,5 +1,5 @@
 import {BarChart3} from "lucide-react";
-import type {DashboardAction} from "@/common/components/dashboard-action/types.ts";
+import type {DashboardAction} from "@/components/dashboard-action/types.ts";
 
 export const actions: DashboardAction[] = [
     {

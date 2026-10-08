@@ -14,11 +14,13 @@ import {routeTree} from './routeTree.gen'
 import {QueryClient} from "@tanstack/react-query";
 import {UserProvider} from "./components/user-provider";
 
+const DAY = 1000 * 60 * 60 * 24;
+
 const queryClient = new QueryClient(
     {
         defaultOptions: {
             queries: {
-                gcTime: 1000 * 60 * 60 * 24, // 24 hours
+                gcTime: DAY
             },
         }
     }
@@ -39,13 +41,18 @@ const persister = createAsyncStoragePersister({
     storage: window.localStorage,
 })
 
+const persistOptions = {
+    persister,            // dein bestehender localStorage-Persister
+    maxAge: DAY,
+    buster: "1",         // erhöhen, wenn sich das Datenformat ändert
+};
 
 createRoot(rootElement).render(
     <StrictMode>
         <Theme>
             <PersistQueryClientProvider
                 client={queryClient}
-                persistOptions={{persister}}
+                persistOptions={persistOptions}
             >
                 <UserProvider>
                     <RouterProvider router={router}/>

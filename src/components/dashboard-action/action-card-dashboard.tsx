@@ -1,5 +1,5 @@
-import {ActionCard} from "@/common/components/dashboard-action/action-card.tsx";
-import type {DashboardAction} from "@/common/components/dashboard-action/types.ts";
+import {ActionCard} from "@/components/dashboard-action/action-card.tsx";
+import type {DashboardAction} from "@/components/dashboard-action/types.ts";
 
 export interface DashboardActionCardDashboardProps {
     onActionConfirm: (id: string) => void;

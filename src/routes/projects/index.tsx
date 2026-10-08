@@ -1,8 +1,8 @@
 import {createFileRoute} from '@tanstack/react-router'
-import {ProjectsIndexPage} from "@features/projects/pages/index-page.tsx";
+import {Projects} from "@features/projects/pages/projects.tsx";
 
 export const Route = createFileRoute('/projects/')({
-    component: ProjectsIndexPage,
+    component: Projects,
 })
 
 

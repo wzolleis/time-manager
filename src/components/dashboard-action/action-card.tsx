@@ -1,4 +1,4 @@
-import type {DashboardAction} from "@/common/components/dashboard-action/types.ts";
+import type {DashboardAction} from "@/components/dashboard-action/types.ts";
 import {Card, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {Button, buttonVariants} from "@/components/ui/button.tsx";
 import {

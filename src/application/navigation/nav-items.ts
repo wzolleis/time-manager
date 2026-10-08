@@ -36,7 +36,6 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     {id: 'settings', label: 'Einstellungen', icon: Settings, to: '/settings', children: []},
     {id: 'users', label: 'Benutzer verwalten', icon: User, to: '/users', children: []},
     {id: 'projects', label: 'Projekte verwalten', icon: ClockPlus, to: '/projects', children: []},
-    {id: 'projects-new', label: 'Neues Projekt anlegen', icon: ClockPlus, to: '/projects/new', children: []},
     {id: 'time-report', label: 'Reports verwalten', icon: WorkflowIcon, to: '/time-report', children: []},
     {id: 'time-report-new', label: 'Neuen Report anlegen', icon: WorkflowIcon, to: '/time-report/new', children: []},
     {id: 'time-stamp', label: 'Zeiterfassung', icon: ClockPlus, to: '/time-stamp', children: []},
