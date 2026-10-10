@@ -11,9 +11,13 @@ import {createRouter, RouterProvider} from "@tanstack/react-router";
 import {routeTree} from './routeTree.gen'
 import {UserProvider} from "./components/user-provider";
 import {persistOptions, queryClient} from "@/query-client.ts";
+import {NotFound} from "@/components/navigation/not-found.tsx";
 
 
-const router = createRouter({routeTree})
+const router = createRouter({
+    routeTree,
+    defaultNotFoundComponent: NotFound,
+})
 
 // Typsicherheit für <Link>, useNavigate usw.
 declare module '@tanstack/react-router' {

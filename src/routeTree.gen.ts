@@ -11,13 +11,14 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as UsersRouteImport } from './routes/users'
-import { Route as ProjectsIndexRouteImport } from './routes/projects/index'
-import { Route as ReportsIndexRouteImport } from './routes/reports/index'
-import { Route as ReportsDailyRouteImport } from './routes/reports/daily'
-import { Route as ReportsNewRouteImport } from './routes/reports/new'
-import { Route as TimeStampIndexRouteImport } from './routes/time-stamp/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
+import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as UserIndexRouteImport } from './routes/user/index'
+import { Route as UserProjectsIndexRouteImport } from './routes/user/projects/index'
+import { Route as UserReportsIndexRouteImport } from './routes/user/reports/index'
+import { Route as UserReportsDailyRouteImport } from './routes/user/reports/daily'
+import { Route as UserTimeStampIndexRouteImport } from './routes/user/time-stamp/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -29,122 +30,134 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UsersRoute = UsersRouteImport.update({
-  id: '/users',
-  path: '/users',
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/admin/settings',
+  path: '/admin/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
-  id: '/projects/',
-  path: '/projects/',
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ReportsIndexRoute = ReportsIndexRouteImport.update({
-  id: '/reports/',
-  path: '/reports/',
+const UserIndexRoute = UserIndexRouteImport.update({
+  id: '/user/',
+  path: '/user/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ReportsDailyRoute = ReportsDailyRouteImport.update({
-  id: '/reports/daily',
-  path: '/reports/daily',
+const UserProjectsIndexRoute = UserProjectsIndexRouteImport.update({
+  id: '/user/projects/',
+  path: '/user/projects/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ReportsNewRoute = ReportsNewRouteImport.update({
-  id: '/reports/new',
-  path: '/reports/new',
+const UserReportsIndexRoute = UserReportsIndexRouteImport.update({
+  id: '/user/reports/',
+  path: '/user/reports/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TimeStampIndexRoute = TimeStampIndexRouteImport.update({
-  id: '/time-stamp/',
-  path: '/time-stamp/',
+const UserReportsDailyRoute = UserReportsDailyRouteImport.update({
+  id: '/user/reports/daily',
+  path: '/user/reports/daily',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UserTimeStampIndexRoute = UserTimeStampIndexRouteImport.update({
+  id: '/user/time-stamp/',
+  path: '/user/time-stamp/',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
-  '/settings': typeof SettingsRoute
-  '/users': typeof UsersRoute
-  '/reports/daily': typeof ReportsDailyRoute
-  '/reports/new': typeof ReportsNewRoute
-  '/projects/': typeof ProjectsIndexRoute
-  '/reports/': typeof ReportsIndexRoute
-  '/time-stamp/': typeof TimeStampIndexRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/': typeof AdminIndexRoute
+  '/user/': typeof UserIndexRoute
+  '/user/reports/daily': typeof UserReportsDailyRoute
+  '/user/projects/': typeof UserProjectsIndexRoute
+  '/user/reports/': typeof UserReportsIndexRoute
+  '/user/time-stamp/': typeof UserTimeStampIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
-  '/settings': typeof SettingsRoute
-  '/users': typeof UsersRoute
-  '/reports/daily': typeof ReportsDailyRoute
-  '/reports/new': typeof ReportsNewRoute
-  '/projects': typeof ProjectsIndexRoute
-  '/reports': typeof ReportsIndexRoute
-  '/time-stamp': typeof TimeStampIndexRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin': typeof AdminIndexRoute
+  '/user': typeof UserIndexRoute
+  '/user/reports/daily': typeof UserReportsDailyRoute
+  '/user/projects': typeof UserProjectsIndexRoute
+  '/user/reports': typeof UserReportsIndexRoute
+  '/user/time-stamp': typeof UserTimeStampIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
-  '/settings': typeof SettingsRoute
-  '/users': typeof UsersRoute
-  '/reports/daily': typeof ReportsDailyRoute
-  '/reports/new': typeof ReportsNewRoute
-  '/projects/': typeof ProjectsIndexRoute
-  '/reports/': typeof ReportsIndexRoute
-  '/time-stamp/': typeof TimeStampIndexRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/': typeof AdminIndexRoute
+  '/user/': typeof UserIndexRoute
+  '/user/reports/daily': typeof UserReportsDailyRoute
+  '/user/projects/': typeof UserProjectsIndexRoute
+  '/user/reports/': typeof UserReportsIndexRoute
+  '/user/time-stamp/': typeof UserTimeStampIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/dashboard'
-    | '/settings'
-    | '/users'
-    | '/reports/daily'
-    | '/reports/new'
-    | '/projects/'
-    | '/reports/'
-    | '/time-stamp/'
+    | '/admin/settings'
+    | '/admin/users'
+    | '/admin/'
+    | '/user/'
+    | '/user/reports/daily'
+    | '/user/projects/'
+    | '/user/reports/'
+    | '/user/time-stamp/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/dashboard'
-    | '/settings'
-    | '/users'
-    | '/reports/daily'
-    | '/reports/new'
-    | '/projects'
-    | '/reports'
-    | '/time-stamp'
+    | '/admin/settings'
+    | '/admin/users'
+    | '/admin'
+    | '/user'
+    | '/user/reports/daily'
+    | '/user/projects'
+    | '/user/reports'
+    | '/user/time-stamp'
   id:
     | '__root__'
     | '/'
     | '/dashboard'
-    | '/settings'
-    | '/users'
-    | '/reports/daily'
-    | '/reports/new'
-    | '/projects/'
-    | '/reports/'
-    | '/time-stamp/'
+    | '/admin/settings'
+    | '/admin/users'
+    | '/admin/'
+    | '/user/'
+    | '/user/reports/daily'
+    | '/user/projects/'
+    | '/user/reports/'
+    | '/user/time-stamp/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
-  SettingsRoute: typeof SettingsRoute
-  UsersRoute: typeof UsersRoute
-  ReportsDailyRoute: typeof ReportsDailyRoute
-  ReportsNewRoute: typeof ReportsNewRoute
-  ProjectsIndexRoute: typeof ProjectsIndexRoute
-  ReportsIndexRoute: typeof ReportsIndexRoute
-  TimeStampIndexRoute: typeof TimeStampIndexRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  UserIndexRoute: typeof UserIndexRoute
+  UserReportsDailyRoute: typeof UserReportsDailyRoute
+  UserProjectsIndexRoute: typeof UserProjectsIndexRoute
+  UserReportsIndexRoute: typeof UserReportsIndexRoute
+  UserTimeStampIndexRoute: typeof UserTimeStampIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -163,53 +176,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/users': {
-      id: '/users'
-      path: '/users'
-      fullPath: '/users'
-      preLoaderRoute: typeof UsersRouteImport
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/projects/': {
-      id: '/projects/'
-      path: '/projects'
-      fullPath: '/projects/'
-      preLoaderRoute: typeof ProjectsIndexRouteImport
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/admin/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/reports/': {
-      id: '/reports/'
-      path: '/reports'
-      fullPath: '/reports/'
-      preLoaderRoute: typeof ReportsIndexRouteImport
+    '/user/': {
+      id: '/user/'
+      path: '/user'
+      fullPath: '/user/'
+      preLoaderRoute: typeof UserIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/reports/daily': {
-      id: '/reports/daily'
-      path: '/reports/daily'
-      fullPath: '/reports/daily'
-      preLoaderRoute: typeof ReportsDailyRouteImport
+    '/user/projects/': {
+      id: '/user/projects/'
+      path: '/user/projects'
+      fullPath: '/user/projects/'
+      preLoaderRoute: typeof UserProjectsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/reports/new': {
-      id: '/reports/new'
-      path: '/reports/new'
-      fullPath: '/reports/new'
-      preLoaderRoute: typeof ReportsNewRouteImport
+    '/user/reports/': {
+      id: '/user/reports/'
+      path: '/user/reports'
+      fullPath: '/user/reports/'
+      preLoaderRoute: typeof UserReportsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/time-stamp/': {
-      id: '/time-stamp/'
-      path: '/time-stamp'
-      fullPath: '/time-stamp/'
-      preLoaderRoute: typeof TimeStampIndexRouteImport
+    '/user/reports/daily': {
+      id: '/user/reports/daily'
+      path: '/user/reports/daily'
+      fullPath: '/user/reports/daily'
+      preLoaderRoute: typeof UserReportsDailyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/user/time-stamp/': {
+      id: '/user/time-stamp/'
+      path: '/user/time-stamp'
+      fullPath: '/user/time-stamp/'
+      preLoaderRoute: typeof UserTimeStampIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -218,13 +238,14 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
-  SettingsRoute: SettingsRoute,
-  UsersRoute: UsersRoute,
-  ReportsDailyRoute: ReportsDailyRoute,
-  ReportsNewRoute: ReportsNewRoute,
-  ProjectsIndexRoute: ProjectsIndexRoute,
-  ReportsIndexRoute: ReportsIndexRoute,
-  TimeStampIndexRoute: TimeStampIndexRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  UserIndexRoute: UserIndexRoute,
+  UserReportsDailyRoute: UserReportsDailyRoute,
+  UserProjectsIndexRoute: UserProjectsIndexRoute,
+  UserReportsIndexRoute: UserReportsIndexRoute,
+  UserTimeStampIndexRoute: UserTimeStampIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

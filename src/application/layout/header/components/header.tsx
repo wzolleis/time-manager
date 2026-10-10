@@ -1,5 +1,5 @@
 import {Box, Button, Flex, Text} from "@radix-ui/themes";
-import {UserDropdown} from "@features/users/components/user-dropdown.tsx";
+import {UserDropdown} from "@features/admin/users/components/user-dropdown.tsx";
 import {Bell} from "lucide-react";
 import {StartEnd} from "@/components/utils/start-end.tsx";
 import {MenuButton} from "@/components/buttons/menu-button.tsx";

@@ -1,4 +1,13 @@
-import {ClockPlus, LayoutDashboard, type LucideIcon, Settings, User, WorkflowIcon} from "lucide-react";
+import {
+    BaggageClaim,
+    ClockPlus,
+    LayoutDashboard,
+    type LucideIcon,
+    Settings,
+    Target,
+    User,
+    WorkflowIcon
+} from "lucide-react";
 import type {ValuesOf} from "@/common/types.ts";
 import type {LinkProps} from "@tanstack/react-router";
 
@@ -8,6 +17,8 @@ export const navItemIds = [
     "reports",
     "reports-daily",
     "time-stamp",
+    "admin",
+    "user",
     "users",
     "projects",
     "projects-new"
@@ -33,12 +44,14 @@ export type  NavNode = NavItem & {
 }
 export const NAVIGATION_ITEMS: NavItem[] = [
     {id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, to: '/dashboard', children: []},
-    {id: 'settings', label: 'Einstellungen', icon: Settings, to: '/settings', children: []},
-    {id: 'users', label: 'Benutzer verwalten', icon: User, to: '/users', children: []},
-    {id: 'projects', label: 'Projekte verwalten', icon: ClockPlus, to: '/projects', children: []},
-    {id: 'reports', label: 'Reports verwalten', icon: WorkflowIcon, to: '/reports', children: []},
-    {id: 'reports-daily', label: 'Heute', icon: WorkflowIcon, to: '/reports/daily', children: []},
-    {id: 'time-stamp', label: 'Zeiterfassung', icon: ClockPlus, to: '/time-stamp', children: []},
+    {id: 'admin', label: 'Administration', icon: BaggageClaim, to: '/admin', children: []},
+    {id: 'settings', label: 'Einstellungen', icon: Settings, to: '/admin/settings', children: []},
+    {id: 'users', label: 'Benutzer verwalten', icon: User, to: '/admin/users', children: []},
+    {id: 'projects', label: 'Projekte', icon: Target, to: '/user/projects', children: []},
+    {id: 'user', label: 'User', icon: User, to: '/user', children: []},
+    {id: 'reports', label: 'Report', icon: WorkflowIcon, to: '/user/reports', children: []},
+    {id: 'reports-daily', label: 'Heute', icon: WorkflowIcon, to: '/user/reports/daily', children: []},
+    {id: 'time-stamp', label: 'Zeiterfassung', icon: ClockPlus, to: '/user/time-stamp', children: []},
 
 ] as const
 

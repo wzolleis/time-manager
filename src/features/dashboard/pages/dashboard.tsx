@@ -1,5 +1,14 @@
+import {ActionCardDashboard} from "@/components/dashboard-action/action-card-dashboard.tsx";
+
 export const Dashboard = () => {
+    const handleConfirm = (id: string) => {
+        // Hier den eigentlichen API-Aufruf einbauen
+        console.log("Bestätigt:", id);
+    };
+
     return (
-        <div>Dashboard</div>
+        <>
+            <ActionCardDashboard title="Dashboard" onActionConfirm={handleConfirm} actions={[]}/>
+        </>
     )
 }
