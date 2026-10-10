@@ -6,8 +6,9 @@ import {db} from "./lib/db";
 import {hasDbCode} from "./lib/db-errors";
 import {projects} from "../../db/schema";
 import {ProjectCreateSchema, ProjectUpdateSchema} from "../../shared/time-entry";
+import {withTiming} from "./lib/timing";
 
-const IdSchema = z.string().uuid();
+const IdSchema = z.uuid();
 
 const getProject = async (id: string) => {
     const [row] = await db.select().from(projects).where(eq(projects.id, id)).limit(1);
@@ -24,7 +25,7 @@ const readBody = async (req: Request): Promise<unknown> => {
 
 const notFound = () => new Response(null, {status: 404});
 
-export default async (req: Request, context: Context) => {
+const handler = async (req: Request, context: Context) => {
     try {
         const rawId = context.params.id;
 
@@ -75,5 +76,7 @@ export default async (req: Request, context: Context) => {
         return Response.json({error: "Interner Fehler"}, {status: 500});
     }
 };
+
+export default withTiming('projects', handler);
 
 export const config: Config = {path: ["/api/projects", "/api/projects/:id"]};

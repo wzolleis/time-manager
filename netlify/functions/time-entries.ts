@@ -8,6 +8,7 @@ import {hasDbCode} from "./lib/db-errors";
 import {timeEntries, timeEntryProjects} from "../../db/schema";
 import {TimeEntryCreateSchema, TimeEntryUpdateSchema} from "../../shared/time-entry";
 import {type Booking, checkSequence} from "../../shared/time-rules";
+import {withTiming} from "./lib/timing";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Executor = Pick<typeof db, "select">;
@@ -72,7 +73,7 @@ const readBody = async (req: Request): Promise<unknown> => {
 
 const notFound = () => new Response(null, {status: 404});
 
-export default async (req: Request, context: Context) => {
+const handler = async (req: Request, context: Context) => {
     try {
         const url = new URL(req.url);
         const rawId = context.params.id;
@@ -183,5 +184,7 @@ export default async (req: Request, context: Context) => {
         return Response.json({error: "Interner Fehler"}, {status: 500});
     }
 };
+
+export default withTiming("time-entries", handler);
 
 export const config: Config = {path: ["/api/time-entries", "/api/time-entries/:id"]};

@@ -7,8 +7,10 @@ import {db} from "./lib/db";
 import {users} from "../../db/schema";
 import {UserCreateSchema, UserUpdateSchema} from "../../shared/user";
 import {hasDbCode} from "./lib/db-errors";
+import {withTiming} from "./lib/timing";
 
-const IdSchema = z.string().uuid();
+const IdSchema = z.uuid();
+
 
 const getUser = async (id: string) => {
     const [row] = await db.select().from(users).where(eq(users.id, id)).limit(1);
@@ -25,7 +27,7 @@ const readBody = async (req: Request): Promise<unknown> => {
 
 const notFound = () => new Response(null, {status: 404});
 
-export default async (req: Request, context: Context) => {
+const handler = async (req: Request, context: Context) => {
     try {
         const rawId = context.params.id;
 
@@ -84,5 +86,7 @@ export default async (req: Request, context: Context) => {
         return Response.json({error: "Interner Fehler"}, {status: 500});
     }
 };
+
+export default withTiming("users", handler);
 
 export const config: Config = {path: ["/api/users", "/api/users/:id"]};
