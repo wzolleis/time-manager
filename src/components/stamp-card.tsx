@@ -9,25 +9,15 @@ import {createTimeEntry, fetchTimeEntries} from "@/api/time-entries";
 import {useCurrentUser} from "@/lib/user-context";
 import {useNow} from "@/lib/use-now";
 import {localDay} from "@shared/time-rules";
+import {formatDuration, formatTime, TZ} from "@/lib/format.ts";
 
 const NO_PROJECT = "none"; // Radix Select erlaubt keinen leeren String als Wert
-const TZ = "Europe/Berlin";
-
-const formatTime = (iso: string) =>
-    new Date(iso).toLocaleTimeString("de-DE", {timeZone: TZ, hour: "2-digit", minute: "2-digit"});
 
 const formatSince = (iso: string) => {
     const date = new Date(iso);
     if (localDay(date) === localDay(new Date())) return `${formatTime(iso)} Uhr`;
     const day = date.toLocaleDateString("de-DE", {timeZone: TZ, day: "2-digit", month: "2-digit"});
     return `${day}., ${formatTime(iso)} Uhr`;
-};
-
-const formatDuration = (ms: number) => {
-    const minutes = Math.max(0, Math.floor(ms / 60_000));
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    return h > 0 ? `${h} Std ${m} Min` : `${m} Min`;
 };
 
 export function StampCard() {

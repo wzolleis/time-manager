@@ -14,8 +14,9 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as UsersRouteImport } from './routes/users'
 import { Route as ProjectsIndexRouteImport } from './routes/projects/index'
-import { Route as TimeReportIndexRouteImport } from './routes/time-report/index'
-import { Route as TimeReportNewRouteImport } from './routes/time-report/new'
+import { Route as ReportsIndexRouteImport } from './routes/reports/index'
+import { Route as ReportsDailyRouteImport } from './routes/reports/daily'
+import { Route as ReportsNewRouteImport } from './routes/reports/new'
 import { Route as TimeStampIndexRouteImport } from './routes/time-stamp/index'
 
 const IndexRoute = IndexRouteImport.update({
@@ -43,14 +44,19 @@ const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
   path: '/projects/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TimeReportIndexRoute = TimeReportIndexRouteImport.update({
-  id: '/time-report/',
-  path: '/time-report/',
+const ReportsIndexRoute = ReportsIndexRouteImport.update({
+  id: '/reports/',
+  path: '/reports/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TimeReportNewRoute = TimeReportNewRouteImport.update({
-  id: '/time-report/new',
-  path: '/time-report/new',
+const ReportsDailyRoute = ReportsDailyRouteImport.update({
+  id: '/reports/daily',
+  path: '/reports/daily',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsNewRoute = ReportsNewRouteImport.update({
+  id: '/reports/new',
+  path: '/reports/new',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TimeStampIndexRoute = TimeStampIndexRouteImport.update({
@@ -64,9 +70,10 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/settings': typeof SettingsRoute
   '/users': typeof UsersRoute
-  '/time-report/new': typeof TimeReportNewRoute
+  '/reports/daily': typeof ReportsDailyRoute
+  '/reports/new': typeof ReportsNewRoute
   '/projects/': typeof ProjectsIndexRoute
-  '/time-report/': typeof TimeReportIndexRoute
+  '/reports/': typeof ReportsIndexRoute
   '/time-stamp/': typeof TimeStampIndexRoute
 }
 export interface FileRoutesByTo {
@@ -74,9 +81,10 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/settings': typeof SettingsRoute
   '/users': typeof UsersRoute
-  '/time-report/new': typeof TimeReportNewRoute
+  '/reports/daily': typeof ReportsDailyRoute
+  '/reports/new': typeof ReportsNewRoute
   '/projects': typeof ProjectsIndexRoute
-  '/time-report': typeof TimeReportIndexRoute
+  '/reports': typeof ReportsIndexRoute
   '/time-stamp': typeof TimeStampIndexRoute
 }
 export interface FileRoutesById {
@@ -85,9 +93,10 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/settings': typeof SettingsRoute
   '/users': typeof UsersRoute
-  '/time-report/new': typeof TimeReportNewRoute
+  '/reports/daily': typeof ReportsDailyRoute
+  '/reports/new': typeof ReportsNewRoute
   '/projects/': typeof ProjectsIndexRoute
-  '/time-report/': typeof TimeReportIndexRoute
+  '/reports/': typeof ReportsIndexRoute
   '/time-stamp/': typeof TimeStampIndexRoute
 }
 export interface FileRouteTypes {
@@ -97,9 +106,10 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/settings'
     | '/users'
-    | '/time-report/new'
+    | '/reports/daily'
+    | '/reports/new'
     | '/projects/'
-    | '/time-report/'
+    | '/reports/'
     | '/time-stamp/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -107,9 +117,10 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/settings'
     | '/users'
-    | '/time-report/new'
+    | '/reports/daily'
+    | '/reports/new'
     | '/projects'
-    | '/time-report'
+    | '/reports'
     | '/time-stamp'
   id:
     | '__root__'
@@ -117,9 +128,10 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/settings'
     | '/users'
-    | '/time-report/new'
+    | '/reports/daily'
+    | '/reports/new'
     | '/projects/'
-    | '/time-report/'
+    | '/reports/'
     | '/time-stamp/'
   fileRoutesById: FileRoutesById
 }
@@ -128,9 +140,10 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   SettingsRoute: typeof SettingsRoute
   UsersRoute: typeof UsersRoute
-  TimeReportNewRoute: typeof TimeReportNewRoute
+  ReportsDailyRoute: typeof ReportsDailyRoute
+  ReportsNewRoute: typeof ReportsNewRoute
   ProjectsIndexRoute: typeof ProjectsIndexRoute
-  TimeReportIndexRoute: typeof TimeReportIndexRoute
+  ReportsIndexRoute: typeof ReportsIndexRoute
   TimeStampIndexRoute: typeof TimeStampIndexRoute
 }
 
@@ -171,18 +184,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/time-report/': {
-      id: '/time-report/'
-      path: '/time-report'
-      fullPath: '/time-report/'
-      preLoaderRoute: typeof TimeReportIndexRouteImport
+    '/reports/': {
+      id: '/reports/'
+      path: '/reports'
+      fullPath: '/reports/'
+      preLoaderRoute: typeof ReportsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/time-report/new': {
-      id: '/time-report/new'
-      path: '/time-report/new'
-      fullPath: '/time-report/new'
-      preLoaderRoute: typeof TimeReportNewRouteImport
+    '/reports/daily': {
+      id: '/reports/daily'
+      path: '/reports/daily'
+      fullPath: '/reports/daily'
+      preLoaderRoute: typeof ReportsDailyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports/new': {
+      id: '/reports/new'
+      path: '/reports/new'
+      fullPath: '/reports/new'
+      preLoaderRoute: typeof ReportsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/time-stamp/': {
@@ -200,9 +220,10 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   SettingsRoute: SettingsRoute,
   UsersRoute: UsersRoute,
-  TimeReportNewRoute: TimeReportNewRoute,
+  ReportsDailyRoute: ReportsDailyRoute,
+  ReportsNewRoute: ReportsNewRoute,
   ProjectsIndexRoute: ProjectsIndexRoute,
-  TimeReportIndexRoute: TimeReportIndexRoute,
+  ReportsIndexRoute: ReportsIndexRoute,
   TimeStampIndexRoute: TimeStampIndexRoute,
 }
 export const routeTree = rootRouteImport

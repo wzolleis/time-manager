@@ -10,6 +10,9 @@ export const pool = mysql.createPool({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     connectionLimit: 1, // Shared Hosting erlaubt oft nur wenige Verbindungen
+    connectTimeout: 10_000,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 10_000,
 });
 
 type Method = "query" | "execute";

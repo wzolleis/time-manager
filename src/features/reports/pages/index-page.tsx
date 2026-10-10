@@ -1,4 +1,4 @@
-import {actions} from "@features/time-report/actions/dashboard-actions.ts";
+import {actions} from "@features/reports/actions/dashboard-actions.ts";
 import {ActionCardDashboard} from "@/components/dashboard-action/action-card-dashboard.tsx";
 
 

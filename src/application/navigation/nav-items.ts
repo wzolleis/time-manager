@@ -5,8 +5,8 @@ import type {LinkProps} from "@tanstack/react-router";
 export const navItemIds = [
     "settings",
     "dashboard",
-    "time-report",
-    "time-report-new",
+    "reports",
+    "reports-daily",
     "time-stamp",
     "users",
     "projects",
@@ -36,8 +36,8 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     {id: 'settings', label: 'Einstellungen', icon: Settings, to: '/settings', children: []},
     {id: 'users', label: 'Benutzer verwalten', icon: User, to: '/users', children: []},
     {id: 'projects', label: 'Projekte verwalten', icon: ClockPlus, to: '/projects', children: []},
-    {id: 'time-report', label: 'Reports verwalten', icon: WorkflowIcon, to: '/time-report', children: []},
-    {id: 'time-report-new', label: 'Neuen Report anlegen', icon: WorkflowIcon, to: '/time-report/new', children: []},
+    {id: 'reports', label: 'Reports verwalten', icon: WorkflowIcon, to: '/reports', children: []},
+    {id: 'reports-daily', label: 'Heute', icon: WorkflowIcon, to: '/reports/daily', children: []},
     {id: 'time-stamp', label: 'Zeiterfassung', icon: ClockPlus, to: '/time-stamp', children: []},
 
 ] as const
