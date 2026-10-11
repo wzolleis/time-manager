@@ -4,7 +4,7 @@ import {Button} from "@/components/ui/button.tsx";
 import {Input} from "@/components/ui/input.tsx";
 import {fetchProjects} from "@/api/projects.ts";
 import {fetchTimeEntries} from "@/api/time-entries.ts";
-import {formatDate, formatDuration, formatTime} from "@/lib/format.ts";
+import {diffClass, formatDate, formatDifference, formatDuration, formatTime} from "@/lib/format.ts";
 import {useNow} from "@/lib/use-now.ts";
 import {useCurrentUser} from "@/lib/user-context.ts";
 import {addDays, localDayRange} from "@shared/day-range.ts";
@@ -13,6 +13,7 @@ import {localDay} from "@shared/time-rules.ts";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table.tsx";
 import {EntryActions, type EntryRow} from "@user/time-stamp/components/time-entry-actions.tsx";
 import {Summary} from "@user/reports/components/report-daily.tsx";
+import {targetMs} from "@shared/target-hours.ts";
 
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
 const columns: DataTableColumnDef<EntryRow>[] = [
@@ -83,6 +84,9 @@ export function ReportDailyEdit() {
             </p>
         );
     }
+    const target = targetMs(day);
+    const elapsed = day <= today; // ISO-Daten lassen sich als Text vergleichen
+    const diff = report.totals.workMs - target;
 
     return (
         <div className="space-y-4">
@@ -113,16 +117,24 @@ export function ReportDailyEdit() {
                 </Button>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <Summary
                     title="Arbeitszeit"
                     value={formatDuration(report.totals.workMs)}
                     hint={report.totals.running ? "läuft noch" : undefined}
                 />
                 <Summary title="Pausen" value={formatDuration(report.totals.breakMs)}/>
-                <Summary title="Buchungen" value={String(report.rows.length)}/>
+                <Summary
+                    title="Soll"
+                    value={formatDuration(target)}
+                    hint={target === 0 ? "Wochenende" : undefined}
+                />
+                <Summary
+                    title="Differenz"
+                    value={elapsed ? formatDifference(diff) : "–"}
+                    valueClassName={elapsed ? diffClass(diff) : undefined}
+                />
             </div>
-
             {entries.isPending && <p className="text-sm text-muted-foreground">Lade…</p>}
             {entries.isError && (
                 <p role="alert" className="text-sm text-destructive">

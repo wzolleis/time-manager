@@ -19,6 +19,7 @@ const HEADINGS: Record<string, string> = {
     "/user/time-stamp": "Zeiterfassung",
     "/user/reports": "Report",
     "/user/reports/daily": "Tagesbericht bearbeiten",
+    "/user/reports/weekly": "Wochenbericht",
     "/user/projects": "Projekte"
 };
 

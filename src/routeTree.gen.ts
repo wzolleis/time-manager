@@ -18,6 +18,7 @@ import { Route as UserIndexRouteImport } from './routes/user/index'
 import { Route as UserProjectsIndexRouteImport } from './routes/user/projects/index'
 import { Route as UserReportsIndexRouteImport } from './routes/user/reports/index'
 import { Route as UserReportsDailyRouteImport } from './routes/user/reports/daily'
+import { Route as UserReportsWeeklyRouteImport } from './routes/user/reports/weekly'
 import { Route as UserTimeStampIndexRouteImport } from './routes/user/time-stamp/index'
 
 const IndexRoute = IndexRouteImport.update({
@@ -65,6 +66,11 @@ const UserReportsDailyRoute = UserReportsDailyRouteImport.update({
   path: '/user/reports/daily',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UserReportsWeeklyRoute = UserReportsWeeklyRouteImport.update({
+  id: '/user/reports/weekly',
+  path: '/user/reports/weekly',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UserTimeStampIndexRoute = UserTimeStampIndexRouteImport.update({
   id: '/user/time-stamp/',
   path: '/user/time-stamp/',
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/user/': typeof UserIndexRoute
   '/user/reports/daily': typeof UserReportsDailyRoute
+  '/user/reports/weekly': typeof UserReportsWeeklyRoute
   '/user/projects/': typeof UserProjectsIndexRoute
   '/user/reports/': typeof UserReportsIndexRoute
   '/user/time-stamp/': typeof UserTimeStampIndexRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/user': typeof UserIndexRoute
   '/user/reports/daily': typeof UserReportsDailyRoute
+  '/user/reports/weekly': typeof UserReportsWeeklyRoute
   '/user/projects': typeof UserProjectsIndexRoute
   '/user/reports': typeof UserReportsIndexRoute
   '/user/time-stamp': typeof UserTimeStampIndexRoute
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/user/': typeof UserIndexRoute
   '/user/reports/daily': typeof UserReportsDailyRoute
+  '/user/reports/weekly': typeof UserReportsWeeklyRoute
   '/user/projects/': typeof UserProjectsIndexRoute
   '/user/reports/': typeof UserReportsIndexRoute
   '/user/time-stamp/': typeof UserTimeStampIndexRoute
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/user/'
     | '/user/reports/daily'
+    | '/user/reports/weekly'
     | '/user/projects/'
     | '/user/reports/'
     | '/user/time-stamp/'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/user'
     | '/user/reports/daily'
+    | '/user/reports/weekly'
     | '/user/projects'
     | '/user/reports'
     | '/user/time-stamp'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/user/'
     | '/user/reports/daily'
+    | '/user/reports/weekly'
     | '/user/projects/'
     | '/user/reports/'
     | '/user/time-stamp/'
@@ -155,6 +167,7 @@ export interface RootRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   UserIndexRoute: typeof UserIndexRoute
   UserReportsDailyRoute: typeof UserReportsDailyRoute
+  UserReportsWeeklyRoute: typeof UserReportsWeeklyRoute
   UserProjectsIndexRoute: typeof UserProjectsIndexRoute
   UserReportsIndexRoute: typeof UserReportsIndexRoute
   UserTimeStampIndexRoute: typeof UserTimeStampIndexRoute
@@ -225,6 +238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UserReportsDailyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/user/reports/weekly': {
+      id: '/user/reports/weekly'
+      path: '/user/reports/weekly'
+      fullPath: '/user/reports/weekly'
+      preLoaderRoute: typeof UserReportsWeeklyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/user/time-stamp/': {
       id: '/user/time-stamp/'
       path: '/user/time-stamp'
@@ -243,6 +263,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   UserIndexRoute: UserIndexRoute,
   UserReportsDailyRoute: UserReportsDailyRoute,
+  UserReportsWeeklyRoute: UserReportsWeeklyRoute,
   UserProjectsIndexRoute: UserProjectsIndexRoute,
   UserReportsIndexRoute: UserReportsIndexRoute,
   UserTimeStampIndexRoute: UserTimeStampIndexRoute,

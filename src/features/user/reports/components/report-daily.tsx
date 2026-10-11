@@ -4,12 +4,14 @@ import {DataTable, type DataTableColumnDef} from "@/components/table/data-table.
 import {Card, CardDescription, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {fetchProjects} from "@/api/projects.ts";
 import {fetchTimeEntries} from "@/api/time-entries.ts";
-import {formatDate, formatDuration, formatTime} from "@/lib/format.ts";
+import {diffClass, formatDate, formatDifference, formatDuration, formatTime} from "@/lib/format.ts";
 import {useNow} from "@/lib/use-now.ts";
 import {useCurrentUser} from "@/lib/user-context.ts";
 import {localDayRange} from "@shared/day-range.ts";
 import {dayTotals} from "@shared/time-report.ts";
 import {localDay} from "@shared/time-rules.ts";
+import {cn} from "@/lib/utils.ts";
+import {targetMs} from "@shared/target-hours.ts";
 
 type Row = {
     id: string;
@@ -37,12 +39,22 @@ const columns: DataTableColumnDef<Row>[] = [
     },
 ];
 
-export function Summary({title, value, hint}: { title: string; value: string; hint?: string }) {
+export function Summary({
+                            title,
+                            value,
+                            hint,
+                            valueClassName,
+                        }: {
+    title: string;
+    value: string;
+    hint?: string;
+    valueClassName?: string;
+}) {
     return (
         <Card>
             <CardHeader>
                 <CardDescription>{title}</CardDescription>
-                <CardTitle className="text-2xl">{value}</CardTitle>
+                <CardTitle className={cn("text-2xl", valueClassName)}>{value}</CardTitle>
                 {hint && <CardDescription>{hint}</CardDescription>}
             </CardHeader>
         </Card>
@@ -91,6 +103,9 @@ export function ReportDaily() {
         );
     }
 
+    const target = targetMs(today);
+    const diff = report.totals.workMs - target;
+
     return (
         <div className="space-y-4">
             <div>
@@ -100,14 +115,24 @@ export function ReportDaily() {
                 </p>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <Summary
                     title="Arbeitszeit"
                     value={formatDuration(report.totals.workMs)}
                     hint={report.totals.running ? "läuft noch" : undefined}
                 />
                 <Summary title="Pausen" value={formatDuration(report.totals.breakMs)}/>
-                <Summary title="Buchungen" value={String(report.rows.length)}/>
+                <Summary
+                    title="Soll"
+                    value={formatDuration(target)}
+                    hint={target === 0 ? "Wochenende" : undefined}
+                />
+                <Summary
+                    title="Differenz"
+                    value={formatDifference(diff)}
+                    valueClassName={diffClass(diff)}
+                    hint={report.totals.running ? "läuft noch" : undefined}
+                />
             </div>
 
             {entries.isPending && <p className="text-sm text-muted-foreground">Lade…</p>}
