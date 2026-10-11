@@ -1,5 +1,5 @@
 import {describe, expect, it} from "vitest";
-import {type Booking, buildPeriods, checkSequence, localDay} from "./time-rules";
+import {type Booking, buildPeriods, checkSequence, findMissingGehen, localDay, nextType} from "./time-rules";
 
 const b = (id: string, type: Booking["type"], iso: string): Booking => ({
     id,
@@ -28,12 +28,49 @@ describe("checkSequence", () => {
         expect(checkSequence(workday.slice(0, 3))).toBeNull();
     });
 
-    it("akzeptiert eine Nachtschicht über Mitternacht", () => {
+    it("lehnt eine Nachtschicht über Mitternacht ab", () => {
         const night = [
-            b("1", "kommen", "2026-06-09T20:00:00Z"), // 22:00
-            b("2", "gehen", "2026-06-10T04:00:00Z"), // 06:00 am Folgetag
+            b("1", "kommen", "2026-06-09T20:00:00Z"), // 22:00 Berlin, 9.6.
+            b("2", "gehen", "2026-06-10T04:00:00Z"), // 06:00 Berlin, 10.6.
         ];
-        expect(checkSequence(night)).toBeNull();
+        expect(checkSequence(night)).toContain("selben Tag");
+    });
+
+    it("akzeptiert ein gehen kurz vor Mitternacht", () => {
+        expect(
+            checkSequence([
+                b("1", "kommen", "2026-06-10T21:00:00Z"), // 23:00 Berlin
+                b("2", "gehen", "2026-06-10T21:59:00Z"), // 23:59 Berlin
+            ]),
+        ).toBeNull();
+    });
+
+    it("lehnt ein gehen kurz nach Mitternacht ab", () => {
+        const result = checkSequence([
+            b("1", "kommen", "2026-06-10T21:59:00Z"), // 23:59 Berlin
+            b("2", "gehen", "2026-06-10T22:01:00Z"), // 00:01 Berlin am nächsten Tag
+        ]);
+        expect(result).toContain("selben Tag");
+    });
+
+    it("bestimmt den Tag lokal, nicht in UTC", () => {
+        // 00:30 und 08:00 Berlin: am selben lokalen Tag, aber an zwei UTC-Tagen
+        expect(
+            checkSequence([
+                b("1", "kommen", "2026-06-09T22:30:00Z"),
+                b("2", "gehen", "2026-06-10T06:00:00Z"),
+            ]),
+        ).toBeNull();
+    });
+
+    it("erlaubt ein kommen am Tag nach dem gehen", () => {
+        expect(
+            checkSequence([
+                b("1", "kommen", "2026-06-09T06:00:00Z"),
+                b("2", "gehen", "2026-06-09T14:00:00Z"),
+                b("3", "kommen", "2026-06-10T06:00:00Z"),
+            ]),
+        ).toBeNull();
     });
 
     it("sortiert die Eingabe selbst, die Reihenfolge im Array ist egal", () => {
@@ -79,12 +116,11 @@ describe("checkSequence", () => {
 });
 
 describe("checkSequence beim Bearbeiten", () => {
-    it("lehnt ein verschobenes gehen ab, das vor dem kommen landet", () => {
-        // gehen (Id 2) wird von 12:00 auf 07:00 vor das erste kommen verschoben
+    it("lehnt ein gehen ab, das auf den nächsten Tag verschoben wird", () => {
         const edited = workday.map((e) =>
-            e.id === "2" ? {...e, bookedAt: new Date("2026-06-10T05:00:00Z")} : e,
+            e.id === "4" ? {...e, bookedAt: new Date("2026-06-11T06:00:00Z")} : e,
         );
-        expect(checkSequence(edited)).not.toBeNull();
+        expect(checkSequence(edited)).toContain("selben Tag");
     });
 
     it("akzeptiert eine Korrektur innerhalb der Lücken", () => {
@@ -164,5 +200,44 @@ describe("localDay", () => {
     it("liefert den lokalen Kalendertag in Berlin", () => {
         expect(localDay(new Date("2026-06-09T22:30:00Z"))).toBe("2026-06-10");
         expect(localDay(new Date("2026-06-09T21:30:00Z"))).toBe("2026-06-09");
+    });
+
+    describe("nextType", () => {
+        it("beginnt mit kommen", () => {
+            expect(nextType([], new Date("2026-06-10T22:00:00Z"))).toBe("kommen");
+        });
+
+        it("nach einem kommen folgt gehen", () => {
+            expect(nextType(workday.slice(0, 1), new Date("2026-06-10T22:00:00Z"))).toBe("gehen");
+        });
+
+        it("nach einem gehen folgt kommen", () => {
+            expect(nextType(workday, new Date("2026-06-10T22:00:00Z"))).toBe("kommen");
+        });
+
+        it("berücksichtigt nur Buchungen vor dem Zeitpunkt", () => {
+            // vor 11:00 Berlin ist das letzte kommen 08:00, also folgt gehen
+            expect(nextType(workday, new Date("2026-06-10T09:00:00Z"))).toBe("gehen");
+        });
+    });
+
+    describe("findMissingGehen", () => {
+        const forgotten = [b("1", "kommen", "2026-06-09T06:00:00Z")];
+
+        it("findet ein kommen eines früheren Tages ohne gehen", () => {
+            expect(findMissingGehen(forgotten, new Date("2026-06-10T09:00:00Z"))?.id).toBe("1");
+        });
+
+        it("meldet nichts, solange der Tag des kommen läuft", () => {
+            expect(findMissingGehen(forgotten, new Date("2026-06-09T20:00:00Z"))).toBeNull();
+        });
+
+        it("meldet nichts, wenn die Folge mit gehen endet", () => {
+            expect(findMissingGehen(workday, new Date("2026-06-12T09:00:00Z"))).toBeNull();
+        });
+
+        it("meldet nichts ohne Buchungen", () => {
+            expect(findMissingGehen([], new Date("2026-06-10T09:00:00Z"))).toBeNull();
+        });
     });
 });

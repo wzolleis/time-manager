@@ -23,6 +23,7 @@ type DayRow = {
     workMs: number;
     breakMs: number;
     diffMs: number | null; // null: Zukunft oder freier Tag ohne Arbeit
+    missingGehen: boolean
 };
 
 const dash = "–";
@@ -34,9 +35,12 @@ const columns: DataTableColumnDef<DayRow>[] = [
         header: "Tag",
         cell: ({row}) => (
             <span className={row.original.isToday ? "font-semibold" : undefined}>
-        {row.original.label}
+                {row.original.label}
                 {row.original.isToday && " · heute"}
-      </span>
+                {row.original.missingGehen && (
+                    <span className="ml-2 text-destructive">Gehen fehlt</span>
+                )}
+            </span>
         ),
     },
     {
@@ -121,6 +125,7 @@ export function ReportWeekly() {
                 workMs: totals.workMs,
                 breakMs: totals.breakMs,
                 diffMs: noDifference ? null : totals.workMs - target,
+                missingGehen: totals.missingGehen,
             };
         });
 

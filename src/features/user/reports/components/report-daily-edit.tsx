@@ -14,7 +14,8 @@ import {DataTable, type DataTableColumnDef} from "@/components/table/data-table.
 import {EntryActions, type EntryRow} from "@user/time-stamp/components/time-entry-actions.tsx";
 import {Summary} from "@user/reports/components/report-daily.tsx";
 import {targetMs} from "@shared/target-hours.ts";
-
+import {nextType} from "@shared/time-rules";
+import {TimeEntryCreateDialog} from "@user/time-stamp/components/time-entry-create-dialog.tsx"; // zum bestehenden Import von localDay ergänzen
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
 const columns: DataTableColumnDef<EntryRow>[] = [
     {
@@ -74,7 +75,11 @@ export function ReportDailyEdit() {
 
         // Für die Summen zählen alle Buchungen, damit Nachtschichten stimmen
         const all = dtos.map((e) => ({id: e.id, type: e.type, bookedAt: new Date(e.bookedAt)}));
-        return {rows, totals: dayTotals(all, range, new Date(now))};
+        return {
+            rows,
+            totals: dayTotals(all, range, new Date(now)),
+            next: nextType(all, range.end), // was ist am Ende dieses Tages als Nächstes dran
+        };
     }, [entries.data, projects.data, range, now]);
 
     if (!currentUser) {
@@ -115,9 +120,19 @@ export function ReportDailyEdit() {
                 <Button variant="ghost" size="sm" disabled={day === today} onClick={() => setDay(today)}>
                     Heute
                 </Button>
+                <TimeEntryCreateDialog
+                    defaultDay={day}
+                    defaultType={report.next}
+                    label="Buchung nachtragen"
+                />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {report.totals.missingGehen && (
+                    <p role="alert" className="text-sm text-destructive">
+                        An diesem Tag fehlt das Gehen. Trage es mit „Buchung nachtragen" nach.
+                    </p>
+                )}
                 <Summary
                     title="Arbeitszeit"
                     value={formatDuration(report.totals.workMs)}
