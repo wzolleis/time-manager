@@ -1,9 +1,181 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "c932a958-7008-43e6-866b-b1e884af7bb1",
-  "prevId": "d8fb240e-c550-4d10-b633-9f2b167fe6d8",
+  "id": "965d67dd-afb1-4b84-a333-40aa88c10bdc",
+  "prevId": "bf9351e6-2c84-49a1-8105-29ba2a69f201",
   "tables": {
+    "projects": {
+      "name": "projects",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "projects_id": {
+          "name": "projects_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "projects_name_unique": {
+          "name": "projects_name_unique",
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "checkConstraint": {}
+    },
+    "time_entries": {
+      "name": "time_entries",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "enum('kommen','gehen')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "booked_at": {
+          "name": "booked_at",
+          "type": "datetime(0)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_time_entries_user_booked": {
+          "name": "idx_time_entries_user_booked",
+          "columns": [
+            "user_id",
+            "booked_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "time_entries_user_id_users_id_fk": {
+          "name": "time_entries_user_id_users_id_fk",
+          "tableFrom": "time_entries",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "time_entries_id": {
+          "name": "time_entries_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "time_entry_projects": {
+      "name": "time_entry_projects",
+      "columns": {
+        "time_entry_id": {
+          "name": "time_entry_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_time_entry_projects_project": {
+          "name": "idx_time_entry_projects_project",
+          "columns": [
+            "project_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "time_entry_projects_time_entry_id_time_entries_id_fk": {
+          "name": "time_entry_projects_time_entry_id_time_entries_id_fk",
+          "tableFrom": "time_entry_projects",
+          "tableTo": "time_entries",
+          "columnsFrom": [
+            "time_entry_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "time_entry_projects_project_id_projects_id_fk": {
+          "name": "time_entry_projects_project_id_projects_id_fk",
+          "tableFrom": "time_entry_projects",
+          "tableTo": "projects",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "time_entry_projects_time_entry_id": {
+          "name": "time_entry_projects_time_entry_id",
+          "columns": [
+            "time_entry_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
     "users": {
       "name": "users",
       "columns": {
@@ -55,6 +227,74 @@
           ]
         }
       },
+      "checkConstraint": {}
+    },
+    "vacations": {
+      "name": "vacations",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "idx_vacations_user_start": {
+          "name": "idx_vacations_user_start",
+          "columns": [
+            "user_id",
+            "start_date"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "vacations_user_id_users_id_fk": {
+          "name": "vacations_user_id_users_id_fk",
+          "tableFrom": "vacations",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "vacations_id": {
+          "name": "vacations_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
       "checkConstraint": {}
     }
   },

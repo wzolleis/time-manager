@@ -10,14 +10,18 @@ UNKNOWN_ID="00000000-0000-4000-8000-000000000000"
 USER_ID=""
 PROJECT_IDS=""
 
-# Alle Buchungen eines Users von der neuesten zur ältesten löschen, dann den User
-# (jedes Präfix einer gültigen Folge ist gültig, die Regeln blockieren das nicht)
 purge_user() {
   local uid="$1" ids id
   wt_call GET "/api/time-entries?userId=$uid"
   ids=$(printf '%s' "$WT_BODY" | grep -o '"id":"[^"]*"' | cut -d'"' -f4 \
         | awk '{a[NR]=$0} END{for(i=NR;i>=1;i--) print a[i]}')
   for id in $ids; do wt_call DELETE "/api/time-entries/$id"; done
+
+  wt_call GET "/api/vacations?userId=$uid"
+  for id in $(printf '%s' "$WT_BODY" | grep -o '"id":"[^"]*"' | cut -d'"' -f4); do
+    wt_call DELETE "/api/vacations/$id"
+  done
+
   wt_call DELETE "/api/users/$uid"
 }
 
@@ -147,6 +151,57 @@ wt_step "Projekt wieder zuordnen" 200 "\"projectId\":\"$PROJECT_ID\"" \
 wt_step "Projekt löschen" 204 "" DELETE "/api/projects/$PROJECT_ID"
 
 wt_step "Buchung bleibt bestehen, ohne Projekt" 200 '"projectId":null' GET "$ENTRY/$KOMMEN1"
+
+# --- Urlaub ----------------------------------------------------------------
+
+VAC="/api/vacations"
+vacation() { printf '{"userId":"%s","startDate":"%s","endDate":"%s"}' "$USER_ID" "$1" "$2"; }
+
+wt_step "Urlaub 08.06. bis 12.06. anlegen" 201 '"startDate":"2026-06-08"' POST $VAC \
+  "$(vacation 2026-06-08 2026-06-12)"
+VAC1=$(wt_id "$WT_BODY")
+
+wt_step "Überschneidung wird abgelehnt (10.06. bis 15.06.)" 422 "Überschneidet sich" POST $VAC \
+  "$(vacation 2026-06-10 2026-06-15)"
+
+wt_step "Überschneidung am letzten Tag wird abgelehnt (12.06.)" 422 "Überschneidet sich" POST $VAC \
+  "$(vacation 2026-06-12 2026-06-12)"
+
+wt_step "Direkt angrenzender Urlaub ist erlaubt (13.06. bis 14.06.)" 201 '"endDate":"2026-06-14"' POST $VAC \
+  "$(vacation 2026-06-13 2026-06-14)"
+VAC2=$(wt_id "$WT_BODY")
+
+wt_step "Ende vor Beginn wird abgelehnt" 400 "vor dem Beginn" POST $VAC \
+  "$(vacation 2026-07-10 2026-07-01)"
+
+wt_step "Ungültiges Datum wird abgelehnt" 400 "" POST $VAC \
+  "$(vacation 2026-02-30 2026-03-02)"
+
+wt_step "Unbekannter User wird abgelehnt" 400 "existiert nicht" POST $VAC \
+  "{\"userId\":\"$UNKNOWN_ID\",\"startDate\":\"2026-08-03\",\"endDate\":\"2026-08-07\"}"
+
+wt_step "Liste enthält beide Urlaube" 200 '"startDate":"2026-06-13"' GET "$VAC?userId=$USER_ID"
+
+wt_step "Ende des ersten Urlaubs auf 11.06. ändern" 200 '"endDate":"2026-06-11"' \
+  PATCH "$VAC/$VAC1" '{"endDate":"2026-06-11"}'
+
+wt_step "Beginn nach das gespeicherte Ende schieben wird abgelehnt" 422 "vor dem Beginn" \
+  PATCH "$VAC/$VAC1" '{"startDate":"2026-06-12"}'
+
+wt_step "Verlängern in den zweiten Urlaub hinein wird abgelehnt" 422 "Überschneidet sich" \
+  PATCH "$VAC/$VAC1" '{"endDate":"2026-06-13"}'
+
+wt_step "Beginn ändern, ohne sich mit sich selbst zu überschneiden" 200 '"startDate":"2026-06-09"' \
+  PATCH "$VAC/$VAC1" '{"startDate":"2026-06-09"}'
+
+wt_step "Leerer Patch wird abgelehnt" 400 "" PATCH "$VAC/$VAC1" '{}'
+
+wt_step "Urlaub löschen" 204 "" DELETE "$VAC/$VAC2"
+
+wt_step "Gelöschter Urlaub ist weg" 404 "" GET "$VAC/$VAC2"
+
+wt_step "Der Zeitraum ist nach dem Löschen wieder frei" 201 '"startDate":"2026-06-13"' POST $VAC \
+  "$(vacation 2026-06-13 2026-06-14)"
 
 # --- User mit Buchungen ----------------------------------------------------
 

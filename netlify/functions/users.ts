@@ -78,7 +78,7 @@ const handler = async (req: Request, context: Context) => {
         }
         if (hasDbCode(err, "ER_ROW_IS_REFERENCED_2")) {
             return Response.json(
-                {error: "User hat noch Zeitbuchungen und kann nicht gelöscht werden"},
+                {error: "User hat noch Zeitbuchungen oder Urlaube und kann nicht gelöscht werden"},
                 {status: 409},
             );
         }

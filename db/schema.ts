@@ -1,5 +1,18 @@
 // db/schema.ts
-import {char, datetime, index, mysqlEnum, mysqlTable, varchar} from "drizzle-orm/mysql-core";
+import {char, date, datetime, index, mysqlEnum, mysqlTable, varchar} from "drizzle-orm/mysql-core"; // zum bisherigen Import ergänzen
+
+export const vacations = mysqlTable(
+    "vacations",
+    {
+        id: char("id", {length: 36}).primaryKey(),
+        userId: char("user_id", {length: 36})
+            .notNull()
+            .references(() => users.id),
+        startDate: date("start_date", {mode: "string"}).notNull(),
+        endDate: date("end_date", {mode: "string"}).notNull(), // inklusive
+    },
+    (t) => [index("idx_vacations_user_start").on(t.userId, t.startDate)],
+);
 
 export const users = mysqlTable("users", {
     id: char("id", {length: 36}).primaryKey(),
