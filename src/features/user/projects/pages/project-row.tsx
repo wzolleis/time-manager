@@ -12,8 +12,7 @@ import {
 import {Input} from "@/components/ui/input.tsx";
 import {Label} from "@/components/ui/label.tsx";
 import {TableCell, TableRow} from "@/components/ui/table.tsx";
-import type {Project} from "@shared/time-entry.ts";
-import type {ProjectUpdate} from "@shared/project.ts";
+import type {Project, ProjectUpdate} from "@shared/project.ts";
 import {updateProject} from "@/api/projects.ts";
 import {DeleteProjectDialog} from "@user/projects/components/delete-project-dialog.tsx";
 

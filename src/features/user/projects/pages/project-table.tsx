@@ -1,6 +1,6 @@
 import {Table, TableBody, TableHead, TableHeader, TableRow,} from "@/components/ui/table.tsx";
-import type {Project} from "@shared/time-entry.ts";
 import {ProjectRow} from "@user/projects/pages/project-row.tsx";
+import type {Project} from "@shared/project.ts";
 
 type ProjectTableProps = {
     projects: Project[];

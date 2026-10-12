@@ -1,9 +1,9 @@
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {Button} from "@/components/ui/button.tsx";
 import {deleteProject, fetchProjects} from "@/api/projects.ts";
-import type {Project} from "@shared/time-entry.ts";
 import {ProjectTable} from "@user/projects/pages/project-table.tsx";
 import {ProjectCreateDialog} from "@user/projects/pages/project-create-dialog.tsx";
+import type {Project} from "@shared/project.ts";
 
 export function Projects() {
     const qc = useQueryClient();
