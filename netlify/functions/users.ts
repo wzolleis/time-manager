@@ -8,8 +8,7 @@ import {users} from "../../db/schema";
 import {UserCreateSchema, UserUpdateSchema} from "../../shared/user";
 import {hasDbCode} from "./lib/db-errors";
 import {withTiming} from "./lib/timing";
-
-const IdSchema = z.uuid();
+import {IdSchema, isApiPath, notFound} from "./lib/id";
 
 
 const getUser = async (id: string) => {
@@ -25,10 +24,9 @@ const readBody = async (req: Request): Promise<unknown> => {
     }
 };
 
-const notFound = () => new Response(null, {status: 404});
-
 const handler = async (req: Request, context: Context) => {
     try {
+        if (!isApiPath(req.url, "users")) return notFound();
         const rawId = context.params.id;
 
         // Sammlung: /api/users

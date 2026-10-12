@@ -10,6 +10,8 @@ import {TimeEntryCreateSchema, TimeEntryUpdateSchema} from "../../shared/time-en
 import {type Booking, checkSequence} from "../../shared/time-rules";
 import {withTiming} from "./lib/timing";
 
+import {IdSchema, isApiPath, notFound} from "./lib/id";
+
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Executor = Pick<typeof db, "select">;
 
@@ -19,7 +21,7 @@ class RuleError extends Error {
 class NotFoundError extends Error {
 }
 
-const IdSchema = z.string().uuid();
+
 const ListQuerySchema = z.object({
     userId: z.string().uuid().optional(),
     from: z.coerce.date().optional(),
@@ -71,10 +73,9 @@ const readBody = async (req: Request): Promise<unknown> => {
     }
 };
 
-const notFound = () => new Response(null, {status: 404});
-
 const handler = async (req: Request, context: Context) => {
     try {
+        if (!isApiPath(req.url, "time-entries")) return notFound();
         const url = new URL(req.url);
         const rawId = context.params.id;
 

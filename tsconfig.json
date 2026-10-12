@@ -16,6 +16,9 @@
       "node"
     ],
     "paths": {
+      "@shared/*": [
+        "./shared/*"
+      ],
       "@project/*": [
         "."
       ],

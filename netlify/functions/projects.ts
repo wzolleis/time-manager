@@ -5,10 +5,10 @@ import {z} from "zod";
 import {db} from "./lib/db";
 import {hasDbCode} from "./lib/db-errors";
 import {projects} from "../../db/schema";
-import {ProjectCreateSchema, ProjectUpdateSchema} from "../../shared/time-entry";
 import {withTiming} from "./lib/timing";
 
-const IdSchema = z.uuid();
+import {IdSchema, isApiPath, notFound} from "./lib/id";
+import {ProjectCreateSchema, ProjectUpdateSchema} from "../../shared/project";
 
 const getProject = async (id: string) => {
     const [row] = await db.select().from(projects).where(eq(projects.id, id)).limit(1);
@@ -23,10 +23,9 @@ const readBody = async (req: Request): Promise<unknown> => {
     }
 };
 
-const notFound = () => new Response(null, {status: 404});
-
 const handler = async (req: Request, context: Context) => {
     try {
+        if (!isApiPath(req.url, "projects")) return notFound();
         const rawId = context.params.id;
 
         // Sammlung: /api/projects

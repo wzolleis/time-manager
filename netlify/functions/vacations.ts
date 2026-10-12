@@ -8,6 +8,7 @@ import {withTiming} from "./lib/timing";
 import {users, vacations} from "../../db/schema";
 import {checkRange, findOverlap, overlapMessage} from "../../shared/vacation-rules";
 import {VacationCreateSchema, VacationUpdateSchema} from "../../shared/vacations";
+import {IdSchema, isApiPath, notFound} from "./lib/id";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Executor = Pick<typeof db, "select">;
@@ -21,7 +22,6 @@ class NotFoundError extends Error {
 class UnknownUserError extends Error {
 }
 
-const IdSchema = z.string().uuid();
 const ListQuerySchema = z.object({userId: z.string().uuid().optional()});
 
 const getVacation = async (ex: Executor, id: string) => {
@@ -50,10 +50,9 @@ const readBody = async (req: Request): Promise<unknown> => {
     }
 };
 
-const notFound = () => Response.json({error: "Nicht gefunden"}, {status: 404});
-
 const handler = async (req: Request, context: Context) => {
     try {
+        if (!isApiPath(req.url, "vacations")) return notFound();
         const url = new URL(req.url);
         const rawId = context.params.id;
 
@@ -130,6 +129,8 @@ const handler = async (req: Request, context: Context) => {
 
         return new Response(null, {status: 405});
     } catch (err) {
+        console.log('---> Fehlerbehandlung in vacations', err);
+
         if (err instanceof z.ZodError) return Response.json({errors: err.issues}, {status: 400});
         if (err instanceof RuleError) return Response.json({error: err.message}, {status: 422});
         if (err instanceof NotFoundError) return notFound();

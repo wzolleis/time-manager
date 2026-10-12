@@ -198,10 +198,15 @@ wt_step "Leerer Patch wird abgelehnt" 400 "" PATCH "$VAC/$VAC1" '{}'
 
 wt_step "Urlaub löschen" 204 "" DELETE "$VAC/$VAC2"
 
-wt_step "Gelöschter Urlaub ist weg" 404 "" GET "$VAC/$VAC2"
-
 wt_step "Der Zeitraum ist nach dem Löschen wieder frei" 201 '"startDate":"2026-06-13"' POST $VAC \
   "$(vacation 2026-06-13 2026-06-14)"
+
+wt_step "Gelöschter Urlaub ist weg" 410 "Nicht gefunden" GET "$VAC/$VAC2"
+
+# --- Unbekannte IDs (Netlify wiederholt eine 410 mit .html) ------------------
+for r in users projects time-entries vacations; do
+  wt_step "Unbekannte ID liefert 410 ($r)" 410 "Nicht gefunden" GET "/api/$r/$UNKNOWN_ID"
+done
 
 # --- User mit Buchungen ----------------------------------------------------
 
