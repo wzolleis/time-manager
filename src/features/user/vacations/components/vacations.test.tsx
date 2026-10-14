@@ -45,6 +45,9 @@ function renderPage() {
 }
 
 beforeEach(() => {
+    // Nur Date fälschen, Timer laufen normal weiter (React Query, findBy*)
+    vi.useFakeTimers({toFake: ["Date"]});
+    vi.setSystemTime(new Date("2026-06-10T12:00:00"));
     vi.stubGlobal(
         "ResizeObserver",
         class {
@@ -63,6 +66,7 @@ beforeEach(() => {
 
 afterEach(() => {
     cleanup();
+    vi.useRealTimers();
     vi.unstubAllGlobals();
     localStorage.clear();
 });
@@ -85,7 +89,34 @@ describe("Urlaubsseite", () => {
     it("zeigt einen Hinweis ohne Einträge", async () => {
         mockApi([]);
         renderPage();
-        await screen.findByText("Noch kein Urlaub eingetragen.");
+        await screen.findByText("Für 2026 ist kein Urlaub eingetragen.");
+    });
+
+    it("zeigt genommene, geplante und ungeplante Urlaubstage des Jahres", async () => {
+        mockApi([
+            {id: "a", userId: USER.id, startDate: "2026-03-02", endDate: "2026-03-06"}, // vorbei: 5
+            {id: "b", userId: USER.id, startDate: "2026-06-08", endDate: "2026-06-12"}, // 3 genommen, 2 geplant
+            {id: "c", userId: USER.id, startDate: "2025-08-04", endDate: "2025-08-08"}, // anderes Jahr
+        ]);
+        renderPage();
+
+        await screen.findByText("Genommen");
+        expect(screen.getByText("8 Tage")).toBeTruthy();
+        expect(screen.getByText("2 Tage")).toBeTruthy();
+        expect(screen.getByText("20 Tage")).toBeTruthy();
+        expect(screen.getByText("verfällt am 31.12.2026")).toBeTruthy();
+        expect(screen.queryByText("04.08.2025")).toBeNull(); // Tabelle zeigt nur das gewählte Jahr
+    });
+
+    it("weist zu viel eingetragenen Urlaub aus", async () => {
+        mockApi([
+            {id: "a", userId: USER.id, startDate: "2026-07-06", endDate: "2026-08-21"}, // 35 Arbeitstage
+        ]);
+        renderPage();
+
+        await screen.findByText("5 Tage über dem Jahresurlaub");
+        expect(screen.getByText("35 Tage")).toBeTruthy(); // geplant
+        expect(screen.getAllByText("0 Tage")).toHaveLength(2); // genommen und ungeplant
     });
 
     it("bietet das Eintragen an", async () => {

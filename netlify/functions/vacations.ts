@@ -6,7 +6,7 @@ import {db} from "./lib/db";
 import {hasDbCode} from "./lib/db-errors";
 import {withTiming} from "./lib/timing";
 import {users, vacations} from "../../db/schema";
-import {checkRange, findOverlap, overlapMessage} from "../../shared/vacation-rules";
+import {checkRange, checkYearLimit, findOverlap, overlapMessage} from "../../shared/vacation-rules";
 import {VacationCreateSchema, VacationUpdateSchema} from "../../shared/vacation";
 import {IdSchema, isApiPath, notFound} from "./lib/id";
 
@@ -73,12 +73,12 @@ const handler = async (req: Request, context: Context) => {
                 const id = randomUUID();
                 await db.transaction(async (tx) => {
                     await lockUser(tx, input.userId);
-                    const clash = findOverlap(await userVacations(tx, input.userId), {
-                        id,
-                        startDate: input.startDate,
-                        endDate: input.endDate,
-                    });
+                    const existing = await userVacations(tx, input.userId);
+                    const candidate = {id, startDate: input.startDate, endDate: input.endDate};
+                    const clash = findOverlap(existing, candidate);
                     if (clash) throw new RuleError(overlapMessage(clash));
+                    const overLimit = checkYearLimit(existing, candidate);
+                    if (overLimit) throw new RuleError(overLimit);
                     await tx.insert(vacations).values({id, ...input});
                 });
                 return Response.json(await getVacation(db, id), {status: 201});
@@ -114,8 +114,11 @@ const handler = async (req: Request, context: Context) => {
                 const problem = checkRange(next.startDate, next.endDate);
                 if (problem) throw new RuleError(problem);
 
-                const clash = findOverlap(await userVacations(tx, current.userId), next);
+                const existing = await userVacations(tx, current.userId);
+                const clash = findOverlap(existing, next);
                 if (clash) throw new RuleError(overlapMessage(clash));
+                const overLimit = checkYearLimit(existing, next);
+                if (overLimit) throw new RuleError(overLimit);
 
                 await tx.update(vacations).set(patch).where(eq(vacations.id, id));
             });
