@@ -4,6 +4,7 @@ import {
     ClockPlus,
     LayoutDashboard,
     type LucideIcon,
+    Parasol,
     Settings,
     Target,
     User,
@@ -18,6 +19,7 @@ export const navItemIds = [
     "reports",
     "reports-daily",
     "reports-weekly",
+    "reports-vacations",
     "time-stamp",
     "admin",
     "user",
@@ -54,6 +56,7 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     {id: 'reports', label: 'Report', icon: WorkflowIcon, to: '/user/reports', children: []},
     {id: 'reports-daily', label: 'Heute', icon: WorkflowIcon, to: '/user/reports/daily', children: []},
     {id: 'reports-weekly', label: 'Woche', icon: CalendarDays, to: '/user/reports/weekly', children: []},
+    {id: 'reports-vacations', label: 'Urlaube', icon: Parasol, to: '/user/reports/vacations', children: []},
     {id: 'time-stamp', label: 'Zeiterfassung', icon: ClockPlus, to: '/user/time-stamp', children: []},
 
 ] as const

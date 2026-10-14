@@ -7,7 +7,7 @@ import {hasDbCode} from "./lib/db-errors";
 import {withTiming} from "./lib/timing";
 import {users, vacations} from "../../db/schema";
 import {checkRange, findOverlap, overlapMessage} from "../../shared/vacation-rules";
-import {VacationCreateSchema, VacationUpdateSchema} from "../../shared/vacations";
+import {VacationCreateSchema, VacationUpdateSchema} from "../../shared/vacation";
 import {IdSchema, isApiPath, notFound} from "./lib/id";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
