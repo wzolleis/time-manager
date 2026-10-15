@@ -52,6 +52,7 @@ function mockApi() {
             const raw = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
             const {pathname} = new URL(raw, "http://localhost");
 
+            if (pathname === "/api/auth/me") return Response.json(TEST_USER);
             if (pathname === "/api/users") return Response.json([TEST_USER]);
             if (pathname === "/api/projects" || pathname === "/api/time-entries") return Response.json([]);
             if (pathname === "/api/vacations") return Response.json([]);

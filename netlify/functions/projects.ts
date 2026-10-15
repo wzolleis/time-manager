@@ -8,6 +8,7 @@ import {projects} from "../../db/schema";
 import {withTiming} from "./lib/timing";
 
 import {IdSchema, isApiPath, notFound} from "./lib/id";
+import {withSession} from "./lib/session";
 import {ProjectCreateSchema, ProjectUpdateSchema} from "../../shared/project";
 
 const getProject = async (id: string) => {
@@ -76,6 +77,6 @@ const handler = async (req: Request, context: Context) => {
     }
 };
 
-export default withTiming('projects', handler);
+export default withTiming('projects', withSession(handler));
 
 export const config: Config = {path: ["/api/projects", "/api/projects/:id"]};

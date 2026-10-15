@@ -22,6 +22,20 @@
       "when": 1792022176884,
       "tag": "0002_holidays",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1792098849227,
+      "tag": "0003_users_password_hash",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1792099063572,
+      "tag": "0004_sessions",
+      "breakpoints": true
     }
   ]
 }

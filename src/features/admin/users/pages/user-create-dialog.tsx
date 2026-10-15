@@ -14,6 +14,7 @@ import {Input} from "@/components/ui/input.tsx";
 import {Label} from "@/components/ui/label.tsx";
 import {createUser} from "@/api/users.ts";
 import type {UserCreate} from "@shared/user.ts";
+import {PASSWORD_MIN_LENGTH} from "@shared/auth.ts";
 
 export function UserCreateDialog() {
     const qc = useQueryClient();
@@ -21,6 +22,7 @@ export function UserCreateDialog() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [avatarUrl, setAvatarUrl] = useState("");
+    const [password, setPassword] = useState("");
 
     const create = useMutation({
         mutationFn: (data: UserCreate) => createUser(data),
@@ -35,6 +37,7 @@ export function UserCreateDialog() {
         setName("");
         setEmail("");
         setAvatarUrl("");
+        setPassword("");
         create.reset();
         setOpen(next);
     };
@@ -44,6 +47,7 @@ export function UserCreateDialog() {
         create.mutate({
             name,
             email,
+            password,
             // Leeres Feld bedeutet "kein Avatar", die DB speichert dann NULL
             avatarUrl: avatarUrl === "" ? null : avatarUrl,
         });
@@ -59,7 +63,8 @@ export function UserCreateDialog() {
                     <DialogHeader>
                         <DialogTitle>Neuen User anlegen</DialogTitle>
                         <DialogDescription>
-                            Name und E-Mail sind Pflicht, der Avatar ist optional.
+                            Name, E-Mail und Passwort sind Pflicht, der Avatar ist optional.
+                            Das Passwort teilst du dem User mit, er kann es danach selbst ändern.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -81,6 +86,19 @@ export function UserCreateDialog() {
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="create-user-password">Passwort</Label>
+                        <Input
+                            id="create-user-password"
+                            type="password"
+                            autoComplete="new-password"
+                            minLength={PASSWORD_MIN_LENGTH}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             required
                         />
                     </div>

@@ -1,7 +1,7 @@
 // components/UserDropdown.tsx
 import React from 'react';
 import {Avatar, DropdownMenu} from '@radix-ui/themes';
-import {LogOut, User as UserIcon} from 'lucide-react';
+import {KeyRound, LogOut, User as UserIcon} from 'lucide-react';
 import {findNavigationItem} from "@/application/navigation/nav-utils.ts";
 import type {NavItem} from "@/application/navigation/nav-items.ts";
 import type {User} from "@shared/user.ts";
@@ -11,10 +11,11 @@ import type {User} from "@shared/user.ts";
 interface UserDropdownProps {
     user: User | null;
     onLogout: () => void;
+    onChangePassword: () => void;
     onItemSelected: (item: NavItem) => void;
 }
 
-export const UserDropdown: React.FC<UserDropdownProps> = ({user, onItemSelected, onLogout}) => {
+export const UserDropdown: React.FC<UserDropdownProps> = ({user, onItemSelected, onLogout, onChangePassword}) => {
     let fallbackInitials =
         user?.name ?? 'J'
             .toUpperCase()
@@ -44,6 +45,9 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({user, onItemSelected,
                 </DropdownMenu.Item>
                 <DropdownMenu.Item onClick={() => onItemSelected(settingsNavItem)}>
                     <SettingsIcon size={14} style={{marginRight: '6px'}}/> {settingsNavItem.label}
+                </DropdownMenu.Item>
+                <DropdownMenu.Item onClick={onChangePassword}>
+                    <KeyRound size={14} style={{marginRight: '6px'}}/> Passwort ändern
                 </DropdownMenu.Item>
                 <DropdownMenu.Separator/>
                 <DropdownMenu.Item color="red" onClick={onLogout}>

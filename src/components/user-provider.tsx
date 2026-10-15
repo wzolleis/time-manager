@@ -1,48 +1,35 @@
 // src/components/user-provider.tsx
-import {type ReactNode, useCallback, useMemo, useState} from "react";
+import {type ReactNode, useMemo} from "react";
 import {useQuery} from "@tanstack/react-query";
-import {fetchUsers} from "@/api/users";
+import {fetchMe, ME_QUERY_KEY} from "@/api/auth";
 import {UserContext, type UserContextValue} from "@/lib/user-context";
-import type {User} from "@shared/user";
+import {Button} from "@/components/ui/button";
+import {LoginPage} from "@/features/auth/pages/login-page";
 
-const STORAGE_KEY = "time-manager:user-id";
-const NO_USERS: User[] = []; // stabile Referenz, damit useMemo nicht ständig neu rechnet
-
-// Der Zugriff auf localStorage kann scheitern (privater Modus, gesperrter Speicher)
-const readStored = (): string | null => {
-    try {
-        return localStorage.getItem(STORAGE_KEY);
-    } catch {
-        return null;
-    }
-};
-
+// Der aktuelle User ist immer der angemeldete. Ohne Session gibt es nur die Login-Seite.
 export function UserProvider({children}: { children: ReactNode }) {
-    const {data, isPending, isError} = useQuery({
-        queryKey: ["users"],
-        queryFn: fetchUsers,
+    const {data: currentUser, isPending, isError, error, refetch} = useQuery({
+        queryKey: ME_QUERY_KEY,
+        queryFn: fetchMe,
     });
-    const users = data ?? NO_USERS;
 
-    const [selectedId, setSelectedId] = useState<string | null>(readStored);
-
-    // Abgeleitet statt per Effekt gesetzt: ein ungültiger gespeicherter Wert
-    // fällt automatisch auf den ersten User zurück
-    const currentUser = users.find((u) => u.id === selectedId) ?? users[0] ?? null;
-
-    const setCurrentUserId = useCallback((id: string) => {
-        setSelectedId(id);
-        try {
-            localStorage.setItem(STORAGE_KEY, id);
-        } catch {
-            // Speichern nicht möglich: die Auswahl gilt dann nur bis zum Neuladen
-        }
-    }, []);
-
-    const value = useMemo<UserContextValue>(
-        () => ({users, currentUser, setCurrentUserId, isPending, isError}),
-        [users, currentUser, setCurrentUserId, isPending, isError],
+    const value = useMemo<UserContextValue | null>(
+        () => (currentUser ? {currentUser} : null),
+        [currentUser],
     );
+
+    if (isPending) {
+        return <p className="p-4 text-sm text-muted-foreground">Lade…</p>;
+    }
+    if (isError) {
+        return (
+            <div className="space-y-2 p-4">
+                <p role="alert" className="text-sm text-destructive">{error.message}</p>
+                <Button variant="outline" onClick={() => refetch()}>Erneut versuchen</Button>
+            </div>
+        );
+    }
+    if (!value) return <LoginPage/>;
 
     return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 }

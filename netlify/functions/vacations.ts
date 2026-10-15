@@ -9,6 +9,7 @@ import {holidays, users, vacations} from "../../db/schema";
 import {checkRange, checkYearLimit, findOverlap, overlapMessage} from "../../shared/vacation-rules";
 import {VacationCreateSchema, VacationUpdateSchema} from "../../shared/vacation";
 import {IdSchema, isApiPath, notFound} from "./lib/id";
+import {withSession} from "./lib/session";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Executor = Pick<typeof db, "select">;
@@ -152,6 +153,6 @@ const handler = async (req: Request, context: Context) => {
     }
 };
 
-export default withTiming("vacations", handler);
+export default withTiming("vacations", withSession(handler));
 
 export const config: Config = {path: ["/api/vacations", "/api/vacations/:id"]};

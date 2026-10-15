@@ -31,7 +31,22 @@ export const users = mysqlTable("users", {
     name: varchar("name", {length: 100}).notNull(),
     email: varchar("email", {length: 191}).notNull().unique(),
     avatarUrl: varchar("avatar_url", {length: 2048}).default(""),
+    // bcrypt-Hash (immer 60 Zeichen). Ohne Hash ist keine Anmeldung möglich, bis der Admin ein Passwort setzt.
+    passwordHash: char("password_hash", {length: 60}),
 });
+
+// Angemeldete Sessions. Gespeichert wird nur der SHA-256-Hash der Session-ID, die ID selbst steht nur im Cookie.
+export const sessions = mysqlTable(
+    "sessions",
+    {
+        idHash: char("id_hash", {length: 64}).primaryKey(),
+        userId: char("user_id", {length: 36})
+            .notNull()
+            .references(() => users.id, {onDelete: "cascade"}),
+        expiresAt: datetime("expires_at", {mode: "date", fsp: 0}).notNull(),
+    },
+    (t) => [index("idx_sessions_user").on(t.userId), index("idx_sessions_expires").on(t.expiresAt)],
+);
 
 export const projects = mysqlTable("projects", {
     id: char("id", {length: 36}).primaryKey(),

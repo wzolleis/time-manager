@@ -6,16 +6,28 @@ import {MenuButton} from "@/components/buttons/menu-button.tsx";
 import {Breadcrumb} from "@/application/breadcrumb/components/breadcrumb.tsx";
 import {useNavigate} from "@tanstack/react-router";
 import {NAVIGATION_ITEMS, type NavItem} from "@/application/navigation/nav-items.ts";
-import {UserSelect} from "@/components/user-select.tsx";
 import {useCurrentUser} from "@/lib/user-context.ts";
 import type {User} from "@shared/user.ts";
+import {useState} from "react";
+import {useQueryClient} from "@tanstack/react-query";
+import {logout, ME_QUERY_KEY} from "@/api/auth.ts";
+import {clearUserData} from "@/query-client.ts";
+import {PasswordChangeDialog} from "@/features/auth/components/password-change-dialog.tsx";
 
 export const Header = () => {
     const navigate = useNavigate();
     const userContext = useCurrentUser()
-    const handleLogout = (): void => {
-        console.log('Benutzer loggt sich aus...');
-        // Logik für Authentifizierungs-Reset hier einfügen
+    const qc = useQueryClient();
+    const [passwordOpen, setPasswordOpen] = useState(false);
+
+    const handleLogout = async (): Promise<void> => {
+        try {
+            await logout();
+        } finally {
+            // Auch wenn der Server nicht erreichbar ist: lokal nichts vom User zurücklassen
+            await clearUserData();
+            qc.setQueryData(ME_QUERY_KEY, null);
+        }
     };
 
     const onItemSelected = (item: NavItem): void => {
@@ -23,7 +35,7 @@ export const Header = () => {
     }
 
 
-    const currentUser: User | null = userContext.currentUser;
+    const currentUser: User = userContext.currentUser;
 
     return (
         <Flex
@@ -49,9 +61,14 @@ export const Header = () => {
                     <Bell size={18}/>
                 </Button>
 
-                <UserSelect/>
                 {/* 2. Wiederverwendbares Dropdown */}
-                <UserDropdown onItemSelected={onItemSelected} user={currentUser} onLogout={handleLogout}/>
+                <UserDropdown
+                    onItemSelected={onItemSelected}
+                    user={currentUser}
+                    onLogout={handleLogout}
+                    onChangePassword={() => setPasswordOpen(true)}
+                />
+                <PasswordChangeDialog open={passwordOpen} onOpenChange={setPasswordOpen}/>
             </Flex>
         </Flex>
     )

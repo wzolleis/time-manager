@@ -6,6 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/lib/walkthrough.sh"
 
 TEST_EMAIL="vitest@example.com"
+TEST_PASSWORD="vitest-passwort-1"
 UNKNOWN_ID="00000000-0000-4000-8000-000000000000"
 USER_ID=""
 PROJECT_IDS=""
@@ -40,7 +41,7 @@ wt_init "$@"
 wt_call GET /api/users
 if [ "$WT_STATUS" != "200" ]; then
   echo "Server nicht nutzbar: Status $WT_STATUS ($WT_BODY)"
-  echo "Läuft 'npx netlify dev'? Stimmen Benutzer und Passwort?"
+  echo "Läuft 'npx netlify dev'? Stimmen E-Mail und Passwort?"
   exit 1
 fi
 
@@ -51,15 +52,50 @@ if [ -n "$OLD" ]; then
   purge_user "$OLD"
 fi
 
+# --- Anmeldung -------------------------------------------------------------
+
+wt_step "Eigener User über /me" 200 "\"email\":\"$(printf '%s' "$WT_AUTH_USER" | tr '[:upper:]' '[:lower:]')\"" GET /api/auth/me
+
+wt_step "Login mit falschem Passwort" 401 "E-Mail oder Passwort ist falsch" POST /api/auth/login \
+  "{\"email\":\"$WT_AUTH_USER\",\"password\":\"sicher-falsch-123\"}"
+
+wt_step "Login mit unbekannter E-Mail (gleiche Meldung)" 401 "E-Mail oder Passwort ist falsch" POST /api/auth/login \
+  '{"email":"gibt-es-nicht@example.com","password":"egal-12345"}'
+
+wt_step "Passwort ändern mit falschem bisherigen Passwort" 400 "bisherige Passwort ist falsch" \
+  POST /api/auth/password '{"oldPassword":"sicher-falsch-123","newPassword":"egal-12345"}'
+
 # --- Users -----------------------------------------------------------------
 
 wt_step "User 'vitest' anlegen" 201 '"name":"vitest"' POST /api/users \
-  "{\"name\":\"vitest\",\"email\":\"$TEST_EMAIL\"}"
+  "{\"name\":\"vitest\",\"email\":\"$TEST_EMAIL\",\"password\":\"$TEST_PASSWORD\"}"
 USER_ID=$(wt_id "$WT_BODY")
 if [ -z "$USER_ID" ]; then echo "Test-User konnte nicht angelegt werden, Abbruch."; exit 1; fi
+if [[ "$WT_BODY" == *password* ]]; then echo "${C_BAD}Antwort enthält das Passwort bzw. den Hash!${C_OFF}"; WT_FAIL=$((WT_FAIL + 1)); fi
+
+wt_step "User ohne Passwort wird abgelehnt" 400 "password" POST /api/users \
+  '{"name":"ohne passwort","email":"ohne-passwort@example.com"}'
+
+wt_step "Zu kurzes Passwort wird abgelehnt" 400 "mindestens" POST /api/users \
+  '{"name":"kurz","email":"kurz@example.com","password":"kurz"}'
+
+wt_step "Login als 'vitest'" 200 "\"email\":\"$TEST_EMAIL\"" POST /api/auth/login \
+  "{\"email\":\"$TEST_EMAIL\",\"password\":\"$TEST_PASSWORD\"}"
+
+wt_step "Admin setzt das Passwort von 'vitest' zurück" 204 "" POST /api/auth/reset-password \
+  "{\"userId\":\"$USER_ID\",\"password\":\"vitest-neu-12345\"}"
+
+wt_step "Altes Passwort gilt nicht mehr" 401 "" POST /api/auth/login \
+  "{\"email\":\"$TEST_EMAIL\",\"password\":\"$TEST_PASSWORD\"}"
+
+wt_step "Neues Passwort gilt" 200 "" POST /api/auth/login \
+  "{\"email\":\"$TEST_EMAIL\",\"password\":\"vitest-neu-12345\"}"
+
+wt_step "Reset für unbekannten User" 410 "Nicht gefunden" POST /api/auth/reset-password \
+  "{\"userId\":\"$UNKNOWN_ID\",\"password\":\"egal-12345\"}"
 
 wt_step "Doppelte E-Mail wird abgelehnt" 409 "existiert bereits" POST /api/users \
-  "{\"name\":\"vitest 2\",\"email\":\"$TEST_EMAIL\"}"
+  "{\"name\":\"vitest 2\",\"email\":\"$TEST_EMAIL\",\"password\":\"$TEST_PASSWORD\"}"
 
 wt_step "Ungültige Daten werden abgelehnt" 400 "" POST /api/users \
   '{"name":"","email":"kaputt"}'

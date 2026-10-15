@@ -11,6 +11,7 @@ import {type Booking, checkSequence} from "../../shared/time-rules";
 import {withTiming} from "./lib/timing";
 
 import {IdSchema, isApiPath, notFound} from "./lib/id";
+import {withSession} from "./lib/session";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Executor = Pick<typeof db, "select">;
@@ -186,6 +187,6 @@ const handler = async (req: Request, context: Context) => {
     }
 };
 
-export default withTiming("time-entries", handler);
+export default withTiming("time-entries", withSession(handler));
 
 export const config: Config = {path: ["/api/time-entries", "/api/time-entries/:id"]};

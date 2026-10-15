@@ -9,10 +9,19 @@ import {UserCreateSchema, UserUpdateSchema} from "../../shared/user";
 import {hasDbCode} from "./lib/db-errors";
 import {withTiming} from "./lib/timing";
 import {IdSchema, isApiPath, notFound} from "./lib/id";
+import {hashPassword} from "./lib/password";
+import {withSession} from "./lib/session";
 
+// Bewusst explizit statt select(): der Passwort-Hash darf nie in einer Antwort landen
+const publicColumns = {
+    id: users.id,
+    name: users.name,
+    email: users.email,
+    avatarUrl: users.avatarUrl,
+};
 
 const getUser = async (id: string) => {
-    const [row] = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    const [row] = await db.select(publicColumns).from(users).where(eq(users.id, id)).limit(1);
     return row ?? null;
 };
 
@@ -32,12 +41,12 @@ const handler = async (req: Request, context: Context) => {
         // Sammlung: /api/users
         if (rawId === undefined) {
             if (req.method === "GET") {
-                return Response.json(await db.select().from(users).orderBy(asc(users.name)));
+                return Response.json(await db.select(publicColumns).from(users).orderBy(asc(users.name)));
             }
             if (req.method === "POST") {
-                const input = UserCreateSchema.parse(await readBody(req));
+                const {password, ...input} = UserCreateSchema.parse(await readBody(req));
                 const id = randomUUID();
-                await db.insert(users).values({id, ...input});
+                await db.insert(users).values({id, ...input, passwordHash: await hashPassword(password)});
                 return Response.json(await getUser(id), {status: 201});
             }
             return new Response(null, {status: 405});
@@ -85,6 +94,6 @@ const handler = async (req: Request, context: Context) => {
     }
 };
 
-export default withTiming("users", handler);
+export default withTiming("users", withSession(handler));
 
 export const config: Config = {path: ["/api/users", "/api/users/:id"]};

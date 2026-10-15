@@ -26,6 +26,7 @@ import {TableCell, TableRow} from "@/components/ui/table.tsx";
 import {updateUser} from "@/api/users.ts";
 import type {User, UserUpdate} from "@shared/user.ts";
 import {EditButton} from "@/components/buttons/edit-button.tsx";
+import {PasswordResetDialog} from "@features/admin/users/components/password-reset-dialog.tsx";
 
 type UserRowProps = {
     user: User;
@@ -85,6 +86,7 @@ export function UserRow({user, onDelete, deleting}: UserRowProps) {
             <TableCell>{user.email}</TableCell>
             <TableCell className="space-x-2 text-right">
                 <EditButton handleOpenChange={handleOpenChange}/>
+                <PasswordResetDialog user={user}/>
 
                 <AlertDialog>
                     <AlertDialogTrigger asChild>

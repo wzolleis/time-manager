@@ -22,6 +22,7 @@ function mockApi() {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
         const raw = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
         const url = new URL(raw, "http://localhost");
+        if (url.pathname === "/api/auth/me") return Response.json(USER);
         if (url.pathname === "/api/users") return Response.json([USER]);
         if (url.pathname === "/api/holidays") {
             return Response.json(url.searchParams.get("userId") ? [GLOBAL, OWN] : [GLOBAL]);

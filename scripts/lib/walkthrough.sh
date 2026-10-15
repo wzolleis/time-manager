@@ -15,6 +15,7 @@ WT_N=0; WT_PASS=0; WT_FAIL=0
 WT_STATUS=""; WT_BODY=""
 WT_CLEANUP="${WT_CLEANUP:-}"
 WT_AUTH_USER=""; WT_AUTH_PASSWORD=""
+WT_COOKIES=""           # Cookie-Datei mit der Session nach dem Login
 
 if [ -t 1 ]; then
   C_OK=$'\033[32m'; C_BAD=$'\033[31m'; C_DIM=$'\033[2m'; C_BOLD=$'\033[1m'; C_OFF=$'\033[0m'
@@ -31,7 +32,7 @@ Aufruf: <skript> [-s | -f | -a] [-h]
   -a, --auto         Nie pausieren (CI), Exit-Code 1 bei Fehlern
   -h, --help         Diese Hilfe
 
-Umgebungsvariablen: API_USER, API_PASSWORD, BASE_URL (Standard http://localhost:8888)
+Umgebungsvariablen: API_USER (E-Mail), API_PASSWORD, BASE_URL (Standard http://localhost:8888)
 Während einer Pause: beliebige Taste = weiter, q = beenden (mit Aufräumen)
 EOF
 }
@@ -57,19 +58,37 @@ wt_init() {
   WT_BASE="${BASE_URL:-http://localhost:8888}"
   WT_AUTH_USER="${API_USER:-}"
   WT_AUTH_PASSWORD="${API_PASSWORD:-}"
-  if [ -z "$WT_AUTH_USER" ]; then read -r -p "Benutzer: " WT_AUTH_USER; fi
+  if [ -z "$WT_AUTH_USER" ]; then read -r -p "E-Mail: " WT_AUTH_USER; fi
   if [ -z "$WT_AUTH_PASSWORD" ]; then read -r -s -p "Passwort: " WT_AUTH_PASSWORD; echo; fi
 
   trap wt_exit EXIT
   trap 'exit 130' INT TERM
 
+  wt_login
+
   echo "${C_BOLD}Ziel:${C_OFF} $WT_BASE   ${C_BOLD}Modus:${C_OFF} $WT_MODE"
+}
+
+# Meldet sich an und merkt sich das Session-Cookie für alle weiteren Aufrufe
+wt_login() {
+  WT_COOKIES="$(mktemp)"
+  local body status pw
+  # Backslash und Anführungszeichen im Passwort für JSON maskieren
+  pw="${WT_AUTH_PASSWORD//\\/\\\\}"
+  pw="${pw//\"/\\\"}"
+  body=$(printf '{"email":"%s","password":"%s"}' "$WT_AUTH_USER" "$pw")
+  status=$(curl -s -o /dev/null -w '%{http_code}' -c "$WT_COOKIES" \
+    -H "Content-Type: application/json" -d "$body" "$WT_BASE/api/auth/login") || status="000"
+  if [ "$status" != "200" ]; then
+    echo "${C_BAD}Anmeldung fehlgeschlagen (HTTP $status)${C_OFF}"
+    exit 1
+  fi
 }
 
 # wt_call METHOD PATH [BODY]  ->  setzt WT_STATUS und WT_BODY
 wt_call() {
   local method="$1" path="$2" body="${3:-}" out
-  local args=(-s -u "$WT_AUTH_USER:$WT_AUTH_PASSWORD" -X "$method" -w $'\n%{http_code}')
+  local args=(-s -b "$WT_COOKIES" -X "$method" -w $'\n%{http_code}')
   if [ -n "$body" ]; then args+=(-H "Content-Type: application/json" -d "$body"); fi
   if ! out=$(curl "${args[@]}" "$WT_BASE$path"); then
     WT_STATUS="000"
@@ -138,6 +157,10 @@ wt_exit() {
     echo "${C_DIM}────────────────────────────────────────────────────${C_OFF}"
     echo "Aufräumen …"
     "$WT_CLEANUP"
+  fi
+  if [ -n "$WT_COOKIES" ]; then
+    curl -s -o /dev/null -b "$WT_COOKIES" -X POST "$WT_BASE/api/auth/logout" || true
+    rm -f "$WT_COOKIES"
   fi
   echo
   if [ "$WT_FAIL" -gt 0 ]; then

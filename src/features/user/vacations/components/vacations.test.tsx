@@ -21,6 +21,7 @@ function mockApi(vacations: unknown[], holidays: unknown[] = []) {
         vi.fn(async (input: RequestInfo | URL) => {
             const raw = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
             const {pathname} = new URL(raw, "http://localhost");
+            if (pathname === "/api/auth/me") return Response.json(USER);
             if (pathname === "/api/users") return Response.json([USER]);
             if (pathname === "/api/vacations") return Response.json(vacations);
             if (pathname === "/api/holidays") return Response.json(holidays);

@@ -3,11 +3,8 @@ import {createContext, useContext} from "react";
 import type {User} from "@shared/user";
 
 export type UserContextValue = {
-    users: User[];
-    currentUser: User | null;
-    setCurrentUserId: (id: string) => void;
-    isPending: boolean;
-    isError: boolean;
+    // Der angemeldete User. Ohne Anmeldung zeigt der UserProvider die Login-Seite, nie die Kinder.
+    currentUser: User;
 };
 
 export const UserContext = createContext<UserContextValue | null>(null);

@@ -9,6 +9,7 @@ import {holidays, users} from "../../db/schema";
 import {findHolidayClash, holidayClashMessage, type HolidayRange} from "../../shared/holiday-rules";
 import {HolidayCreateSchema, HolidayUpdateSchema} from "../../shared/holiday";
 import {IdSchema, isApiPath, notFound} from "./lib/id";
+import {withSession} from "./lib/session";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Executor = Pick<typeof db, "select">;
@@ -130,6 +131,6 @@ const handler = async (req: Request, context: Context) => {
     }
 };
 
-export default withTiming("holidays", handler);
+export default withTiming("holidays", withSession(handler));
 
 export const config: Config = {path: ["/api/holidays", "/api/holidays/:id"]};
