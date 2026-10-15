@@ -5,6 +5,7 @@ import {Card, CardDescription, CardHeader, CardTitle} from "@/components/ui/card
 import {fetchProjects} from "@/api/projects.ts";
 import {fetchTimeEntries} from "@/api/time-entries.ts";
 import {fetchVacations} from "@/api/vacations.ts";
+import {useHolidays} from "@/features/holidays/use-holidays.ts";
 import {diffClass, formatDate, formatDifference, formatDuration, formatTime} from "@/lib/format.ts";
 import {useNow} from "@/lib/use-now.ts";
 import {useCurrentUser} from "@/lib/user-context.ts";
@@ -12,9 +13,9 @@ import {localDayRange} from "@shared/day-range.ts";
 import {dayTotals} from "@shared/time-report.ts";
 import {localDay} from "@shared/time-rules.ts";
 import {cn} from "@/lib/utils.ts";
-import {targetMs, WORKDAYS_PER_WEEK} from "@shared/target-hours.ts";
-import {isVacationDay} from "@shared/vacation-rules.ts";
-import {weekdayIndex} from "@shared/week.ts";
+import {dayKind, targetMs} from "@shared/target-hours.ts";
+import {dayKindLabel} from "@user/reports/day-kind-label.ts";
+import {holidayOn} from "@shared/holiday-rules.ts";
 
 type Row = {
     id: string;
@@ -76,6 +77,7 @@ export function ReportDaily() {
         enabled: !!userId,
     });
     const projects = useQuery({queryKey: ["projects"], queryFn: fetchProjects});
+    const holidays = useHolidays(userId);
     // Gleicher Query-Key wie die Urlaubsseite
     const vacations = useQuery({
         queryKey: ["vacations", userId],
@@ -113,9 +115,9 @@ export function ReportDaily() {
     }
 
     const vacationList = vacations.data ?? [];
-    const target = targetMs(today, vacationList);
-    // Am Wochenende ändert Urlaub nichts, dort bleibt der Hinweis "Wochenende"
-    const vacation = weekdayIndex(today) < WORKDAYS_PER_WEEK && isVacationDay(today, vacationList);
+    const holidayList = holidays.data ?? [];
+    const target = targetMs(today, vacationList, holidayList);
+    const targetHint = dayKindLabel(dayKind(today, vacationList, holidayList), holidayOn(today, holidayList)?.name);
     const diff = report.totals.workMs - target;
 
     return (
@@ -137,7 +139,7 @@ export function ReportDaily() {
                 <Summary
                     title="Soll"
                     value={formatDuration(target)}
-                    hint={vacation ? "Urlaub" : target === 0 ? "Wochenende" : undefined}
+                    hint={targetHint}
                 />
                 <Summary
                     title="Differenz"
@@ -156,6 +158,11 @@ export function ReportDaily() {
             {vacations.isError && (
                 <p role="alert" className="text-sm text-destructive">
                     Urlaube konnten nicht geladen werden: {vacations.error.message}
+                </p>
+            )}
+            {holidays.isError && (
+                <p role="alert" className="text-sm text-destructive">
+                    Feiertage konnten nicht geladen werden: {holidays.error.message}
                 </p>
             )}
             {entries.isSuccess && (

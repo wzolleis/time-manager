@@ -5,6 +5,7 @@ import {Input} from "@/components/ui/input.tsx";
 import {fetchProjects} from "@/api/projects.ts";
 import {fetchTimeEntries} from "@/api/time-entries.ts";
 import {fetchVacations} from "@/api/vacations.ts";
+import {useHolidays} from "@/features/holidays/use-holidays.ts";
 import {diffClass, formatDate, formatDifference, formatDuration, formatTime} from "@/lib/format.ts";
 import {useNow} from "@/lib/use-now.ts";
 import {useCurrentUser} from "@/lib/user-context.ts";
@@ -14,9 +15,9 @@ import {localDay} from "@shared/time-rules.ts";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table.tsx";
 import {EntryActions, type EntryRow} from "@user/time-stamp/components/time-entry-actions.tsx";
 import {Summary} from "@user/reports/components/report-daily.tsx";
-import {targetMs, WORKDAYS_PER_WEEK} from "@shared/target-hours.ts";
-import {isVacationDay} from "@shared/vacation-rules.ts";
-import {weekdayIndex} from "@shared/week.ts";
+import {dayKindLabel} from "@user/reports/day-kind-label.ts";
+import {dayKind, targetMs} from "@shared/target-hours.ts";
+import {holidayOn} from "@shared/holiday-rules.ts";
 import {nextType} from "@shared/time-rules";
 import {TimeEntryCreateDialog} from "@user/time-stamp/components/time-entry-create-dialog.tsx"; // zum bestehenden Import von localDay ergänzen
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
@@ -59,6 +60,7 @@ export function ReportDailyEdit() {
         enabled: !!userId,
     });
     const projects = useQuery({queryKey: ["projects"], queryFn: fetchProjects});
+    const holidays = useHolidays(userId);
     // Gleicher Query-Key wie die Urlaubsseite
     const vacations = useQuery({
         queryKey: ["vacations", userId],
@@ -99,9 +101,9 @@ export function ReportDailyEdit() {
         );
     }
     const vacationList = vacations.data ?? [];
-    const target = targetMs(day, vacationList);
-    // Am Wochenende ändert Urlaub nichts, dort bleibt der Hinweis "Wochenende"
-    const vacation = weekdayIndex(day) < WORKDAYS_PER_WEEK && isVacationDay(day, vacationList);
+    const holidayList = holidays.data ?? [];
+    const target = targetMs(day, vacationList, holidayList);
+    const targetHint = dayKindLabel(dayKind(day, vacationList, holidayList), holidayOn(day, holidayList)?.name);
     const elapsed = day <= today; // ISO-Daten lassen sich als Text vergleichen
     const diff = report.totals.workMs - target;
 
@@ -154,7 +156,7 @@ export function ReportDailyEdit() {
                 <Summary
                     title="Soll"
                     value={formatDuration(target)}
-                    hint={vacation ? "Urlaub" : target === 0 ? "Wochenende" : undefined}
+                    hint={targetHint}
                 />
                 <Summary
                     title="Differenz"
@@ -171,6 +173,11 @@ export function ReportDailyEdit() {
             {vacations.isError && (
                 <p role="alert" className="text-sm text-destructive">
                     Urlaube konnten nicht geladen werden: {vacations.error.message}
+                </p>
+            )}
+            {holidays.isError && (
+                <p role="alert" className="text-sm text-destructive">
+                    Feiertage konnten nicht geladen werden: {holidays.error.message}
                 </p>
             )}
             {entries.isSuccess && (

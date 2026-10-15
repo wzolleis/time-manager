@@ -15,6 +15,13 @@
       "when": 1791749903193,
       "tag": "0001_groovy_klaw",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1792022176884,
+      "tag": "0002_holidays",
+      "breakpoints": true
     }
   ]
 }

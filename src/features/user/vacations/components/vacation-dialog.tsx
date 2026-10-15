@@ -13,6 +13,7 @@ import {
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {createVacation, updateVacation} from "@/api/vacations";
+import {useHolidays} from "@/features/holidays/use-holidays";
 import {useCurrentUser} from "@/lib/user-context";
 import {localDay} from "@shared/time-rules";
 import {checkRange, countWorkdays, dayCount} from "@shared/vacation-rules";
@@ -29,6 +30,7 @@ export function VacationDialog({vacation, label, variant = "outline", size = "sm
     const {currentUser} = useCurrentUser();
     const qc = useQueryClient();
     const uid = useId();
+    const holidays = useHolidays(currentUser?.id);
 
     const [open, setOpen] = useState(false);
     const [start, setStart] = useState("");
@@ -90,8 +92,8 @@ export function VacationDialog({vacation, label, variant = "outline", size = "sm
                     <DialogHeader>
                         <DialogTitle>{vacation ? "Urlaub bearbeiten" : "Urlaub eintragen"}</DialogTitle>
                         <DialogDescription>
-                            Für {currentUser?.name}. Das Ende ist eingeschlossen. Wochenenden zählen als
-                            Kalendertage, aber nicht als Arbeitstage.
+                            Für {currentUser?.name}. Das Ende ist eingeschlossen. Wochenenden und Feiertage
+                            zählen als Kalendertage, aber nicht als Urlaubstage.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -121,7 +123,7 @@ export function VacationDialog({vacation, label, variant = "outline", size = "sm
 
                     <p className={problem ? "text-sm text-destructive" : "text-sm text-muted-foreground"}>
                         {problem ??
-                            `${dayCount(start, end)} Kalendertage · ${countWorkdays(start, end)} Arbeitstage`}
+                            `${dayCount(start, end)} Kalendertage · ${countWorkdays(start, end, holidays.data ?? [])} Urlaubstage`}
                     </p>
 
                     {save.isError && (

@@ -1,21 +1,21 @@
 // shared/target-hours.test.ts
 import {describe, expect, it} from "vitest";
-import {DAILY_TARGET_MS, targetMs, WEEKLY_TARGET_MS} from "./target-hours";
+import {DAILY_TARGET_MS, dayKind, targetMs, WEEKLY_TARGET_MS} from "./target-hours";
 import {weekDays} from "./week";
 
 const weekTarget = (anchor: string, vacations: { startDate: string; endDate: string }[]) =>
-    weekDays(anchor).reduce((s, d) => s + targetMs(d, vacations), 0);
+    weekDays(anchor).reduce((s, d) => s + targetMs(d, vacations, []), 0);
 
 describe("targetMs", () => {
     it("Montag bis Freitag je 8 Stunden", () => {
         for (const day of ["2026-06-08", "2026-06-09", "2026-06-10", "2026-06-11", "2026-06-12"]) {
-            expect(targetMs(day, [])).toBe(DAILY_TARGET_MS);
+            expect(targetMs(day, [], [])).toBe(DAILY_TARGET_MS);
         }
     });
 
     it("am Wochenende 0", () => {
-        expect(targetMs("2026-06-13", [])).toBe(0); // Samstag
-        expect(targetMs("2026-06-14", [])).toBe(0); // Sonntag
+        expect(targetMs("2026-06-13", [], [])).toBe(0); // Samstag
+        expect(targetMs("2026-06-14", [], [])).toBe(0); // Sonntag
     });
 
     it("eine Woche ergibt 40 Stunden", () => {
@@ -25,10 +25,10 @@ describe("targetMs", () => {
 
     it("an einem Urlaubstag 0, Beginn und Ende zählen mit", () => {
         const vacations = [{startDate: "2026-06-09", endDate: "2026-06-10"}];
-        expect(targetMs("2026-06-08", vacations)).toBe(DAILY_TARGET_MS);
-        expect(targetMs("2026-06-09", vacations)).toBe(0);
-        expect(targetMs("2026-06-10", vacations)).toBe(0);
-        expect(targetMs("2026-06-11", vacations)).toBe(DAILY_TARGET_MS);
+        expect(targetMs("2026-06-08", vacations, [])).toBe(DAILY_TARGET_MS);
+        expect(targetMs("2026-06-09", vacations, [])).toBe(0);
+        expect(targetMs("2026-06-10", vacations, [])).toBe(0);
+        expect(targetMs("2026-06-11", vacations, [])).toBe(DAILY_TARGET_MS);
     });
 
     it("zwei Urlaubstage senken das Wochensoll auf 24 Stunden", () => {
@@ -41,7 +41,7 @@ describe("targetMs", () => {
         const vacations = [{startDate: "2026-06-12", endDate: "2026-06-15"}];
         expect(weekTarget("2026-06-10", vacations)).toBe(32 * 3_600_000);
         expect(weekTarget("2026-06-17", vacations)).toBe(32 * 3_600_000);
-        expect(targetMs("2026-06-13", vacations)).toBe(0);
+        expect(targetMs("2026-06-13", vacations, [])).toBe(0);
     });
 
     it("mehrere Urlaube in einer Woche", () => {
@@ -50,5 +50,45 @@ describe("targetMs", () => {
             {startDate: "2026-06-12", endDate: "2026-06-12"},
         ];
         expect(weekTarget("2026-06-10", vacations)).toBe(24 * 3_600_000);
+    });
+});
+
+describe("Feiertage", () => {
+    const einheit = [{date: "2026-10-02"}]; // ein Freitag
+
+    it("an einem Feiertag ist das Soll 0", () => {
+        expect(targetMs("2026-10-02", [], einheit)).toBe(0);
+        expect(targetMs("2026-10-01", [], einheit)).toBe(DAILY_TARGET_MS);
+    });
+
+    it("ein Feiertag senkt das Wochensoll auf 32 Stunden", () => {
+        expect(weekDays("2026-10-01").reduce((s, d) => s + targetMs(d, [], einheit), 0)).toBe(32 * 3_600_000);
+    });
+
+    it("Urlaub und Feiertag in derselben Woche", () => {
+        const vacations = [{startDate: "2026-09-28", endDate: "2026-09-29"}]; // Mo und Di
+        expect(weekDays("2026-10-01").reduce((s, d) => s + targetMs(d, vacations, einheit), 0)).toBe(16 * 3_600_000);
+    });
+});
+
+describe("dayKind", () => {
+    const vacations = [{startDate: "2026-09-28", endDate: "2026-10-04"}]; // Mo bis So
+    const holidays = [{date: "2026-10-02"}, {date: "2026-10-03"}]; // Fr und Sa
+
+    it("Arbeitstag ohne Urlaub und Feiertag", () => {
+        expect(dayKind("2026-10-05", vacations, holidays)).toBe("workday");
+    });
+
+    it("Urlaub an einem Arbeitstag", () => {
+        expect(dayKind("2026-09-28", vacations, holidays)).toBe("vacation");
+    });
+
+    it("ein Feiertag im Urlaub ist ein Feiertag", () => {
+        expect(dayKind("2026-10-02", vacations, holidays)).toBe("holiday");
+    });
+
+    it("das Wochenende geht vor, auch vor Feiertag und Urlaub", () => {
+        expect(dayKind("2026-10-03", vacations, holidays)).toBe("weekend");
+        expect(dayKind("2026-10-04", vacations, holidays)).toBe("weekend");
     });
 });

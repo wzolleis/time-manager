@@ -14,6 +14,18 @@ export const vacations = mysqlTable(
     (t) => [index("idx_vacations_user_start").on(t.userId, t.startDate)],
 );
 
+// Feiertage: ohne user_id gelten sie für alle, mit user_id nur für diesen User
+export const holidays = mysqlTable(
+    "holidays",
+    {
+        id: char("id", {length: 36}).primaryKey(),
+        userId: char("user_id", {length: 36}).references(() => users.id),
+        date: date("date", {mode: "string"}).notNull(),
+        name: varchar("name", {length: 100}).notNull(),
+    },
+    (t) => [index("idx_holidays_date").on(t.date), index("idx_holidays_user_date").on(t.userId, t.date)],
+);
+
 export const users = mysqlTable("users", {
     id: char("id", {length: 36}).primaryKey(),
     name: varchar("name", {length: 100}).notNull(),

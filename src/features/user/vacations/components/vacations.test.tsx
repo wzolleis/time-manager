@@ -15,7 +15,7 @@ const USER = {
 };
 
 
-function mockApi(vacations: unknown[]) {
+function mockApi(vacations: unknown[], holidays: unknown[] = []) {
     vi.stubGlobal(
         "fetch",
         vi.fn(async (input: RequestInfo | URL) => {
@@ -23,6 +23,7 @@ function mockApi(vacations: unknown[]) {
             const {pathname} = new URL(raw, "http://localhost");
             if (pathname === "/api/users") return Response.json([USER]);
             if (pathname === "/api/vacations") return Response.json(vacations);
+            if (pathname === "/api/holidays") return Response.json(holidays);
             return Response.json({error: `Nicht gemockt: ${pathname}`}, {status: 404});
         }),
     );
@@ -117,6 +118,19 @@ describe("Urlaubsseite", () => {
         await screen.findByText("5 Tage über dem Jahresurlaub");
         expect(screen.getByText("35 Tage")).toBeTruthy(); // geplant
         expect(screen.getAllByText("0 Tage")).toHaveLength(2); // genommen und ungeplant
+    });
+
+    it("Feiertage im Urlaub verbrauchen keinen Urlaubstag", async () => {
+        mockApi(
+            [{id: "a", userId: USER.id, startDate: "2026-09-28", endDate: "2026-10-02"}], // Mo bis Fr
+            [{id: "h", userId: null, date: "2026-10-02", name: "Feiertag"}], // Freitag
+        );
+        renderPage();
+
+        await screen.findByText("Genommen");
+        expect(screen.getByText("4")).toBeTruthy(); // Urlaubstage in der Tabelle
+        expect(screen.getByText("4 Tage")).toBeTruthy(); // geplant
+        expect(screen.getByText("26 Tage")).toBeTruthy(); // ungeplant
     });
 
     it("bietet das Eintragen an", async () => {

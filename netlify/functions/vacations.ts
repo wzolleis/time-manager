@@ -1,11 +1,11 @@
 import type {Config, Context} from "@netlify/functions";
 import {randomUUID} from "node:crypto";
-import {and, asc, eq} from "drizzle-orm";
+import {and, asc, eq, isNull, or} from "drizzle-orm";
 import {z} from "zod";
 import {db} from "./lib/db";
 import {hasDbCode} from "./lib/db-errors";
 import {withTiming} from "./lib/timing";
-import {users, vacations} from "../../db/schema";
+import {holidays, users, vacations} from "../../db/schema";
 import {checkRange, checkYearLimit, findOverlap, overlapMessage} from "../../shared/vacation-rules";
 import {VacationCreateSchema, VacationUpdateSchema} from "../../shared/vacation";
 import {IdSchema, isApiPath, notFound} from "./lib/id";
@@ -42,6 +42,13 @@ const lockUser = async (tx: Tx, userId: string) => {
 const userVacations = (tx: Tx, userId: string) =>
     tx.select().from(vacations).where(eq(vacations.userId, userId));
 
+// Globale und eigene Feiertage: sie verbrauchen keinen Urlaubstag
+const userHolidays = (tx: Tx, userId: string) =>
+    tx
+        .select({date: holidays.date})
+        .from(holidays)
+        .where(or(isNull(holidays.userId), eq(holidays.userId, userId)));
+
 const readBody = async (req: Request): Promise<unknown> => {
     try {
         return await req.json();
@@ -77,7 +84,7 @@ const handler = async (req: Request, context: Context) => {
                     const candidate = {id, startDate: input.startDate, endDate: input.endDate};
                     const clash = findOverlap(existing, candidate);
                     if (clash) throw new RuleError(overlapMessage(clash));
-                    const overLimit = checkYearLimit(existing, candidate);
+                    const overLimit = checkYearLimit(existing, candidate, await userHolidays(tx, input.userId));
                     if (overLimit) throw new RuleError(overLimit);
                     await tx.insert(vacations).values({id, ...input});
                 });
@@ -117,7 +124,7 @@ const handler = async (req: Request, context: Context) => {
                 const existing = await userVacations(tx, current.userId);
                 const clash = findOverlap(existing, next);
                 if (clash) throw new RuleError(overlapMessage(clash));
-                const overLimit = checkYearLimit(existing, next);
+                const overLimit = checkYearLimit(existing, next, await userHolidays(tx, current.userId));
                 if (overLimit) throw new RuleError(overLimit);
 
                 await tx.update(vacations).set(patch).where(eq(vacations.id, id));

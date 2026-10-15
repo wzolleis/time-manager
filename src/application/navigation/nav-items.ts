@@ -1,6 +1,7 @@
 import {
     BaggageClaim,
     CalendarDays,
+    CalendarHeart,
     ClockPlus,
     LayoutDashboard,
     type LucideIcon,
@@ -24,6 +25,8 @@ export const navItemIds = [
     "admin",
     "user",
     "users",
+    "holidays-admin",
+    "holidays",
     "projects",
     "projects-new"
 ] as const
@@ -51,8 +54,10 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     {id: 'admin', label: 'Administration', icon: BaggageClaim, to: '/admin', children: []},
     {id: 'settings', label: 'Einstellungen', icon: Settings, to: '/admin/settings', children: []},
     {id: 'users', label: 'Benutzer verwalten', icon: User, to: '/admin/users', children: []},
+    {id: 'holidays-admin', label: 'Feiertage', icon: CalendarHeart, to: '/admin/holidays', children: []},
     {id: 'projects', label: 'Projekte', icon: Target, to: '/user/projects', children: []},
     {id: 'user', label: 'User', icon: User, to: '/user', children: []},
+    {id: 'holidays', label: 'Feiertage', icon: CalendarHeart, to: '/user/holidays', children: []},
     {id: 'reports', label: 'Report', icon: WorkflowIcon, to: '/user/reports', children: []},
     {id: 'reports-daily', label: 'Heute', icon: WorkflowIcon, to: '/user/reports/daily', children: []},
     {id: 'reports-weekly', label: 'Woche', icon: CalendarDays, to: '/user/reports/weekly', children: []},

@@ -2,6 +2,7 @@ import {useMemo, useState} from "react";
 import {useQuery} from "@tanstack/react-query";
 import {Button} from "@/components/ui/button";
 import {fetchVacations} from "@/api/vacations";
+import {useHolidays} from "@/features/holidays/use-holidays";
 import {useNow} from "@/lib/use-now";
 import {useCurrentUser} from "@/lib/user-context";
 import {localDay} from "@shared/time-rules";
@@ -27,7 +28,7 @@ const columns: DataTableColumnDef<Row>[] = [
         cell: ({getValue}) => germanDay(getValue<string>()),
     },
     {accessorKey: "days", header: "Kalendertage", enableSorting: false},
-    {accessorKey: "workdays", header: "Arbeitstage", enableSorting: false},
+    {accessorKey: "workdays", header: "Urlaubstage", enableSorting: false}, // ohne Wochenenden und Feiertage
     {
         id: "actions",
         header: "",
@@ -52,6 +53,8 @@ export function ReportVacations() {
         enabled: !!userId,
     });
 
+    const holidays = useHolidays(userId);
+
     // Nur Urlaube, die zumindest teilweise im gewählten Jahr liegen
     const rows = useMemo<Row[]>(
         () =>
@@ -60,13 +63,13 @@ export function ReportVacations() {
                 .map((v) => ({
                     ...v,
                     days: dayCount(v.startDate, v.endDate),
-                    workdays: countWorkdays(v.startDate, v.endDate),
+                    workdays: countWorkdays(v.startDate, v.endDate, holidays.data ?? []),
                 })),
-        [vacations.data, year],
+        [vacations.data, holidays.data, year],
     );
     const balance = useMemo(
-        () => vacationBalance(vacations.data ?? [], year, today),
-        [vacations.data, year, today],
+        () => vacationBalance(vacations.data ?? [], year, today, holidays.data ?? []),
+        [vacations.data, holidays.data, year, today],
     );
 
     if (!currentUser) {
@@ -102,6 +105,11 @@ export function ReportVacations() {
                 </Button>
             </div>
 
+            {holidays.isError && (
+                <p role="alert" className="text-sm text-destructive">
+                    Feiertage konnten nicht geladen werden: {holidays.error.message}
+                </p>
+            )}
             {vacations.isSuccess && (
                 <div className="grid gap-4 sm:grid-cols-3">
                     <Summary title="Genommen" value={dayLabel(balance.taken)} hint="bis einschließlich heute"/>

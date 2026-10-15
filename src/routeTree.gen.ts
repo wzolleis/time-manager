@@ -8,19 +8,21 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as AdminIndexRouteImport } from './routes/admin/index'
-import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
-import { Route as AdminUsersRouteImport } from './routes/admin/users'
-import { Route as UserIndexRouteImport } from './routes/user/index'
-import { Route as UserProjectsIndexRouteImport } from './routes/user/projects/index'
-import { Route as UserReportsIndexRouteImport } from './routes/user/reports/index'
-import { Route as UserReportsDailyRouteImport } from './routes/user/reports/daily'
-import { Route as UserReportsVacationsRouteImport } from './routes/user/reports/vacations'
-import { Route as UserReportsWeeklyRouteImport } from './routes/user/reports/weekly'
-import { Route as UserTimeStampIndexRouteImport } from './routes/user/time-stamp/index'
+import {Route as rootRouteImport} from './routes/__root'
+import {Route as IndexRouteImport} from './routes/index'
+import {Route as DashboardRouteImport} from './routes/dashboard'
+import {Route as AdminIndexRouteImport} from './routes/admin/index'
+import {Route as AdminHolidaysRouteImport} from './routes/admin/holidays'
+import {Route as AdminSettingsRouteImport} from './routes/admin/settings'
+import {Route as AdminUsersRouteImport} from './routes/admin/users'
+import {Route as UserIndexRouteImport} from './routes/user/index'
+import {Route as UserHolidaysRouteImport} from './routes/user/holidays'
+import {Route as UserProjectsIndexRouteImport} from './routes/user/projects/index'
+import {Route as UserReportsIndexRouteImport} from './routes/user/reports/index'
+import {Route as UserReportsDailyRouteImport} from './routes/user/reports/daily'
+import {Route as UserReportsVacationsRouteImport} from './routes/user/reports/vacations'
+import {Route as UserReportsWeeklyRouteImport} from './routes/user/reports/weekly'
+import {Route as UserTimeStampIndexRouteImport} from './routes/user/time-stamp/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -37,6 +39,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminHolidaysRoute = AdminHolidaysRouteImport.update({
+  id: '/admin/holidays',
+  path: '/admin/holidays',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/admin/settings',
   path: '/admin/settings',
@@ -50,6 +57,11 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
 const UserIndexRoute = UserIndexRouteImport.update({
   id: '/user/',
   path: '/user/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UserHolidaysRoute = UserHolidaysRouteImport.update({
+  id: '/user/holidays',
+  path: '/user/holidays',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UserProjectsIndexRoute = UserProjectsIndexRouteImport.update({
@@ -86,8 +98,10 @@ const UserTimeStampIndexRoute = UserTimeStampIndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/admin/holidays': typeof AdminHolidaysRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/user/holidays': typeof UserHolidaysRoute
   '/admin/': typeof AdminIndexRoute
   '/user/': typeof UserIndexRoute
   '/user/reports/daily': typeof UserReportsDailyRoute
@@ -100,8 +114,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/admin/holidays': typeof AdminHolidaysRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/user/holidays': typeof UserHolidaysRoute
   '/admin': typeof AdminIndexRoute
   '/user': typeof UserIndexRoute
   '/user/reports/daily': typeof UserReportsDailyRoute
@@ -115,8 +131,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/admin/holidays': typeof AdminHolidaysRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/user/holidays': typeof UserHolidaysRoute
   '/admin/': typeof AdminIndexRoute
   '/user/': typeof UserIndexRoute
   '/user/reports/daily': typeof UserReportsDailyRoute
@@ -131,8 +149,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
+      | '/admin/holidays'
     | '/admin/settings'
     | '/admin/users'
+      | '/user/holidays'
     | '/admin/'
     | '/user/'
     | '/user/reports/daily'
@@ -145,8 +165,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/dashboard'
+      | '/admin/holidays'
     | '/admin/settings'
     | '/admin/users'
+      | '/user/holidays'
     | '/admin'
     | '/user'
     | '/user/reports/daily'
@@ -159,8 +181,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/dashboard'
+      | '/admin/holidays'
     | '/admin/settings'
     | '/admin/users'
+      | '/user/holidays'
     | '/admin/'
     | '/user/'
     | '/user/reports/daily'
@@ -174,8 +198,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
+  AdminHolidaysRoute: typeof AdminHolidaysRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminUsersRoute: typeof AdminUsersRoute
+  UserHolidaysRoute: typeof UserHolidaysRoute
   AdminIndexRoute: typeof AdminIndexRoute
   UserIndexRoute: typeof UserIndexRoute
   UserReportsDailyRoute: typeof UserReportsDailyRoute
@@ -209,6 +235,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/holidays': {
+      id: '/admin/holidays'
+      path: '/admin/holidays'
+      fullPath: '/admin/holidays'
+      preLoaderRoute: typeof AdminHolidaysRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/admin/settings'
@@ -228,6 +261,13 @@ declare module '@tanstack/react-router' {
       path: '/user'
       fullPath: '/user/'
       preLoaderRoute: typeof UserIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/user/holidays': {
+      id: '/user/holidays'
+      path: '/user/holidays'
+      fullPath: '/user/holidays'
+      preLoaderRoute: typeof UserHolidaysRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/user/projects/': {
@@ -278,8 +318,10 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
+  AdminHolidaysRoute: AdminHolidaysRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminUsersRoute: AdminUsersRoute,
+  UserHolidaysRoute: UserHolidaysRoute,
   AdminIndexRoute: AdminIndexRoute,
   UserIndexRoute: UserIndexRoute,
   UserReportsDailyRoute: UserReportsDailyRoute,

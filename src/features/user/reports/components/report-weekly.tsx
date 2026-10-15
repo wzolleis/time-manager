@@ -3,17 +3,19 @@ import {useQuery} from "@tanstack/react-query";
 import {Button} from "@/components/ui/button";
 import {fetchTimeEntries} from "@/api/time-entries";
 import {fetchVacations} from "@/api/vacations";
+import {useHolidays} from "@/features/holidays/use-holidays";
 import {diffClass, formatDayMonth, formatDayShort, formatDifference, formatDuration,} from "@/lib/format";
 import {useNow} from "@/lib/use-now";
 import {useCurrentUser} from "@/lib/user-context";
 import {addDays, localDayRange} from "@shared/day-range";
-import {DAILY_TARGET_MS, targetMs, WEEKLY_TARGET_MS, WORKDAYS_PER_WEEK} from "@shared/target-hours";
-import {isVacationDay} from "@shared/vacation-rules";
+import {dayKind, type DayKind, targetMs} from "@shared/target-hours";
+import {holidayOn} from "@shared/holiday-rules";
 import {dayTotals} from "@shared/time-report";
 import {localDay} from "@shared/time-rules";
-import {isoWeek, weekdayIndex, weekDays} from "@shared/week";
+import {isoWeek, weekDays} from "@shared/week";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table.tsx";
 import {Summary} from "@user/reports/components/report-daily.tsx";
+import {dayKindLabel} from "@user/reports/day-kind-label.ts";
 
 type DayRow = {
     day: string; // "JJJJ-MM-TT", sortiert richtig
@@ -22,7 +24,8 @@ type DayRow = {
     count: number;
     running: boolean;
     targetMs: number;
-    vacation: boolean;
+    kind: DayKind;
+    holidayName?: string;
     workMs: number;
     breakMs: number;
     diffMs: number | null; // null: Zukunft oder freier Tag ohne Arbeit
@@ -40,8 +43,10 @@ const columns: DataTableColumnDef<DayRow>[] = [
             <span className={row.original.isToday ? "font-semibold" : undefined}>
                 {row.original.label}
                 {row.original.isToday && " · heute"}
-                {row.original.vacation && (
-                    <span className="ml-2 text-muted-foreground">Urlaub</span>
+                {(row.original.kind === "vacation" || row.original.kind === "holiday") && (
+                    <span className="ml-2 text-muted-foreground">
+                        {dayKindLabel(row.original.kind, row.original.holidayName)}
+                    </span>
                 )}
                 {row.original.missingGehen && (
                     <span className="ml-2 text-destructive">Gehen fehlt</span>
@@ -100,6 +105,7 @@ export function ReportWeekly() {
         queryFn: () => fetchTimeEntries(userId!),
         enabled: !!userId,
     });
+    const holidays = useHolidays(userId);
     // Gleicher Query-Key wie die Urlaubsseite
     const vacations = useQuery({
         queryKey: ["vacations", userId],
@@ -119,12 +125,13 @@ export function ReportWeekly() {
         }));
         const nowDate = new Date(now);
         const vacationList = vacations.data ?? [];
+        const holidayList = holidays.data ?? [];
 
         const rows: DayRow[] = days.map((day) => {
             const range = localDayRange(day);
             const count = all.filter((e) => e.bookedAt >= range.start && e.bookedAt < range.end).length;
             const totals = dayTotals(all, range, nowDate);
-            const target = targetMs(day, vacationList);
+            const target = targetMs(day, vacationList, holidayList);
             const elapsed = day <= today; // Tage nach heute zählen nicht zur Differenz
             const noDifference = !elapsed || (target === 0 && totals.workMs === 0);
 
@@ -135,7 +142,8 @@ export function ReportWeekly() {
                 count,
                 running: totals.running,
                 targetMs: target,
-                vacation: weekdayIndex(day) < WORKDAYS_PER_WEEK && isVacationDay(day, vacationList), // am Wochenende ändert Urlaub nichts
+                kind: dayKind(day, vacationList, holidayList),
+                holidayName: holidayOn(day, holidayList)?.name,
                 workMs: totals.workMs,
                 breakMs: totals.breakMs,
                 diffMs: noDifference ? null : totals.workMs - target,
@@ -145,12 +153,12 @@ export function ReportWeekly() {
 
         const workMs = rows.reduce((sum, r) => sum + r.workMs, 0);
         const breakMs = rows.reduce((sum, r) => sum + r.breakMs, 0);
-        const targetWeekMs = rows.reduce((sum, r) => sum + r.targetMs, 0); // ohne Urlaubstage
+        const targetWeekMs = rows.reduce((sum, r) => sum + r.targetMs, 0); // ohne Urlaubs- und Feiertage
         // Soll nur für die Tage bis heute, damit die Differenz mitten in der Woche aussagekräftig ist
         const targetToDateMs = rows.filter((r) => r.day <= today).reduce((sum, r) => sum + r.targetMs, 0);
 
         return {rows, workMs, breakMs, targetWeekMs, targetToDateMs, diffMs: workMs - targetToDateMs};
-    }, [entries.data, vacations.data, days, today, now]);
+    }, [entries.data, vacations.data, holidays.data, days, today, now]);
 
     if (!currentUser) {
         return (
@@ -163,10 +171,12 @@ export function ReportWeekly() {
     const thisWeek = weekDays(today)[0] === days[0];
     const futureWeek = days[0] > today;
     const partial = report.targetToDateMs !== report.targetWeekMs;
-    // Jeder Urlaubstag an einem Arbeitstag senkt das Wochensoll um ein Tagessoll
-    const vacationDays = Math.round((WEEKLY_TARGET_MS - report.targetWeekMs) / DAILY_TARGET_MS);
+    // Jeder Urlaubs- und Feiertag an einem Arbeitstag senkt das Wochensoll um ein Tagessoll
+    const vacationDays = report.rows.filter((r) => r.kind === "vacation").length;
+    const holidayDays = report.rows.filter((r) => r.kind === "holiday").length;
     const targetHint = [
         vacationDays > 0 && (vacationDays === 1 ? "1 Urlaubstag" : `${vacationDays} Urlaubstage`),
+        holidayDays > 0 && (holidayDays === 1 ? "1 Feiertag" : `${holidayDays} Feiertage`),
         partial && !futureWeek && `bis heute: ${formatDuration(report.targetToDateMs)}`,
     ].filter(Boolean).join(" · ");
 
@@ -223,6 +233,11 @@ export function ReportWeekly() {
             {vacations.isError && (
                 <p role="alert" className="text-sm text-destructive">
                     Urlaube konnten nicht geladen werden: {vacations.error.message}
+                </p>
+            )}
+            {holidays.isError && (
+                <p role="alert" className="text-sm text-destructive">
+                    Feiertage konnten nicht geladen werden: {holidays.error.message}
                 </p>
             )}
             {entries.isSuccess && <DataTable columns={columns} data={report.rows}/>}
