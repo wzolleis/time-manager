@@ -4,13 +4,15 @@ import {randomUUID} from "node:crypto";
 import {asc, eq} from "drizzle-orm";
 import {z} from "zod";
 import {db} from "./lib/db";
-import {users} from "../../db/schema";
+import {userRoles, users} from "../../db/schema";
 import {UserCreateSchema, UserUpdateSchema} from "../../shared/user";
 import {hasDbCode} from "./lib/db-errors";
 import {withTiming} from "./lib/timing";
 import {IdSchema, isApiPath, notFound} from "./lib/id";
 import {hashPassword} from "./lib/password";
 import {withSession} from "./lib/session";
+import {lastAdmin, lockAdmins} from "./lib/roles";
+import {USER_ROLE_ID} from "../../shared/role";
 
 // Bewusst explizit statt select(): der Passwort-Hash darf nie in einer Antwort landen
 const publicColumns = {
@@ -46,7 +48,12 @@ const handler = async (req: Request, context: Context) => {
             if (req.method === "POST") {
                 const {password, ...input} = UserCreateSchema.parse(await readBody(req));
                 const id = randomUUID();
-                await db.insert(users).values({id, ...input, passwordHash: await hashPassword(password)});
+                const passwordHash = await hashPassword(password);
+                // Jeder neue User bekommt die Rolle "User"
+                await db.transaction(async (tx) => {
+                    await tx.insert(users).values({id, ...input, passwordHash});
+                    await tx.insert(userRoles).values({userId: id, roleId: USER_ROLE_ID});
+                });
                 return Response.json(await getUser(id), {status: 201});
             }
             return new Response(null, {status: 405});
@@ -71,8 +78,12 @@ const handler = async (req: Request, context: Context) => {
         }
 
         if (req.method === "DELETE") {
-            const [result] = await db.delete(users).where(eq(users.id, id));
-            return result.affectedRows > 0 ? new Response(null, {status: 204}) : notFound();
+            return await db.transaction(async (tx) => {
+                const admins = await lockAdmins(tx);
+                if (admins.length === 1 && admins[0] === id) return lastAdmin();
+                const [result] = await tx.delete(users).where(eq(users.id, id));
+                return result.affectedRows > 0 ? new Response(null, {status: 204}) : notFound();
+            });
         }
 
         return new Response(null, {status: 405});

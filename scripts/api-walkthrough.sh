@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# API-Walkthrough: Users, Projekte, Zeitbuchungen, Projektzuordnung.
+# API-Walkthrough: Anmeldung, Rollen, Users, Projekte, Zeitbuchungen, Projektzuordnung.
 # Läuft mit einem Wegwerf-User "vitest" und räumt hinterher auf.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -10,6 +10,11 @@ TEST_PASSWORD="vitest-passwort-1"
 UNKNOWN_ID="00000000-0000-4000-8000-000000000000"
 USER_ID=""
 PROJECT_IDS=""
+ADMIN_COOKIES=""
+TEST_COOKIES=""
+# Feste IDs der Rollen, wie in shared/role.ts
+ADMIN_ROLE_ID="c8d47966-f04b-4e73-a752-b48266371049"
+USER_ROLE_ID="65c4543a-6a98-44c6-b953-6329d1688bd0"
 
 purge_user() {
   local uid="$1" ids id
@@ -28,6 +33,9 @@ purge_user() {
 
 cleanup() {
   local pid
+  # Falls der Lauf als 'vitest' abgebrochen wurde: zurück zur Session des Admins
+  if [ -n "$ADMIN_COOKIES" ]; then WT_COOKIES="$ADMIN_COOKIES"; fi
+  if [ -n "$TEST_COOKIES" ]; then rm -f "$TEST_COOKIES"; fi
   for pid in $PROJECT_IDS; do wt_call DELETE "/api/projects/$pid"; done
   if [ -n "$USER_ID" ]; then purge_user "$USER_ID"; fi
 }
@@ -90,6 +98,48 @@ wt_step "Altes Passwort gilt nicht mehr" 401 "" POST /api/auth/login \
 
 wt_step "Neues Passwort gilt" 200 "" POST /api/auth/login \
   "{\"email\":\"$TEST_EMAIL\",\"password\":\"vitest-neu-12345\"}"
+
+# --- Rollen ----------------------------------------------------------------
+
+wt_step "Alle Rollen auflisten" 200 "{\"id\":\"$ADMIN_ROLE_ID\",\"name\":\"Administrator\"}" GET /api/roles
+
+wt_step "Neuer User hat die Rolle 'User'" 200 "[{\"id\":\"$USER_ROLE_ID\",\"name\":\"User\"}]" GET "/api/users/$USER_ID/roles"
+
+wt_step "Unbekannte Rolle wird abgelehnt" 400 "Unbekannte Rolle" PUT "/api/users/$USER_ID/roles" \
+  "{\"roleIds\":[\"$USER_ROLE_ID\",\"$UNKNOWN_ID\"]}"
+
+# Ab hier mit einer eigenen Session als 'vitest' (die Session des Admins bleibt bestehen)
+ADMIN_COOKIES="$WT_COOKIES"
+TEST_COOKIES="$(mktemp)"
+curl -s -o /dev/null -c "$TEST_COOKIES" -H "Content-Type: application/json" \
+  -d "{\"email\":\"$TEST_EMAIL\",\"password\":\"vitest-neu-12345\"}" "$WT_BASE/api/auth/login"
+WT_COOKIES="$TEST_COOKIES"
+
+wt_step "'vitest' darf Projekte lesen (ohne Eintrag gilt 'User')" 200 "" GET /api/projects
+
+wt_step "'vitest' darf keine User auflisten" 403 "notwendigen Rechte" GET /api/users
+
+wt_step "'vitest' darf kein Passwort zurücksetzen" 403 "notwendigen Rechte" POST /api/auth/reset-password \
+  "{\"userId\":\"$USER_ID\",\"password\":\"egal-12345\"}"
+
+wt_step "'vitest' darf sich nicht selbst zum Administrator machen" 403 "notwendigen Rechte" \
+  PUT "/api/users/$USER_ID/roles" "{\"roleIds\":[\"$ADMIN_ROLE_ID\",\"$USER_ROLE_ID\"]}"
+
+WT_COOKIES="$ADMIN_COOKIES"
+wt_step "Admin macht 'vitest' zum Administrator" 200 '"Administrator"' PUT "/api/users/$USER_ID/roles" \
+  "{\"roleIds\":[\"$ADMIN_ROLE_ID\",\"$USER_ROLE_ID\"]}"
+
+WT_COOKIES="$TEST_COOKIES"
+wt_step "Als Administrator darf 'vitest' die User auflisten" 200 "\"email\":\"$TEST_EMAIL\"" GET /api/users
+
+WT_COOKIES="$ADMIN_COOKIES"
+wt_step "Admin nimmt 'vitest' die Rolle wieder weg" 200 "[{\"id\":\"$USER_ROLE_ID\",\"name\":\"User\"}]" \
+  PUT "/api/users/$USER_ID/roles" "{\"roleIds\":[\"$USER_ROLE_ID\"]}"
+
+curl -s -o /dev/null -b "$TEST_COOKIES" -X POST "$WT_BASE/api/auth/logout"
+rm -f "$TEST_COOKIES"
+TEST_COOKIES=""
+ADMIN_COOKIES=""
 
 wt_step "Reset für unbekannten User" 410 "Nicht gefunden" POST /api/auth/reset-password \
   "{\"userId\":\"$UNKNOWN_ID\",\"password\":\"egal-12345\"}"

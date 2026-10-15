@@ -34,7 +34,10 @@ export const queryClient = new QueryClient(
         mutationCache: new MutationCache({onError}),
         defaultOptions: {
             queries: {
-                gcTime: DAY, staleTime: MINUTE_5
+                gcTime: DAY, staleTime: MINUTE_5,
+                // Ohne Anmeldung (401) oder ohne Rechte (403) hilft ein erneuter Versuch nicht
+                retry: (failureCount, err) =>
+                    !(err instanceof ApiError && (err.status === 401 || err.status === 403)) && failureCount < 3,
             },
         }
     }

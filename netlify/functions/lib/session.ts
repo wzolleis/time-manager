@@ -4,6 +4,7 @@ import type {Context} from "@netlify/functions";
 import {and, eq, lt, ne} from "drizzle-orm";
 import {db} from "./db";
 import {sessions, users} from "../../../db/schema";
+import {endpointPath, forbidden, hasEndpointAccess} from "./roles";
 
 export const SESSION_COOKIE = "session";
 export const SESSION_TTL_MS = 8 * 60 * 60 * 1000; // 8 Stunden Inaktivität
@@ -18,10 +19,14 @@ type AuthedHandler = (req: Request, context: Context, session: Session) => Promi
 
 const sha256 = (value: string) => createHash("sha256").update(value).digest("hex");
 
-const cookie = (value: string, maxAgeSeconds: number) =>
-    `${SESSION_COOKIE}=${value}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${maxAgeSeconds}`;
+// Secure nur über HTTPS: Safari verwirft Secure-Cookies auf http://localhost (netlify dev),
+// dann gäbe es lokal keine Session. Netlify selbst liefert immer über HTTPS aus.
+const cookie = (req: Request, value: string, maxAgeSeconds: number) => {
+    const secure = new URL(req.url).protocol === "https:" ? " Secure;" : "";
+    return `${SESSION_COOKIE}=${value}; Path=/; HttpOnly;${secure} SameSite=Strict; Max-Age=${maxAgeSeconds}`;
+};
 
-export const clearSessionCookie = () => cookie("", 0);
+export const clearSessionCookie = (req: Request) => cookie(req, "", 0);
 
 function readSessionId(req: Request): string | null {
     const header = req.headers.get("Cookie");
@@ -34,7 +39,7 @@ function readSessionId(req: Request): string | null {
 }
 
 /** Legt eine neue Session an und liefert den Set-Cookie-Header dafür */
-export async function createSession(userId: string): Promise<string> {
+export async function createSession(req: Request, userId: string): Promise<string> {
     const id = randomBytes(32).toString("base64url");
     const now = new Date();
     // Abgelaufene Sessions bei der Gelegenheit aufräumen, damit die Tabelle nicht wächst
@@ -44,7 +49,7 @@ export async function createSession(userId: string): Promise<string> {
         userId,
         expiresAt: new Date(now.getTime() + SESSION_TTL_MS),
     });
-    return cookie(id, SESSION_TTL_MS / 1000);
+    return cookie(req, id, SESSION_TTL_MS / 1000);
 }
 
 /** Liest die Session aus dem Cookie, verlängert sie und liefert den User; null wenn nicht angemeldet */
@@ -92,17 +97,23 @@ export async function deleteUserSessions(userId: string, exceptIdHash?: string):
 
 export const unauthorized = () => Response.json({error: "Anmeldung erforderlich"}, {status: 401});
 
-/** Umhüllt einen Handler: ohne gültige Session gibt es 401, sonst bekommt der Handler die Session */
+/**
+ * Umhüllt einen Handler: ohne gültige Session gibt es 401, ohne die Rolle für Endpoint und
+ * Methode (Tabelle endpoint_roles) 403, sonst bekommt der Handler die Session.
+ */
 export function withSession(handler: AuthedHandler): Handler {
     return async (req, context) => {
         let session: Session | null;
+        let allowed: boolean;
         try {
             session = await getSession(req);
+            if (!session) return unauthorized();
+            allowed = await hasEndpointAccess(session.user.id, endpointPath(req.url), req.method);
         } catch (err) {
             console.error(err);
             return Response.json({error: "Interner Fehler"}, {status: 500});
         }
-        if (!session) return unauthorized();
+        if (!allowed) return forbidden();
         return handler(req, context, session);
     };
 }

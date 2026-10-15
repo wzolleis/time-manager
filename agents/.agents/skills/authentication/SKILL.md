@@ -6,7 +6,8 @@ description: Wie wird der Anwender angemeldet und wie werden Anwender und Passw�
 ## Definition der Anwender
 
 Der Administrator kann neue Anwender anlegen. Der erste Administrator wird manuell angelegt,
-siehe `authorization/SKILL.md`. Sein Passwort wird mit `node scripts/set-password.ts <email>` gesetzt.
+siehe `authorization/SKILL.md`. Sein Passwort wird mit `node scripts/set-password.ts <email>` gesetzt,
+die Rolle Administrator mit `node scripts/grant-admin.ts <email>`.
 Beim Anlegen legt der Administrator das Passwort fest. In der Tabelle `users` wird nur
 ein Hash des Passworts gespeichert, nie das Passwort selbst.
 
@@ -48,7 +49,9 @@ Arbeitsspeicher.
 - Nach erfolgreichem Login erzeugt das Backend eine zufällige Session-ID (32 Bytes, kryptografisch sicher).
 - In `sessions` werden der SHA-256-Hash der Session-ID, die User-ID und der Ablaufzeitpunkt gespeichert.
   Die Session-ID selbst steht nur im Cookie.
-- Cookie: `HttpOnly`, `Secure`, `SameSite=Strict`, `Path=/`.
+- Cookie: `HttpOnly`, `SameSite=Strict`, `Path=/`, über HTTPS zusätzlich `Secure`. Lokal (`netlify dev`, http) fehlt
+  `Secure`,
+  weil Safari solche Cookies auf `http://localhost` verwirft.
 - Bei jedem API-Aufruf liest das Backend die Session über den Hash der Session-ID.
   Fehlt sie oder ist sie abgelaufen, antwortet es mit `401 Unauthorized`.
 - Eine Session läuft nach 8 Stunden Inaktivität ab. Jeder gültige API-Aufruf verlängert sie wieder auf 8 Stunden.
@@ -57,6 +60,7 @@ Arbeitsspeicher.
   Jede neue Function wird mit `withSession(handler)` exportiert.
 - Abgelaufene Sessions werden beim nächsten Login aus der Tabelle gelöscht.
 - Der so ermittelte Anwender ist die Grundlage für die Rollenprüfung in `authorization/SKILL.md`.
+  `withSession` prüft danach auch die Rolle und antwortet ohne sie mit `403 Forbidden`.
 
 ## Logout
 

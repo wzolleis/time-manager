@@ -1,5 +1,5 @@
 // db/schema.ts
-import {char, date, datetime, index, mysqlEnum, mysqlTable, varchar} from "drizzle-orm/mysql-core"; // zum bisherigen Import ergänzen
+import {char, date, datetime, index, mysqlEnum, mysqlTable, primaryKey, varchar} from "drizzle-orm/mysql-core";
 
 export const vacations = mysqlTable(
     "vacations",
@@ -46,6 +46,40 @@ export const sessions = mysqlTable(
         expiresAt: datetime("expires_at", {mode: "date", fsp: 0}).notNull(),
     },
     (t) => [index("idx_sessions_user").on(t.userId), index("idx_sessions_expires").on(t.expiresAt)],
+);
+
+// Rollen. "Administrator" und "User" sind fest vorgegeben, ihre IDs stehen in shared/role.ts.
+export const roles = mysqlTable("roles", {
+    id: char("id", {length: 36}).primaryKey(),
+    name: varchar("name", {length: 50}).notNull().unique(),
+});
+
+// Zuordnung Benutzer -> Rolle (n:m)
+export const userRoles = mysqlTable(
+    "user_roles",
+    {
+        userId: char("user_id", {length: 36})
+            .notNull()
+            .references(() => users.id, {onDelete: "cascade"}),
+        roleId: char("role_id", {length: 36})
+            .notNull()
+            .references(() => roles.id),
+    },
+    (t) => [primaryKey({columns: [t.userId, t.roleId]}), index("idx_user_roles_role").on(t.roleId)],
+);
+
+// Zuordnung Endpoint + Methode -> Rolle. Der Pfad ist das Muster aus config.path, z. B. /api/users/:id.
+// Ohne Eintrag gilt die Rolle "User". Gepflegt wird die Tabelle über Migrationen.
+export const endpointRoles = mysqlTable(
+    "endpoint_roles",
+    {
+        path: varchar("path", {length: 191}).notNull(),
+        method: mysqlEnum("method", ["GET", "POST", "PUT", "PATCH", "DELETE"]).notNull(),
+        roleId: char("role_id", {length: 36})
+            .notNull()
+            .references(() => roles.id),
+    },
+    (t) => [primaryKey({columns: [t.path, t.method]})],
 );
 
 export const projects = mysqlTable("projects", {

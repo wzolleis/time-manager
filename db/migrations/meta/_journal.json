@@ -36,6 +36,34 @@
       "when": 1792099063572,
       "tag": "0004_sessions",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1792101886491,
+      "tag": "0005_roles",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1792101889120,
+      "tag": "0006_roles_seed",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1792102835277,
+      "tag": "0007_roles_id_add",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1792102844773,
+      "tag": "0008_roles_id",
+      "breakpoints": true
     }
   ]
 }
