@@ -2,5 +2,11 @@
     "tabWidth": 4,
     "bracketSpacing": false,
     "singleQuote": false,
-    "printWidth": 120
+    "printWidth": 120,
+    "overrides": [
+        {
+            "files": "package.json",
+            "options": {"tabWidth": 2}
+        }
+    ]
 }
