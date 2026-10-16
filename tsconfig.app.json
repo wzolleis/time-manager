@@ -30,10 +30,7 @@
         "./shared/*"
       ],
       "@/*": ["./src/*"],
-      "@features/*": ["./src/features/*"],
-      "@user/*": [
-        "./src/features/user/*"
-      ]
+      "@features/*": ["./src/features/*"]
     }
   },
   "include": [

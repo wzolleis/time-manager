@@ -9,12 +9,12 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {Button, buttonVariants} from "@/components/ui/button";
-import {HolidayDialog} from "@/features/holidays/components/holiday-dialog";
-import {deleteHoliday} from "@/api/holidays";
-import {germanDay} from "@shared/vacation-rules";
-import type {Holiday} from "@shared/holiday";
+} from "@/components/ui/alert-dialog.tsx";
+import {Button, buttonVariants} from "@/components/ui/button.tsx";
+import {HolidayDialog} from "@features/holidays/components/holiday-dialog.tsx";
+import {deleteHoliday} from "@/api/holidays.ts";
+import {germanDay} from "@shared/vacation-rules.ts";
+import type {Holiday} from "@shared/holiday.ts";
 
 export function HolidayActions({holiday, userName}: { holiday: Holiday; userName?: string }) {
     const qc = useQueryClient();

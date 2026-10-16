@@ -29,7 +29,6 @@
       "@/features/*": [
         "./src/features/*"
       ],
-      "@user/*": ["./src/features/user/*"],
       "@layout/*": ["./src/features/layout/*"]
     }
   }

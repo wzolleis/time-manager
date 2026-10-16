@@ -1,6 +1,6 @@
 import {type ComponentProps, useId, useState} from "react";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button";
+import {Button} from "@/components/ui/button.tsx";
 import {
     Dialog,
     DialogContent,
@@ -9,14 +9,14 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog";
-import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
-import {createHoliday, updateHoliday} from "@/api/holidays";
-import {localDay} from "@shared/time-rules";
-import {isValidDay} from "@shared/vacation-rules";
-import {weekdayIndex} from "@shared/week";
-import type {Holiday, HolidayUpdate} from "@shared/holiday";
+} from "@/components/ui/dialog.tsx";
+import {Input} from "@/components/ui/input.tsx";
+import {Label} from "@/components/ui/label.tsx";
+import {createHoliday, updateHoliday} from "@/api/holidays.ts";
+import {localDay} from "@shared/time-rules.ts";
+import {isValidDay} from "@shared/vacation-rules.ts";
+import {weekdayIndex} from "@shared/week.ts";
+import type {Holiday, HolidayUpdate} from "@shared/holiday.ts";
 
 type Props = {
     holiday?: Holiday; // mit Feiertag: bearbeiten, ohne: neu anlegen

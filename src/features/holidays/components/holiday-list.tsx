@@ -1,15 +1,15 @@
 import {useMemo, useState} from "react";
-import {Button} from "@/components/ui/button";
+import {Button} from "@/components/ui/button.tsx";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table.tsx";
-import {useNow} from "@/lib/use-now";
-import {useCurrentUser} from "@/lib/user-context";
-import {HolidayActions} from "@/features/holidays/components/holiday-actions";
-import {HolidayDialog} from "@/features/holidays/components/holiday-dialog";
-import {useGlobalHolidays, useHolidays} from "@/features/holidays/use-holidays";
-import {localDay} from "@shared/time-rules";
-import {germanDay} from "@shared/vacation-rules";
-import {weekdayIndex} from "@shared/week";
-import type {Holiday} from "@shared/holiday";
+import {useNow} from "@/lib/use-now.ts";
+import {useCurrentUser} from "@/lib/user-context.ts";
+import {HolidayActions} from "@features/holidays/components/holiday-actions.tsx";
+import {HolidayDialog} from "@features/holidays/components/holiday-dialog.tsx";
+import {useGlobalHolidays, useHolidays} from "@features/holidays/use-holidays.ts";
+import {localDay} from "@shared/time-rules.ts";
+import {germanDay} from "@shared/vacation-rules.ts";
+import {weekdayIndex} from "@shared/week.ts";
+import type {Holiday} from "@shared/holiday.ts";
 
 const WEEKDAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
