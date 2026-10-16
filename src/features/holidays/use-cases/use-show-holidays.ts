@@ -4,7 +4,7 @@ import {useGlobalHolidays, useHolidays} from "@/views/holidays";
 import type {Holiday} from "@shared/holiday";
 
 export type HolidayScope = "global" | "user";
-export type HolidayRow = Holiday & { editable: boolean; userName?: string };
+export type HolidayRow = Holiday & {editable: boolean; userName?: string};
 
 /**
  * scope "global": Der Administrator sieht die Feiertage für alle und darf jeden ändern.

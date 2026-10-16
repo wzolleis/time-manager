@@ -14,7 +14,6 @@ const USER = {
     avatarUrl: null,
 };
 
-
 function mockApi(vacations: unknown[], holidays: unknown[] = []) {
     vi.stubGlobal(
         "fetch",
@@ -40,7 +39,7 @@ function renderPage() {
     render(
         <QueryClientProvider client={queryClient}>
             <UserProvider>
-                <RouterProvider router={router}/>
+                <RouterProvider router={router} />
             </UserProvider>
         </QueryClientProvider>,
     );
@@ -53,17 +52,14 @@ beforeEach(() => {
     vi.stubGlobal(
         "ResizeObserver",
         class {
-            observe() {
-            }
+            observe() {}
 
-            unobserve() {
-            }
+            unobserve() {}
 
-            disconnect() {
-            }
+            disconnect() {}
         },
     );
-    vi.stubGlobal('scrollTo', vi.fn());
+    vi.stubGlobal("scrollTo", vi.fn());
 });
 
 afterEach(() => {

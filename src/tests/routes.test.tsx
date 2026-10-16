@@ -41,9 +41,7 @@ const makeRouter = (path: string) =>
     });
 
 // Routen mit Parametern ($id) oder Platzhaltern (*) brauchen konkrete Werte und bleiben außen vor
-const paths = Object.keys(makeRouter("/").routesByPath).filter(
-    (p) => !p.includes("$") && !p.includes("*"),
-);
+const paths = Object.keys(makeRouter("/").routesByPath).filter((p) => !p.includes("$") && !p.includes("*"));
 
 function mockApi() {
     vi.stubGlobal(
@@ -65,24 +63,21 @@ function mockApi() {
 }
 
 function mockWindow() {
-    vi.stubGlobal('scrollTo', vi.fn());
+    vi.stubGlobal("scrollTo", vi.fn());
 }
 
 beforeEach(() => {
     mockApi();
-    mockWindow()
+    mockWindow();
     // Radix-Komponenten brauchen ResizeObserver, jsdom bringt ihn nicht mit
     vi.stubGlobal(
         "ResizeObserver",
         class {
-            observe() {
-            }
+            observe() {}
 
-            unobserve() {
-            }
+            unobserve() {}
 
-            disconnect() {
-            }
+            disconnect() {}
         },
     );
 });
@@ -109,7 +104,7 @@ describe("Routen", () => {
             render(
                 <QueryClientProvider client={queryClient}>
                     <UserProvider>
-                        <RouterProvider router={router}/>
+                        <RouterProvider router={router} />
                     </UserProvider>
                 </QueryClientProvider>,
             );
@@ -133,7 +128,7 @@ describe("Routen", () => {
         const screen = render(
             <QueryClientProvider client={queryClient}>
                 <UserProvider>
-                    <RouterProvider router={router}/>
+                    <RouterProvider router={router} />
                 </UserProvider>
             </QueryClientProvider>,
         );

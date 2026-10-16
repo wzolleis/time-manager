@@ -40,13 +40,13 @@ const actionsColumn: DataTableColumnDef<HolidayRow> = {
     enableSorting: false,
     // Globale Feiertage sind im User-Bereich nur zum Lesen da
     cell: ({row}) =>
-        row.original.editable ? <HolidayActions holiday={row.original} userName={row.original.userName}/> : null,
+        row.original.editable ? <HolidayActions holiday={row.original} userName={row.original.userName} /> : null,
 };
 
 const globalColumns = [dateColumn, nameColumn, actionsColumn];
 const userColumns = [dateColumn, nameColumn, scopeColumn, actionsColumn];
 
-type Props = { scope: HolidayScope };
+type Props = {scope: HolidayScope};
 
 /**
  * scope "global": die Feiertage für alle, zum Pflegen im Admin-Bereich.
@@ -62,11 +62,7 @@ export function HolidayList({scope}: Props) {
     const count = holidays.rows?.length ?? 0;
 
     if (scope === "user" && !currentUser) {
-        return (
-            <p className="text-sm text-muted-foreground">
-                Bitte zuerst einen User anlegen und auswählen.
-            </p>
-        );
+        return <p className="text-sm text-muted-foreground">Bitte zuerst einen User anlegen und auswählen.</p>;
     }
 
     return (

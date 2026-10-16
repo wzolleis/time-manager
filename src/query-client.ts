@@ -4,16 +4,16 @@ import {ApiError} from "@/api/http";
 import {ME_QUERY_KEY} from "@/api/auth";
 
 export const DAY = 1000 * 60 * 60 * 24;
-export const MINUTE_5 = 5 * 60 * 1000
+export const MINUTE_5 = 5 * 60 * 1000;
 
 export const persister = createAsyncStoragePersister({
     storage: window.localStorage,
-})
+});
 
 export const persistOptions = {
-    persister,            // dein bestehender localStorage-Persister
+    persister, // dein bestehender localStorage-Persister
     maxAge: DAY,
-    buster: "1",         // erhöhen, wenn sich das Datenformat ändert
+    buster: "1", // erhöhen, wenn sich das Datenformat ändert
     dehydrateOptions: {
         // Den Anmeldestatus nie aus dem Speicher übernehmen, sondern immer beim Server erfragen
         shouldDehydrateQuery: (query: Parameters<typeof defaultShouldDehydrateQuery>[0]) =>
@@ -28,20 +28,19 @@ const onError = (err: unknown) => {
     }
 };
 
-export const queryClient = new QueryClient(
-    {
-        queryCache: new QueryCache({onError}),
-        mutationCache: new MutationCache({onError}),
-        defaultOptions: {
-            queries: {
-                gcTime: DAY, staleTime: MINUTE_5,
-                // Ohne Anmeldung (401) oder ohne Rechte (403) hilft ein erneuter Versuch nicht
-                retry: (failureCount, err) =>
-                    !(err instanceof ApiError && (err.status === 401 || err.status === 403)) && failureCount < 3,
-            },
-        }
-    }
-);
+export const queryClient = new QueryClient({
+    queryCache: new QueryCache({onError}),
+    mutationCache: new MutationCache({onError}),
+    defaultOptions: {
+        queries: {
+            gcTime: DAY,
+            staleTime: MINUTE_5,
+            // Ohne Anmeldung (401) oder ohne Rechte (403) hilft ein erneuter Versuch nicht
+            retry: (failureCount, err) =>
+                !(err instanceof ApiError && (err.status === 401 || err.status === 403)) && failureCount < 3,
+        },
+    },
+});
 
 /** Entfernt alle Daten des bisherigen Users aus dem Cache und aus dem localStorage */
 export async function clearUserData(): Promise<void> {

@@ -1,45 +1,40 @@
-import {StrictMode} from 'react'
-import {createRoot} from 'react-dom/client'
-import './index.css'
+import {StrictMode} from "react";
+import {createRoot} from "react-dom/client";
+import "./index.css";
 import "@radix-ui/themes/styles.css";
-import {PersistQueryClientProvider} from '@tanstack/react-query-persist-client'
+import {PersistQueryClientProvider} from "@tanstack/react-query-persist-client";
 
 import {Theme} from "@radix-ui/themes";
 import {createRouter, RouterProvider} from "@tanstack/react-router";
 
 // Wird vom Router-Plugin automatisch aus src/routes/ generiert
-import {routeTree} from './routeTree.gen'
+import {routeTree} from "./routeTree.gen";
 import {UserProvider} from "./components/user-provider";
 import {persistOptions, queryClient} from "@/query-client";
 import {NotFound} from "@/components/navigation/not-found";
 
-
 const router = createRouter({
     routeTree,
     defaultNotFoundComponent: NotFound,
-})
+});
 
 // Typsicherheit für <Link>, useNavigate usw.
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
     interface Register {
-        router: typeof router
+        router: typeof router;
     }
 }
 
-const rootElement = document.getElementById('root')!
-
+const rootElement = document.getElementById("root")!;
 
 createRoot(rootElement).render(
     <StrictMode>
         <Theme>
-            <PersistQueryClientProvider
-                client={queryClient}
-                persistOptions={persistOptions}
-            >
+            <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
                 <UserProvider>
-                    <RouterProvider router={router}/>
+                    <RouterProvider router={router} />
                 </UserProvider>
             </PersistQueryClientProvider>
         </Theme>
     </StrictMode>,
-)
+);

@@ -4,5 +4,5 @@ const TimeReportNew = () => {
             <h1 className="text-2xl font-semibold">Neuer Report</h1>
         </div>
     );
-}
-export default TimeReportNew
+};
+export default TimeReportNew;

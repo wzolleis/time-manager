@@ -1,4 +1,4 @@
-import {Table, TableBody, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
+import {Table, TableBody, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {UserRow} from "@features/users/pages/user-row";
 import type {User} from "@shared/user";
 
@@ -25,12 +25,7 @@ export function UserTable({users, onDelete, deletingId}: UserTableProps) {
                 </TableHeader>
                 <TableBody>
                     {users.map((user) => (
-                        <UserRow
-                            key={user.id}
-                            user={user}
-                            onDelete={onDelete}
-                            deleting={deletingId === user.id}
-                        />
+                        <UserRow key={user.id} user={user} onDelete={onDelete} deleting={deletingId === user.id} />
                     ))}
                 </TableBody>
             </Table>

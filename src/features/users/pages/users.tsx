@@ -8,7 +8,13 @@ import {UserTable} from "@features/users/pages/user-table";
 export function Users() {
     const qc = useQueryClient();
 
-    const {data: users, isPending, isError, error, refetch} = useQuery({
+    const {
+        data: users,
+        isPending,
+        isError,
+        error,
+        refetch,
+    } = useQuery({
         queryKey: ["users"],
         queryFn: fetchUsers,
     });
@@ -24,7 +30,7 @@ export function Users() {
         <div className="space-y-4 p-4">
             <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-semibold">Benutzerverwaltung</h1>
-                <UserCreateDialog/>
+                <UserCreateDialog />
             </div>
 
             {isPending && <p className="text-sm text-muted-foreground">Lade…</p>}

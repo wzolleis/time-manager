@@ -11,8 +11,8 @@ export const SESSION_TTL_MS = 8 * 60 * 60 * 1000; // 8 Stunden Inaktivität
 // Die Verlängerung wird höchstens einmal pro Minute geschrieben, nicht bei jedem Aufruf
 const REFRESH_AFTER_MS = 60 * 1000;
 
-export type SessionUser = { id: string; name: string; email: string; avatarUrl: string | null };
-export type Session = { user: SessionUser; idHash: string };
+export type SessionUser = {id: string; name: string; email: string; avatarUrl: string | null};
+export type Session = {user: SessionUser; idHash: string};
 
 type Handler = (req: Request, context: Context) => Promise<Response>;
 type AuthedHandler = (req: Request, context: Context, session: Session) => Promise<Response>;

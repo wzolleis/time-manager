@@ -92,8 +92,8 @@ export function VacationDialog({vacation, label, variant = "outline", size = "sm
                     <DialogHeader>
                         <DialogTitle>{vacation ? "Urlaub bearbeiten" : "Urlaub eintragen"}</DialogTitle>
                         <DialogDescription>
-                            Für {currentUser?.name}. Das Ende ist eingeschlossen. Wochenenden und Feiertage
-                            zählen als Kalendertage, aber nicht als Urlaubstage.
+                            Für {currentUser?.name}. Das Ende ist eingeschlossen. Wochenenden und Feiertage zählen als
+                            Kalendertage, aber nicht als Urlaubstage.
                         </DialogDescription>
                     </DialogHeader>
 

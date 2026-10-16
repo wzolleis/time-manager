@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {fetchProjects} from "@/api/projects";
 import {createTimeEntry} from "@/api/time-entries";
 import {formatTime} from "@/lib/format";
@@ -35,13 +35,13 @@ type Props = {
 const NO_PROJECT = "none"; // Radix Select erlaubt keinen leeren String als Wert
 
 export function TimeEntryCreateDialog({
-                                          defaultDay,
-                                          defaultType,
-                                          defaultTime,
-                                          label,
-                                          variant = "outline",
-                                          size = "sm",
-                                      }: Props) {
+    defaultDay,
+    defaultType,
+    defaultTime,
+    label,
+    variant = "outline",
+    size = "sm",
+}: Props) {
     const {currentUser} = useCurrentUser();
     const qc = useQueryClient();
     const uid = useId();
@@ -96,8 +96,8 @@ export function TimeEntryCreateDialog({
                     <DialogHeader>
                         <DialogTitle>Buchung nachtragen</DialogTitle>
                         <DialogDescription>
-                            Für {currentUser?.name}. Kommen und Gehen müssen am selben Tag liegen, die
-                            Abfolge wird beim Speichern geprüft.
+                            Für {currentUser?.name}. Kommen und Gehen müssen am selben Tag liegen, die Abfolge wird beim
+                            Speichern geprüft.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -105,7 +105,7 @@ export function TimeEntryCreateDialog({
                         <Label htmlFor={`${uid}-type`}>Buchung</Label>
                         <Select value={type} onValueChange={(v) => setType(v as EntryType)}>
                             <SelectTrigger id={`${uid}-type`}>
-                                <SelectValue/>
+                                <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="kommen">Kommen</SelectItem>
@@ -143,7 +143,7 @@ export function TimeEntryCreateDialog({
                             <Label htmlFor={`${uid}-project`}>Projekt</Label>
                             <Select value={projectChoice} onValueChange={setProjectChoice}>
                                 <SelectTrigger id={`${uid}-project`}>
-                                    <SelectValue/>
+                                    <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value={NO_PROJECT}>Kein Projekt</SelectItem>

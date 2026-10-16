@@ -16,7 +16,7 @@ import {deleteVacation} from "@/api/vacations";
 import {germanDay} from "@shared/vacation-rules";
 import type {Vacation} from "@shared/vacation";
 
-export function VacationActions({vacation}: { vacation: Vacation }) {
+export function VacationActions({vacation}: {vacation: Vacation}) {
     const qc = useQueryClient();
 
     const remove = useMutation({
@@ -27,7 +27,7 @@ export function VacationActions({vacation}: { vacation: Vacation }) {
     return (
         <div className="space-y-1">
             <div className="flex justify-end gap-2">
-                <VacationDialog vacation={vacation} label="Bearbeiten"/>
+                <VacationDialog vacation={vacation} label="Bearbeiten" />
 
                 <AlertDialog onOpenChange={(next) => next && remove.reset()}>
                     <AlertDialogTrigger asChild>
@@ -39,8 +39,8 @@ export function VacationActions({vacation}: { vacation: Vacation }) {
                         <AlertDialogHeader>
                             <AlertDialogTitle>Urlaub löschen?</AlertDialogTitle>
                             <AlertDialogDescription>
-                                Der Urlaub vom {germanDay(vacation.startDate)} bis{" "}
-                                {germanDay(vacation.endDate)} wird dauerhaft entfernt.
+                                Der Urlaub vom {germanDay(vacation.startDate)} bis {germanDay(vacation.endDate)} wird
+                                dauerhaft entfernt.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>

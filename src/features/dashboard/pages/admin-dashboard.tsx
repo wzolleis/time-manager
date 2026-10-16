@@ -8,7 +8,7 @@ export const AdminDashboard = () => {
 
     return (
         <>
-            <ActionCardDashboard title="Administrator Dashboard" onActionConfirm={handleConfirm} actions={[]}/>
+            <ActionCardDashboard title="Administrator Dashboard" onActionConfirm={handleConfirm} actions={[]} />
         </>
-    )
-}
+    );
+};

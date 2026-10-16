@@ -10,17 +10,11 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger
+    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {Link} from "@tanstack/react-router";
 
-export function ActionCard({
-                               action,
-                               onConfirm,
-                           }: {
-    action: DashboardAction;
-    onConfirm: (id: string) => void;
-}) {
+export function ActionCard({action, onConfirm}: {action: DashboardAction; onConfirm: (id: string) => void}) {
     const Icon = action.icon;
     const isDestructive = action.kind === "confirm";
 
@@ -34,7 +28,7 @@ export function ActionCard({
                             : "mb-2 flex size-10 items-center justify-center rounded-md bg-primary/10 text-primary"
                     }
                 >
-                    <Icon className="size-5" aria-hidden/>
+                    <Icon className="size-5" aria-hidden />
                 </div>
                 <CardTitle>{action.title}</CardTitle>
                 <CardDescription>{action.description}</CardDescription>
@@ -56,9 +50,7 @@ export function ActionCard({
                         <AlertDialogContent>
                             <AlertDialogHeader>
                                 <AlertDialogTitle>{action.confirmTitle}</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    {action.confirmText}
-                                </AlertDialogDescription>
+                                <AlertDialogDescription>{action.confirmText}</AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Abbrechen</AlertDialogCancel>

@@ -68,16 +68,14 @@ export function ProjectRow({project, onDelete, deleting}: ProjectRowProps) {
                     Bearbeiten
                 </Button>
 
-                <DeleteProjectDialog project={project} onDelete={onDelete} deleting={deleting}/>
+                <DeleteProjectDialog project={project} onDelete={onDelete} deleting={deleting} />
 
                 <Dialog open={open} onOpenChange={handleOpenChange}>
                     <DialogContent>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <DialogHeader>
                                 <DialogTitle>Projekt bearbeiten</DialogTitle>
-                                <DialogDescription>
-                                    Änderungen gelten nach dem Speichern sofort.
-                                </DialogDescription>
+                                <DialogDescription>Änderungen gelten nach dem Speichern sofort.</DialogDescription>
                             </DialogHeader>
 
                             <div className="space-y-2 text-left">

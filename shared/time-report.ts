@@ -7,11 +7,7 @@ export type DayTotals = {
     missingGehen: boolean; // an diesem vergangenen Tag fehlt das gehen
 };
 
-export function dayTotals(
-    entries: Booking[],
-    range: { start: Date; end: Date },
-    now: Date,
-): DayTotals {
+export function dayTotals(entries: Booking[], range: {start: Date; end: Date}, now: Date): DayTotals {
     const {work, breaks} = buildPeriods(entries);
     const start = range.start.getTime();
     const end = range.end.getTime();

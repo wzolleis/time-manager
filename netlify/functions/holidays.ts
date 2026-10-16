@@ -15,11 +15,9 @@ import {RuleError, ruleViolation} from "./lib/rule-error";
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Executor = Pick<typeof db, "select">;
 
-class NotFoundError extends Error {
-}
+class NotFoundError extends Error {}
 
-class UnknownUserError extends Error {
-}
+class UnknownUserError extends Error {}
 
 // Ohne userId nur die globalen Feiertage, mit userId zusätzlich die eigenen dieses Users
 const ListQuerySchema = z.object({userId: z.string().uuid().optional()});
@@ -31,17 +29,12 @@ const getHoliday = async (ex: Executor, id: string) => {
 
 // Sperrt die Zeile des Users bis zum Ende der Transaktion und prüft, dass er existiert
 const lockUser = async (tx: Tx, userId: string) => {
-    const rows = await tx
-        .select({id: users.id})
-        .from(users)
-        .where(eq(users.id, userId))
-        .for("update");
+    const rows = await tx.select({id: users.id}).from(users).where(eq(users.id, userId)).for("update");
     if (rows.length === 0) throw new UnknownUserError();
 };
 
 // FOR UPDATE sperrt auch die Lücke im Index auf date: ein paralleles Anlegen am selben Tag wartet
-const holidaysOn = (tx: Tx, date: string) =>
-    tx.select().from(holidays).where(eq(holidays.date, date)).for("update");
+const holidaysOn = (tx: Tx, date: string) => tx.select().from(holidays).where(eq(holidays.date, date)).for("update");
 
 const checkClash = async (tx: Tx, candidate: HolidayRange) => {
     const clash = findHolidayClash(await holidaysOn(tx, candidate.date), candidate);
@@ -69,7 +62,9 @@ const handler = async (req: Request, context: Context) => {
                 const rows = await db
                     .select()
                     .from(holidays)
-                    .where(q.userId ? or(isNull(holidays.userId), eq(holidays.userId, q.userId)) : isNull(holidays.userId))
+                    .where(
+                        q.userId ? or(isNull(holidays.userId), eq(holidays.userId, q.userId)) : isNull(holidays.userId),
+                    )
                     .orderBy(asc(holidays.date));
                 return Response.json(rows);
             }

@@ -1,7 +1,7 @@
-import {defineConfig} from 'vite'
-import react from '@vitejs/plugin-react'
+import {defineConfig} from "vite";
+import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
-import { tanstackRouter } from '@tanstack/router-plugin/vite'
+import {tanstackRouter} from "@tanstack/router-plugin/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -10,7 +10,7 @@ export default defineConfig({
     },
     plugins: [
         tanstackRouter({
-            target: 'react',
+            target: "react",
             autoCodeSplitting: true,
         }),
         react(),
@@ -20,4 +20,4 @@ export default defineConfig({
         // Weist Vite an, die 'paths' aus der tsconfig.json zu nutzen
         tsconfigPaths: true,
     },
-})
+});

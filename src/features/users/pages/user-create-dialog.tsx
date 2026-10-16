@@ -63,8 +63,8 @@ export function UserCreateDialog() {
                     <DialogHeader>
                         <DialogTitle>Neuen User anlegen</DialogTitle>
                         <DialogDescription>
-                            Name, E-Mail und Passwort sind Pflicht, der Avatar ist optional.
-                            Das Passwort teilst du dem User mit, er kann es danach selbst ändern.
+                            Name, E-Mail und Passwort sind Pflicht, der Avatar ist optional. Das Passwort teilst du dem
+                            User mit, er kann es danach selbst ändern.
                         </DialogDescription>
                     </DialogHeader>
 

@@ -19,7 +19,7 @@ export const weekDays = (day: string): string[] => {
 };
 
 /** Kalenderwoche nach ISO 8601 (Woche mit dem ersten Donnerstag des Jahres ist KW 1) */
-export function isoWeek(day: string): { year: number; week: number } {
+export function isoWeek(day: string): {year: number; week: number} {
     const [y, m, d] = day.split("-").map(Number);
     const thursday = new Date(Date.UTC(y, m - 1, d));
     thursday.setUTCDate(thursday.getUTCDate() - weekdayIndex(day) + 3); // Donnerstag dieser Woche
@@ -32,4 +32,3 @@ export function isoWeek(day: string): { year: number; week: number } {
     const week = 1 + Math.round((thursday.getTime() - firstThursday.getTime()) / (7 * 86_400_000));
     return {year, week};
 }
-

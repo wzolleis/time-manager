@@ -12,8 +12,7 @@ const METHODS: readonly string[] = endpointRoles.method.enumValues;
 export const forbidden = () =>
     Response.json({error: "Dir fehlen die notwendigen Rechte für diese Aktion"}, {status: 403});
 
-export const lastAdmin = () =>
-    Response.json({error: "Es muss mindestens ein Administrator bleiben"}, {status: 409});
+export const lastAdmin = () => Response.json({error: "Es muss mindestens ein Administrator bleiben"}, {status: 409});
 
 // Netlify wiederholt eine 403 (wie eine 404) mit .html, .htm, /index.html und /index.htm
 // und gibt die Antwort der letzten Wiederholung zurück
@@ -37,7 +36,9 @@ export const endpointPath = (url: string) =>
 export function matchesPattern(pattern: string, path: string): boolean {
     const want = pattern.split("/");
     const have = path.split("/");
-    return want.length === have.length && want.every((seg, i) => (seg.startsWith(":") ? have[i] !== "" : seg === have[i]));
+    return (
+        want.length === have.length && want.every((seg, i) => (seg.startsWith(":") ? have[i] !== "" : seg === have[i]))
+    );
 }
 
 /**
@@ -46,7 +47,7 @@ export function matchesPattern(pattern: string, path: string): boolean {
  * Der Vergleich läuft über den Pfad statt über context.params, denn bei den Wiederholungen
  * von Netlify sind die Parameter leer.
  */
-export function requiredRoleId(entries: { path: string; roleId: string }[], path: string): string {
+export function requiredRoleId(entries: {path: string; roleId: string}[], path: string): string {
     const params = (pattern: string) => pattern.split("/").filter((seg) => seg.startsWith(":")).length;
     const match = entries
         .filter((e) => matchesPattern(e.path, path))

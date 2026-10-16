@@ -64,10 +64,10 @@ const conn = await mysql.createConnection({
 
 try {
     const hash = await bcrypt.hash(password, COST);
-    const [result] = await conn.execute<mysql.ResultSetHeader>(
-        "UPDATE users SET password_hash = ? WHERE email = ?",
-        [hash, email],
-    );
+    const [result] = await conn.execute<mysql.ResultSetHeader>("UPDATE users SET password_hash = ? WHERE email = ?", [
+        hash,
+        email,
+    ]);
     if (result.affectedRows === 0) {
         console.error(`Kein User mit der E-Mail ${email}`);
         process.exitCode = 1;

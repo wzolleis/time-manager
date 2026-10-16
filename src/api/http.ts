@@ -10,7 +10,7 @@ export class ApiError extends Error {
 
 type ErrorBody = {
     error?: string;
-    errors?: { path: (string | number)[]; message: string }[];
+    errors?: {path: (string | number)[]; message: string}[];
 };
 
 export async function request<T>(url: string, init?: RequestInit): Promise<T> {

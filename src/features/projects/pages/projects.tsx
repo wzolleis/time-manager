@@ -8,7 +8,13 @@ import type {Project} from "@shared/project";
 export function Projects() {
     const qc = useQueryClient();
 
-    const {data: projects, isPending, isError, error, refetch} = useQuery({
+    const {
+        data: projects,
+        isPending,
+        isError,
+        error,
+        refetch,
+    } = useQuery({
         queryKey: ["projects"],
         queryFn: fetchProjects,
     });
@@ -24,7 +30,7 @@ export function Projects() {
         <div className="space-y-4 p-4">
             <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-semibold">Projekte</h1>
-                <ProjectCreateDialog/>
+                <ProjectCreateDialog />
             </div>
 
             {isPending && <p className="text-sm text-muted-foreground">Lade…</p>}

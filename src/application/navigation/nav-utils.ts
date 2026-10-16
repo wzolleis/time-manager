@@ -1,7 +1,6 @@
 import {NAVIGATION_ITEMS, type NavItem, type NavNode} from "@/application/navigation/nav-items";
 import type {LinkProps} from "@tanstack/react-router";
 
-
 export function toLinkProps(item: NavItem): LinkProps {
     const {...linkProps} = item;
     return linkProps;
@@ -12,10 +11,9 @@ export function toNavNodeLinkProps(node: NavNode): LinkProps {
     return toLinkProps(item);
 }
 
-
 export const findNavigationItem = (id: string): NavItem => {
-    return NAVIGATION_ITEMS.find(item => item.id === id)!
-}
+    return NAVIGATION_ITEMS.find((item) => item.id === id)!;
+};
 
 export function getPath(item: NavItem): string {
     return typeof item.to === "string" ? item.to : "";
@@ -52,10 +50,7 @@ export function buildNavTree(items: NavItem[]): NavNode[] {
     return roots.map((root) => createNavNode(root, items));
 }
 
-export function findBreadcrumbTrail(
-    nodes: NavNode[],
-    pathname: string
-): NavNode[] | null {
+export function findBreadcrumbTrail(nodes: NavNode[], pathname: string): NavNode[] | null {
     for (const node of nodes) {
         const nodePath = getPath(node);
 

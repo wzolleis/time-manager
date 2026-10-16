@@ -4,7 +4,7 @@ import {ChevronRight} from "lucide-react";
 import {useBreadcrumbTrail} from "@/application/breadcrumb/hooks/use-breadcrumb-trail";
 import type {NavItem} from "@/application/navigation/nav-items";
 
-export function Breadcrumb({items}: { items: NavItem[] }) {
+export function Breadcrumb({items}: {items: NavItem[]}) {
     const trail = useBreadcrumbTrail(items);
 
     if (trail.length === 0) {
@@ -21,7 +21,7 @@ export function Breadcrumb({items}: { items: NavItem[] }) {
                     <span key={item.id} className="flex items-center gap-1">
                         {isLast ? (
                             <span className="flex items-center gap-1 font-medium text-foreground">
-                                <Icon className="h-4 w-4"/>
+                                <Icon className="h-4 w-4" />
                                 {item.label}
                             </span>
                         ) : (
@@ -29,13 +29,11 @@ export function Breadcrumb({items}: { items: NavItem[] }) {
                                 {...toLinkProps(item)}
                                 className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
                             >
-                                <Icon className="h-4 w-4"/>
+                                <Icon className="h-4 w-4" />
                                 {item.label}
                             </Link>
                         )}
-                        {!isLast && (
-                            <ChevronRight className="h-4 w-4 text-muted-foreground"/>
-                        )}
+                        {!isLast && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
                     </span>
                 );
             })}

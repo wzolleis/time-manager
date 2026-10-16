@@ -4,7 +4,7 @@ import {Button} from "@radix-ui/themes";
 export const MenuButton = () => {
     return (
         <Button variant="ghost" size="2">
-            <Menu size={20}/>
+            <Menu size={20} />
         </Button>
-    )
-}
+    );
+};

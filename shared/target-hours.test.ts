@@ -3,7 +3,7 @@ import {describe, expect, it} from "vitest";
 import {DAILY_TARGET_MS, dayKind, targetMs, WEEKLY_TARGET_MS} from "./target-hours";
 import {weekDays} from "./week";
 
-const weekTarget = (anchor: string, vacations: { startDate: string; endDate: string }[]) =>
+const weekTarget = (anchor: string, vacations: {startDate: string; endDate: string}[]) =>
     weekDays(anchor).reduce((s, d) => s + targetMs(d, vacations, []), 0);
 
 describe("targetMs", () => {

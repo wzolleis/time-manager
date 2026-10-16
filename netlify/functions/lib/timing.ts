@@ -1,7 +1,7 @@
 import {AsyncLocalStorage} from "node:async_hooks";
 import type {Context} from "@netlify/functions";
 
-type Mark = { name: string; ms: number };
+type Mark = {name: string; ms: number};
 type Handler = (req: Request, context: Context) => Promise<Response>;
 
 const storage = new AsyncLocalStorage<Mark[]>();

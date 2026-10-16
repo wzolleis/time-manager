@@ -11,5 +11,4 @@ export const createHoliday = (data: HolidayCreate) =>
 export const updateHoliday = (id: string, data: HolidayUpdate) =>
     request<Holiday>(`/api/holidays/${id}`, {method: "PATCH", body: JSON.stringify(data)});
 
-export const deleteHoliday = (id: string) =>
-    request<void>(`/api/holidays/${id}`, {method: "DELETE"});
+export const deleteHoliday = (id: string) => request<void>(`/api/holidays/${id}`, {method: "DELETE"});

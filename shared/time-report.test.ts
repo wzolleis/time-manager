@@ -5,7 +5,9 @@ import {dayTotals} from "./time-report";
 import type {Booking} from "./time-rules";
 
 const b = (id: string, type: Booking["type"], iso: string): Booking => ({
-    id, type, bookedAt: new Date(iso),
+    id,
+    type,
+    bookedAt: new Date(iso),
 });
 const HOUR = 3_600_000;
 const day = localDayRange("2026-06-10"); // 22:00Z bis 22:00Z
@@ -42,17 +44,17 @@ describe("dayTotals", () => {
     });
 
     it("ignoriert Buchungen anderer Tage", () => {
-        const yesterday = [
-            b("1", "kommen", "2026-06-09T06:00:00Z"),
-            b("2", "gehen", "2026-06-09T14:00:00Z"),
-        ];
+        const yesterday = [b("1", "kommen", "2026-06-09T06:00:00Z"), b("2", "gehen", "2026-06-09T14:00:00Z")];
         const t = dayTotals(yesterday, day, new Date("2026-06-10T09:00:00Z"));
-        expect(t).toEqual({workMs: 0, breakMs: 0, running: false, "missingGehen": false});
+        expect(t).toEqual({workMs: 0, breakMs: 0, running: false, missingGehen: false});
     });
 
     it("liefert Nullen ohne Buchungen", () => {
         expect(dayTotals([], day, new Date("2026-06-10T09:00:00Z"))).toEqual({
-            workMs: 0, breakMs: 0, running: false, "missingGehen": false,
+            workMs: 0,
+            breakMs: 0,
+            running: false,
+            missingGehen: false,
         });
     });
 

@@ -1,15 +1,14 @@
 // Bewusst ohne Abhängigkeit zur DB, damit Client und Server dieselben Regeln nutzen
 import {isValidDay} from "./day-range";
 
-export type HolidayDay = { date: string }; // "JJJJ-MM-TT"
-export type HolidayRange = { id: string; userId: string | null; date: string; name: string };
+export type HolidayDay = {date: string}; // "JJJJ-MM-TT"
+export type HolidayRange = {id: string; userId: string | null; date: string; name: string};
 
 /** Der Feiertag an diesem Tag (sonst undefined) */
 export const holidayOn = <H extends HolidayDay>(day: string, holidays: H[]): H | undefined =>
     holidays.find((h) => h.date === day);
 
-export const isHoliday = (day: string, holidays: HolidayDay[]): boolean =>
-    holidays.some((h) => h.date === day);
+export const isHoliday = (day: string, holidays: HolidayDay[]): boolean => holidays.some((h) => h.date === day);
 
 /**
  * Ein vorhandener Feiertag, mit dem der neue kollidiert (sonst null).

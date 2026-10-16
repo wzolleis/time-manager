@@ -15,10 +15,7 @@ const formatter = new Intl.DateTimeFormat("en-US", {
 function offsetMs(at: Date): number {
     const parts = formatter.formatToParts(at);
     const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
-    const localAsUtc = Date.UTC(
-        get("year"), get("month") - 1, get("day"),
-        get("hour"), get("minute"), get("second"),
-    );
+    const localAsUtc = Date.UTC(get("year"), get("month") - 1, get("day"), get("hour"), get("minute"), get("second"));
     return localAsUtc - Math.floor(at.getTime() / 1000) * 1000;
 }
 
@@ -43,7 +40,7 @@ export function addDays(day: string, delta: number): string {
 }
 
 /** [start, end): end ist der Beginn des Folgetags und gehört nicht mehr dazu */
-export function localDayRange(day: string): { start: Date; end: Date } {
+export function localDayRange(day: string): {start: Date; end: Date} {
     return {start: startOfLocalDay(day), end: startOfLocalDay(addDays(day, 1))};
 }
 

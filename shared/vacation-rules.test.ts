@@ -78,9 +78,7 @@ describe("findOverlap", () => {
     });
 
     it("liefert eine lesbare Meldung", () => {
-        expect(overlapMessage(existing[0])).toBe(
-            "Überschneidet sich mit dem Urlaub vom 08.06.2026 bis 12.06.2026",
-        );
+        expect(overlapMessage(existing[0])).toBe("Überschneidet sich mit dem Urlaub vom 08.06.2026 bis 12.06.2026");
     });
 });
 
@@ -122,7 +120,10 @@ describe("vacationBalance", () => {
 
     it("ohne Urlaub ist das ganze Kontingent ungeplant", () => {
         expect(vacationBalance([], 2026, today, [])).toEqual({
-            taken: 0, planned: 0, unplanned: VACATION_DAYS_PER_YEAR, over: 0,
+            taken: 0,
+            planned: 0,
+            unplanned: VACATION_DAYS_PER_YEAR,
+            over: 0,
         });
     });
 
@@ -133,7 +134,10 @@ describe("vacationBalance", () => {
             v("c", "2026-08-03", "2026-08-16"), // zwei Wochen in der Zukunft: 10
         ];
         expect(vacationBalance(vacations, 2026, today, [])).toEqual({
-            taken: 8, planned: 12, unplanned: 10, over: 0,
+            taken: 8,
+            planned: 12,
+            unplanned: 10,
+            over: 0,
         });
     });
 
@@ -156,7 +160,10 @@ describe("vacationBalance", () => {
     it("mehr als 30 Tage: ungeplant bleibt 0, der Überhang wird ausgewiesen", () => {
         const vacations = [v("a", "2026-07-06", "2026-08-21")]; // 7 Wochen = 35 Arbeitstage
         expect(vacationBalance(vacations, 2026, today, [])).toEqual({
-            taken: 0, planned: 35, unplanned: 0, over: 5,
+            taken: 0,
+            planned: 35,
+            unplanned: 0,
+            over: 5,
         });
     });
 

@@ -11,7 +11,6 @@ export const IdSchema = z.string().uuid();
 export const isApiPath = (url: string, name: string): boolean =>
     new RegExp(`^(/api|/\\.netlify/functions)/${name}(/[^/.]+)?/?$`).test(new URL(url).pathname);
 
-
 /**
  * "Nicht gefunden" bewusst mit 410 statt 404: Netlify wiederholt eine 404-Antwort mit
  * .html, .htm und /index.html und fällt am Ende auf die App (index.html, Status 200) zurück,

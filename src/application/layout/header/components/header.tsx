@@ -16,7 +16,7 @@ import {PasswordChangeDialog} from "@/features/auth/components/password-change-d
 
 export const Header = () => {
     const navigate = useNavigate();
-    const userContext = useCurrentUser()
+    const userContext = useCurrentUser();
     const qc = useQueryClient();
     const [passwordOpen, setPasswordOpen] = useState(false);
 
@@ -31,9 +31,8 @@ export const Header = () => {
     };
 
     const onItemSelected = (item: NavItem): void => {
-        navigate({to: item.to})
-    }
-
+        navigate({to: item.to});
+    };
 
     const currentUser: User = userContext.currentUser;
 
@@ -43,22 +42,22 @@ export const Header = () => {
             align="center"
             px="4"
             py="3"
-            style={{background: 'var(--color-background)', borderBottom: '1px solid var(--gray-4)'}}
+            style={{background: "var(--color-background)", borderBottom: "1px solid var(--gray-4)"}}
         >
-            <Flex align="center" gap="3" width={'100%'}>
+            <Flex align="center" gap="3" width={"100%"}>
                 {/* Hamburger */}
-                <Box display={{md: 'none'}}>
-                    <MenuButton/>
+                <Box display={{md: "none"}}>
+                    <MenuButton />
                 </Box>
                 <StartEnd>
-                    <Breadcrumb items={NAVIGATION_ITEMS}/> {/* dieselbe flache Liste wie für buildNavTree(navItems) */}
+                    <Breadcrumb items={NAVIGATION_ITEMS} /> {/* dieselbe flache Liste wie für buildNavTree(navItems) */}
                     <Text color="gray">{`Hallo ${currentUser?.name}`}</Text>
                 </StartEnd>
             </Flex>
 
             <Flex align="center" gap="3">
                 <Button variant="ghost" size="2" radius="full">
-                    <Bell size={18}/>
+                    <Bell size={18} />
                 </Button>
 
                 {/* 2. Wiederverwendbares Dropdown */}
@@ -68,8 +67,8 @@ export const Header = () => {
                     onLogout={handleLogout}
                     onChangePassword={() => setPasswordOpen(true)}
                 />
-                <PasswordChangeDialog open={passwordOpen} onOpenChange={setPasswordOpen}/>
+                <PasswordChangeDialog open={passwordOpen} onOpenChange={setPasswordOpen} />
             </Flex>
         </Flex>
-    )
-}
+    );
+};

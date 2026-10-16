@@ -2,7 +2,7 @@ import {addDays, isValidDay} from "./day-range";
 import {type HolidayDay, isHoliday} from "./holiday-rules";
 import {weekdayIndex} from "./week";
 
-export type VacationRange = { id: string; startDate: string; endDate: string };
+export type VacationRange = {id: string; startDate: string; endDate: string};
 
 export const MAX_VACATION_DAYS = 366;
 
@@ -13,8 +13,7 @@ const utc = (day: string): number => {
 };
 
 /** Kalendertage inklusive Beginn und Ende */
-export const dayCount = (start: string, end: string): number =>
-    Math.round((utc(end) - utc(start)) / DAY_MS) + 1;
+export const dayCount = (start: string, end: string): number => Math.round((utc(end) - utc(start)) / DAY_MS) + 1;
 
 /** Deutsches Datum: "2026-06-08" wird zu "08.06.2026" */
 export const germanDay = (day: string): string => day.split("-").reverse().join(".");
@@ -30,10 +29,7 @@ export function checkRange(start: string, end: string): string | null {
 }
 
 /** Der erste vorhandene Urlaub, der sich mit dem neuen Zeitraum überschneidet (sonst null) */
-export function findOverlap(
-    existing: VacationRange[],
-    candidate: VacationRange,
-): VacationRange | null {
+export function findOverlap(existing: VacationRange[], candidate: VacationRange): VacationRange | null {
     return (
         existing.find(
             (v) =>
@@ -57,10 +53,8 @@ export function countWorkdays(start: string, end: string, holidays: HolidayDay[]
 }
 
 /** Liegt der Tag ("JJJJ-MM-TT") in einem der Urlaube? Beginn und Ende zählen mit. */
-export const isVacationDay = (
-    day: string,
-    vacations: Pick<VacationRange, "startDate" | "endDate">[],
-): boolean => vacations.some((v) => v.startDate <= day && day <= v.endDate);
+export const isVacationDay = (day: string, vacations: Pick<VacationRange, "startDate" | "endDate">[]): boolean =>
+    vacations.some((v) => v.startDate <= day && day <= v.endDate);
 
 export const VACATION_DAYS_PER_YEAR = 30;
 

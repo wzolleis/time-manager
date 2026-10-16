@@ -23,7 +23,7 @@ function mockApi() {
             return loggedIn ? Response.json(USER) : Response.json({error: "Anmeldung erforderlich"}, {status: 401});
         }
         if (pathname === "/api/auth/login") {
-            const body = JSON.parse(String(init?.body)) as { email: string; password: string };
+            const body = JSON.parse(String(init?.body)) as {email: string; password: string};
             if (body.email === USER.email && body.password === PASSWORD) {
                 loggedIn = true;
                 return Response.json(USER);
@@ -46,7 +46,7 @@ function renderApp() {
     render(
         <QueryClientProvider client={queryClient}>
             <UserProvider>
-                <Greeting/>
+                <Greeting />
             </UserProvider>
         </QueryClientProvider>,
     );

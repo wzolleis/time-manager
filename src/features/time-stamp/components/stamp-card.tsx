@@ -2,7 +2,7 @@ import {useState} from "react";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {fetchProjects} from "@/api/projects";
 import {createTimeEntry, fetchTimeEntries} from "@/api/time-entries";
 import {formatDayShort, formatDuration, formatTime} from "@/lib/format";
@@ -54,9 +54,9 @@ export function StampCard() {
     const isIn = last?.type === "kommen";
     const missing = entries.data
         ? findMissingGehen(
-            entries.data.map((e) => ({id: e.id, type: e.type, bookedAt: new Date(e.bookedAt)})),
-            new Date(now),
-        )
+              entries.data.map((e) => ({id: e.id, type: e.type, bookedAt: new Date(e.bookedAt)})),
+              new Date(now),
+          )
         : null;
     const projectName = isIn ? projects.data?.find((p) => p.id === last.projectId)?.name : undefined;
 
@@ -84,8 +84,8 @@ export function StampCard() {
                 {missing ? (
                     <div className="space-y-3">
                         <p className="text-sm text-destructive">
-                            Ein Gehen lässt sich nur am Tag des Kommens buchen. Trage es nach, danach kannst du
-                            wieder stempeln.
+                            Ein Gehen lässt sich nur am Tag des Kommens buchen. Trage es nach, danach kannst du wieder
+                            stempeln.
                         </p>
                         <TimeEntryCreateDialog
                             defaultDay={localDay(missing.bookedAt)}
@@ -100,7 +100,7 @@ export function StampCard() {
                         {!isIn && (
                             <Select value={projectChoice} onValueChange={setProjectChoice}>
                                 <SelectTrigger aria-label="Projekt wählen">
-                                    <SelectValue/>
+                                    <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value={NO_PROJECT}>Kein Projekt</SelectItem>

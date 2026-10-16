@@ -43,7 +43,7 @@ function renderPage(path: string) {
     render(
         <QueryClientProvider client={queryClient}>
             <UserProvider>
-                <RouterProvider router={router}/>
+                <RouterProvider router={router} />
             </UserProvider>
         </QueryClientProvider>,
     );
@@ -58,14 +58,11 @@ beforeEach(() => {
     vi.stubGlobal(
         "ResizeObserver",
         class {
-            observe() {
-            }
+            observe() {}
 
-            unobserve() {
-            }
+            unobserve() {}
 
-            disconnect() {
-            }
+            disconnect() {}
         },
     );
     vi.stubGlobal("scrollTo", vi.fn());

@@ -6,14 +6,14 @@ import {useHolidays} from "@/views/holidays";
 import {useNow} from "@/lib/use-now";
 import {useCurrentUser} from "@/lib/user-context";
 import {localDay} from "@shared/time-rules";
-import {countWorkdays, dayCount, germanDay, VACATION_DAYS_PER_YEAR, vacationBalance,} from "@shared/vacation-rules";
+import {countWorkdays, dayCount, germanDay, VACATION_DAYS_PER_YEAR, vacationBalance} from "@shared/vacation-rules";
 import type {Vacation} from "@shared/vacation";
 import {VacationActions} from "@features/vacations/components/vacation-actions";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {VacationDialog} from "@features/vacations/components/vacation-dialog";
 import {Summary} from "@features/reports/components/report-daily";
 
-type Row = Vacation & { days: number; workdays: number };
+type Row = Vacation & {days: number; workdays: number};
 
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
 const columns: DataTableColumnDef<Row>[] = [
@@ -33,7 +33,7 @@ const columns: DataTableColumnDef<Row>[] = [
         id: "actions",
         header: "",
         enableSorting: false,
-        cell: ({row}) => <VacationActions vacation={row.original}/>,
+        cell: ({row}) => <VacationActions vacation={row.original} />,
     },
 ];
 
@@ -73,11 +73,7 @@ export function ReportVacations() {
     );
 
     if (!currentUser) {
-        return (
-            <p className="text-sm text-muted-foreground">
-                Bitte zuerst einen User anlegen und auswählen.
-            </p>
-        );
+        return <p className="text-sm text-muted-foreground">Bitte zuerst einen User anlegen und auswählen.</p>;
     }
 
     return (
@@ -90,7 +86,7 @@ export function ReportVacations() {
                         {VACATION_DAYS_PER_YEAR} Urlaubstage im Jahr
                     </p>
                 </div>
-                <VacationDialog label="Urlaub eintragen" variant="default" size="default"/>
+                <VacationDialog label="Urlaub eintragen" variant="default" size="default" />
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
@@ -112,8 +108,8 @@ export function ReportVacations() {
             )}
             {vacations.isSuccess && (
                 <div className="grid gap-4 sm:grid-cols-3">
-                    <Summary title="Genommen" value={dayLabel(balance.taken)} hint="bis einschließlich heute"/>
-                    <Summary title="Geplant" value={dayLabel(balance.planned)} hint="ab morgen eingetragen"/>
+                    <Summary title="Genommen" value={dayLabel(balance.taken)} hint="bis einschließlich heute" />
+                    <Summary title="Geplant" value={dayLabel(balance.planned)} hint="ab morgen eingetragen" />
                     <Summary
                         title="Ungeplant"
                         value={dayLabel(balance.unplanned)}
@@ -139,7 +135,7 @@ export function ReportVacations() {
                 </div>
             )}
             {vacations.isSuccess && (
-                <DataTable columns={columns} data={rows} emptyText={`Für ${year} ist kein Urlaub eingetragen.`}/>
+                <DataTable columns={columns} data={rows} emptyText={`Für ${year} ist kein Urlaub eingetragen.`} />
             )}
         </div>
     );

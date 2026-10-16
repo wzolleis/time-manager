@@ -17,9 +17,9 @@ describe("VacationCreateSchema", () => {
     });
 
     it("lehnt ein ungültiges Datum ab", () => {
-        expect(
-            VacationCreateSchema.safeParse({userId, startDate: "2026-02-30", endDate: "2026-03-02"}).success,
-        ).toBe(false);
+        expect(VacationCreateSchema.safeParse({userId, startDate: "2026-02-30", endDate: "2026-03-02"}).success).toBe(
+            false,
+        );
     });
 
     it("verlangt beide Daten und den User", () => {
@@ -43,9 +43,7 @@ describe("VacationUpdateSchema", () => {
     });
 
     it("prüft die Reihenfolge, wenn beide Daten gesendet werden", () => {
-        expect(
-            VacationUpdateSchema.safeParse({startDate: "2026-06-12", endDate: "2026-06-08"}).success,
-        ).toBe(false);
+        expect(VacationUpdateSchema.safeParse({startDate: "2026-06-12", endDate: "2026-06-08"}).success).toBe(false);
     });
 
     it("lehnt ein ungültiges Datum ab", () => {

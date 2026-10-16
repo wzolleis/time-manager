@@ -56,10 +56,7 @@ describe("checkSequence", () => {
     it("bestimmt den Tag lokal, nicht in UTC", () => {
         // 00:30 und 08:00 Berlin: am selben lokalen Tag, aber an zwei UTC-Tagen
         expect(
-            checkSequence([
-                b("1", "kommen", "2026-06-09T22:30:00Z"),
-                b("2", "gehen", "2026-06-10T06:00:00Z"),
-            ]),
+            checkSequence([b("1", "kommen", "2026-06-09T22:30:00Z"), b("2", "gehen", "2026-06-10T06:00:00Z")]),
         ).toBeNull();
     });
 
@@ -117,17 +114,13 @@ describe("checkSequence", () => {
 
 describe("checkSequence beim Bearbeiten", () => {
     it("lehnt ein gehen ab, das auf den nächsten Tag verschoben wird", () => {
-        const edited = workday.map((e) =>
-            e.id === "4" ? {...e, bookedAt: new Date("2026-06-11T06:00:00Z")} : e,
-        );
+        const edited = workday.map((e) => (e.id === "4" ? {...e, bookedAt: new Date("2026-06-11T06:00:00Z")} : e));
         expect(checkSequence(edited)).toContain("selben Tag");
     });
 
     it("akzeptiert eine Korrektur innerhalb der Lücken", () => {
         // gehen (Id 2) von 12:00 auf 11:45
-        const edited = workday.map((e) =>
-            e.id === "2" ? {...e, bookedAt: new Date("2026-06-10T09:45:00Z")} : e,
-        );
+        const edited = workday.map((e) => (e.id === "2" ? {...e, bookedAt: new Date("2026-06-10T09:45:00Z")} : e));
         expect(checkSequence(edited)).toBeNull();
     });
 

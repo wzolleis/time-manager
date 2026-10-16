@@ -14,7 +14,7 @@ import {fetchRoles, fetchUserRoles, updateUserRoles} from "@/api/roles";
 import type {User} from "@shared/user";
 
 // Der Admin legt fest, welche Rollen ein User hat
-export function UserRolesDialog({user}: { user: User }) {
+export function UserRolesDialog({user}: {user: User}) {
     const qc = useQueryClient();
     const [open, setOpen] = useState(false);
     // null: noch nichts geändert, dann gelten die gespeicherten Rollen
@@ -56,7 +56,9 @@ export function UserRolesDialog({user}: { user: User }) {
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button variant="outline" size="sm">Rollen</Button>
+                <Button variant="outline" size="sm">
+                    Rollen
+                </Button>
             </DialogTrigger>
             <DialogContent>
                 <form onSubmit={handleSubmit} className="space-y-4">

@@ -16,7 +16,6 @@ function buildPrefixPaths(pathname: string): string[] {
     return segments.map((_, index) => "/" + segments.slice(0, index + 1).join("/"));
 }
 
-
 export function useBreadcrumbTrail(items: NavItem[]): NavItem[] {
     const pathname = useRouterState({
         select: (state) => state.location.pathname,

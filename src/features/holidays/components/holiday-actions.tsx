@@ -15,13 +15,13 @@ import {useDeleteHoliday} from "@features/holidays/use-cases/use-delete-holiday"
 import {germanDay} from "@shared/vacation-rules";
 import type {Holiday} from "@shared/holiday";
 
-export function HolidayActions({holiday, userName}: { holiday: Holiday; userName?: string }) {
+export function HolidayActions({holiday, userName}: {holiday: Holiday; userName?: string}) {
     const {remove, isDeleting, error, reset} = useDeleteHoliday();
 
     return (
         <div className="space-y-1">
             <div className="flex justify-end gap-2">
-                <HolidayDialog holiday={holiday} userId={holiday.userId} userName={userName} label="Bearbeiten"/>
+                <HolidayDialog holiday={holiday} userId={holiday.userId} userName={userName} label="Bearbeiten" />
 
                 <AlertDialog onOpenChange={(next) => next && reset()}>
                     <AlertDialogTrigger asChild>

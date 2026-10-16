@@ -39,7 +39,7 @@ export default withSession(async () => {
         });
     } catch (err) {
         // Nur Code und Meldung, keine Zugangsdaten
-        const e = err as { code?: string; message?: string };
+        const e = err as {code?: string; message?: string};
         return Response.json({error: e.code ?? "unbekannt", message: e.message}, {status: 500});
     }
 });

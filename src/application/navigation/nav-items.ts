@@ -9,7 +9,7 @@ import {
     Settings,
     Target,
     User,
-    WorkflowIcon
+    WorkflowIcon,
 } from "lucide-react";
 import type {ValuesOf} from "@/common/types";
 import type {LinkProps} from "@tanstack/react-router";
@@ -28,8 +28,8 @@ export const navItemIds = [
     "holidays-admin",
     "holidays",
     "projects",
-    "projects-new"
-] as const
+    "projects-new",
+] as const;
 export type NavItemId = ValuesOf<typeof navItemIds>;
 
 /**
@@ -39,30 +39,28 @@ export type NavItem = {
     id: NavItemId;
     label: string;
     icon: LucideIcon;
-} & LinkProps
+} & LinkProps;
 
 /**
  * Die Items werden in einen Knoten in einem Navigationsbaum umgewandelt
  * Das Item bekommt die untergordneten Items im Pfad als childItems
  * (children war schon als Name vergeben)
  */
-export type  NavNode = NavItem & {
-    childItems: NavNode[]
-}
+export type NavNode = NavItem & {
+    childItems: NavNode[];
+};
 export const NAVIGATION_ITEMS: NavItem[] = [
-    {id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, to: '/dashboard', children: []},
-    {id: 'admin', label: 'Administration', icon: BaggageClaim, to: '/admin', children: []},
-    {id: 'settings', label: 'Einstellungen', icon: Settings, to: '/admin/settings', children: []},
-    {id: 'users', label: 'Benutzer verwalten', icon: User, to: '/admin/users', children: []},
-    {id: 'holidays-admin', label: 'Feiertage', icon: CalendarHeart, to: '/admin/holidays', children: []},
-    {id: 'projects', label: 'Projekte', icon: Target, to: '/user/projects', children: []},
-    {id: 'user', label: 'User', icon: User, to: '/user', children: []},
-    {id: 'holidays', label: 'Feiertage', icon: CalendarHeart, to: '/user/holidays', children: []},
-    {id: 'reports', label: 'Report', icon: WorkflowIcon, to: '/user/reports', children: []},
-    {id: 'reports-daily', label: 'Heute', icon: WorkflowIcon, to: '/user/reports/daily', children: []},
-    {id: 'reports-weekly', label: 'Woche', icon: CalendarDays, to: '/user/reports/weekly', children: []},
-    {id: 'reports-vacations', label: 'Urlaube', icon: Parasol, to: '/user/reports/vacations', children: []},
-    {id: 'time-stamp', label: 'Zeiterfassung', icon: ClockPlus, to: '/user/time-stamp', children: []},
-
-] as const
-
+    {id: "dashboard", label: "Dashboard", icon: LayoutDashboard, to: "/dashboard", children: []},
+    {id: "admin", label: "Administration", icon: BaggageClaim, to: "/admin", children: []},
+    {id: "settings", label: "Einstellungen", icon: Settings, to: "/admin/settings", children: []},
+    {id: "users", label: "Benutzer verwalten", icon: User, to: "/admin/users", children: []},
+    {id: "holidays-admin", label: "Feiertage", icon: CalendarHeart, to: "/admin/holidays", children: []},
+    {id: "projects", label: "Projekte", icon: Target, to: "/user/projects", children: []},
+    {id: "user", label: "User", icon: User, to: "/user", children: []},
+    {id: "holidays", label: "Feiertage", icon: CalendarHeart, to: "/user/holidays", children: []},
+    {id: "reports", label: "Report", icon: WorkflowIcon, to: "/user/reports", children: []},
+    {id: "reports-daily", label: "Heute", icon: WorkflowIcon, to: "/user/reports/daily", children: []},
+    {id: "reports-weekly", label: "Woche", icon: CalendarDays, to: "/user/reports/weekly", children: []},
+    {id: "reports-vacations", label: "Urlaube", icon: Parasol, to: "/user/reports/vacations", children: []},
+    {id: "time-stamp", label: "Zeiterfassung", icon: ClockPlus, to: "/user/time-stamp", children: []},
+] as const;

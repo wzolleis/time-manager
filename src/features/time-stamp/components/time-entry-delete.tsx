@@ -7,7 +7,7 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger
+    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {Button, buttonVariants} from "@/components/ui/button";
 import {formatTime} from "@/lib/format";
@@ -15,7 +15,7 @@ import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {deleteTimeEntry} from "@/api/time-entries";
 import type {EntryRow} from "@features/time-stamp/components/time-entry-actions";
 
-export const TimeEntryDelete = ({entry}: { entry: EntryRow }) => {
+export const TimeEntryDelete = ({entry}: {entry: EntryRow}) => {
     const qc = useQueryClient();
     const refresh = () => qc.invalidateQueries({queryKey: ["time-entries"]});
     const isKommen = entry.type === "kommen";
@@ -40,9 +40,9 @@ export const TimeEntryDelete = ({entry}: { entry: EntryRow }) => {
                             {typeLabel} um {formatTime(entry.bookedAt)} Uhr löschen?
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                            Kommen und Gehen gehören zusammen. Löschst du nur diese Buchung, muss die
-                            Abfolge danach noch stimmen, sonst lehnt der Server das ab. Mit Gegenstück
-                            verschwindet zusätzlich {isKommen ? "das folgende Gehen" : "das vorhergehende Kommen"}.
+                            Kommen und Gehen gehören zusammen. Löschst du nur diese Buchung, muss die Abfolge danach
+                            noch stimmen, sonst lehnt der Server das ab. Mit Gegenstück verschwindet zusätzlich{" "}
+                            {isKommen ? "das folgende Gehen" : "das vorhergehende Kommen"}.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="flex-wrap">
@@ -68,5 +68,5 @@ export const TimeEntryDelete = ({entry}: { entry: EntryRow }) => {
                 </p>
             )}
         </>
-    )
-}
+    );
+};

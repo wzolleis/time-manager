@@ -1,7 +1,7 @@
 import {ActionCardDashboard} from "@/components/dashboard-action/action-card-dashboard";
 import type {DashboardAction} from "@/components/dashboard-action/types";
 
-const actions: DashboardAction[] = []
+const actions: DashboardAction[] = [];
 
 export const UserDashboard = () => {
     const handleConfirm = (id: string) => {
@@ -11,7 +11,7 @@ export const UserDashboard = () => {
 
     return (
         <>
-            <ActionCardDashboard title="User Dashboard" onActionConfirm={handleConfirm} actions={actions}/>
+            <ActionCardDashboard title="User Dashboard" onActionConfirm={handleConfirm} actions={actions} />
         </>
-    )
-}
+    );
+};

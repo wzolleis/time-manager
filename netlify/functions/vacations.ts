@@ -15,11 +15,9 @@ import {RuleError, ruleViolation} from "./lib/rule-error";
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Executor = Pick<typeof db, "select">;
 
-class NotFoundError extends Error {
-}
+class NotFoundError extends Error {}
 
-class UnknownUserError extends Error {
-}
+class UnknownUserError extends Error {}
 
 const ListQuerySchema = z.object({userId: z.string().uuid().optional()});
 
@@ -30,16 +28,11 @@ const getVacation = async (ex: Executor, id: string) => {
 
 // Sperrt die Zeile des Users bis zum Ende der Transaktion und prüft, dass er existiert
 const lockUser = async (tx: Tx, userId: string) => {
-    const rows = await tx
-        .select({id: users.id})
-        .from(users)
-        .where(eq(users.id, userId))
-        .for("update");
+    const rows = await tx.select({id: users.id}).from(users).where(eq(users.id, userId)).for("update");
     if (rows.length === 0) throw new UnknownUserError();
 };
 
-const userVacations = (tx: Tx, userId: string) =>
-    tx.select().from(vacations).where(eq(vacations.userId, userId));
+const userVacations = (tx: Tx, userId: string) => tx.select().from(vacations).where(eq(vacations.userId, userId));
 
 // Globale und eigene Feiertage: sie verbrauchen keinen Urlaubstag
 const userHolidays = (tx: Tx, userId: string) =>
@@ -138,7 +131,7 @@ const handler = async (req: Request, context: Context) => {
 
         return new Response(null, {status: 405});
     } catch (err) {
-        console.log('---> Fehlerbehandlung in vacations', err);
+        console.log("---> Fehlerbehandlung in vacations", err);
 
         if (err instanceof z.ZodError) return Response.json({errors: err.issues}, {status: 400});
         if (err instanceof RuleError) return ruleViolation(err);

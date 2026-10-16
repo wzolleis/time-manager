@@ -86,9 +86,9 @@ export function UserRow({user, onDelete, deleting}: UserRowProps) {
             <TableCell className="font-medium">{user.name}</TableCell>
             <TableCell>{user.email}</TableCell>
             <TableCell className="space-x-2 text-right">
-                <EditButton handleOpenChange={handleOpenChange}/>
-                <UserRolesDialog user={user}/>
-                <PasswordResetDialog user={user}/>
+                <EditButton handleOpenChange={handleOpenChange} />
+                <UserRolesDialog user={user} />
+                <PasswordResetDialog user={user} />
 
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -100,8 +100,8 @@ export function UserRow({user, onDelete, deleting}: UserRowProps) {
                         <AlertDialogHeader>
                             <AlertDialogTitle>{user.name} löschen?</AlertDialogTitle>
                             <AlertDialogDescription>
-                                Der User wird dauerhaft aus der Datenbank entfernt. Das lässt sich
-                                nicht rückgängig machen.
+                                Der User wird dauerhaft aus der Datenbank entfernt. Das lässt sich nicht rückgängig
+                                machen.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -121,9 +121,7 @@ export function UserRow({user, onDelete, deleting}: UserRowProps) {
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <DialogHeader>
                                 <DialogTitle>User bearbeiten</DialogTitle>
-                                <DialogDescription>
-                                    Änderungen gelten nach dem Speichern sofort.
-                                </DialogDescription>
+                                <DialogDescription>Änderungen gelten nach dem Speichern sofort.</DialogDescription>
                             </DialogHeader>
 
                             <div className="space-y-2 text-left">

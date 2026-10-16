@@ -44,11 +44,11 @@ const columns: DataTableColumnDef<Row>[] = [
 ];
 
 export function Summary({
-                            title,
-                            value,
-                            hint,
-                            valueClassName,
-                        }: {
+    title,
+    value,
+    hint,
+    valueClassName,
+}: {
     title: string;
     value: string;
     hint?: string;
@@ -107,11 +107,7 @@ export function ReportDaily() {
     }, [entries.data, projects.data, today, now]);
 
     if (!currentUser) {
-        return (
-            <p className="text-sm text-muted-foreground">
-                Bitte zuerst einen User anlegen und auswählen.
-            </p>
-        );
+        return <p className="text-sm text-muted-foreground">Bitte zuerst einen User anlegen und auswählen.</p>;
     }
 
     const vacationList = vacations.data ?? [];
@@ -135,12 +131,8 @@ export function ReportDaily() {
                     value={formatDuration(report.totals.workMs)}
                     hint={report.totals.running ? "läuft noch" : undefined}
                 />
-                <Summary title="Pausen" value={formatDuration(report.totals.breakMs)}/>
-                <Summary
-                    title="Soll"
-                    value={formatDuration(target)}
-                    hint={targetHint}
-                />
+                <Summary title="Pausen" value={formatDuration(report.totals.breakMs)} />
+                <Summary title="Soll" value={formatDuration(target)} hint={targetHint} />
                 <Summary
                     title="Differenz"
                     value={formatDifference(diff)}
@@ -166,7 +158,7 @@ export function ReportDaily() {
                 </p>
             )}
             {entries.isSuccess && (
-                <DataTable columns={columns} data={report.rows} emptyText="Heute noch keine Buchungen."/>
+                <DataTable columns={columns} data={report.rows} emptyText="Heute noch keine Buchungen." />
             )}
         </div>
     );

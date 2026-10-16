@@ -3,8 +3,8 @@ import type {DashboardAction} from "@/components/dashboard-action/types";
 
 export interface DashboardActionCardDashboardProps {
     onActionConfirm: (id: string) => void;
-    actions: DashboardAction[]
-    title: string
+    actions: DashboardAction[];
+    title: string;
 }
 
 export const ActionCardDashboard = (props: DashboardActionCardDashboardProps) => {
@@ -18,13 +18,9 @@ export const ActionCardDashboard = (props: DashboardActionCardDashboardProps) =>
 
             <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {actions.map((action) => (
-                    <ActionCard
-                        key={action.id}
-                        action={action}
-                        onConfirm={onActionConfirm}
-                    />
+                    <ActionCard key={action.id} action={action} onConfirm={onActionConfirm} />
                 ))}
             </section>
         </main>
     );
-}
+};

@@ -27,7 +27,7 @@ function renderDialog() {
     const queryClient = new QueryClient({defaultOptions: {queries: {retry: false}}});
     render(
         <QueryClientProvider client={queryClient}>
-            <UserRolesDialog user={USER}/>
+            <UserRolesDialog user={USER} />
         </QueryClientProvider>,
     );
 }
@@ -43,7 +43,7 @@ describe("UserRolesDialog", () => {
         renderDialog();
         fireEvent.click(screen.getByRole("button", {name: "Rollen"}));
 
-        const admin = await screen.findByLabelText("Administrator") as HTMLInputElement;
+        const admin = (await screen.findByLabelText("Administrator")) as HTMLInputElement;
         expect(admin.checked).toBe(false);
         expect((screen.getByLabelText("User") as HTMLInputElement).checked).toBe(true);
 
@@ -66,11 +66,17 @@ describe("UserRolesDialog", () => {
     });
 
     it("zeigt ohne Rechte die Meldung des Servers", async () => {
-        vi.stubGlobal("fetch", vi.fn(async () =>
-            Response.json({error: "Dir fehlen die notwendigen Rechte für diese Aktion"}, {status: 403})));
+        vi.stubGlobal(
+            "fetch",
+            vi.fn(async () =>
+                Response.json({error: "Dir fehlen die notwendigen Rechte für diese Aktion"}, {status: 403}),
+            ),
+        );
         renderDialog();
         fireEvent.click(screen.getByRole("button", {name: "Rollen"}));
 
-        expect((await screen.findByRole("alert")).textContent).toBe("Dir fehlen die notwendigen Rechte für diese Aktion");
+        expect((await screen.findByRole("alert")).textContent).toBe(
+            "Dir fehlen die notwendigen Rechte für diese Aktion",
+        );
     });
 });

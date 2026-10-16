@@ -15,8 +15,7 @@ export async function fetchMe(): Promise<User | null> {
     }
 }
 
-export const login = (data: Login) =>
-    request<User>("/api/auth/login", {method: "POST", body: JSON.stringify(data)});
+export const login = (data: Login) => request<User>("/api/auth/login", {method: "POST", body: JSON.stringify(data)});
 
 export const logout = () => request<void>("/api/auth/logout", {method: "POST"});
 

@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {fetchProjects} from "@/api/projects";
 import {updateTimeEntry} from "@/api/time-entries";
 import {formatTime} from "@/lib/format";
@@ -30,7 +30,7 @@ export type EntryRow = {
 
 const NO_PROJECT = "none"; // Radix Select erlaubt keinen leeren String als Wert
 
-export function EntryActions({entry}: { entry: EntryRow }) {
+export function EntryActions({entry}: {entry: EntryRow}) {
     const qc = useQueryClient();
     const refresh = () => qc.invalidateQueries({queryKey: ["time-entries"]});
     const projects = useQuery({queryKey: ["projects"], queryFn: fetchProjects});
@@ -87,7 +87,7 @@ export function EntryActions({entry}: { entry: EntryRow }) {
                     Bearbeiten
                 </Button>
                 {/* ts-ignore */}
-                <TimeEntryDelete entry={entry}/>
+                <TimeEntryDelete entry={entry} />
             </div>
 
             <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -116,7 +116,7 @@ export function EntryActions({entry}: { entry: EntryRow }) {
                                 <Label htmlFor={`project-${entry.id}`}>Projekt</Label>
                                 <Select value={projectChoice} onValueChange={setProjectChoice}>
                                     <SelectTrigger id={`project-${entry.id}`}>
-                                        <SelectValue/>
+                                        <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value={NO_PROJECT}>Kein Projekt</SelectItem>

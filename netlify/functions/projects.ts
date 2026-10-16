@@ -77,6 +77,6 @@ const handler = async (req: Request, context: Context) => {
     }
 };
 
-export default withTiming('projects', withSession(handler));
+export default withTiming("projects", withSession(handler));
 
 export const config: Config = {path: ["/api/projects", "/api/projects/:id"]};

@@ -45,10 +45,15 @@ const handler = async (req: Request, context: Context) => {
         // Alle Rollen: /api/roles
         if (rawId === undefined) {
             if (req.method !== "GET") return new Response(null, {status: 405});
-            return Response.json(await db.select({
-                id: roles.id,
-                name: roles.name
-            }).from(roles).orderBy(asc(roles.name)));
+            return Response.json(
+                await db
+                    .select({
+                        id: roles.id,
+                        name: roles.name,
+                    })
+                    .from(roles)
+                    .orderBy(asc(roles.name)),
+            );
         }
 
         // Rollen eines Users: /api/users/:id/roles

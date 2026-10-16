@@ -1,35 +1,25 @@
 {
-  "files": [],
-  "references": [
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.node.json"
-    },
-    {
-      "path": "./tsconfig.netlify.json"
-    }
-  ],
-  "exclude": [
-    "netlify/edge-functions"
-  ],
-  "compilerOptions": {
-    "types": [
-      "node"
+    "files": [],
+    "references": [
+        {
+            "path": "./tsconfig.app.json"
+        },
+        {
+            "path": "./tsconfig.node.json"
+        },
+        {
+            "path": "./tsconfig.netlify.json"
+        }
     ],
-    "paths": {
-      "@shared/*": [
-        "./shared/*"
-      ],
-      "@project/*": [
-        "."
-      ],
-      "@/*": ["./src/*"],
-      "@/features/*": [
-        "./src/features/*"
-      ],
-      "@layout/*": ["./src/features/layout/*"]
+    "exclude": ["netlify/edge-functions"],
+    "compilerOptions": {
+        "types": ["node"],
+        "paths": {
+            "@shared/*": ["./shared/*"],
+            "@project/*": ["."],
+            "@/*": ["./src/*"],
+            "@/features/*": ["./src/features/*"],
+            "@layout/*": ["./src/features/layout/*"]
+        }
     }
-  }
 }

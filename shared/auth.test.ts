@@ -39,11 +39,13 @@ describe("PasswordChangeSchema", () => {
 describe("User-Schemas und Passwort", () => {
     it("verlangt beim Anlegen ein Passwort", () => {
         expect(UserCreateSchema.safeParse({name: "Bob", email: "bob@example.com"}).success).toBe(false);
-        expect(UserCreateSchema.safeParse({
-            name: "Bob",
-            email: "bob@example.com",
-            password: "geheim123"
-        }).success).toBe(true);
+        expect(
+            UserCreateSchema.safeParse({
+                name: "Bob",
+                email: "bob@example.com",
+                password: "geheim123",
+            }).success,
+        ).toBe(true);
     });
 
     it("kennt keinen Passwort-Hash, weder in Antworten noch in Eingaben", () => {

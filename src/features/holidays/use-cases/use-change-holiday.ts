@@ -3,7 +3,7 @@ import {updateHoliday} from "@/api/holidays";
 import {checkHoliday} from "@shared/holiday-rules";
 import type {Holiday, HolidayUpdate} from "@shared/holiday";
 
-type Change = { holiday: Holiday; date: string; name: string };
+type Change = {holiday: Holiday; date: string; name: string};
 
 /** Datum oder Name eines Feiertags werden geändert */
 export function useChangeHoliday() {

@@ -5,19 +5,19 @@ export type Booking = {
     bookedAt: Date;
 };
 
-export type Period = { from: Date; to: Date | null }; // to = null: läuft noch
+export type Period = {from: Date; to: Date | null}; // to = null: läuft noch
 
 const TZ = "Europe/Berlin";
 const dayFormat = new Intl.DateTimeFormat("sv-SE", {timeZone: TZ}); // ergibt JJJJ-MM-TT
 const timeFormat = new Intl.DateTimeFormat("de-DE", {
-    timeZone: TZ, dateStyle: "short", timeStyle: "short",
+    timeZone: TZ,
+    dateStyle: "short",
+    timeStyle: "short",
 });
 
 export const localDay = (d: Date) => dayFormat.format(d);
 
-const sorted = (entries: Booking[]) =>
-    [...entries].sort((a, b) => a.bookedAt.getTime() - b.bookedAt.getTime());
-
+const sorted = (entries: Booking[]) => [...entries].sort((a, b) => a.bookedAt.getTime() - b.bookedAt.getTime());
 
 /** null = gültig, sonst eine verständliche Fehlermeldung */
 export function checkSequence(entries: Booking[]): string | null {
@@ -47,7 +47,7 @@ export function checkSequence(entries: Booking[]): string | null {
 }
 
 /** Arbeitszeiten und Pausen aus einer gültigen Folge */
-export function buildPeriods(entries: Booking[]): { work: Period[]; breaks: Period[] } {
+export function buildPeriods(entries: Booking[]): {work: Period[]; breaks: Period[]} {
     const list = sorted(entries);
     const work: Period[] = [];
     const breaks: Period[] = [];
@@ -67,7 +67,9 @@ export function buildPeriods(entries: Booking[]): { work: Period[]; breaks: Peri
 
 /** Welche Buchung wäre vor dem Zeitpunkt als Nächstes dran? */
 export function nextType(entries: Booking[], before: Date): Booking["type"] {
-    const last = sorted(entries).filter((e) => e.bookedAt < before).at(-1);
+    const last = sorted(entries)
+        .filter((e) => e.bookedAt < before)
+        .at(-1);
     return last?.type === "kommen" ? "gehen" : "kommen";
 }
 

@@ -41,7 +41,7 @@ const columns: DataTableColumnDef<EntryRow>[] = [
         id: "actions",
         header: "",
         enableSorting: false,
-        cell: ({row}) => <EntryActions entry={row.original}/>,
+        cell: ({row}) => <EntryActions entry={row.original} />,
     },
 ];
 
@@ -94,11 +94,7 @@ export function ReportDailyEdit() {
     }, [entries.data, projects.data, range, now]);
 
     if (!currentUser) {
-        return (
-            <p className="text-sm text-muted-foreground">
-                Bitte zuerst einen User anlegen und auswählen.
-            </p>
-        );
+        return <p className="text-sm text-muted-foreground">Bitte zuerst einen User anlegen und auswählen.</p>;
     }
     const vacationList = vacations.data ?? [];
     const holidayList = holidays.data ?? [];
@@ -117,8 +113,12 @@ export function ReportDailyEdit() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-                <Button variant="outline" size="sm" aria-label="Vorheriger Tag"
-                        onClick={() => setDay(addDays(day, -1))}>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    aria-label="Vorheriger Tag"
+                    onClick={() => setDay(addDays(day, -1))}
+                >
                     ←
                 </Button>
                 <Input
@@ -134,11 +134,7 @@ export function ReportDailyEdit() {
                 <Button variant="ghost" size="sm" disabled={day === today} onClick={() => setDay(today)}>
                     Heute
                 </Button>
-                <TimeEntryCreateDialog
-                    defaultDay={day}
-                    defaultType={report.next}
-                    label="Buchung nachtragen"
-                />
+                <TimeEntryCreateDialog defaultDay={day} defaultType={report.next} label="Buchung nachtragen" />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -152,12 +148,8 @@ export function ReportDailyEdit() {
                     value={formatDuration(report.totals.workMs)}
                     hint={report.totals.running ? "läuft noch" : undefined}
                 />
-                <Summary title="Pausen" value={formatDuration(report.totals.breakMs)}/>
-                <Summary
-                    title="Soll"
-                    value={formatDuration(target)}
-                    hint={targetHint}
-                />
+                <Summary title="Pausen" value={formatDuration(report.totals.breakMs)} />
+                <Summary title="Soll" value={formatDuration(target)} hint={targetHint} />
                 <Summary
                     title="Differenz"
                     value={elapsed ? formatDifference(diff) : "–"}

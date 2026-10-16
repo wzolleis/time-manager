@@ -4,7 +4,7 @@ import {Button} from "@/components/ui/button";
 import {fetchTimeEntries} from "@/api/time-entries";
 import {fetchVacations} from "@/api/vacations";
 import {useHolidays} from "@/views/holidays";
-import {diffClass, formatDayMonth, formatDayShort, formatDifference, formatDuration,} from "@/lib/format";
+import {diffClass, formatDayMonth, formatDayShort, formatDifference, formatDuration} from "@/lib/format";
 import {useNow} from "@/lib/use-now";
 import {useCurrentUser} from "@/lib/user-context";
 import {addDays, localDayRange} from "@shared/day-range";
@@ -29,7 +29,7 @@ type DayRow = {
     workMs: number;
     breakMs: number;
     diffMs: number | null; // null: Zukunft oder freier Tag ohne Arbeit
-    missingGehen: boolean
+    missingGehen: boolean;
 };
 
 const dash = "–";
@@ -48,9 +48,7 @@ const columns: DataTableColumnDef<DayRow>[] = [
                         {dayKindLabel(row.original.kind, row.original.holidayName)}
                     </span>
                 )}
-                {row.original.missingGehen && (
-                    <span className="ml-2 text-destructive">Gehen fehlt</span>
-                )}
+                {row.original.missingGehen && <span className="ml-2 text-destructive">Gehen fehlt</span>}
             </span>
         ),
     },
@@ -78,9 +76,7 @@ const columns: DataTableColumnDef<DayRow>[] = [
         enableSorting: false,
         cell: ({row}) => {
             const diff = row.original.diffMs;
-            return diff === null ? dash : (
-                <span className={diffClass(diff)}>{formatDifference(diff)}</span>
-            );
+            return diff === null ? dash : <span className={diffClass(diff)}>{formatDifference(diff)}</span>;
         },
     },
     {
@@ -161,11 +157,7 @@ export function ReportWeekly() {
     }, [entries.data, vacations.data, holidays.data, days, today, now]);
 
     if (!currentUser) {
-        return (
-            <p className="text-sm text-muted-foreground">
-                Bitte zuerst einen User anlegen und auswählen.
-            </p>
-        );
+        return <p className="text-sm text-muted-foreground">Bitte zuerst einen User anlegen und auswählen.</p>;
     }
 
     const thisWeek = weekDays(today)[0] === days[0];
@@ -178,25 +170,35 @@ export function ReportWeekly() {
         vacationDays > 0 && (vacationDays === 1 ? "1 Urlaubstag" : `${vacationDays} Urlaubstage`),
         holidayDays > 0 && (holidayDays === 1 ? "1 Feiertag" : `${holidayDays} Feiertage`),
         partial && !futureWeek && `bis heute: ${formatDuration(report.targetToDateMs)}`,
-    ].filter(Boolean).join(" · ");
+    ]
+        .filter(Boolean)
+        .join(" · ");
 
     return (
         <div className="space-y-4">
             <div>
                 <h1 className="text-2xl font-semibold">Wochenbericht</h1>
                 <p className="text-sm text-muted-foreground">
-                    {currentUser.name} · KW {week}/{year} ·{" "}
-                    {formatDayMonth(localDayRange(days[0]).start)} – {formatDayMonth(localDayRange(days[6]).start)}
+                    {currentUser.name} · KW {week}/{year} · {formatDayMonth(localDayRange(days[0]).start)} –{" "}
+                    {formatDayMonth(localDayRange(days[6]).start)}
                 </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-                <Button variant="outline" size="sm" aria-label="Vorherige Woche"
-                        onClick={() => setAnchor(addDays(anchor, -7))}>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    aria-label="Vorherige Woche"
+                    onClick={() => setAnchor(addDays(anchor, -7))}
+                >
                     ←
                 </Button>
-                <Button variant="outline" size="sm" aria-label="Nächste Woche"
-                        onClick={() => setAnchor(addDays(anchor, 7))}>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    aria-label="Nächste Woche"
+                    onClick={() => setAnchor(addDays(anchor, 7))}
+                >
                     →
                 </Button>
                 <Button variant="ghost" size="sm" disabled={thisWeek} onClick={() => setAnchor(today)}>
@@ -210,12 +212,8 @@ export function ReportWeekly() {
                     value={formatDuration(report.workMs)}
                     hint={report.rows.some((r) => r.running) ? "läuft noch" : undefined}
                 />
-                <Summary title="Pausen" value={formatDuration(report.breakMs)}/>
-                <Summary
-                    title="Soll"
-                    value={formatDuration(report.targetWeekMs)}
-                    hint={targetHint || undefined}
-                />
+                <Summary title="Pausen" value={formatDuration(report.breakMs)} />
+                <Summary title="Soll" value={formatDuration(report.targetWeekMs)} hint={targetHint || undefined} />
                 <Summary
                     title="Differenz"
                     value={futureWeek ? "–" : formatDifference(report.diffMs)}
@@ -240,7 +238,7 @@ export function ReportWeekly() {
                     Feiertage konnten nicht geladen werden: {holidays.error.message}
                 </p>
             )}
-            {entries.isSuccess && <DataTable columns={columns} data={report.rows}/>}
+            {entries.isSuccess && <DataTable columns={columns} data={report.rows} />}
         </div>
     );
 }

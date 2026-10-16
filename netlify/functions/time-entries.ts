@@ -17,9 +17,7 @@ import {RuleError, ruleViolation} from "./lib/rule-error";
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Executor = Pick<typeof db, "select">;
 
-class NotFoundError extends Error {
-}
-
+class NotFoundError extends Error {}
 
 const ListQuerySchema = z.object({
     userId: z.string().uuid().optional(),

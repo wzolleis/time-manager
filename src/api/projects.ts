@@ -10,5 +10,4 @@ export const createProject = (data: ProjectCreate) =>
 export const updateProject = (id: string, data: ProjectUpdate) =>
     request<Project>(`/api/projects/${id}`, {method: "PATCH", body: JSON.stringify(data)});
 
-export const deleteProject = (id: string) =>
-    request<void>(`/api/projects/${id}`, {method: "DELETE"});
+export const deleteProject = (id: string) => request<void>(`/api/projects/${id}`, {method: "DELETE"});

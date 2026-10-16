@@ -29,8 +29,7 @@ function instrument(target: object) {
         const original = t[method].bind(target);
         t[method] = (...args: unknown[]) => {
             const first = args[0];
-            const sql =
-                typeof first === "string" ? first : ((first as { sql?: string } | undefined)?.sql ?? "");
+            const sql = typeof first === "string" ? first : ((first as {sql?: string} | undefined)?.sql ?? "");
             const label = sql.replace(/\s+/g, " ").slice(0, 60);
             return timed(`sql.${method}: ${label}`, () => original(...args));
         };

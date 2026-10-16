@@ -11,8 +11,7 @@ import {
     tableFeatures,
     useTable,
 } from "@tanstack/react-table";
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
-
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 
 // Modulebene: nur die Features, die wir wirklich brauchen
 const features = tableFeatures({
@@ -21,8 +20,8 @@ const features = tableFeatures({
     sortedRowModel: createSortedRowModel(),
     sortFns: {
         alphanumeric: sortFn_alphanumeric, // Texte
-        basic: sortFn_basic,               // Zahlen und Sonstiges
-        datetime: sortFn_datetime,         // Datumswerte (Date)
+        basic: sortFn_basic, // Zahlen und Sonstiges
+        datetime: sortFn_datetime, // Datumswerte (Date)
     },
 });
 
@@ -36,10 +35,10 @@ type DataTableProps<TData extends RowData> = {
 };
 
 export function DataTable<TData extends RowData>({
-                                                     columns,
-                                                     data,
-                                                     emptyText = "Keine Einträge vorhanden.",
-                                                 }: DataTableProps<TData>) {
+    columns,
+    data,
+    emptyText = "Keine Einträge vorhanden.",
+}: DataTableProps<TData>) {
     const table = useTable({
         features,
         columns,
@@ -67,8 +66,8 @@ export function DataTable<TData extends RowData>({
                                             >
                                                 {flexRender(header.column.columnDef.header, header.getContext())}
                                                 <span aria-hidden>
-                          {sorted === "asc" ? "↑" : sorted === "desc" ? "↓" : ""}
-                        </span>
+                                                    {sorted === "asc" ? "↑" : sorted === "desc" ? "↓" : ""}
+                                                </span>
                                             </button>
                                         ) : (
                                             flexRender(header.column.columnDef.header, header.getContext())

@@ -51,9 +51,7 @@ export function ProjectCreateDialog() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <DialogHeader>
                         <DialogTitle>Neues Projekt anlegen</DialogTitle>
-                        <DialogDescription>
-                            Name ist Pflicht
-                        </DialogDescription>
+                        <DialogDescription>Name ist Pflicht</DialogDescription>
                     </DialogHeader>
 
                     <div className="space-y-2">

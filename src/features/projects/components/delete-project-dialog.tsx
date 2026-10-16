@@ -7,7 +7,7 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger
+    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {Button, buttonVariants} from "@/components/ui/button";
 import type {Project} from "@shared/project";
@@ -15,9 +15,8 @@ import type {Project} from "@shared/project";
 export interface DeleteProjectDialogProps {
     project: Project;
     onDelete: (project: Project) => void;
-    deleting: boolean
+    deleting: boolean;
 }
-
 
 export const DeleteProjectDialog = (props: DeleteProjectDialogProps) => {
     const {onDelete, project, deleting} = props;
@@ -33,8 +32,7 @@ export const DeleteProjectDialog = (props: DeleteProjectDialogProps) => {
                 <AlertDialogHeader>
                     <AlertDialogTitle>{project.name} löschen?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Das Projekt wird dauerhaft aus der Datenbank entfernt. Das lässt sich
-                        nicht rückgängig machen.
+                        Das Projekt wird dauerhaft aus der Datenbank entfernt. Das lässt sich nicht rückgängig machen.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -48,5 +46,5 @@ export const DeleteProjectDialog = (props: DeleteProjectDialogProps) => {
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
-    )
-}
+    );
+};

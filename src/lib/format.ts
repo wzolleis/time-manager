@@ -5,7 +5,11 @@ export const formatTime = (d: Date | string) =>
 
 export const formatDate = (d: Date | number | string) =>
     new Date(d).toLocaleDateString("de-DE", {
-        timeZone: TZ, weekday: "long", day: "2-digit", month: "2-digit", year: "numeric",
+        timeZone: TZ,
+        weekday: "long",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
     });
 
 export const formatDuration = (ms: number) => {

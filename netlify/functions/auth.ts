@@ -28,11 +28,7 @@ const readBody = async (req: Request): Promise<unknown> => {
 };
 
 const getPasswordHash = async (userId: string) => {
-    const [row] = await db
-        .select({passwordHash: users.passwordHash})
-        .from(users)
-        .where(eq(users.id, userId))
-        .limit(1);
+    const [row] = await db.select({passwordHash: users.passwordHash}).from(users).where(eq(users.id, userId)).limit(1);
     return row?.passwordHash ?? null;
 };
 
@@ -45,7 +41,7 @@ async function login(req: Request): Promise<Response> {
             name: users.name,
             email: users.email,
             avatarUrl: users.avatarUrl,
-            passwordHash: users.passwordHash
+            passwordHash: users.passwordHash,
         })
         .from(users)
         .where(eq(users.email, email))
@@ -71,7 +67,10 @@ async function changePassword(req: Request, session: Session): Promise<Response>
     if (!(await verifyPassword(oldPassword, await getPasswordHash(session.user.id)))) {
         return Response.json({error: "Das bisherige Passwort ist falsch"}, {status: 400});
     }
-    await db.update(users).set({passwordHash: await hashPassword(newPassword)}).where(eq(users.id, session.user.id));
+    await db
+        .update(users)
+        .set({passwordHash: await hashPassword(newPassword)})
+        .where(eq(users.id, session.user.id));
     await deleteUserSessions(session.user.id, session.idHash);
     return new Response(null, {status: 204});
 }
