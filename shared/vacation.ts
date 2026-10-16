@@ -1,7 +1,8 @@
 import {z} from "zod";
 import {createInsertSchema, createSelectSchema, createUpdateSchema} from "drizzle-zod";
 import {vacations} from "../db/schema";
-import {checkRange, isValidDay} from "./vacation-rules";
+import {isValidDay} from "./day-range";
+import {checkRange} from "./vacation-rules";
 
 const day = z.string().refine(isValidDay, "Ungültiges Datum (JJJJ-MM-TT)");
 

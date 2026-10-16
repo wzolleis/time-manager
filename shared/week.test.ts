@@ -1,6 +1,6 @@
 // shared/week.test.ts
 import {describe, expect, it} from "vitest";
-import {isoWeek, startOfWeek, weekDays} from "./week";
+import {isoWeek, isWeekend, startOfWeek, weekDays} from "./week";
 
 describe("startOfWeek", () => {
     it("liefert den Montag", () => {
@@ -40,5 +40,13 @@ describe("isoWeek", () => {
 
     it("Ende Dezember kann schon zur ersten Woche des Folgejahres gehören", () => {
         expect(isoWeek("2025-12-29")).toEqual({year: 2026, week: 1});
+    });
+});
+
+describe("isWeekend", () => {
+    it("erkennt Samstag und Sonntag", () => {
+        expect(isWeekend("2026-10-03")).toBe(true); // Samstag
+        expect(isWeekend("2026-10-04")).toBe(true); // Sonntag
+        expect(isWeekend("2026-10-02")).toBe(false); // Freitag
     });
 });

@@ -1,4 +1,4 @@
-import {addDays} from "./day-range";
+import {addDays, isValidDay} from "./day-range";
 import {type HolidayDay, isHoliday} from "./holiday-rules";
 import {weekdayIndex} from "./week";
 
@@ -11,14 +11,6 @@ const utc = (day: string): number => {
     const [y, m, d] = day.split("-").map(Number);
     return Date.UTC(y, m - 1, d);
 };
-
-/** "JJJJ-MM-TT" und ein echtes Kalenderdatum (2026-02-30 ist ungültig) */
-export function isValidDay(day: string): boolean {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return false;
-    const [y, m, d] = day.split("-").map(Number);
-    const date = new Date(Date.UTC(y, m - 1, d));
-    return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
-}
 
 /** Kalendertage inklusive Beginn und Ende */
 export const dayCount = (start: string, end: string): number =>

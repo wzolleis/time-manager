@@ -1,6 +1,6 @@
 // shared/day-range.test.ts
 import {describe, expect, it} from "vitest";
-import {addDays, localDayRange, localTimeToUtc} from "./day-range";
+import {addDays, isValidDay, localDayRange, localTimeToUtc} from "./day-range";
 
 describe("localDayRange", () => {
     it("Sommer: Mitternacht Berlin ist 22:00 UTC am Vortag", () => {
@@ -54,5 +54,21 @@ describe("localDayRange", () => {
             expect(addDays("2026-03-01", -1)).toBe("2026-02-28");
             expect(addDays("2026-12-31", 1)).toBe("2027-01-01");
         });
+    });
+});
+
+describe("isValidDay", () => {
+    it("akzeptiert echte Kalenderdaten", () => {
+        expect(isValidDay("2026-06-10")).toBe(true);
+        expect(isValidDay("2028-02-29")).toBe(true); // Schaltjahr
+    });
+
+    it("lehnt unmögliche Daten und falsche Formate ab", () => {
+        expect(isValidDay("2026-02-30")).toBe(false);
+        expect(isValidDay("2026-13-01")).toBe(false);
+        expect(isValidDay("2027-02-29")).toBe(false); // kein Schaltjahr
+        expect(isValidDay("10.06.2026")).toBe(false);
+        expect(isValidDay("0050-01-01")).toBe(false);
+        expect(isValidDay("")).toBe(false);
     });
 });

@@ -1,6 +1,5 @@
 import {type ComponentProps, useId, useState} from "react";
-import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button.tsx";
+import {Button} from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -9,14 +8,14 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog.tsx";
-import {Input} from "@/components/ui/input.tsx";
-import {Label} from "@/components/ui/label.tsx";
-import {createHoliday, updateHoliday} from "@/api/holidays.ts";
-import {localDay} from "@shared/time-rules.ts";
-import {isValidDay} from "@shared/vacation-rules.ts";
-import {weekdayIndex} from "@shared/week.ts";
-import type {Holiday, HolidayUpdate} from "@shared/holiday.ts";
+} from "@/components/ui/dialog";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {useAddHoliday} from "@features/holidays/use-cases/use-add-holiday";
+import {useChangeHoliday} from "@features/holidays/use-cases/use-change-holiday";
+import {localDay} from "@shared/time-rules";
+import {isWeekend} from "@shared/week";
+import type {Holiday} from "@shared/holiday";
 
 type Props = {
     holiday?: Holiday; // mit Feiertag: bearbeiten, ohne: neu anlegen
@@ -28,31 +27,22 @@ type Props = {
 };
 
 export function HolidayDialog({holiday, userId, userName, label, variant = "outline", size = "sm"}: Props) {
-    const qc = useQueryClient();
     const uid = useId();
 
     const [open, setOpen] = useState(false);
     const [date, setDate] = useState("");
     const [name, setName] = useState("");
 
-    const save = useMutation({
-        mutationFn: async () => {
-            if (holiday) {
-                // Nur Geändertes senden
-                const patch: HolidayUpdate = {};
-                if (date !== holiday.date) patch.date = date;
-                if (name.trim() !== holiday.name) patch.name = name;
-                if (Object.keys(patch).length === 0) return;
-                await updateHoliday(holiday.id, patch);
-            } else {
-                await createHoliday({userId, date, name});
-            }
-        },
-        onSuccess: async () => {
-            await qc.invalidateQueries({queryKey: ["holidays"]});
-            setOpen(false);
-        },
-    });
+    // Beide Use Cases immer aufrufen (Hook-Regeln), verwendet wird der passende
+    const add = useAddHoliday();
+    const change = useChangeHoliday();
+    const save = holiday ? change : add;
+
+    const submit = () => {
+        const close = {onSuccess: () => setOpen(false)};
+        if (holiday) change.change({holiday, date, name}, close);
+        else add.add({userId, date, name}, close);
+    };
 
     // Beim Öffnen immer mit den gespeicherten Werten bzw. mit heute starten
     const handleOpenChange = (next: boolean) => {
@@ -65,12 +55,8 @@ export function HolidayDialog({holiday, userId, userName, label, variant = "outl
     };
 
     const global = (holiday ? holiday.userId : userId) === null;
-    const problem = !isValidDay(date)
-        ? "Bitte ein Datum wählen"
-        : name.trim() === ""
-            ? "Bitte einen Namen angeben"
-            : null;
-    const weekend = !problem && weekdayIndex(date) >= 5;
+    const problem = save.problem(date, name);
+    const weekend = !problem && isWeekend(date);
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -83,7 +69,7 @@ export function HolidayDialog({holiday, userId, userName, label, variant = "outl
                 <form
                     onSubmit={(e) => {
                         e.preventDefault();
-                        save.mutate();
+                        submit();
                     }}
                     className="space-y-4"
                 >
@@ -125,7 +111,7 @@ export function HolidayDialog({holiday, userId, userName, label, variant = "outl
                         </p>
                     )}
 
-                    {save.isError && (
+                    {save.error && (
                         <p role="alert" className="text-sm text-destructive">
                             {save.error.message}
                         </p>
@@ -135,8 +121,8 @@ export function HolidayDialog({holiday, userId, userName, label, variant = "outl
                         <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                             Abbrechen
                         </Button>
-                        <Button type="submit" disabled={save.isPending || problem !== null}>
-                            {save.isPending ? "Speichere…" : "Speichern"}
+                        <Button type="submit" disabled={save.isSaving || problem !== null}>
+                            {save.isSaving ? "Speichere…" : "Speichern"}
                         </Button>
                     </DialogFooter>
                 </form>

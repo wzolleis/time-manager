@@ -1,21 +1,21 @@
 import {useMemo} from "react";
 import {useQuery} from "@tanstack/react-query";
-import {DataTable, type DataTableColumnDef} from "@/components/table/data-table.tsx";
-import {Card, CardDescription, CardHeader, CardTitle} from "@/components/ui/card.tsx";
-import {fetchProjects} from "@/api/projects.ts";
-import {fetchTimeEntries} from "@/api/time-entries.ts";
-import {fetchVacations} from "@/api/vacations.ts";
-import {useHolidays} from "@features/holidays/use-holidays.ts";
-import {diffClass, formatDate, formatDifference, formatDuration, formatTime} from "@/lib/format.ts";
-import {useNow} from "@/lib/use-now.ts";
-import {useCurrentUser} from "@/lib/user-context.ts";
-import {localDayRange} from "@shared/day-range.ts";
-import {dayTotals} from "@shared/time-report.ts";
-import {localDay} from "@shared/time-rules.ts";
-import {cn} from "@/lib/utils.ts";
-import {dayKind, targetMs} from "@shared/target-hours.ts";
-import {dayKindLabel} from "@features/reports/day-kind-label.ts";
-import {holidayOn} from "@shared/holiday-rules.ts";
+import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
+import {Card, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
+import {fetchProjects} from "@/api/projects";
+import {fetchTimeEntries} from "@/api/time-entries";
+import {fetchVacations} from "@/api/vacations";
+import {useHolidays} from "@/views/holidays";
+import {diffClass, formatDate, formatDifference, formatDuration, formatTime} from "@/lib/format";
+import {useNow} from "@/lib/use-now";
+import {useCurrentUser} from "@/lib/user-context";
+import {localDayRange} from "@shared/day-range";
+import {dayTotals} from "@shared/time-report";
+import {localDay} from "@shared/time-rules";
+import {cn} from "@/lib/utils";
+import {dayKind, targetMs} from "@shared/target-hours";
+import {dayKindLabel} from "@features/reports/day-kind-label";
+import {holidayOn} from "@shared/holiday-rules";
 
 type Row = {
     id: string;

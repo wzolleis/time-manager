@@ -8,7 +8,6 @@ import {
     findOverlap,
     germanDay,
     isVacationDay,
-    isValidDay,
     overlapMessage,
     VACATION_DAYS_PER_YEAR,
     vacationBalance,
@@ -16,22 +15,6 @@ import {
 } from "./vacation-rules";
 
 const v = (id: string, startDate: string, endDate: string) => ({id, startDate, endDate});
-
-describe("isValidDay", () => {
-    it("akzeptiert echte Kalenderdaten", () => {
-        expect(isValidDay("2026-06-10")).toBe(true);
-        expect(isValidDay("2028-02-29")).toBe(true); // Schaltjahr
-    });
-
-    it("lehnt unmögliche Daten und falsche Formate ab", () => {
-        expect(isValidDay("2026-02-30")).toBe(false);
-        expect(isValidDay("2026-13-01")).toBe(false);
-        expect(isValidDay("2027-02-29")).toBe(false); // kein Schaltjahr
-        expect(isValidDay("10.06.2026")).toBe(false);
-        expect(isValidDay("0050-01-01")).toBe(false);
-        expect(isValidDay("")).toBe(false);
-    });
-});
 
 describe("dayCount", () => {
     it("zählt Beginn und Ende mit", () => {

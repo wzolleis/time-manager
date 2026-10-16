@@ -1,7 +1,7 @@
 import {z} from "zod";
 import {createInsertSchema, createSelectSchema, createUpdateSchema} from "drizzle-zod";
 import {holidays} from "../db/schema";
-import {isValidDay} from "./vacation-rules";
+import {isValidDay} from "./day-range";
 
 const day = z.string().refine(isValidDay, "Ungültiges Datum (JJJJ-MM-TT)");
 const name = z.string().trim().min(1, "Bitte einen Namen angeben").max(100);

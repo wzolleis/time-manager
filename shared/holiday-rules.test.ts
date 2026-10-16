@@ -1,6 +1,6 @@
 // shared/holiday-rules.test.ts
 import {describe, expect, it} from "vitest";
-import {findHolidayClash, holidayClashMessage, holidayOn, isHoliday} from "./holiday-rules";
+import {checkHoliday, findHolidayClash, holidayClashMessage, holidayOn, isHoliday} from "./holiday-rules";
 
 const ALICE = "275f12fb-e116-4857-9f12-fbe116b857fb";
 const BOB = "8a1c2f0e-3b4d-4e5f-9a6b-7c8d9e0f1a2b";
@@ -63,5 +63,18 @@ describe("holidayClashMessage", () => {
         expect(holidayClashMessage(h("a", ALICE, "2026-11-01", "Allerheiligen"))).toBe(
             "Am 01.11.2026 ist bereits der Feiertag „Allerheiligen“ eingetragen",
         );
+    });
+});
+
+describe("checkHoliday", () => {
+    it("akzeptiert Datum und Namen", () => {
+        expect(checkHoliday("2026-10-03", "Tag der Deutschen Einheit")).toBeNull();
+    });
+    it("verlangt ein gültiges Datum", () => {
+        expect(checkHoliday("", "Feiertag")).toBe("Bitte ein Datum wählen");
+        expect(checkHoliday("2026-02-30", "Feiertag")).toBe("Bitte ein Datum wählen");
+    });
+    it("verlangt einen Namen", () => {
+        expect(checkHoliday("2026-10-03", "  ")).toBe("Bitte einen Namen angeben");
     });
 });

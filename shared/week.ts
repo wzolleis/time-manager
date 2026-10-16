@@ -6,6 +6,9 @@ export function weekdayIndex(day: string): number {
     return (new Date(Date.UTC(y, m - 1, d)).getUTCDay() + 6) % 7;
 }
 
+/** Samstag oder Sonntag */
+export const isWeekend = (day: string): boolean => weekdayIndex(day) >= 5;
+
 /** Montag der Woche, in der der Tag liegt */
 export const startOfWeek = (day: string): string => addDays(day, -weekdayIndex(day));
 

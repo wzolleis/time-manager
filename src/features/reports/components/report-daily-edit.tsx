@@ -1,25 +1,25 @@
 import {useMemo, useState} from "react";
 import {useQuery} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button.tsx";
-import {Input} from "@/components/ui/input.tsx";
-import {fetchProjects} from "@/api/projects.ts";
-import {fetchTimeEntries} from "@/api/time-entries.ts";
-import {fetchVacations} from "@/api/vacations.ts";
-import {useHolidays} from "@features/holidays/use-holidays.ts";
-import {diffClass, formatDate, formatDifference, formatDuration, formatTime} from "@/lib/format.ts";
-import {useNow} from "@/lib/use-now.ts";
-import {useCurrentUser} from "@/lib/user-context.ts";
-import {addDays, localDayRange} from "@shared/day-range.ts";
-import {dayTotals} from "@shared/time-report.ts";
-import {localDay} from "@shared/time-rules.ts";
-import {DataTable, type DataTableColumnDef} from "@/components/table/data-table.tsx";
-import {EntryActions, type EntryRow} from "@features/time-stamp/components/time-entry-actions.tsx";
-import {Summary} from "@features/reports/components/report-daily.tsx";
-import {dayKindLabel} from "@features/reports/day-kind-label.ts";
-import {dayKind, targetMs} from "@shared/target-hours.ts";
-import {holidayOn} from "@shared/holiday-rules.ts";
-import {nextType} from "@shared/time-rules.ts";
-import {TimeEntryCreateDialog} from "@features/time-stamp/components/time-entry-create-dialog.tsx"; // zum bestehenden Import von localDay ergänzen
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {fetchProjects} from "@/api/projects";
+import {fetchTimeEntries} from "@/api/time-entries";
+import {fetchVacations} from "@/api/vacations";
+import {useHolidays} from "@/views/holidays";
+import {diffClass, formatDate, formatDifference, formatDuration, formatTime} from "@/lib/format";
+import {useNow} from "@/lib/use-now";
+import {useCurrentUser} from "@/lib/user-context";
+import {addDays, localDayRange} from "@shared/day-range";
+import {dayTotals} from "@shared/time-report";
+import {localDay} from "@shared/time-rules";
+import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
+import {EntryActions, type EntryRow} from "@features/time-stamp/components/time-entry-actions";
+import {Summary} from "@features/reports/components/report-daily";
+import {dayKindLabel} from "@features/reports/day-kind-label";
+import {dayKind, targetMs} from "@shared/target-hours";
+import {holidayOn} from "@shared/holiday-rules";
+import {nextType} from "@shared/time-rules";
+import {TimeEntryCreateDialog} from "@features/time-stamp/components/time-entry-create-dialog"; // zum bestehenden Import von localDay ergänzen
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
 const columns: DataTableColumnDef<EntryRow>[] = [
     {

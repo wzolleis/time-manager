@@ -1,6 +1,6 @@
 import {type ComponentProps, useId, useState} from "react";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button.tsx";
+import {Button} from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -9,15 +9,15 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog.tsx";
-import {Input} from "@/components/ui/input.tsx";
-import {Label} from "@/components/ui/label.tsx";
-import {createVacation, updateVacation} from "@/api/vacations.ts";
-import {useHolidays} from "@features/holidays/use-holidays.ts";
-import {useCurrentUser} from "@/lib/user-context.ts";
-import {localDay} from "@shared/time-rules.ts";
-import {checkRange, countWorkdays, dayCount} from "@shared/vacation-rules.ts";
-import type {Vacation, VacationUpdate} from "@shared/vacation.ts";
+} from "@/components/ui/dialog";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {createVacation, updateVacation} from "@/api/vacations";
+import {useHolidays} from "@/views/holidays";
+import {useCurrentUser} from "@/lib/user-context";
+import {localDay} from "@shared/time-rules";
+import {checkRange, countWorkdays, dayCount} from "@shared/vacation-rules";
+import type {Vacation, VacationUpdate} from "@shared/vacation";
 
 type Props = {
     vacation?: Vacation; // mit Urlaub: bearbeiten, ohne: neu anlegen

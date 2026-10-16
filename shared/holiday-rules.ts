@@ -1,4 +1,6 @@
 // Bewusst ohne Abhängigkeit zur DB, damit Client und Server dieselben Regeln nutzen
+import {isValidDay} from "./day-range";
+
 export type HolidayDay = { date: string }; // "JJJJ-MM-TT"
 export type HolidayRange = { id: string; userId: string | null; date: string; name: string };
 
@@ -32,3 +34,10 @@ export const holidayClashMessage = (h: HolidayRange): string => {
         ? `Am ${day} ist bereits der Feiertag „${h.name}“ für alle eingetragen`
         : `Am ${day} ist bereits der Feiertag „${h.name}“ eingetragen`;
 };
+
+/** null = gültig, sonst eine verständliche Fehlermeldung */
+export function checkHoliday(date: string, name: string): string | null {
+    if (!isValidDay(date)) return "Bitte ein Datum wählen";
+    if (name.trim() === "") return "Bitte einen Namen angeben";
+    return null;
+}

@@ -1,27 +1,24 @@
-import {useMemo, useState} from "react";
-import {Button} from "@/components/ui/button.tsx";
-import {DataTable, type DataTableColumnDef} from "@/components/table/data-table.tsx";
-import {useNow} from "@/lib/use-now.ts";
-import {useCurrentUser} from "@/lib/user-context.ts";
-import {HolidayActions} from "@features/holidays/components/holiday-actions.tsx";
-import {HolidayDialog} from "@features/holidays/components/holiday-dialog.tsx";
-import {useGlobalHolidays, useHolidays} from "@features/holidays/use-holidays.ts";
-import {localDay} from "@shared/time-rules.ts";
-import {germanDay} from "@shared/vacation-rules.ts";
-import {weekdayIndex} from "@shared/week.ts";
-import type {Holiday} from "@shared/holiday.ts";
+import {useState} from "react";
+import {Button} from "@/components/ui/button";
+import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
+import {useNow} from "@/lib/use-now";
+import {useCurrentUser} from "@/lib/user-context";
+import {HolidayActions} from "@features/holidays/components/holiday-actions";
+import {HolidayDialog} from "@features/holidays/components/holiday-dialog";
+import {type HolidayRow, type HolidayScope, useShowHolidays} from "@features/holidays/use-cases/use-show-holidays";
+import {localDay} from "@shared/time-rules";
+import {germanDay} from "@shared/vacation-rules";
+import {isWeekend, weekdayIndex} from "@shared/week";
 
 const WEEKDAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
-type Row = Holiday & { editable: boolean; userName?: string };
-
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
-const dateColumn: DataTableColumnDef<Row> = {
+const dateColumn: DataTableColumnDef<HolidayRow> = {
     accessorKey: "date",
     header: "Datum",
     cell: ({row}) => {
         const date = row.original.date;
-        const weekend = weekdayIndex(date) >= 5;
+        const weekend = isWeekend(date);
         return (
             <span>
                 {WEEKDAYS[weekdayIndex(date)]}, {germanDay(date)}
@@ -30,14 +27,14 @@ const dateColumn: DataTableColumnDef<Row> = {
         );
     },
 };
-const nameColumn: DataTableColumnDef<Row> = {accessorKey: "name", header: "Name", enableSorting: false};
-const scopeColumn: DataTableColumnDef<Row> = {
+const nameColumn: DataTableColumnDef<HolidayRow> = {accessorKey: "name", header: "Name", enableSorting: false};
+const scopeColumn: DataTableColumnDef<HolidayRow> = {
     accessorKey: "userId",
     header: "Gilt für",
     enableSorting: false,
     cell: ({row}) => (row.original.userId === null ? "alle" : "nur mich"),
 };
-const actionsColumn: DataTableColumnDef<Row> = {
+const actionsColumn: DataTableColumnDef<HolidayRow> = {
     id: "actions",
     header: "",
     enableSorting: false,
@@ -49,7 +46,7 @@ const actionsColumn: DataTableColumnDef<Row> = {
 const globalColumns = [dateColumn, nameColumn, actionsColumn];
 const userColumns = [dateColumn, nameColumn, scopeColumn, actionsColumn];
 
-type Props = { scope: "global" | "user" };
+type Props = { scope: HolidayScope };
 
 /**
  * scope "global": die Feiertage für alle, zum Pflegen im Admin-Bereich.
@@ -61,22 +58,8 @@ export function HolidayList({scope}: Props) {
     const currentYear = Number(localDay(new Date(now)).slice(0, 4));
     const [year, setYear] = useState(currentYear);
 
-    // Beide Hooks immer aufrufen (Hook-Regeln), es läuft nur die passende Query
-    const userQuery = useHolidays(scope === "user" ? currentUser?.id : undefined);
-    const globalQuery = useGlobalHolidays(scope === "global");
-    const holidays = scope === "user" ? userQuery : globalQuery;
-
-    const rows = useMemo<Row[]>(
-        () =>
-            (holidays.data ?? [])
-                .filter((h) => h.date.startsWith(`${year}-`))
-                .map((h) => ({
-                    ...h,
-                    editable: scope === "global" || h.userId !== null,
-                    userName: currentUser?.name,
-                })),
-        [holidays.data, year, scope, currentUser?.name],
-    );
+    const holidays = useShowHolidays(scope, year);
+    const count = holidays.rows?.length ?? 0;
 
     if (scope === "user" && !currentUser) {
         return (
@@ -95,7 +78,7 @@ export function HolidayList({scope}: Props) {
                     </h1>
                     <p className="text-sm text-muted-foreground">
                         {scope === "user" && `${currentUser!.name} · `}
-                        {year} · {rows.length} {rows.length === 1 ? "Feiertag" : "Feiertage"}
+                        {year} · {count} {count === 1 ? "Feiertag" : "Feiertage"}
                     </p>
                 </div>
                 <HolidayDialog
@@ -120,20 +103,20 @@ export function HolidayList({scope}: Props) {
             </div>
 
             {holidays.isPending && <p className="text-sm text-muted-foreground">Lade…</p>}
-            {holidays.isError && (
+            {holidays.error && (
                 <div className="space-y-2">
                     <p role="alert" className="text-sm text-destructive">
                         {holidays.error.message}
                     </p>
-                    <Button variant="outline" onClick={() => holidays.refetch()}>
+                    <Button variant="outline" onClick={holidays.retry}>
                         Erneut versuchen
                     </Button>
                 </div>
             )}
-            {holidays.isSuccess && (
+            {holidays.rows && (
                 <DataTable
                     columns={scope === "global" ? globalColumns : userColumns}
-                    data={rows}
+                    data={holidays.rows}
                     emptyText={`Für ${year} ist kein Feiertag eingetragen.`}
                 />
             )}

@@ -1,4 +1,4 @@
-import {HolidayList} from "@features/holidays/components/holiday-list.tsx";
+import {HolidayList} from "@features/holidays/components/holiday-list";
 
 export const AdminHolidaysPage = () => (
     <div className="p-4">

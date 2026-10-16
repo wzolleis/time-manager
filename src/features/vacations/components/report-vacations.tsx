@@ -1,17 +1,17 @@
 import {useMemo, useState} from "react";
 import {useQuery} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button.tsx";
-import {fetchVacations} from "@/api/vacations.ts";
-import {useHolidays} from "@features/holidays/use-holidays.ts";
-import {useNow} from "@/lib/use-now.ts";
-import {useCurrentUser} from "@/lib/user-context.ts";
-import {localDay} from "@shared/time-rules.ts";
-import {countWorkdays, dayCount, germanDay, VACATION_DAYS_PER_YEAR, vacationBalance,} from "@shared/vacation-rules.ts";
-import type {Vacation} from "@shared/vacation.ts";
-import {VacationActions} from "@features/vacations/components/vacation-actions.tsx";
-import {DataTable, type DataTableColumnDef} from "@/components/table/data-table.tsx";
-import {VacationDialog} from "@features/vacations/components/vacation-dialog.tsx";
-import {Summary} from "@features/reports/components/report-daily.tsx";
+import {Button} from "@/components/ui/button";
+import {fetchVacations} from "@/api/vacations";
+import {useHolidays} from "@/views/holidays";
+import {useNow} from "@/lib/use-now";
+import {useCurrentUser} from "@/lib/user-context";
+import {localDay} from "@shared/time-rules";
+import {countWorkdays, dayCount, germanDay, VACATION_DAYS_PER_YEAR, vacationBalance,} from "@shared/vacation-rules";
+import type {Vacation} from "@shared/vacation";
+import {VacationActions} from "@features/vacations/components/vacation-actions";
+import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
+import {VacationDialog} from "@features/vacations/components/vacation-dialog";
+import {Summary} from "@features/reports/components/report-daily";
 
 type Row = Vacation & { days: number; workdays: number };
 
