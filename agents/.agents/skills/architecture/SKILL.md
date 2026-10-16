@@ -87,7 +87,8 @@ Import-Aliase (`tsconfig.app.json`): `@/` → `src/`, `@shared/` → `shared/`, 
 - [use-case.md](use-case.md): Was ein Use Case ist, wo er liegt und wie er die anderen Bausteine verwendet. Zuerst
   lesen.
 - [views.md](views.md): Daten lesen, ein Hook pro Aggregat in `src/views/`
-- [repository.md](repository.md): Daten schreiben mit `useMutation`
+- [repository.md](repository.md): Daten schreiben, API-Funktionen in `src/api/` und `useMutation`, Query Keys invalidieren
 - [service.md](service.md): Werte berechnen und Regeln prüfen, als reine Funktionen in `shared/`
+- [testing.md](testing.md): Wann sich ein Test lohnt, auf welcher Ebene er liegt und wie er geschrieben wird
 
 
