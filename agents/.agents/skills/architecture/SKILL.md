@@ -50,7 +50,7 @@ src/
 ├ views/                Ein File pro Aggregat mit den lesenden Hooks, z. B. useVacations (siehe views.md)
 ├ features/             Fachliche Bereiche, siehe unten
 ├ routes/               Routen für das file-basierte Routing von tanstack-router. Eine Route bindet
-│                       nur die Seite aus features/…/pages ein. routeTree.gen.ts wird erzeugt, nicht bearbeiten.
+│                       nur die Seite aus features/…/components ein. routeTree.gen.ts wird erzeugt, nicht bearbeiten.
 ├ application/          Layout, Navigationsmenü und Breadcrumb
 ├ components/           Fachlich neutrale Komponenten; ui/ enthält die shadcn-Komponenten
 ├ lib/                  Hilfsfunktionen für Frameworks und Bibliotheken (format, use-now, user-context)
@@ -65,8 +65,8 @@ src/features/
 
 src/features/vacations/               Aufbau eines Aggregats, jeder Ordner nur bei Bedarf
 ├ use-cases/            Ein Hook pro Use Case (siehe use-case.md)
-├ components/           Komponenten für die Ansichten des Aggregats, Tests daneben (*.test.tsx)
-├ pages/                Seiten, die eine Route aus src/routes einbindet
+├ components/           Komponenten für die Ansichten des Aggregats, Tests daneben (*.test.tsx).
+│                       Enthält auch die Seiten, die eine Route aus src/routes einbindet
 └ actions/              Actions, die auf dem Dashboard erscheinen
 
 netlify/functions/      Ein File pro Aggregat mit den Endpoints unter /api/<aggregat>
@@ -89,9 +89,8 @@ bleibt ohne Präfix:
 
 ```text
 src/features/holidays/
-├ components/
-│ └ holiday-list.tsx
-└ pages/
+└ components/
+  ├ holiday-list.tsx
   ├ holidays-page.tsx         HolidaysPage, eingebunden von src/routes/user/holidays.tsx
   └ admin-holidays-page.tsx   AdminHolidaysPage, eingebunden von src/routes/admin/holidays.tsx
 ```
