@@ -1,5 +1,5 @@
 import {request} from "./http";
-import type {Vacation, VacationCreate, VacationUpdate} from "@shared/vacation.ts";
+import type {Vacation, VacationCreate, VacationUpdate} from "@shared/vacation";
 
 export const fetchVacations = (userId: string) =>
     request<Vacation[]>(`/api/vacations?userId=${userId}`);

@@ -1,4 +1,4 @@
-import {ReportWeekly} from "@features/reports/components/report-weekly.tsx";
+import {ReportWeekly} from "@features/reports/components/report-weekly";
 
 export const ReportWeeklyPage = () => {
     return (

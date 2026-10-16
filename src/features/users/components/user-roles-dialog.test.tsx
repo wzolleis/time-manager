@@ -2,8 +2,8 @@
 import {afterEach, describe, expect, it, vi} from "vitest";
 import {cleanup, fireEvent, render, screen, waitFor} from "@testing-library/react";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
-import {UserRolesDialog} from "./user-roles-dialog.tsx";
-import {ADMIN_ROLE_ID, USER_ROLE_ID} from "@shared/role.ts";
+import {UserRolesDialog} from "./user-roles-dialog";
+import {ADMIN_ROLE_ID, USER_ROLE_ID} from "@shared/role";
 
 const ADMIN = {id: ADMIN_ROLE_ID, name: "Administrator"};
 const USER_ROLE = {id: USER_ROLE_ID, name: "User"};

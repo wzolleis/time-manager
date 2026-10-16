@@ -11,7 +11,7 @@ import {
     User,
     WorkflowIcon
 } from "lucide-react";
-import type {ValuesOf} from "@/common/types.ts";
+import type {ValuesOf} from "@/common/types";
 import type {LinkProps} from "@tanstack/react-router";
 
 export const navItemIds = [

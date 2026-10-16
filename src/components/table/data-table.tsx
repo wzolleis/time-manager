@@ -11,7 +11,7 @@ import {
     tableFeatures,
     useTable,
 } from "@tanstack/react-table";
-import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table.tsx";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
 
 
 // Modulebene: nur die Features, die wir wirklich brauchen

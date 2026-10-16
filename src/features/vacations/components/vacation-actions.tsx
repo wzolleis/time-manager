@@ -9,12 +9,12 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from "@/components/ui/alert-dialog.tsx";
-import {Button, buttonVariants} from "@/components/ui/button.tsx";
-import {VacationDialog} from "@features/vacations/components/vacation-dialog.tsx";
-import {deleteVacation} from "@/api/vacations.ts";
-import {germanDay} from "@shared/vacation-rules.ts";
-import type {Vacation} from "@shared/vacation.ts";
+} from "@/components/ui/alert-dialog";
+import {Button, buttonVariants} from "@/components/ui/button";
+import {VacationDialog} from "@features/vacations/components/vacation-dialog";
+import {deleteVacation} from "@/api/vacations";
+import {germanDay} from "@shared/vacation-rules";
+import type {Vacation} from "@shared/vacation";
 
 export function VacationActions({vacation}: { vacation: Vacation }) {
     const qc = useQueryClient();

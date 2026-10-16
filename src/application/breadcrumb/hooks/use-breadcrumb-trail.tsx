@@ -1,7 +1,7 @@
 import {useRouterState} from "@tanstack/react-router";
 import {useMemo} from "react";
-import {getPath} from "@/application/navigation/nav-utils.ts";
-import type {NavItem} from "@/application/navigation/nav-items.ts";
+import {getPath} from "@/application/navigation/nav-utils";
+import type {NavItem} from "@/application/navigation/nav-items";
 
 function buildPathMap(items: NavItem[]): Map<string, NavItem> {
     return new Map(items.map((item) => [getPath(item), item]));

@@ -1,4 +1,4 @@
-import {NAVIGATION_ITEMS, type NavItem, type NavNode} from "@/application/navigation/nav-items.ts";
+import {NAVIGATION_ITEMS, type NavItem, type NavNode} from "@/application/navigation/nav-items";
 import type {LinkProps} from "@tanstack/react-router";
 
 

@@ -1,5 +1,5 @@
 import {Avatar, Box, Flex, Text} from "@radix-ui/themes";
-import type {User} from "@shared/user.ts";
+import type {User} from "@shared/user";
 
 export interface UserFooterProfileProps {
     user: User;

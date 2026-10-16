@@ -1,6 +1,6 @@
 // src/api/roles.ts
-import type {Role} from "@shared/role.ts";
-import {request} from "@/api/http.ts";
+import type {Role} from "@shared/role";
+import {request} from "@/api/http";
 
 export const fetchRoles = () => request<Role[]>("/api/roles");
 

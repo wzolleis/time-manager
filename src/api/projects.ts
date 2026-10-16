@@ -1,6 +1,6 @@
 // src/api/projects.ts
 import {request} from "./http";
-import type {Project, ProjectCreate, ProjectUpdate} from "@shared/project.ts";
+import type {Project, ProjectCreate, ProjectUpdate} from "@shared/project";
 
 export const fetchProjects = () => request<Project[]>("/api/projects");
 

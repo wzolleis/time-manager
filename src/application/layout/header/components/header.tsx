@@ -1,18 +1,18 @@
 import {Box, Button, Flex, Text} from "@radix-ui/themes";
-import {UserDropdown} from "@features/users/components/user-dropdown.tsx";
+import {UserDropdown} from "@features/users/components/user-dropdown";
 import {Bell} from "lucide-react";
-import {StartEnd} from "@/components/utils/start-end.tsx";
-import {MenuButton} from "@/components/buttons/menu-button.tsx";
-import {Breadcrumb} from "@/application/breadcrumb/components/breadcrumb.tsx";
+import {StartEnd} from "@/components/utils/start-end";
+import {MenuButton} from "@/components/buttons/menu-button";
+import {Breadcrumb} from "@/application/breadcrumb/components/breadcrumb";
 import {useNavigate} from "@tanstack/react-router";
-import {NAVIGATION_ITEMS, type NavItem} from "@/application/navigation/nav-items.ts";
-import {useCurrentUser} from "@/lib/user-context.ts";
-import type {User} from "@shared/user.ts";
+import {NAVIGATION_ITEMS, type NavItem} from "@/application/navigation/nav-items";
+import {useCurrentUser} from "@/lib/user-context";
+import type {User} from "@shared/user";
 import {useState} from "react";
 import {useQueryClient} from "@tanstack/react-query";
-import {logout, ME_QUERY_KEY} from "@/api/auth.ts";
-import {clearUserData} from "@/query-client.ts";
-import {PasswordChangeDialog} from "@/features/auth/components/password-change-dialog.tsx";
+import {logout, ME_QUERY_KEY} from "@/api/auth";
+import {clearUserData} from "@/query-client";
+import {PasswordChangeDialog} from "@/features/auth/components/password-change-dialog";
 
 export const Header = () => {
     const navigate = useNavigate();

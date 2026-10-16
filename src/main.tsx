@@ -10,8 +10,8 @@ import {createRouter, RouterProvider} from "@tanstack/react-router";
 // Wird vom Router-Plugin automatisch aus src/routes/ generiert
 import {routeTree} from './routeTree.gen'
 import {UserProvider} from "./components/user-provider";
-import {persistOptions, queryClient} from "@/query-client.ts";
-import {NotFound} from "@/components/navigation/not-found.tsx";
+import {persistOptions, queryClient} from "@/query-client";
+import {NotFound} from "@/components/navigation/not-found";
 
 
 const router = createRouter({

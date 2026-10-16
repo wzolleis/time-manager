@@ -27,7 +27,23 @@ export default defineConfig([
           caughtErrorsIgnorePattern: "^_",
         },
       ],
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              regex: "\\.tsx?$",
+              message: "Ohne Dateiendung importieren, z. B. \"@/api/holidays\" statt \"@/api/holidays.ts\".",
+            },
+          ],
+        },
+      ],
     },
+  },
+  {
+    // Skripte laufen direkt mit node, und node braucht beim Import die Dateiendung
+    files: ['scripts/**/*.ts'],
+    rules: { 'no-restricted-imports': 'off' },
   },
   {
     // shadcn-Komponenten werden generiert und exportieren auch Varianten wie buttonVariants
@@ -35,5 +51,10 @@ export default defineConfig([
     rules: {
       'react-refresh/only-export-components': 'off',
     },
+  },
+  {
+    // Generierte Dateien behalten die Imports, die der Generator schreibt
+    files: ['src/components/ui/**/*.{ts,tsx}', 'src/routeTree.gen.ts'],
+    rules: { 'no-restricted-imports': 'off' },
   },
 ])

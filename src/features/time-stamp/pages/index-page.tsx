@@ -1,5 +1,5 @@
-import {StampCard} from "@features/time-stamp/components/stamp-card.tsx";
-import {ReportDailyEdit} from "@features/reports/components/report-daily-edit.tsx";
+import {StampCard} from "@features/time-stamp/components/stamp-card";
+import {ReportDailyEdit} from "@features/reports/components/report-daily-edit";
 
 export const IndexPage = () => {
     return (

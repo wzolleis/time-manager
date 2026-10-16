@@ -1,8 +1,8 @@
 import {Link} from "@tanstack/react-router";
-import {toLinkProps} from "@/application/navigation/nav-utils.ts";
+import {toLinkProps} from "@/application/navigation/nav-utils";
 import {ChevronRight} from "lucide-react";
-import {useBreadcrumbTrail} from "@/application/breadcrumb/hooks/use-breadcrumb-trail.tsx";
-import type {NavItem} from "@/application/navigation/nav-items.ts";
+import {useBreadcrumbTrail} from "@/application/breadcrumb/hooks/use-breadcrumb-trail";
+import type {NavItem} from "@/application/navigation/nav-items";
 
 export function Breadcrumb({items}: { items: NavItem[] }) {
     const trail = useBreadcrumbTrail(items);

@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {useMutation} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button.tsx";
+import {Button} from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -9,12 +9,12 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog.tsx";
-import {Input} from "@/components/ui/input.tsx";
-import {Label} from "@/components/ui/label.tsx";
-import {resetPassword} from "@/api/auth.ts";
-import {PASSWORD_MIN_LENGTH} from "@shared/auth.ts";
-import type {User} from "@shared/user.ts";
+} from "@/components/ui/dialog";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {resetPassword} from "@/api/auth";
+import {PASSWORD_MIN_LENGTH} from "@shared/auth";
+import type {User} from "@shared/user";
 
 // Der Admin setzt ein neues Passwort, ohne das alte zu kennen
 export function PasswordResetDialog({user}: { user: User }) {

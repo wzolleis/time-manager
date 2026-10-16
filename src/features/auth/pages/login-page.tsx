@@ -1,12 +1,12 @@
 // src/features/auth/pages/login-page.tsx
 import {useState} from "react";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button.tsx";
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card.tsx";
-import {Input} from "@/components/ui/input.tsx";
-import {Label} from "@/components/ui/label.tsx";
-import {login, ME_QUERY_KEY} from "@/api/auth.ts";
-import type {Login} from "@shared/auth.ts";
+import {Button} from "@/components/ui/button";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {login, ME_QUERY_KEY} from "@/api/auth";
+import type {Login} from "@shared/auth";
 
 // Steht außerhalb des Routers: ohne Anmeldung gibt es keine andere Seite
 export function LoginPage() {

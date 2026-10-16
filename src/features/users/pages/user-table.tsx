@@ -1,6 +1,6 @@
-import {Table, TableBody, TableHead, TableHeader, TableRow,} from "@/components/ui/table.tsx";
-import {UserRow} from "@features/users/pages/user-row.tsx";
-import type {User} from "@shared/user.ts";
+import {Table, TableBody, TableHead, TableHeader, TableRow,} from "@/components/ui/table";
+import {UserRow} from "@features/users/pages/user-row";
+import type {User} from "@shared/user";
 
 type UserTableProps = {
     users: User[];

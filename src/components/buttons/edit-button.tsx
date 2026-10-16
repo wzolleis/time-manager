@@ -1,4 +1,4 @@
-import {Button} from "@/components/ui/button.tsx";
+import {Button} from "@/components/ui/button";
 import type {ButtonProps} from "@base-ui/react";
 
 export interface EditButtonProps extends ButtonProps {

@@ -30,7 +30,7 @@ der View. Alle Funktionen verwenden `request` aus `src/api/http.ts`. Die Typen k
 ```ts
 // src/api/vacations.ts
 import {request} from "./http";
-import type {Vacation, VacationCreate, VacationUpdate} from "@shared/vacation.ts";
+import type {Vacation, VacationCreate, VacationUpdate} from "@shared/vacation";
 
 export const createVacation = (data: VacationCreate) =>
     request<Vacation>("/api/vacations", {method: "POST", body: JSON.stringify(data)});

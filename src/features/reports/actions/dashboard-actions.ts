@@ -1,4 +1,4 @@
-import type {DashboardAction} from "@/components/dashboard-action/types.ts";
+import type {DashboardAction} from "@/components/dashboard-action/types";
 
 export const actions: DashboardAction[] = [] as const
 

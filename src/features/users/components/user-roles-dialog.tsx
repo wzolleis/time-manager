@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button.tsx";
+import {Button} from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -9,9 +9,9 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog.tsx";
-import {fetchRoles, fetchUserRoles, updateUserRoles} from "@/api/roles.ts";
-import type {User} from "@shared/user.ts";
+} from "@/components/ui/dialog";
+import {fetchRoles, fetchUserRoles, updateUserRoles} from "@/api/roles";
+import type {User} from "@shared/user";
 
 // Der Admin legt fest, welche Rollen ein User hat
 export function UserRolesDialog({user}: { user: User }) {

@@ -1,6 +1,6 @@
-import type {DashboardAction} from "@/components/dashboard-action/types.ts";
-import {Card, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card.tsx";
-import {Button, buttonVariants} from "@/components/ui/button.tsx";
+import type {DashboardAction} from "@/components/dashboard-action/types";
+import {Card, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
+import {Button, buttonVariants} from "@/components/ui/button";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -11,7 +11,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger
-} from "@/components/ui/alert-dialog.tsx";
+} from "@/components/ui/alert-dialog";
 import {Link} from "@tanstack/react-router";
 
 export function ActionCard({

@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button.tsx";
+import {Button} from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -8,17 +8,17 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog.tsx";
-import {Input} from "@/components/ui/input.tsx";
-import {Label} from "@/components/ui/label.tsx";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select.tsx";
-import {fetchProjects} from "@/api/projects.ts";
-import {updateTimeEntry} from "@/api/time-entries.ts";
-import {formatTime} from "@/lib/format.ts";
-import {localTimeToUtc} from "@shared/day-range.ts";
-import {localDay} from "@shared/time-rules.ts";
-import type {TimeEntryUpdate} from "@shared/time-entry.ts";
-import {TimeEntryDelete} from "@features/time-stamp/components/time-entry-delete.tsx";
+} from "@/components/ui/dialog";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
+import {fetchProjects} from "@/api/projects";
+import {updateTimeEntry} from "@/api/time-entries";
+import {formatTime} from "@/lib/format";
+import {localTimeToUtc} from "@shared/day-range";
+import {localDay} from "@shared/time-rules";
+import type {TimeEntryUpdate} from "@shared/time-entry";
+import {TimeEntryDelete} from "@features/time-stamp/components/time-entry-delete";
 
 export type EntryRow = {
     id: string;

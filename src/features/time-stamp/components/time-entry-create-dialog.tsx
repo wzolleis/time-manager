@@ -1,6 +1,6 @@
 import {type ComponentProps, useId, useState} from "react";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button.tsx";
+import {Button} from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -9,17 +9,17 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog.tsx";
-import {Input} from "@/components/ui/input.tsx";
-import {Label} from "@/components/ui/label.tsx";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select.tsx";
-import {fetchProjects} from "@/api/projects.ts";
-import {createTimeEntry} from "@/api/time-entries.ts";
-import {formatTime} from "@/lib/format.ts";
-import {useCurrentUser} from "@/lib/user-context.ts";
-import {localTimeToUtc} from "@shared/day-range.ts";
-import {localDay} from "@shared/time-rules.ts";
-import type {TimeEntryCreate} from "@shared/time-entry.ts";
+} from "@/components/ui/dialog";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
+import {fetchProjects} from "@/api/projects";
+import {createTimeEntry} from "@/api/time-entries";
+import {formatTime} from "@/lib/format";
+import {useCurrentUser} from "@/lib/user-context";
+import {localTimeToUtc} from "@shared/day-range";
+import {localDay} from "@shared/time-rules";
+import type {TimeEntryCreate} from "@shared/time-entry";
 
 type EntryType = "kommen" | "gehen";
 

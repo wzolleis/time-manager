@@ -1,7 +1,7 @@
 import {defaultShouldDehydrateQuery, MutationCache, QueryCache, QueryClient} from "@tanstack/react-query";
 import {createAsyncStoragePersister} from "@tanstack/query-async-storage-persister";
-import {ApiError} from "@/api/http.ts";
-import {ME_QUERY_KEY} from "@/api/auth.ts";
+import {ApiError} from "@/api/http";
+import {ME_QUERY_KEY} from "@/api/auth";
 
 export const DAY = 1000 * 60 * 60 * 24;
 export const MINUTE_5 = 5 * 60 * 1000

@@ -2,10 +2,10 @@
 import React from 'react';
 import {Box, Flex, Grid, Theme} from '@radix-ui/themes';
 import '@radix-ui/themes/styles.css';
-import Content from "@/application/layout/compoents/content.tsx";
-import {Header} from "@/application/layout/header/components/header.tsx";
-import {NAVIGATION_ITEMS} from "@/application/navigation/nav-items.ts";
-import {Sidebar} from "@/application/layout/sidebar/components/sidebar.tsx";
+import Content from "@/application/layout/compoents/content";
+import {Header} from "@/application/layout/header/components/header";
+import {NAVIGATION_ITEMS} from "@/application/navigation/nav-items";
+import {Sidebar} from "@/application/layout/sidebar/components/sidebar";
 
 export default function ApplicationLayout(): React.JSX.Element {
     return (

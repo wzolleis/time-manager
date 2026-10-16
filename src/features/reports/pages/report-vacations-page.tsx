@@ -1,4 +1,4 @@
-import {ReportVacations} from "@features/vacations/components/report-vacations.tsx";
+import {ReportVacations} from "@features/vacations/components/report-vacations";
 
 export const ReportVacationsPage = () => {
     return (

@@ -8,12 +8,12 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger
-} from "@/components/ui/alert-dialog.tsx";
-import {Button, buttonVariants} from "@/components/ui/button.tsx";
-import {formatTime} from "@/lib/format.ts";
+} from "@/components/ui/alert-dialog";
+import {Button, buttonVariants} from "@/components/ui/button";
+import {formatTime} from "@/lib/format";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {deleteTimeEntry} from "@/api/time-entries.ts";
-import type {EntryRow} from "@features/time-stamp/components/time-entry-actions.tsx";
+import {deleteTimeEntry} from "@/api/time-entries";
+import type {EntryRow} from "@features/time-stamp/components/time-entry-actions";
 
 export const TimeEntryDelete = ({entry}: { entry: EntryRow }) => {
     const qc = useQueryClient();

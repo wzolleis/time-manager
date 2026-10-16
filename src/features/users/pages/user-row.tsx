@@ -10,8 +10,8 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from "@/components/ui/alert-dialog.tsx";
-import {Button, buttonVariants} from "@/components/ui/button.tsx";
+} from "@/components/ui/alert-dialog";
+import {Button, buttonVariants} from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -19,15 +19,15 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog.tsx";
-import {Input} from "@/components/ui/input.tsx";
-import {Label} from "@/components/ui/label.tsx";
-import {TableCell, TableRow} from "@/components/ui/table.tsx";
-import {updateUser} from "@/api/users.ts";
-import type {User, UserUpdate} from "@shared/user.ts";
-import {EditButton} from "@/components/buttons/edit-button.tsx";
-import {PasswordResetDialog} from "@features/users/components/password-reset-dialog.tsx";
-import {UserRolesDialog} from "@features/users/components/user-roles-dialog.tsx";
+} from "@/components/ui/dialog";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {TableCell, TableRow} from "@/components/ui/table";
+import {updateUser} from "@/api/users";
+import type {User, UserUpdate} from "@shared/user";
+import {EditButton} from "@/components/buttons/edit-button";
+import {PasswordResetDialog} from "@features/users/components/password-reset-dialog";
+import {UserRolesDialog} from "@features/users/components/user-roles-dialog";
 
 type UserRowProps = {
     user: User;

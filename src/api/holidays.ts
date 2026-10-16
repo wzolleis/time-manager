@@ -1,5 +1,5 @@
 import {request} from "./http";
-import type {Holiday, HolidayCreate, HolidayUpdate} from "@shared/holiday.ts";
+import type {Holiday, HolidayCreate, HolidayUpdate} from "@shared/holiday";
 
 /** Ohne userId nur die globalen Feiertage, mit userId zusätzlich die eigenen dieses Users */
 export const fetchHolidays = (userId?: string) =>

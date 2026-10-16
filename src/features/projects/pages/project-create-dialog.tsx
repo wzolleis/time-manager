@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button.tsx";
+import {Button} from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -9,11 +9,11 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog.tsx";
-import {Input} from "@/components/ui/input.tsx";
-import {Label} from "@/components/ui/label.tsx";
-import type {ProjectCreate} from "@shared/project.ts";
-import {createProject} from "@/api/projects.ts";
+} from "@/components/ui/dialog";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import type {ProjectCreate} from "@shared/project";
+import {createProject} from "@/api/projects";
 
 export function ProjectCreateDialog() {
     const qc = useQueryClient();

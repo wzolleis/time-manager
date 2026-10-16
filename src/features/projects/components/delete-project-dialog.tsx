@@ -8,9 +8,9 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger
-} from "@/components/ui/alert-dialog.tsx";
-import {Button, buttonVariants} from "@/components/ui/button.tsx";
-import type {Project} from "@shared/project.ts";
+} from "@/components/ui/alert-dialog";
+import {Button, buttonVariants} from "@/components/ui/button";
+import type {Project} from "@shared/project";
 
 export interface DeleteProjectDialogProps {
     project: Project;

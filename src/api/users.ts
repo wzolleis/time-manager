@@ -1,6 +1,6 @@
 // src/api/users.ts
-import type {User, UserCreate, UserUpdate} from "@shared/user.ts";
-import {request} from "@/api/http.ts";
+import type {User, UserCreate, UserUpdate} from "@shared/user";
+import {request} from "@/api/http";
 
 export const fetchUsers = () => request<User[]>("/api/users");
 

@@ -1,7 +1,7 @@
 // src/api/auth.ts
-import type {Login, PasswordChange, PasswordReset} from "@shared/auth.ts";
-import type {User} from "@shared/user.ts";
-import {ApiError, request} from "@/api/http.ts";
+import type {Login, PasswordChange, PasswordReset} from "@shared/auth";
+import type {User} from "@shared/user";
+import {ApiError, request} from "@/api/http";
 
 export const ME_QUERY_KEY = ["auth", "me"] as const;
 

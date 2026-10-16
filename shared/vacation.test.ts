@@ -1,6 +1,6 @@
 // shared/vacation.test.ts
 import {describe, expect, it} from "vitest";
-import {VacationCreateSchema, VacationUpdateSchema} from "@shared/vacation.ts";
+import {VacationCreateSchema, VacationUpdateSchema} from "@shared/vacation";
 
 const userId = "275f12fb-e116-4857-9f12-fbe116b857fb";
 

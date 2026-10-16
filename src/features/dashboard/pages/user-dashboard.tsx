@@ -1,5 +1,5 @@
-import {ActionCardDashboard} from "@/components/dashboard-action/action-card-dashboard.tsx";
-import type {DashboardAction} from "@/components/dashboard-action/types.ts";
+import {ActionCardDashboard} from "@/components/dashboard-action/action-card-dashboard";
+import type {DashboardAction} from "@/components/dashboard-action/types";
 
 const actions: DashboardAction[] = []
 

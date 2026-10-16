@@ -101,6 +101,13 @@ Welcher Bereich eine Seite zeigt, entscheidet die Route unter `src/routes/admin/
 Die Rechte prüft der Server, nicht der Ordner.
 
 Import-Aliase (`tsconfig.app.json`): `@/` → `src/`, `@shared/` → `shared/`, `@features/` → `src/features/`.
+Importiert wird ohne Dateiendung: `@/api/holidays`, nicht `@/api/holidays.ts`. Das prüft die
+ESLint-Regel `no-restricted-imports`, für `netlify/functions` zusätzlich `tsc`
+(`allowImportingTsExtensions: false`). Ausnahmen:
+
+- Generierte Dateien (`src/components/ui/`, `src/routeTree.gen.ts`) behalten die Imports, die der
+  Generator schreibt. Deshalb bleibt `allowImportingTsExtensions` in `tsconfig.app.json` erlaubt.
+- Die Skripte in `scripts/` laufen direkt mit `node` und brauchen die Endung.
 
 ## References
 

@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button.tsx";
+import {Button} from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -9,12 +9,12 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "@/components/ui/dialog.tsx";
-import {Input} from "@/components/ui/input.tsx";
-import {Label} from "@/components/ui/label.tsx";
-import {createUser} from "@/api/users.ts";
-import type {UserCreate} from "@shared/user.ts";
-import {PASSWORD_MIN_LENGTH} from "@shared/auth.ts";
+} from "@/components/ui/dialog";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {createUser} from "@/api/users";
+import type {UserCreate} from "@shared/user";
+import {PASSWORD_MIN_LENGTH} from "@shared/auth";
 
 export function UserCreateDialog() {
     const qc = useQueryClient();

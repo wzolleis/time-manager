@@ -1,15 +1,15 @@
 import {useState} from "react";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button.tsx";
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card.tsx";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select.tsx";
-import {fetchProjects} from "@/api/projects.ts";
-import {createTimeEntry, fetchTimeEntries} from "@/api/time-entries.ts";
-import {formatDayShort, formatDuration, formatTime} from "@/lib/format.ts";
-import {useCurrentUser} from "@/lib/user-context.ts";
-import {useNow} from "@/lib/use-now.ts";
-import {findMissingGehen, localDay} from "@shared/time-rules.ts";
-import {TimeEntryCreateDialog} from "@features/time-stamp/components/time-entry-create-dialog.tsx";
+import {Button} from "@/components/ui/button";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
+import {fetchProjects} from "@/api/projects";
+import {createTimeEntry, fetchTimeEntries} from "@/api/time-entries";
+import {formatDayShort, formatDuration, formatTime} from "@/lib/format";
+import {useCurrentUser} from "@/lib/user-context";
+import {useNow} from "@/lib/use-now";
+import {findMissingGehen, localDay} from "@shared/time-rules";
+import {TimeEntryCreateDialog} from "@features/time-stamp/components/time-entry-create-dialog";
 
 const NO_PROJECT = "none"; // Radix Select erlaubt keinen leeren String als Wert
 

@@ -3,9 +3,9 @@ import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 import {cleanup, render, screen} from "@testing-library/react";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {createMemoryHistory, createRouter, RouterProvider} from "@tanstack/react-router";
-import {routeTree} from "@/routeTree.gen.ts";
-import {UserProvider} from "@/components/user-provider.tsx";
-import {NotFound} from "@/components/navigation/not-found.tsx";
+import {routeTree} from "@/routeTree.gen";
+import {UserProvider} from "@/components/user-provider";
+import {NotFound} from "@/components/navigation/not-found";
 
 const USER = {
     id: "275f12fb-e116-4857-9f12-fbe116b857fb",

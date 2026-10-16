@@ -1,5 +1,5 @@
-import {actions} from "@features/reports/actions/dashboard-actions.ts";
-import {ActionCardDashboard} from "@/components/dashboard-action/action-card-dashboard.tsx";
+import {actions} from "@features/reports/actions/dashboard-actions";
+import {ActionCardDashboard} from "@/components/dashboard-action/action-card-dashboard";
 
 
 export function IndexPage() {

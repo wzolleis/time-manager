@@ -1,4 +1,4 @@
-import {ActionCardDashboard} from "@/components/dashboard-action/action-card-dashboard.tsx";
+import {ActionCardDashboard} from "@/components/dashboard-action/action-card-dashboard";
 
 export const Dashboard = () => {
     const handleConfirm = (id: string) => {

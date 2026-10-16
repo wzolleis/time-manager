@@ -1,7 +1,7 @@
 // src/features/auth/components/password-change-dialog.tsx
 import {useState} from "react";
 import {useMutation} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button.tsx";
+import {Button} from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -9,11 +9,11 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog.tsx";
-import {Input} from "@/components/ui/input.tsx";
-import {Label} from "@/components/ui/label.tsx";
-import {changePassword} from "@/api/auth.ts";
-import {PASSWORD_MIN_LENGTH, type PasswordChange} from "@shared/auth.ts";
+} from "@/components/ui/dialog";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {changePassword} from "@/api/auth";
+import {PASSWORD_MIN_LENGTH, type PasswordChange} from "@shared/auth";
 
 type Props = {
     open: boolean;

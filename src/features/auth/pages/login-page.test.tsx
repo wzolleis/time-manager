@@ -2,8 +2,8 @@
 import {afterEach, describe, expect, it, vi} from "vitest";
 import {cleanup, fireEvent, render, screen} from "@testing-library/react";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
-import {UserProvider} from "@/components/user-provider.tsx";
-import {useCurrentUser} from "@/lib/user-context.ts";
+import {UserProvider} from "@/components/user-provider";
+import {useCurrentUser} from "@/lib/user-context";
 
 const USER = {
     id: "275f12fb-e116-4857-9f12-fbe116b857fb",

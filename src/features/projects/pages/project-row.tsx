@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button.tsx";
+import {Button} from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -8,13 +8,13 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-} from "@/components/ui/dialog.tsx";
-import {Input} from "@/components/ui/input.tsx";
-import {Label} from "@/components/ui/label.tsx";
-import {TableCell, TableRow} from "@/components/ui/table.tsx";
-import type {Project, ProjectUpdate} from "@shared/project.ts";
-import {updateProject} from "@/api/projects.ts";
-import {DeleteProjectDialog} from "@features/projects/components/delete-project-dialog.tsx";
+} from "@/components/ui/dialog";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {TableCell, TableRow} from "@/components/ui/table";
+import type {Project, ProjectUpdate} from "@shared/project";
+import {updateProject} from "@/api/projects";
+import {DeleteProjectDialog} from "@features/projects/components/delete-project-dialog";
 
 type ProjectRowProps = {
     project: Project;
