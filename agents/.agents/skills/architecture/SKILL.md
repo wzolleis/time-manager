@@ -59,13 +59,11 @@ src/
 └ query-client.ts       QueryClient, Persistenz im localStorage, globale Fehlerbehandlung (401)
 
 src/features/
-├ admin/<aggregat>/     Administrationsbereich, nur Rolle "Administrator"
-├ user/<aggregat>/      User-Bereich, Rolle "User"
-├ holidays/             von Admin- und User-Bereich gemeinsam verwendet
+├ <aggregat>/           Ein Ordner pro Aggregat oder Thema, z. B. vacations, holidays, users, reports
 ├ auth/                 Anmeldung und Passwort
-└ dashboard/            Startseite
+└ dashboard/            Startseite und die Dashboards von Admin- und User-Bereich
 
-src/features/user/vacations/          Aufbau eines Aggregats, jeder Ordner nur bei Bedarf
+src/features/vacations/               Aufbau eines Aggregats, jeder Ordner nur bei Bedarf
 ├ use-cases/            Ein Hook pro Use Case (siehe use-case.md)
 ├ components/           Komponenten für die Ansichten des Aggregats, Tests daneben (*.test.tsx)
 ├ pages/                Seiten, die eine Route aus src/routes einbindet
@@ -79,8 +77,30 @@ db/
 scripts/                Skripte für die Kommandozeile, z. B. grant-admin.ts, api-walkthrough.sh
 ```
 
-Import-Aliase (`tsconfig.app.json`): `@/` → `src/`, `@shared/` → `shared/`, `@features/` → `src/features/`,
-`@user/` → `src/features/user/`.
+### Admin- und User-Bereich in einem Feature
+
+Unterhalb von `src/features` wird nicht nach `admin/` und `user/` getrennt. Ein Feature liegt in einem
+einzigen Ordner, auch wenn es Seiten für beide Bereiche hat. Komponenten, Use Cases und Actions
+verwenden beide Seiten gemeinsam.
+
+Hat ein Feature Seiten für beide Bereiche, bekommt die Seite des Administrationsbereichs das Präfix
+`admin`: die Datei heißt `admin-…`, die Komponente `Admin…`. Die Datei der Seite des User-Bereichs
+bleibt ohne Präfix:
+
+```text
+src/features/holidays/
+├ components/
+│ └ holiday-list.tsx
+└ pages/
+  ├ holidays-page.tsx         HolidaysPage, eingebunden von src/routes/user/holidays.tsx
+  └ admin-holidays-page.tsx   AdminHolidaysPage, eingebunden von src/routes/admin/holidays.tsx
+```
+
+Gibt es ein Feature nur in einem Bereich, z. B. `users` nur für Administratoren, entfällt das Präfix.
+Welcher Bereich eine Seite zeigt, entscheidet die Route unter `src/routes/admin/` oder `src/routes/user/`.
+Die Rechte prüft der Server, nicht der Ordner.
+
+Import-Aliase (`tsconfig.app.json`): `@/` → `src/`, `@shared/` → `shared/`, `@features/` → `src/features/`.
 
 ## References
 

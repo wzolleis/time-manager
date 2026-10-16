@@ -48,7 +48,7 @@ Meldung (`error` oder `errors` aus dem Body des Servers). Die API-Funktion fäng
 ## 2. useMutation im Use Case
 
 ```ts
-// src/features/user/vacations/use-cases/use-delete-vacation.ts
+// src/features/vacations/use-cases/use-delete-vacation.ts
 export function useDeleteVacation() {
     const qc = useQueryClient();
     return useMutation({

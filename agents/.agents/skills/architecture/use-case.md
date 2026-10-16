@@ -32,7 +32,7 @@ wenn er vorhandene Daten für eine Prüfung braucht, etwa für die Überschneidu
 Jeder Use Case ist ein eigener Hook in einer eigenen Datei im Ordner `use-cases` des Features:
 
 ```text
-src/features/user/vacations/
+src/features/vacations/
 ├ use-cases/
 │ ├ use-add-vacation.ts
 │ └ use-delete-vacation.ts
@@ -68,7 +68,7 @@ So landen die Antworten im Code:
 Code wandelt die DTOs noch in Buchungen um.)
 
 ```ts
-// src/features/user/reports/use-cases/use-show-daily-report.ts
+// src/features/reports/use-cases/use-show-daily-report.ts
 export function useShowDailyReport(userId: string, day: string) {
     const entries = useTimeEntries(userId); // View
     const vacations = useVacations(userId); // View
@@ -92,7 +92,7 @@ export function useShowDailyReport(userId: string, day: string) {
 „Der User trägt einen Urlaub ein.“ Das braucht einen Service für die Regel und ein Repository.
 
 ```ts
-// src/features/user/vacations/use-cases/use-add-vacation.ts
+// src/features/vacations/use-cases/use-add-vacation.ts
 export function useAddVacation() {
     const qc = useQueryClient();
 
