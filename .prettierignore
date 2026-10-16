@@ -1,0 +1,10 @@
+# Generierte Dateien
+src/components/ui/
+src/routeTree.gen.ts
+db/migrations/
+
+package-lock.json
+deno.lock
+
+# Dokumentation und Skills bleiben, wie sie geschrieben sind
+*.md

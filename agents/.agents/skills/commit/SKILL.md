@@ -12,13 +12,18 @@ description: Committet alle gestagten, nicht gestagten und neuen Änderungen als
    npm run test:run
    npm run lint
    npm run tsc
+   npm run format:check
    ```
-   Schlägt einer der Befehle fehl, wird nicht committet. Die Fehler dem User melden.
+   Schlägt einer der Befehle fehl, wird nicht committet. Die Fehler dem User melden. Meldet nur
+   `format:check` Abweichungen, mit `npm run format` formatieren und die Prüfungen wiederholen.
 3. Die Änderungen nach ihrem Zweck gruppieren. Bilden sie eine einzige Änderung, gibt es einen Commit;
    voneinander unabhängige Arbeiten kommen in getrennte Commits.
 4. Jede offene Änderung committen, auch Arbeit, die nichts mit dem aktuellen Gespräch zu tun hat.
    Änderungen niemals verwerfen oder umschreiben, damit sie in einen Commit passen.
-5. Jede Gruppe mit konkreten Pfaden stagen und dann committen.
+5. Jede Gruppe mit konkreten Pfaden stagen und dann committen. Der Pre-commit-Hook (`lint-staged`)
+   formatiert die gestagten Dateien mit Prettier und korrigiert sie mit `eslint --fix`. Schlägt er
+   fehl, ist nichts committet: die Meldung lesen, den Fehler beheben und erneut committen. Den Hook
+   nicht mit `--no-verify` umgehen.
 6. Danach `git status --short` ausführen und die erstellten Commits melden.
 
 ## Was nie ins Git kommt
