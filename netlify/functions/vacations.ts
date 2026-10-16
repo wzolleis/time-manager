@@ -10,12 +10,10 @@ import {checkRange, checkYearLimit, findOverlap, overlapMessage} from "../../sha
 import {VacationCreateSchema, VacationUpdateSchema} from "../../shared/vacation";
 import {IdSchema, isApiPath, notFound} from "./lib/id";
 import {withSession} from "./lib/session";
+import {RuleError, ruleViolation} from "./lib/rule-error";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Executor = Pick<typeof db, "select">;
-
-class RuleError extends Error {
-}
 
 class NotFoundError extends Error {
 }
@@ -143,7 +141,7 @@ const handler = async (req: Request, context: Context) => {
         console.log('---> Fehlerbehandlung in vacations', err);
 
         if (err instanceof z.ZodError) return Response.json({errors: err.issues}, {status: 400});
-        if (err instanceof RuleError) return Response.json({error: err.message}, {status: 422});
+        if (err instanceof RuleError) return ruleViolation(err);
         if (err instanceof NotFoundError) return notFound();
         if (err instanceof UnknownUserError || hasDbCode(err, "ER_NO_REFERENCED_ROW_2")) {
             return Response.json({error: "User existiert nicht"}, {status: 400});

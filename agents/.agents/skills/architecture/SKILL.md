@@ -19,7 +19,7 @@ Wenn die Use Cases sauber definiert sind, ist alles andere nur noch mechanische 
 Each question about a use case has one component that answers it:
 
 ```text
-Who wants to do what?                    → use case, command, service       ArchiveAbsenceService
+Who wants to do what?                    → use case (Hook)                  useArchiveAbsence
 In which states may it happen?           → narrowing find, input state      findActiveAbsenceById, ActiveAbsence
 Who may do it?                           → actor flag, who-acts policy      mayEditOthersAbsences
 What else must hold? (time, values)      → policy, value constructor        cannotArchiveWhileOngoingPolicy, createPeriod
@@ -31,29 +31,63 @@ Who sees the result?                     → view, visibility rule            Ab
 
 ### Rechte und Rollen
 
-Es gibt den Administrationsbereich, die Aktionen dort dürfen nur von Usern in der Rolle "admin" durchgeführt werden.
-Es gibt den User-Bereich, die Aktionen dort dürfen von den Usern in der Rolle "user" durchgeführt werden.
+Es gibt den Administrationsbereich, die Aktionen dort dürfen nur von Usern in der Rolle "Administrator" durchgeführt
+werden.
+Es gibt den User-Bereich, die Aktionen dort dürfen von den Usern in der Rolle "User" durchgeführt werden.
+Geprüft wird auf dem Server, Details im Skill `authorization`.
 
 ## Layout
 
 ```text
-src/lib             Hilfsfunktionen, die die Verwendung der Frameworks und Bibliotheken erleichtert
-shared/             geteilte Logik zwischen Client und Server Modulen (netlify functions). Hier sind die Business-Regeln definiert, da diese oft am Client und Server benötigt werden.
-src/features/admin       Die Verzeichnisse unterhalb der Features definieren die Domainen-Objekte, die im Admin-Bereich verwendet werden.
-src/features/user   Die Verzeichnisse defineren die Domainen-Objekte (Aggregate), die für einen User relevante sind
-src/features/user/vacations/
-├ components        Komponenten die für Ansichten der vacations benötigt werden
-├ pages             Seiten, die für das Routing benötigt werden. 
-├ actions           Definiert Actions, die auf der index-Seite (Dashboard) sichtbar sind.
-├api                Definiert den Zugriff auf die Daten, sowohl lesend als auch schreibend. 
-                    Jede Datei ist für ein Aggregate in der Domain zuständig. 
-                    vacations kümmert sich um das Lesen und Schreiben der Vacations
-├application        Definiert das Layout und das Navigationsmenü sowie die Breadcrumb.
-├routes             Definiert die Routen in der Anwendung und verwendet das file-basierte Routing von tanstack-router.
-├tests              Hier sind die Tests abgelegt, die nicht zu einer einzelnen Komponente passend in deren Verzeichnis definiert werden können.
-                    In routes.test.tsx wird getestet, dass es zu jeder Route eine Ansicht gibt und diese auch angezeigt werden kann.
+shared/                 Geteilt zwischen Client und Netlify Functions
+├ <thema>.ts            Zod-Schemas und Typen eines Aggregats, z. B. vacation.ts
+├ <thema>-rules.ts      Services: Regeln und Berechnungen (siehe service.md)
+└ <thema>-report.ts     Services: Auswertungen für Berichte
+
+src/
+├ api/                  Ein File pro Aggregat, ohne React: fetch… für die View, create/update/delete… für das
+│                       Repository (siehe views.md, repository.md). http.ts enthält request und ApiError.
+├ views/                Ein File pro Aggregat mit den lesenden Hooks, z. B. useVacations (siehe views.md)
+├ features/             Fachliche Bereiche, siehe unten
+├ routes/               Routen für das file-basierte Routing von tanstack-router. Eine Route bindet
+│                       nur die Seite aus features/…/pages ein. routeTree.gen.ts wird erzeugt, nicht bearbeiten.
+├ application/          Layout, Navigationsmenü und Breadcrumb
+├ components/           Fachlich neutrale Komponenten; ui/ enthält die shadcn-Komponenten
+├ lib/                  Hilfsfunktionen für Frameworks und Bibliotheken (format, use-now, user-context)
+├ tests/                Tests, die zu keiner einzelnen Komponente gehören. routes.test.tsx prüft, dass
+│                       jede Route eine Ansicht hat und diese angezeigt werden kann.
+└ query-client.ts       QueryClient, Persistenz im localStorage, globale Fehlerbehandlung (401)
+
+src/features/
+├ admin/<aggregat>/     Administrationsbereich, nur Rolle "Administrator"
+├ user/<aggregat>/      User-Bereich, Rolle "User"
+├ holidays/             von Admin- und User-Bereich gemeinsam verwendet
+├ auth/                 Anmeldung und Passwort
+└ dashboard/            Startseite
+
+src/features/user/vacations/          Aufbau eines Aggregats, jeder Ordner nur bei Bedarf
+├ use-cases/            Ein Hook pro Use Case (siehe use-case.md)
+├ components/           Komponenten für die Ansichten des Aggregats, Tests daneben (*.test.tsx)
+├ pages/                Seiten, die eine Route aus src/routes einbindet
+└ actions/              Actions, die auf dem Dashboard erscheinen
+
+netlify/functions/      Ein File pro Aggregat mit den Endpoints unter /api/<aggregat>
+└ lib/                  Session, Rollen, DB-Verbindung, RuleError
+db/
+├ schema.ts             Drizzle-Schema aller Tabellen
+└ migrations/           Erzeugt mit drizzle-kit generate, angewendet mit npm run db:migrate
+scripts/                Skripte für die Kommandozeile, z. B. grant-admin.ts, api-walkthrough.sh
 ```
 
+Import-Aliase (`tsconfig.app.json`): `@/` → `src/`, `@shared/` → `shared/`, `@features/` → `src/features/`,
+`@user/` → `src/features/user/`.
+
 ## References
+
+- [use-case.md](use-case.md): Was ein Use Case ist, wo er liegt und wie er die anderen Bausteine verwendet. Zuerst
+  lesen.
+- [views.md](views.md): Daten lesen, ein Hook pro Aggregat in `src/views/`
+- [repository.md](repository.md): Daten schreiben mit `useMutation`
+- [service.md](service.md): Werte berechnen und Regeln prüfen, als reine Funktionen in `shared/`
 
 
