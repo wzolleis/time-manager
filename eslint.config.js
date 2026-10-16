@@ -18,8 +18,6 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
-  },
-  {
     rules: {
       "@typescript-eslint/no-unused-vars": [
         "warn",
@@ -29,6 +27,13 @@ export default defineConfig([
           caughtErrorsIgnorePattern: "^_",
         },
       ],
+    },
+  },
+  {
+    // shadcn-Komponenten werden generiert und exportieren auch Varianten wie buttonVariants
+    files: ['src/components/ui/**/*.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
     },
   },
 ])
