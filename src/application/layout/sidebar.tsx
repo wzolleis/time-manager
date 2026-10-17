@@ -1,5 +1,5 @@
 import {buildNavTree} from "@/application/navigation/nav-utils";
-import {SidebarItem} from "@/application/layout/sidebar/components/sidebar-item";
+import {SidebarItem} from "@/application/layout/sidebar-item";
 import type {NavItem} from "@/application/navigation/nav-items";
 
 export function Sidebar({items}: {items: NavItem[]}) {

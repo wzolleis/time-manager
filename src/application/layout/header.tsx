@@ -12,7 +12,7 @@ import {useState} from "react";
 import {useQueryClient} from "@tanstack/react-query";
 import {logout, ME_QUERY_KEY} from "@/api/auth";
 import {clearUserData} from "@/query-client";
-import {PasswordChangeDialog} from "@/features/auth/components/password-change-dialog";
+import {PasswordChangeDialog} from "@features/auth/components/password-change-dialog";
 
 export const Header = () => {
     const navigate = useNavigate();
