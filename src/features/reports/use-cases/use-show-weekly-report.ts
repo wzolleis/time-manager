@@ -1,0 +1,41 @@
+import {useMemo} from "react";
+import {useNow} from "@/lib/use-now";
+import {useCurrentUser} from "@/lib/user-context";
+import {useHolidays} from "@/views/holidays";
+import {useTimeEntries} from "@/views/time-entries";
+import {useVacations} from "@/views/vacations";
+import {weekTotals} from "@shared/time-report";
+import {localDay} from "@shared/time-rules";
+import {isoWeek, weekDays} from "@shared/week";
+
+/** Der User sieht seinen Wochenbericht für die Woche, in der anchor "JJJJ-MM-TT" liegt */
+export function useShowWeeklyReport(anchor: string) {
+    const {currentUser} = useCurrentUser();
+    const now = useNow();
+    const userId = currentUser?.id;
+
+    const entries = useTimeEntries(userId);
+    const vacations = useVacations(userId);
+    const holidays = useHolidays(userId);
+
+    const today = localDay(new Date(now));
+    const days = useMemo(() => weekDays(anchor), [anchor]);
+
+    const totals = useMemo(() => {
+        const all = (entries.data ?? []).map((e) => ({id: e.id, type: e.type, bookedAt: new Date(e.bookedAt)}));
+        return weekTotals(all, days, vacations.data ?? [], holidays.data ?? [], today, new Date(now));
+    }, [entries.data, vacations.data, holidays.data, days, today, now]);
+
+    return {
+        currentUser,
+        today,
+        ...isoWeek(anchor),
+        totals,
+        thisWeek: weekDays(today)[0] === days[0],
+        futureWeek: days[0] > today,
+        partial: totals.targetToDateMs !== totals.targetWeekMs,
+        isPending: entries.isPending || vacations.isPending || holidays.isPending,
+        error: entries.error ?? vacations.error ?? holidays.error,
+        retry: () => Promise.all([entries.refetch(), vacations.refetch(), holidays.refetch()]),
+    };
+}

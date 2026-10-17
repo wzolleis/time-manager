@@ -1,8 +1,9 @@
 // shared/time-report.test.ts
 import {describe, expect, it} from "vitest";
 import {localDayRange} from "./day-range";
-import {dayTotals} from "./time-report";
+import {dayTotals, weekTotals} from "./time-report";
 import type {Booking} from "./time-rules";
+import {weekDays} from "./week";
 
 const b = (id: string, type: Booking["type"], iso: string): Booking => ({
     id,
@@ -73,5 +74,35 @@ describe("dayTotals", () => {
         const t = dayTotals(workday.slice(0, 1), day, new Date("2026-06-10T08:30:00Z"));
         expect(t.missingGehen).toBe(false);
         expect(t.running).toBe(true);
+    });
+});
+
+describe("weekTotals", () => {
+    const week = weekDays("2026-06-10"); // Mo 8.6. bis So 14.6.
+    const now = new Date("2026-06-10T20:00:00Z"); // Mittwoch abends
+
+    it("rechnet die Differenz mitten in der Woche gegen das Soll bis heute", () => {
+        const t = weekTotals(workday, week, [], [], "2026-06-10", now);
+        expect(t.targetWeekMs).toBe(40 * HOUR);
+        expect(t.targetToDateMs).toBe(24 * HOUR); // Mo bis Mi
+        expect(t.workMs).toBe(8.5 * HOUR);
+        expect(t.diffMs).toBe(8.5 * HOUR - 24 * HOUR);
+    });
+
+    it("zeigt keine Differenz für künftige Tage und freie Tage ohne Arbeit", () => {
+        const t = weekTotals(workday, week, [], [], "2026-06-10", now);
+        const diffs = Object.fromEntries(t.days.map((d) => [d.day, d.diffMs]));
+        expect(diffs["2026-06-09"]).toBe(-8 * HOUR); // vergangener Arbeitstag ohne Buchung
+        expect(diffs["2026-06-10"]).toBe(0.5 * HOUR);
+        expect(diffs["2026-06-11"]).toBeNull(); // Zukunft
+        expect(weekTotals([], week, [], [], "2026-06-14", now).days[6].diffMs).toBeNull(); // Sonntag ohne Arbeit
+    });
+
+    it("senkt das Wochensoll an Urlaubs- und Feiertagen", () => {
+        const vacations = [{startDate: "2026-06-08", endDate: "2026-06-08"}];
+        const holidays = [{date: "2026-06-11", name: "Fronleichnam"}];
+        const t = weekTotals([], week, vacations, holidays, "2026-06-10", now);
+        expect(t.targetWeekMs).toBe(24 * HOUR);
+        expect(t.days[3]).toMatchObject({kind: "holiday", holidayName: "Fronleichnam", targetMs: 0});
     });
 });

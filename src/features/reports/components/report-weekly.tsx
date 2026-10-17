@@ -1,36 +1,16 @@
-import {useMemo, useState} from "react";
-import {useQuery} from "@tanstack/react-query";
+import {useState} from "react";
 import {Button} from "@/components/ui/button";
-import {fetchTimeEntries} from "@/api/time-entries";
-import {fetchVacations} from "@/api/vacations";
-import {useHolidays} from "@/views/holidays";
-import {diffClass, formatDayMonth, formatDayShort, formatDifference, formatDuration} from "@/lib/format";
-import {useNow} from "@/lib/use-now";
-import {useCurrentUser} from "@/lib/user-context";
-import {addDays, localDayRange} from "@shared/day-range";
-import {dayKind, type DayKind, targetMs} from "@shared/target-hours";
-import {holidayOn} from "@shared/holiday-rules";
-import {dayTotals} from "@shared/time-report";
-import {localDay} from "@shared/time-rules";
-import {isoWeek, weekDays} from "@shared/week";
+import {Summary} from "@/components/summary";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
-import {Summary} from "@features/reports/components/report-daily";
+import {diffClass, formatDayMonth, formatDayShort, formatDifference, formatDuration} from "@/lib/format";
+import {addDays, localDayRange} from "@shared/day-range";
+import type {WeekDayTotals} from "@shared/time-report";
+import {localDay} from "@shared/time-rules";
+import {ReportError} from "@features/reports/components/report-error";
+import {useShowWeeklyReport} from "@features/reports/use-cases/use-show-weekly-report";
 import {dayKindLabel} from "@features/reports/utils/day-kind-label";
 
-type DayRow = {
-    day: string; // "JJJJ-MM-TT", sortiert richtig
-    label: string;
-    isToday: boolean;
-    count: number;
-    running: boolean;
-    targetMs: number;
-    kind: DayKind;
-    holidayName?: string;
-    workMs: number;
-    breakMs: number;
-    diffMs: number | null; // null: Zukunft oder freier Tag ohne Arbeit
-    missingGehen: boolean;
-};
+type DayRow = WeekDayTotals & {isToday: boolean};
 
 const dash = "–";
 
@@ -41,7 +21,7 @@ const columns: DataTableColumnDef<DayRow>[] = [
         header: "Tag",
         cell: ({row}) => (
             <span className={row.original.isToday ? "font-semibold" : undefined}>
-                {row.original.label}
+                {formatDayShort(localDayRange(row.original.day).start)}
                 {row.original.isToday && " · heute"}
                 {(row.original.kind === "vacation" || row.original.kind === "holiday") && (
                     <span className="ml-2 text-muted-foreground">
@@ -88,88 +68,24 @@ const columns: DataTableColumnDef<DayRow>[] = [
 ];
 
 export function ReportWeekly() {
-    const {currentUser} = useCurrentUser();
-    const now = useNow();
-    const userId = currentUser?.id;
-
-    const today = localDay(new Date(now));
     const [anchor, setAnchor] = useState(() => localDay(new Date())); // irgendein Tag der Woche
-
-    // Gleicher Query-Key wie Stempel-Karte und Tagesbericht: keine zusätzliche Anfrage
-    const entries = useQuery({
-        queryKey: ["time-entries", userId],
-        queryFn: () => fetchTimeEntries(userId!),
-        enabled: !!userId,
-    });
-    const holidays = useHolidays(userId);
-    // Gleicher Query-Key wie die Urlaubsseite
-    const vacations = useQuery({
-        queryKey: ["vacations", userId],
-        queryFn: () => fetchVacations(userId!),
-        enabled: !!userId,
-    });
-
-    const days = useMemo(() => weekDays(anchor), [anchor]);
-    const {year, week} = isoWeek(anchor);
-
-    const report = useMemo(() => {
-        // Alle Buchungen gehen in die Summen ein, damit Nachtschichten am Tageswechsel stimmen
-        const all = (entries.data ?? []).map((e) => ({
-            id: e.id,
-            type: e.type,
-            bookedAt: new Date(e.bookedAt),
-        }));
-        const nowDate = new Date(now);
-        const vacationList = vacations.data ?? [];
-        const holidayList = holidays.data ?? [];
-
-        const rows: DayRow[] = days.map((day) => {
-            const range = localDayRange(day);
-            const count = all.filter((e) => e.bookedAt >= range.start && e.bookedAt < range.end).length;
-            const totals = dayTotals(all, range, nowDate);
-            const target = targetMs(day, vacationList, holidayList);
-            const elapsed = day <= today; // Tage nach heute zählen nicht zur Differenz
-            const noDifference = !elapsed || (target === 0 && totals.workMs === 0);
-
-            return {
-                day,
-                label: formatDayShort(range.start),
-                isToday: day === today,
-                count,
-                running: totals.running,
-                targetMs: target,
-                kind: dayKind(day, vacationList, holidayList),
-                holidayName: holidayOn(day, holidayList)?.name,
-                workMs: totals.workMs,
-                breakMs: totals.breakMs,
-                diffMs: noDifference ? null : totals.workMs - target,
-                missingGehen: totals.missingGehen,
-            };
-        });
-
-        const workMs = rows.reduce((sum, r) => sum + r.workMs, 0);
-        const breakMs = rows.reduce((sum, r) => sum + r.breakMs, 0);
-        const targetWeekMs = rows.reduce((sum, r) => sum + r.targetMs, 0); // ohne Urlaubs- und Feiertage
-        // Soll nur für die Tage bis heute, damit die Differenz mitten in der Woche aussagekräftig ist
-        const targetToDateMs = rows.filter((r) => r.day <= today).reduce((sum, r) => sum + r.targetMs, 0);
-
-        return {rows, workMs, breakMs, targetWeekMs, targetToDateMs, diffMs: workMs - targetToDateMs};
-    }, [entries.data, vacations.data, holidays.data, days, today, now]);
+    const report = useShowWeeklyReport(anchor);
+    const {currentUser, today, totals, futureWeek, partial} = report;
 
     if (!currentUser) {
         return <p className="text-sm text-muted-foreground">Bitte zuerst einen User anlegen und auswählen.</p>;
     }
 
-    const thisWeek = weekDays(today)[0] === days[0];
-    const futureWeek = days[0] > today;
-    const partial = report.targetToDateMs !== report.targetWeekMs;
+    const rows: DayRow[] = totals.days.map((d) => ({...d, isToday: d.day === today}));
+    const first = totals.days[0].day;
+    const last = totals.days[totals.days.length - 1].day;
     // Jeder Urlaubs- und Feiertag an einem Arbeitstag senkt das Wochensoll um ein Tagessoll
-    const vacationDays = report.rows.filter((r) => r.kind === "vacation").length;
-    const holidayDays = report.rows.filter((r) => r.kind === "holiday").length;
+    const vacationDays = rows.filter((r) => r.kind === "vacation").length;
+    const holidayDays = rows.filter((r) => r.kind === "holiday").length;
     const targetHint = [
         vacationDays > 0 && (vacationDays === 1 ? "1 Urlaubstag" : `${vacationDays} Urlaubstage`),
         holidayDays > 0 && (holidayDays === 1 ? "1 Feiertag" : `${holidayDays} Feiertage`),
-        partial && !futureWeek && `bis heute: ${formatDuration(report.targetToDateMs)}`,
+        partial && !futureWeek && `bis heute: ${formatDuration(totals.targetToDateMs)}`,
     ]
         .filter(Boolean)
         .join(" · ");
@@ -179,8 +95,8 @@ export function ReportWeekly() {
             <div>
                 <h1 className="text-2xl font-semibold">Wochenbericht</h1>
                 <p className="text-sm text-muted-foreground">
-                    {currentUser.name} · KW {week}/{year} · {formatDayMonth(localDayRange(days[0]).start)} –{" "}
-                    {formatDayMonth(localDayRange(days[6]).start)}
+                    {currentUser.name} · KW {report.week}/{report.year} · {formatDayMonth(localDayRange(first).start)} –{" "}
+                    {formatDayMonth(localDayRange(last).start)}
                 </p>
             </div>
 
@@ -201,7 +117,7 @@ export function ReportWeekly() {
                 >
                     →
                 </Button>
-                <Button variant="ghost" size="sm" disabled={thisWeek} onClick={() => setAnchor(today)}>
+                <Button variant="ghost" size="sm" disabled={report.thisWeek} onClick={() => setAnchor(today)}>
                     Diese Woche
                 </Button>
             </div>
@@ -209,36 +125,22 @@ export function ReportWeekly() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <Summary
                     title="Arbeitszeit"
-                    value={formatDuration(report.workMs)}
-                    hint={report.rows.some((r) => r.running) ? "läuft noch" : undefined}
+                    value={formatDuration(totals.workMs)}
+                    hint={rows.some((r) => r.running) ? "läuft noch" : undefined}
                 />
-                <Summary title="Pausen" value={formatDuration(report.breakMs)} />
-                <Summary title="Soll" value={formatDuration(report.targetWeekMs)} hint={targetHint || undefined} />
+                <Summary title="Pausen" value={formatDuration(totals.breakMs)} />
+                <Summary title="Soll" value={formatDuration(totals.targetWeekMs)} hint={targetHint || undefined} />
                 <Summary
                     title="Differenz"
-                    value={futureWeek ? "–" : formatDifference(report.diffMs)}
-                    valueClassName={futureWeek ? undefined : diffClass(report.diffMs)}
+                    value={futureWeek ? dash : formatDifference(totals.diffMs)}
+                    valueClassName={futureWeek ? undefined : diffClass(totals.diffMs)}
                     hint={partial && !futureWeek ? "gegen das Soll bis heute" : undefined}
                 />
             </div>
 
-            {entries.isPending && <p className="text-sm text-muted-foreground">Lade…</p>}
-            {entries.isError && (
-                <p role="alert" className="text-sm text-destructive">
-                    {entries.error.message}
-                </p>
-            )}
-            {vacations.isError && (
-                <p role="alert" className="text-sm text-destructive">
-                    Urlaube konnten nicht geladen werden: {vacations.error.message}
-                </p>
-            )}
-            {holidays.isError && (
-                <p role="alert" className="text-sm text-destructive">
-                    Feiertage konnten nicht geladen werden: {holidays.error.message}
-                </p>
-            )}
-            {entries.isSuccess && <DataTable columns={columns} data={report.rows} />}
+            {report.isPending && <p className="text-sm text-muted-foreground">Lade…</p>}
+            {report.error && <ReportError error={report.error} onRetry={report.retry} />}
+            {!report.isPending && !report.error && <DataTable columns={columns} data={rows} />}
         </div>
     );
 }

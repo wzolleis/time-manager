@@ -1,25 +1,17 @@
-import {useMemo, useState} from "react";
-import {useQuery} from "@tanstack/react-query";
+import {useState} from "react";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
-import {fetchProjects} from "@/api/projects";
-import {fetchTimeEntries} from "@/api/time-entries";
-import {fetchVacations} from "@/api/vacations";
-import {useHolidays} from "@/views/holidays";
-import {diffClass, formatDate, formatDifference, formatDuration, formatTime} from "@/lib/format";
-import {useNow} from "@/lib/use-now";
-import {useCurrentUser} from "@/lib/user-context";
-import {addDays, localDayRange} from "@shared/day-range";
-import {dayTotals} from "@shared/time-report";
-import {localDay} from "@shared/time-rules";
+import {Summary} from "@/components/summary";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
+import {diffClass, formatDate, formatDifference, formatDuration, formatTime} from "@/lib/format";
+import {addDays} from "@shared/day-range";
+import {localDay} from "@shared/time-rules";
 import {EntryActions, type EntryRow} from "@features/time-stamp/components/time-entry-actions";
-import {Summary} from "@features/reports/components/report-daily";
+import {TimeEntryCreateDialog} from "@features/time-stamp/components/time-entry-create-dialog";
+import {ReportError} from "@features/reports/components/report-error";
+import {useShowDailyReport} from "@features/reports/use-cases/use-show-daily-report";
 import {dayKindLabel} from "@features/reports/utils/day-kind-label";
-import {dayKind, targetMs} from "@shared/target-hours";
-import {holidayOn} from "@shared/holiday-rules";
-import {nextType} from "@shared/time-rules";
-import {TimeEntryCreateDialog} from "@features/time-stamp/components/time-entry-create-dialog"; // zum bestehenden Import von localDay ergänzen
+
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
 const columns: DataTableColumnDef<EntryRow>[] = [
     {
@@ -46,69 +38,20 @@ const columns: DataTableColumnDef<EntryRow>[] = [
 ];
 
 export function ReportDailyEdit() {
-    const {currentUser} = useCurrentUser();
-    const now = useNow();
-    const userId = currentUser?.id;
-
-    const today = localDay(new Date(now));
     const [day, setDay] = useState(() => localDay(new Date()));
-
-    // Gleicher Query-Key wie Stempel-Karte und Tagesbericht: keine zusätzliche Anfrage
-    const entries = useQuery({
-        queryKey: ["time-entries", userId],
-        queryFn: () => fetchTimeEntries(userId!),
-        enabled: !!userId,
-    });
-    const projects = useQuery({queryKey: ["projects"], queryFn: fetchProjects});
-    const holidays = useHolidays(userId);
-    // Gleicher Query-Key wie die Urlaubsseite
-    const vacations = useQuery({
-        queryKey: ["vacations", userId],
-        queryFn: () => fetchVacations(userId!),
-        enabled: !!userId,
-    });
-
-    const range = useMemo(() => localDayRange(day), [day]);
-
-    const report = useMemo(() => {
-        const dtos = entries.data ?? [];
-        const names = new Map((projects.data ?? []).map((p) => [p.id, p.name]));
-
-        const rows: EntryRow[] = dtos
-            .map((e) => ({
-                id: e.id,
-                type: e.type,
-                bookedAt: new Date(e.bookedAt),
-                projectId: e.projectId,
-                projectName: e.projectId ? (names.get(e.projectId) ?? null) : null,
-            }))
-            .filter((r) => r.bookedAt >= range.start && r.bookedAt < range.end);
-
-        // Für die Summen zählen alle Buchungen, damit Nachtschichten stimmen
-        const all = dtos.map((e) => ({id: e.id, type: e.type, bookedAt: new Date(e.bookedAt)}));
-        return {
-            rows,
-            totals: dayTotals(all, range, new Date(now)),
-            next: nextType(all, range.end), // was ist am Ende dieses Tages als Nächstes dran
-        };
-    }, [entries.data, projects.data, range, now]);
+    const report = useShowDailyReport(day);
+    const {currentUser, today, totals} = report;
 
     if (!currentUser) {
         return <p className="text-sm text-muted-foreground">Bitte zuerst einen User anlegen und auswählen.</p>;
     }
-    const vacationList = vacations.data ?? [];
-    const holidayList = holidays.data ?? [];
-    const target = targetMs(day, vacationList, holidayList);
-    const targetHint = dayKindLabel(dayKind(day, vacationList, holidayList), holidayOn(day, holidayList)?.name);
-    const elapsed = day <= today; // ISO-Daten lassen sich als Text vergleichen
-    const diff = report.totals.workMs - target;
 
     return (
         <div className="space-y-4">
             <div>
                 <h1 className="text-2xl font-semibold">Tagesbericht bearbeiten</h1>
                 <p className="text-sm text-muted-foreground">
-                    {currentUser.name} · {formatDate(range.start)}
+                    {currentUser.name} · {formatDate(report.range.start)}
                 </p>
             </div>
 
@@ -138,41 +81,32 @@ export function ReportDailyEdit() {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {report.totals.missingGehen && (
+                {totals.missingGehen && (
                     <p role="alert" className="text-sm text-destructive">
                         An diesem Tag fehlt das Gehen. Trage es mit „Buchung nachtragen" nach.
                     </p>
                 )}
                 <Summary
                     title="Arbeitszeit"
-                    value={formatDuration(report.totals.workMs)}
-                    hint={report.totals.running ? "läuft noch" : undefined}
+                    value={formatDuration(totals.workMs)}
+                    hint={totals.running ? "läuft noch" : undefined}
                 />
-                <Summary title="Pausen" value={formatDuration(report.totals.breakMs)} />
-                <Summary title="Soll" value={formatDuration(target)} hint={targetHint} />
+                <Summary title="Pausen" value={formatDuration(totals.breakMs)} />
+                <Summary
+                    title="Soll"
+                    value={formatDuration(report.target)}
+                    hint={dayKindLabel(report.kind, report.holidayName)}
+                />
                 <Summary
                     title="Differenz"
-                    value={elapsed ? formatDifference(diff) : "–"}
-                    valueClassName={elapsed ? diffClass(diff) : undefined}
+                    value={report.elapsed ? formatDifference(report.diff) : "–"}
+                    valueClassName={report.elapsed ? diffClass(report.diff) : undefined}
                 />
             </div>
-            {entries.isPending && <p className="text-sm text-muted-foreground">Lade…</p>}
-            {entries.isError && (
-                <p role="alert" className="text-sm text-destructive">
-                    {entries.error.message}
-                </p>
-            )}
-            {vacations.isError && (
-                <p role="alert" className="text-sm text-destructive">
-                    Urlaube konnten nicht geladen werden: {vacations.error.message}
-                </p>
-            )}
-            {holidays.isError && (
-                <p role="alert" className="text-sm text-destructive">
-                    Feiertage konnten nicht geladen werden: {holidays.error.message}
-                </p>
-            )}
-            {entries.isSuccess && (
+
+            {report.isPending && <p className="text-sm text-muted-foreground">Lade…</p>}
+            {report.error && <ReportError error={report.error} onRetry={report.retry} />}
+            {!report.isPending && !report.error && (
                 <DataTable
                     columns={columns}
                     data={report.rows}

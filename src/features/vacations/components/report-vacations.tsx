@@ -11,7 +11,7 @@ import type {Vacation} from "@shared/vacation";
 import {VacationActions} from "@features/vacations/components/vacation-actions";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {VacationDialog} from "@features/vacations/components/vacation-dialog";
-import {Summary} from "@features/reports/components/report-daily";
+import {Summary} from "@/components/summary";
 
 type Row = Vacation & {days: number; workdays: number};
 
