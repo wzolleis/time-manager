@@ -19,14 +19,7 @@ import {localTimeToUtc} from "@shared/day-range";
 import {localDay} from "@shared/time-rules";
 import type {TimeEntryUpdate} from "@shared/time-entry";
 import {TimeEntryDelete} from "@features/time-stamp/components/time-entry-delete";
-
-export type EntryRow = {
-    id: string;
-    type: "kommen" | "gehen";
-    bookedAt: Date;
-    projectId: string | null;
-    projectName: string | null;
-};
+import type {EntryRow} from "@features/time-stamp/time-entry-row";
 
 const NO_PROJECT = "none"; // Radix Select erlaubt keinen leeren String als Wert
 

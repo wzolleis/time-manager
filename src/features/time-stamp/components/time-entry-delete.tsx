@@ -13,7 +13,7 @@ import {Button, buttonVariants} from "@/components/ui/button";
 import {formatTime} from "@/lib/format";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {deleteTimeEntry} from "@/api/time-entries";
-import type {EntryRow} from "@features/time-stamp/components/time-entry-actions";
+import type {EntryRow} from "@features/time-stamp/time-entry-row";
 
 export const TimeEntryDelete = ({entry}: {entry: EntryRow}) => {
     const qc = useQueryClient();

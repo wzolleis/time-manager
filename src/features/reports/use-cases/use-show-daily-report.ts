@@ -10,7 +10,7 @@ import {holidayOn} from "@shared/holiday-rules";
 import {dayKind, targetMs} from "@shared/target-hours";
 import {dayTotals} from "@shared/time-report";
 import {localDay, nextType} from "@shared/time-rules";
-import type {EntryRow} from "@features/time-stamp/components/time-entry-actions";
+import type {EntryRow} from "@features/time-stamp/time-entry-row";
 
 /** Der User sieht seinen Tagesbericht für einen Tag "JJJJ-MM-TT" */
 export function useShowDailyReport(day: string) {
