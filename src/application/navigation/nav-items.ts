@@ -3,7 +3,6 @@ import {
     CalendarDays,
     CalendarHeart,
     CalendarRange,
-    ClockPlus,
     LayoutDashboard,
     type LucideIcon,
     Parasol,
@@ -25,7 +24,6 @@ export const navItemIds = [
     "reports-monthly",
     "reports-vacations",
     "reports-sick-leaves",
-    "time-stamp",
     "admin",
     "user",
     "users",
@@ -74,5 +72,4 @@ export const NAVIGATION_ITEMS: NavItem[] = [
         to: "/user/reports/sick-leaves",
         children: [],
     },
-    {id: "time-stamp", label: "Zeiterfassung", icon: ClockPlus, to: "/user/time-stamp", children: []},
 ] as const;

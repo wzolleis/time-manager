@@ -17,7 +17,6 @@ const HEADINGS: Record<string, string> = {
     "/admin/settings": "Einstellungen",
     "/admin/holidays": "Feiertage für alle",
     "/user": "User Dashboard",
-    "/user/time-stamp": "Zeiterfassung",
     "/user/reports": "Report",
     "/user/reports/daily": "Heute",
     "/user/reports/weekly": "Wochenbericht",

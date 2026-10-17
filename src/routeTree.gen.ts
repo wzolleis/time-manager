@@ -24,7 +24,6 @@ import { Route as UserReportsMonthlyRouteImport } from './routes/user/reports/mo
 import { Route as UserReportsSickLeavesRouteImport } from './routes/user/reports/sick-leaves'
 import { Route as UserReportsVacationsRouteImport } from './routes/user/reports/vacations'
 import { Route as UserReportsWeeklyRouteImport } from './routes/user/reports/weekly'
-import { Route as UserTimeStampIndexRouteImport } from './routes/user/time-stamp/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -101,11 +100,6 @@ const UserReportsWeeklyRoute = UserReportsWeeklyRouteImport.update({
   path: '/user/reports/weekly',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UserTimeStampIndexRoute = UserTimeStampIndexRouteImport.update({
-  id: '/user/time-stamp/',
-  path: '/user/time-stamp/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -123,7 +117,6 @@ export interface FileRoutesByFullPath {
   '/user/reports/weekly': typeof UserReportsWeeklyRoute
   '/user/projects/': typeof UserProjectsIndexRoute
   '/user/reports/': typeof UserReportsIndexRoute
-  '/user/time-stamp/': typeof UserTimeStampIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -141,7 +134,6 @@ export interface FileRoutesByTo {
   '/user/reports/weekly': typeof UserReportsWeeklyRoute
   '/user/projects': typeof UserProjectsIndexRoute
   '/user/reports': typeof UserReportsIndexRoute
-  '/user/time-stamp': typeof UserTimeStampIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -160,7 +152,6 @@ export interface FileRoutesById {
   '/user/reports/weekly': typeof UserReportsWeeklyRoute
   '/user/projects/': typeof UserProjectsIndexRoute
   '/user/reports/': typeof UserReportsIndexRoute
-  '/user/time-stamp/': typeof UserTimeStampIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -180,7 +171,6 @@ export interface FileRouteTypes {
     | '/user/reports/weekly'
     | '/user/projects/'
     | '/user/reports/'
-    | '/user/time-stamp/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -198,7 +188,6 @@ export interface FileRouteTypes {
     | '/user/reports/weekly'
     | '/user/projects'
     | '/user/reports'
-    | '/user/time-stamp'
   id:
     | '__root__'
     | '/'
@@ -216,7 +205,6 @@ export interface FileRouteTypes {
     | '/user/reports/weekly'
     | '/user/projects/'
     | '/user/reports/'
-    | '/user/time-stamp/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -235,7 +223,6 @@ export interface RootRouteChildren {
   UserReportsWeeklyRoute: typeof UserReportsWeeklyRoute
   UserProjectsIndexRoute: typeof UserProjectsIndexRoute
   UserReportsIndexRoute: typeof UserReportsIndexRoute
-  UserTimeStampIndexRoute: typeof UserTimeStampIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -345,13 +332,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UserReportsWeeklyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/user/time-stamp/': {
-      id: '/user/time-stamp/'
-      path: '/user/time-stamp'
-      fullPath: '/user/time-stamp/'
-      preLoaderRoute: typeof UserTimeStampIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -371,7 +351,6 @@ const rootRouteChildren: RootRouteChildren = {
   UserReportsWeeklyRoute: UserReportsWeeklyRoute,
   UserProjectsIndexRoute: UserProjectsIndexRoute,
   UserReportsIndexRoute: UserReportsIndexRoute,
-  UserTimeStampIndexRoute: UserTimeStampIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

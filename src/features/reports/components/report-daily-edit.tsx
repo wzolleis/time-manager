@@ -8,6 +8,7 @@ import {addDays} from "@shared/day-range";
 import {localDay} from "@shared/time-rules";
 import {EntryActions} from "@features/time-stamp/components/time-entry-actions";
 import {TimeEntryCreateDialog} from "@features/time-stamp/components/time-entry-create-dialog";
+import {StampCard} from "@features/time-stamp/components/stamp-card";
 import {ReportError} from "@features/reports/components/report-error";
 import {type DailyReportRow, useShowDailyReport} from "@features/reports/use-cases/use-show-daily-report";
 import {dayKindLabel} from "@features/reports/utils/day-kind-label";
@@ -61,6 +62,9 @@ export function ReportDailyEdit() {
                     {currentUser.name} · {formatDate(report.range.start)}
                 </p>
             </div>
+
+            {/* Gestempelt wird immer jetzt, deshalb nur am heutigen Tag */}
+            {day === today && <StampCard />}
 
             <div className="flex flex-wrap items-center gap-2">
                 <Button

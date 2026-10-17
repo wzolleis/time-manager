@@ -1,6 +1,6 @@
 ---
 name: today-report
-description: Beschreibt den Use Case Tagesbericht („Heute“). Der User sieht Buchungen, Arbeitszeit, Pausen, Soll und Differenz eines Tages, standardmäßig des heutigen, und korrigiert dort seine Buchungen.
+description: Beschreibt den Use Case Tagesbericht („Heute“). Der User stempelt dort, sieht Buchungen, Arbeitszeit, Pausen, Soll und Differenz eines Tages, standardmäßig des heutigen, und trägt Buchungen nach, ändert und löscht sie.
 ---
 
 # Tagesbericht
@@ -9,12 +9,14 @@ description: Beschreibt den Use Case Tagesbericht („Heute“). Der User sieht 
 
 Der User sieht für heute oder einen beliebigen anderen Tag seine Buchungen (Kommen und Gehen), wie lange
 er gearbeitet und Pause gemacht hat und wie das zum Soll des Tages steht. Im Bericht trägt er vergessene
-Buchungen nach, ändert und löscht sie. Beim Öffnen zeigt der Bericht den heutigen Tag.
+Buchungen nach, ändert und löscht sie. Am heutigen Tag stempelt er dort auch Kommen und Gehen. Beim Öffnen
+zeigt der Bericht den heutigen Tag.
 
 Der Use Case ist umgesetzt. Diese Beschreibung hält fest, wie er sich verhält, damit Änderungen daran die
 Regeln nicht verletzen. Code:
 
-- Komponente `../../src/features/reports/components/report-daily-edit.tsx`
+- Komponente `../../src/features/reports/components/report-daily-edit.tsx`, darin die Stempelkarte
+  `../../src/features/time-stamp/components/stamp-card.tsx`
 - Use Case `../../src/features/reports/use-cases/use-show-daily-report.ts`
 - Services `dayTotals` und `dayDiffMs` in `../../shared/time-report.ts`, `targetMs` und `dayKind` in
   `../../shared/target-hours.ts`, `nextType` und `firstBookingDay` in `../../shared/time-rules.ts`
@@ -24,16 +26,29 @@ Geändert wird nach dem Skill `architecture` (`../../agents/.agents/skills/archi
 
 ## Wo der Bericht erscheint
 
-| Ort                   | Route                 | Einbindung                                                       |
-|-----------------------|-----------------------|------------------------------------------------------------------|
-| Menüeintrag „Heute“   | `/user/reports/daily` | `ReportDailyPage` zeigt nur `ReportDailyEdit`                    |
-| Seite „Zeiterfassung“ | `/user/time-stamp`    | unter der Stempelkarte (`StampCard`), dieselbe `ReportDailyEdit` |
-
-Beide Orte verwenden dieselbe Komponente und denselben Use Case. Eine Änderung wirkt an beiden Stellen.
+Nur unter dem Menüeintrag „Heute“, Route `/user/reports/daily` (`ReportDailyPage` zeigt `ReportDailyEdit`).
+Die frühere Seite „Zeiterfassung“ (`/user/time-stamp`) gibt es nicht mehr, ihr Inhalt ist hier.
 
 ## Inhalt
 
-### Kennzahlen oben
+### Stempelkarte
+
+Nur wenn der heutige Tag angezeigt wird, steht unter dem Kopf die Stempelkarte (`StampCard`, Use Case
+`useStampTime` in `../../src/features/time-stamp/use-cases/use-stamp-time.ts`). Gestempelt wird immer mit
+der aktuellen Zeit, an einem anderen Tag würde die Buchung nicht in der angezeigten Tabelle erscheinen.
+
+- Titel: Name des Users. Darunter der Status: „Noch keine Buchungen“, „Eingestempelt seit 08:00 Uhr
+  (2 Std 15 Min) · <Projekt>“ oder „Ausgestempelt seit 12:00 Uhr“. Liegt die letzte Buchung an einem
+  anderen Tag, steht der Tag davor, z. B. „Di., 13.10., 17:00 Uhr“.
+- Ausgestempelt: Auswahl „Projekt wählen“ (mit „Kein Projekt“) und Button „Kommen“.
+- Eingestempelt: Button „Gehen“.
+- Fehlt zu einem Kommen eines früheren Tages das Gehen (`findMissingGehen`): Status „Gehen zum Kommen am
+  <Tag> fehlt“, Hinweis „Ein Gehen lässt sich nur am Tag des Kommens buchen. Trage es nach, danach kannst
+  du wieder stempeln.“ und Button „Gehen nachtragen“ statt „Kommen“/„Gehen“.
+- Ist heute ein Krankheitstag, der Hinweis aus `sick-leave.md`, Regel 8. Stempeln bleibt möglich.
+- Nach dem Stempeln wird `["time-entries"]` invalidiert, Tabelle und Karten rechnen neu.
+
+### Kennzahlen
 
 Vier Karten (Komponente `Summary` aus `../../src/components/summary.tsx`):
 
@@ -147,7 +162,8 @@ dieser Art lässt `checkSequence` nicht mehr zu.
 
 ## Bedienung
 
-- **Kopf:** Überschrift „Heute“ (`h1`), wie der Menüeintrag, auch wenn ein anderer Tag gewählt ist. Darunter Name des Users und der Tag mit
+- **Kopf:** Überschrift „Heute“ (`h1`), wie der Menüeintrag, auch wenn ein anderer Tag gewählt ist.
+  Darunter am heutigen Tag die Stempelkarte, dann Navigation, Karten und Tabelle. Darunter Name des Users und der Tag mit
   `formatDate`, z. B. „Jack · Mittwoch, 14.10.2026“.
 - **Tag wählen:**
   - Pfeil „Vorheriger Tag“ (←) und Pfeil „Nächster Tag“ (→), je ein Tag
@@ -193,7 +209,8 @@ Lesender Use Case: Views und Services, kein Repository. Alle Bausteine sind vorh
 | Service    | `../../shared/time-rules.ts`                                                                      | `localDay`, `firstBookingDay`, `nextType`, `buildPeriods`                                                                                                                          |
 | Service    | `../../shared/sick-leave-rules.ts`                                                                | `isSickDay` für die Markierung, `withoutSickDays` steckt in `dayTotals`                                                                                                            |
 | Use Case   | `../../src/features/reports/use-cases/use-show-daily-report.ts`                                   | `useShowDailyReport(day)`, liefert `rows` (`DailyReportRow` mit `ignored`), `totals`, `target`, `kind`, `holidayName`, `diff` (`null`: „–“), `next`, `isPending`, `error`, `retry` |
-| Komponente | `../../src/features/reports/components/report-daily-edit.tsx`                                     | `ReportDailyEdit`, zeigt nur an, hält den gewählten Tag                                                                                                                            |
+| Komponente | `../../src/features/reports/components/report-daily-edit.tsx`                                     | `ReportDailyEdit`, zeigt nur an, hält den gewählten Tag, zeigt heute die `StampCard`                                                                                               |
+| Komponente | `../../src/features/time-stamp/components/stamp-card.tsx`                                         | `StampCard` mit Use Case `useStampTime` (stempeln, Status, fehlendes Gehen)                                                                                                        |
 | Komponente | `../../src/features/reports/utils/day-kind-label.ts`                                              | Hinweis zum Soll je `DayKind`                                                                                                                                                      |
 | Seite      | `../../src/features/reports/components/report-daily-page.tsx`                                     | `ReportDailyPage`                                                                                                                                                                  |
 | Route      | `../../src/routes/user/reports/daily.tsx`                                                         | `/user/reports/daily`, bindet nur `ReportDailyPage` ein                                                                                                                            |
@@ -223,14 +240,15 @@ Nach `../../agents/.agents/skills/architecture/testing.md`. Vorhanden:
 - **Routing:** Eintrag `"/user/reports/daily": "Heute"` in
   `../../src/tests/routes.test.tsx`
 
-Ein Komponenten-Test fehlt. Er lohnt sich erst, wenn die Komponente mehr als anzeigen soll. Wird eine
-Regel geändert, gehört der Test in den Service-Test, mit Gegenprobe (Regel absichtlich brechen, Test muss
-fehlschlagen).
+- **Komponenten-Test** `../../src/features/reports/components/report-daily.test.tsx`: Stempelkarte, Karten
+  und „Buchung nachtragen“ erscheinen; die Stempelkarte nur am heutigen Tag
+
+Wird eine Regel geändert, gehört der Test in den Service-Test, mit Gegenprobe (Regel absichtlich brechen,
+Test muss fehlschlagen).
 
 ## Offene Punkte
 
 Bewusst zurückgestellt, kommt später. Ohne Auftrag des Users nicht ändern:
 
-1. **Zwei Überschriften:** Auf der Seite „Zeiterfassung“ stehen zwei `h1`, „Zeiterfassung“ und „Heute“.
-2. **Meldung zum fehlenden Gehen** steht im Raster der Karten und belegt dort einen Platz wie eine Karte.
-3. **Gewählter Tag nicht in der URL:** Ein Link auf einen bestimmten Tag ist nicht möglich.
+1. **Meldung zum fehlenden Gehen** steht im Raster der Karten und belegt dort einen Platz wie eine Karte.
+2. **Gewählter Tag nicht in der URL:** Ein Link auf einen bestimmten Tag ist nicht möglich.
