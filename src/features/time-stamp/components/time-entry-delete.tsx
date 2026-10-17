@@ -11,27 +11,20 @@ import {
 } from "@/components/ui/alert-dialog";
 import {Button, buttonVariants} from "@/components/ui/button";
 import {formatTime} from "@/lib/format";
-import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {deleteTimeEntry} from "@/api/time-entries";
 import type {EntryRow} from "@features/time-stamp/time-entry-row";
+import {useDeleteTimeEntry} from "@features/time-stamp/use-cases/use-delete-time-entry";
 
 export const TimeEntryDelete = ({entry}: {entry: EntryRow}) => {
-    const qc = useQueryClient();
-    const refresh = () => qc.invalidateQueries({queryKey: ["time-entries"]});
+    const remove = useDeleteTimeEntry();
     const isKommen = entry.type === "kommen";
     const typeLabel = isKommen ? "Kommen" : "Gehen";
-
-    const remove = useMutation({
-        mutationFn: (pair: boolean) => deleteTimeEntry(entry.id, pair),
-        onSuccess: refresh,
-    });
 
     return (
         <>
             <AlertDialog onOpenChange={(next) => next && remove.reset()}>
                 <AlertDialogTrigger asChild>
-                    <Button variant="destructive" size="sm" disabled={remove.isPending}>
-                        {remove.isPending ? "Lösche…" : "Löschen"}
+                    <Button variant="destructive" size="sm" disabled={remove.isDeleting}>
+                        {remove.isDeleting ? "Lösche…" : "Löschen"}
                     </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -49,20 +42,20 @@ export const TimeEntryDelete = ({entry}: {entry: EntryRow}) => {
                         <AlertDialogCancel>Abbrechen</AlertDialogCancel>
                         <AlertDialogAction
                             className={buttonVariants({variant: "outline", size: "sm"})}
-                            onClick={() => remove.mutate(false)}
+                            onClick={() => remove.remove({id: entry.id, pair: false})}
                         >
                             Nur diese
                         </AlertDialogAction>
                         <AlertDialogAction
                             className={buttonVariants({variant: "destructive", size: "sm"})}
-                            onClick={() => remove.mutate(true)}
+                            onClick={() => remove.remove({id: entry.id, pair: true})}
                         >
                             Mit Gegenstück
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-            {remove.isError && (
+            {remove.error && (
                 <p role="alert" className="text-right text-sm text-destructive">
                     {remove.error.message}
                 </p>

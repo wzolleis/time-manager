@@ -1,5 +1,4 @@
 import {type ComponentProps, useId, useState} from "react";
-import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {Button} from "@/components/ui/button";
 import {
     Dialog,
@@ -13,13 +12,10 @@ import {
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {fetchProjects} from "@/api/projects";
-import {createTimeEntry} from "@/api/time-entries";
 import {formatTime} from "@/lib/format";
-import {useCurrentUser} from "@/lib/user-context";
-import {localTimeToUtc} from "@shared/day-range";
+import {useProjects} from "@/views/projects";
 import {localDay} from "@shared/time-rules";
-import type {TimeEntryCreate} from "@shared/time-entry";
+import {useAddTimeEntry} from "@features/time-stamp/use-cases/use-add-time-entry";
 
 type EntryType = "kommen" | "gehen";
 
@@ -42,24 +38,16 @@ export function TimeEntryCreateDialog({
     variant = "outline",
     size = "sm",
 }: Props) {
-    const {currentUser} = useCurrentUser();
-    const qc = useQueryClient();
     const uid = useId();
-    const projects = useQuery({queryKey: ["projects"], queryFn: fetchProjects});
+    const projects = useProjects();
+    const create = useAddTimeEntry();
+    const {currentUser} = create;
 
     const [open, setOpen] = useState(false);
     const [day, setDay] = useState(defaultDay);
     const [time, setTime] = useState("");
     const [type, setType] = useState<EntryType>(defaultType);
     const [projectChoice, setProjectChoice] = useState(NO_PROJECT);
-
-    const create = useMutation({
-        mutationFn: (data: TimeEntryCreate) => createTimeEntry(data),
-        onSuccess: async () => {
-            await qc.invalidateQueries({queryKey: ["time-entries"]});
-            setOpen(false);
-        },
-    });
 
     // Beim Öffnen immer mit den Vorgaben starten, keine alten Eingaben oder Fehler
     const handleOpenChange = (next: boolean) => {
@@ -76,12 +64,10 @@ export function TimeEntryCreateDialog({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!currentUser) return;
-        create.mutate({
-            userId: currentUser.id,
-            type,
-            bookedAt: localTimeToUtc(day, time),
-            projectId: type === "kommen" && projectChoice !== NO_PROJECT ? projectChoice : undefined,
-        });
+        create.add(
+            {type, day, time, projectId: projectChoice === NO_PROJECT ? null : projectChoice},
+            {onSuccess: () => setOpen(false)},
+        );
     };
 
     return (
@@ -157,7 +143,7 @@ export function TimeEntryCreateDialog({
                         </div>
                     )}
 
-                    {create.isError && (
+                    {create.error && (
                         <p role="alert" className="text-sm text-destructive">
                             {create.error.message}
                         </p>
@@ -167,8 +153,8 @@ export function TimeEntryCreateDialog({
                         <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                             Abbrechen
                         </Button>
-                        <Button type="submit" disabled={create.isPending}>
-                            {create.isPending ? "Speichere…" : "Speichern"}
+                        <Button type="submit" disabled={create.isSaving}>
+                            {create.isSaving ? "Speichere…" : "Speichern"}
                         </Button>
                     </DialogFooter>
                 </form>

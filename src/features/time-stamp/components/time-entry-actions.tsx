@@ -1,5 +1,4 @@
-import {useState} from "react";
-import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import React, {useState} from "react";
 import {Button} from "@/components/ui/button";
 import {
     Dialog,
@@ -12,21 +11,17 @@ import {
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {fetchProjects} from "@/api/projects";
-import {updateTimeEntry} from "@/api/time-entries";
 import {formatTime} from "@/lib/format";
-import {localTimeToUtc} from "@shared/day-range";
-import {localDay} from "@shared/time-rules";
-import type {TimeEntryUpdate} from "@shared/time-entry";
+import {useProjects} from "@/views/projects";
 import {TimeEntryDelete} from "@features/time-stamp/components/time-entry-delete";
+import {useChangeTimeEntry} from "@features/time-stamp/use-cases/use-change-time-entry";
 import type {EntryRow} from "@features/time-stamp/time-entry-row";
 
 const NO_PROJECT = "none"; // Radix Select erlaubt keinen leeren String als Wert
 
 export function EntryActions({entry}: {entry: EntryRow}) {
-    const qc = useQueryClient();
-    const refresh = () => qc.invalidateQueries({queryKey: ["time-entries"]});
-    const projects = useQuery({queryKey: ["projects"], queryFn: fetchProjects});
+    const projects = useProjects();
+    const update = useChangeTimeEntry();
 
     const isKommen = entry.type === "kommen";
     const typeLabel = isKommen ? "Kommen" : "Gehen";
@@ -35,14 +30,6 @@ export function EntryActions({entry}: {entry: EntryRow}) {
     const [open, setOpen] = useState(false);
     const [time, setTime] = useState(formatTime(entry.bookedAt));
     const [projectChoice, setProjectChoice] = useState(entry.projectId ?? NO_PROJECT);
-
-    const update = useMutation({
-        mutationFn: (data: TimeEntryUpdate) => updateTimeEntry(entry.id, data),
-        onSuccess: async () => {
-            await refresh();
-            setOpen(false);
-        },
-    });
 
     // Beim Öffnen immer mit den gespeicherten Werten starten
     const handleOpenChange = (next: boolean) => {
@@ -54,23 +41,12 @@ export function EntryActions({entry}: {entry: EntryRow}) {
         setOpen(next);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>): void => {
         e.preventDefault();
-
-        // Nur Geändertes senden. Die Zeit bleibt unangetastet, wenn sie nicht geändert wurde,
-        // damit die Sekunden der ursprünglichen Buchung erhalten bleiben.
-        const patch: TimeEntryUpdate = {};
-        if (time !== formatTime(entry.bookedAt)) {
-            patch.bookedAt = localTimeToUtc(localDay(entry.bookedAt), time);
-        }
-        const newProject = isKommen && projectChoice !== NO_PROJECT ? projectChoice : null;
-        if (newProject !== entry.projectId) patch.projectId = newProject;
-
-        if (Object.keys(patch).length === 0) {
-            setOpen(false);
-            return;
-        }
-        update.mutate(patch);
+        update.change(
+            {entry, time, projectId: projectChoice === NO_PROJECT ? null : projectChoice},
+            {onSuccess: () => setOpen(false)},
+        );
     };
 
     return (
@@ -79,7 +55,6 @@ export function EntryActions({entry}: {entry: EntryRow}) {
                 <Button variant="outline" size="sm" onClick={() => handleOpenChange(true)}>
                     Bearbeiten
                 </Button>
-                {/* ts-ignore */}
                 <TimeEntryDelete entry={entry} />
             </div>
 
@@ -123,7 +98,7 @@ export function EntryActions({entry}: {entry: EntryRow}) {
                             </div>
                         )}
 
-                        {update.isError && (
+                        {update.error && (
                             <p role="alert" className="text-sm text-destructive">
                                 {update.error.message}
                             </p>
@@ -133,8 +108,8 @@ export function EntryActions({entry}: {entry: EntryRow}) {
                             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                                 Abbrechen
                             </Button>
-                            <Button type="submit" disabled={update.isPending}>
-                                {update.isPending ? "Speichere…" : "Speichern"}
+                            <Button type="submit" disabled={update.isSaving}>
+                                {update.isSaving ? "Speichere…" : "Speichern"}
                             </Button>
                         </DialogFooter>
                     </form>
