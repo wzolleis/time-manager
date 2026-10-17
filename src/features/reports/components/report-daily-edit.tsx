@@ -6,9 +6,9 @@ import {DataTable, type DataTableColumnDef} from "@/components/table/data-table"
 import {diffClass, formatDate, formatDifference, formatDuration, formatTime} from "@/lib/format";
 import {addDays} from "@shared/day-range";
 import {localDay} from "@shared/time-rules";
-import {EntryActions} from "@features/time-stamp/components/time-entry-actions";
-import {TimeEntryCreateDialog} from "@features/time-stamp/components/time-entry-create-dialog";
-import {StampCard} from "@features/time-stamp/components/stamp-card";
+import {EntryActions} from "@features/reports/components/time-entry-actions";
+import {TimeEntryCreateDialog} from "@features/reports/components/time-entry-create-dialog";
+import {StampCard} from "@features/reports/components/stamp-card";
 import {ReportError} from "@features/reports/components/report-error";
 import {type DailyReportRow, useShowDailyReport} from "@features/reports/use-cases/use-show-daily-report";
 import {dayKindLabel} from "@features/reports/utils/day-kind-label";

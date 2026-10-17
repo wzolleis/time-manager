@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import {Button, buttonVariants} from "@/components/ui/button";
 import {formatTime} from "@/lib/format";
-import type {EntryRow} from "@features/time-stamp/time-entry-row";
-import {useDeleteTimeEntry} from "@features/time-stamp/use-cases/use-delete-time-entry";
+import type {EntryRow} from "@features/reports/time-entry-row";
+import {useDeleteTimeEntry} from "@features/reports/use-cases/use-delete-time-entry";
 
 export const TimeEntryDelete = ({entry}: {entry: EntryRow}) => {
     const remove = useDeleteTimeEntry();

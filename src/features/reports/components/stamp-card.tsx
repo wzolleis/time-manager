@@ -4,8 +4,8 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/compo
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {formatDayShort, formatDuration, formatTime} from "@/lib/format";
 import {localDay} from "@shared/time-rules";
-import {TimeEntryCreateDialog} from "@features/time-stamp/components/time-entry-create-dialog";
-import {useStampTime} from "@features/time-stamp/use-cases/use-stamp-time";
+import {TimeEntryCreateDialog} from "@features/reports/components/time-entry-create-dialog";
+import {useStampTime} from "@features/reports/use-cases/use-stamp-time";
 
 const NO_PROJECT = "none"; // Radix Select erlaubt keinen leeren String als Wert
 

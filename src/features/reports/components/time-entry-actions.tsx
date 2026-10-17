@@ -14,9 +14,9 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/c
 import {formatTime} from "@/lib/format";
 import {localDay} from "@shared/time-rules";
 import {useProjects} from "@/views/projects";
-import {TimeEntryDelete} from "@features/time-stamp/components/time-entry-delete";
-import {useChangeTimeEntry} from "@features/time-stamp/use-cases/use-change-time-entry";
-import type {EntryRow} from "@features/time-stamp/time-entry-row";
+import {TimeEntryDelete} from "@features/reports/components/time-entry-delete";
+import {useChangeTimeEntry} from "@features/reports/use-cases/use-change-time-entry";
+import type {EntryRow} from "@features/reports/time-entry-row";
 
 const NO_PROJECT = "none"; // Radix Select erlaubt keinen leeren String als Wert
 

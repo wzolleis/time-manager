@@ -16,7 +16,7 @@ Der Use Case ist umgesetzt. Diese Beschreibung hält fest, wie er sich verhält,
 Regeln nicht verletzen. Code:
 
 - Komponente `../../src/features/reports/components/report-daily-edit.tsx`, darin die Stempelkarte
-  `../../src/features/time-stamp/components/stamp-card.tsx`
+  `../../src/features/reports/components/stamp-card.tsx`
 - Use Case `../../src/features/reports/use-cases/use-show-daily-report.ts`
 - Services `dayTotals` und `dayDiffMs` in `../../shared/time-report.ts`, `targetMs` und `dayKind` in
   `../../shared/target-hours.ts`, `nextType` und `firstBookingDay` in `../../shared/time-rules.ts`
@@ -34,7 +34,7 @@ Die frühere Seite „Zeiterfassung“ (`/user/time-stamp`) gibt es nicht mehr, 
 ### Stempelkarte
 
 Nur wenn der heutige Tag angezeigt wird, steht unter dem Kopf die Stempelkarte (`StampCard`, Use Case
-`useStampTime` in `../../src/features/time-stamp/use-cases/use-stamp-time.ts`). Gestempelt wird immer mit
+`useStampTime` in `../../src/features/reports/use-cases/use-stamp-time.ts`). Gestempelt wird immer mit
 der aktuellen Zeit, an einem anderen Tag würde die Buchung nicht in der angezeigten Tabelle erscheinen.
 
 - Titel: Name des Users. Darunter der Status: „Noch keine Buchungen“, „Eingestempelt seit 08:00 Uhr
@@ -131,7 +131,7 @@ Aus `../../src/lib/format.ts`:
    nach einem Kommen ein Gehen, sonst ein Kommen. Am heutigen Tag ist die Uhrzeit mit jetzt vorbelegt,
    an anderen Tagen leer. Künftige Tage lassen sich im Dialog nicht wählen (`max` = heute).
 10. **Ändern und Löschen** der Buchungen sind eigene Use Cases (`useAddTimeEntry`, `useChangeTimeEntry`,
-    `useDeleteTimeEntry` in `../../src/features/time-stamp/use-cases/`). Der Tagesbericht ruft sie nur
+    `useDeleteTimeEntry` in `../../src/features/reports/use-cases/`). Der Tagesbericht ruft sie nur
     über die Komponenten auf. Für sie gilt die Abfolge Kommen/Gehen (`checkSequence`): Kommen und Gehen
     eines Paars liegen am selben Tag.
 
@@ -172,7 +172,7 @@ dieser Art lässt `checkSequence` nicht mehr zu.
   - Der gewählte Tag steht nur im Zustand der Komponente, nicht in der URL. Nach dem Neuladen zeigt der
     Bericht wieder heute.
 - **Button „Buchung nachtragen“** öffnet `TimeEntryCreateDialog` (Regel 9).
-- **Aktionen je Buchung** (`../../src/features/time-stamp/components/time-entry-actions.tsx`):
+- **Aktionen je Buchung** (`../../src/features/reports/components/time-entry-actions.tsx`):
   - „Bearbeiten“: Uhrzeit ändern, beim Kommen auch das Projekt. Der Tag bleibt gleich. Die Abfolge wird
     live geprüft, bei einem Problem ist „Speichern“ deaktiviert. An einem Krankheitstag steht der Hinweis
     aus `sick-leave.md`, Regel 8.
@@ -210,7 +210,7 @@ Lesender Use Case: Views und Services, kein Repository. Alle Bausteine sind vorh
 | Service    | `../../shared/sick-leave-rules.ts`                                                                | `isSickDay` für die Markierung, `withoutSickDays` steckt in `dayTotals`                                                                                                            |
 | Use Case   | `../../src/features/reports/use-cases/use-show-daily-report.ts`                                   | `useShowDailyReport(day)`, liefert `rows` (`DailyReportRow` mit `ignored`), `totals`, `target`, `kind`, `holidayName`, `diff` (`null`: „–“), `next`, `isPending`, `error`, `retry` |
 | Komponente | `../../src/features/reports/components/report-daily-edit.tsx`                                     | `ReportDailyEdit`, zeigt nur an, hält den gewählten Tag, zeigt heute die `StampCard`                                                                                               |
-| Komponente | `../../src/features/time-stamp/components/stamp-card.tsx`                                         | `StampCard` mit Use Case `useStampTime` (stempeln, Status, fehlendes Gehen)                                                                                                        |
+| Komponente | `../../src/features/reports/components/stamp-card.tsx`                                            | `StampCard` mit Use Case `useStampTime` (stempeln, Status, fehlendes Gehen)                                                                                                        |
 | Komponente | `../../src/features/reports/utils/day-kind-label.ts`                                              | Hinweis zum Soll je `DayKind`                                                                                                                                                      |
 | Seite      | `../../src/features/reports/components/report-daily-page.tsx`                                     | `ReportDailyPage`                                                                                                                                                                  |
 | Route      | `../../src/routes/user/reports/daily.tsx`                                                         | `/user/reports/daily`, bindet nur `ReportDailyPage` ein                                                                                                                            |

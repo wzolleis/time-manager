@@ -12,7 +12,7 @@ import {isSickDay} from "@shared/sick-leave-rules";
 import {dayKind, targetMs} from "@shared/target-hours";
 import {dayDiffMs, dayTotals} from "@shared/time-report";
 import {firstBookingDay, localDay, nextType} from "@shared/time-rules";
-import type {EntryRow} from "@features/time-stamp/time-entry-row";
+import type {EntryRow} from "@features/reports/time-entry-row";
 
 export type DailyReportRow = EntryRow & {ignored: boolean}; // ignored: am Krankheitstag, zählt nicht
 

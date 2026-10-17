@@ -15,7 +15,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/c
 import {formatTime} from "@/lib/format";
 import {useProjects} from "@/views/projects";
 import {localDay} from "@shared/time-rules";
-import {useAddTimeEntry} from "@features/time-stamp/use-cases/use-add-time-entry";
+import {useAddTimeEntry} from "@features/reports/use-cases/use-add-time-entry";
 
 type EntryType = "kommen" | "gehen";
 
