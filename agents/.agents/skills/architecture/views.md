@@ -25,6 +25,7 @@ Eine Datei pro Aggregat in `src/views/`, der Hook heißt `use<Aggregat>`:
 ```text
 src/views/
 ├ vacations.ts       useVacations(userId)
+├ sick-leaves.ts     useSickLeaves(userId)
 ├ time-entries.ts    useTimeEntries(userId)
 ├ projects.ts        useProjects()
 ├ holidays.ts        useHolidays(userId), useGlobalHolidays()

@@ -23,6 +23,7 @@ const HEADINGS: Record<string, string> = {
     "/user/reports/weekly": "Wochenbericht",
     "/user/reports/monthly": "Monatsbericht",
     "/user/reports/vacations": "Urlaub",
+    "/user/reports/sick-leaves": "Krankmeldungen",
     "/user/projects": "Projekte",
     "/user/holidays": "Feiertage",
 };
@@ -55,6 +56,7 @@ function mockApi() {
             if (pathname === "/api/users") return Response.json([TEST_USER]);
             if (pathname === "/api/projects" || pathname === "/api/time-entries") return Response.json([]);
             if (pathname === "/api/vacations") return Response.json([]);
+            if (pathname === "/api/sick-leaves") return Response.json([]);
             if (pathname === "/api/holidays") return Response.json([]);
 
             // Nicht gemockte Aufrufe fallen auf, statt still zu scheitern

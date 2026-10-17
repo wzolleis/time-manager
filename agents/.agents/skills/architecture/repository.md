@@ -77,6 +77,7 @@ Query Keys beginnen immer mit dem Namen des Aggregats. Danach folgen Parameter, 
 | Aggregat           | Query Keys der Views                             | nach dem Schreiben invalidieren |
 |--------------------|--------------------------------------------------|---------------------------------|
 | Urlaube            | `["vacations", userId]`                          | `["vacations"]`                 |
+| Krankmeldungen     | `["sick-leaves", userId]`                        | `["sick-leaves"]`               |
 | Buchungen          | `["time-entries", userId]`                       | `["time-entries"]`              |
 | Projekte           | `["projects"]`                                   | `["projects"]`                  |
 | Feiertage          | `["holidays", userId]`, `["holidays", "global"]` | `["holidays"]`                  |
