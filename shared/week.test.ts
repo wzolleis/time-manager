@@ -1,6 +1,6 @@
 // shared/week.test.ts
 import {describe, expect, it} from "vitest";
-import {isoWeek, isWeekend, startOfWeek, weekDays} from "./week";
+import {addMonths, isoWeek, isWeekend, monthWeeks, startOfWeek, weekDays} from "./week";
 
 describe("startOfWeek", () => {
     it("liefert den Montag", () => {
@@ -53,5 +53,29 @@ describe("isWeekend", () => {
         expect(isWeekend("2026-10-03")).toBe(true); // Samstag
         expect(isWeekend("2026-10-04")).toBe(true); // Sonntag
         expect(isWeekend("2026-10-02")).toBe(false); // Freitag
+    });
+});
+
+describe("addMonths", () => {
+    it("rechnet über den Jahreswechsel", () => {
+        expect(addMonths("2026-12", 1)).toBe("2027-01");
+        expect(addMonths("2027-01", -1)).toBe("2026-12");
+    });
+});
+
+describe("monthWeeks", () => {
+    it("beschneidet die Wochen am Monatsanfang und -ende auf den Monat", () => {
+        const weeks = monthWeeks("2026-10"); // 01.10. ist ein Donnerstag, 31.10. ein Samstag
+        expect(weeks.map((w) => w.week)).toEqual([40, 41, 42, 43, 44]);
+        expect(weeks[0].days).toEqual(["2026-10-01", "2026-10-02", "2026-10-03", "2026-10-04"]);
+        expect(weeks[1].days).toHaveLength(7);
+        expect(weeks[4].days.at(-1)).toBe("2026-10-31");
+    });
+
+    it("nennt beim Jahreswechsel die ISO-Kalenderwoche mit ihrem Jahr", () => {
+        const january = monthWeeks("2027-01");
+        expect(january[0]).toEqual({year: 2026, week: 53, days: ["2027-01-01", "2027-01-02", "2027-01-03"]});
+        expect(january[1]).toMatchObject({year: 2027, week: 1});
+        expect(monthWeeks("2026-12").at(-1)?.days).toEqual(["2026-12-28", "2026-12-29", "2026-12-30", "2026-12-31"]);
     });
 });

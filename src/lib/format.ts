@@ -36,3 +36,13 @@ export const formatDayShort = (d: Date) =>
 
 export const formatDayMonth = (d: Date) =>
     d.toLocaleDateString("de-DE", {timeZone: TZ, day: "2-digit", month: "2-digit"});
+
+/** Monat ("JJJJ-MM") ausgeschrieben: "Oktober 2026" */
+export const formatMonth = (month: string) => {
+    const [y, m] = month.split("-").map(Number);
+    return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString("de-DE", {
+        timeZone: "UTC",
+        month: "long",
+        year: "numeric",
+    });
+};

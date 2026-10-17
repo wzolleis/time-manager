@@ -1,7 +1,7 @@
 // shared/time-report.test.ts
 import {describe, expect, it} from "vitest";
 import {localDayRange} from "./day-range";
-import {dayTotals, weekTotals} from "./time-report";
+import {dayTotals, monthTotals, weekTotals} from "./time-report";
 import type {Booking} from "./time-rules";
 import {weekDays} from "./week";
 
@@ -104,5 +104,42 @@ describe("weekTotals", () => {
         const t = weekTotals([], week, vacations, holidays, "2026-06-10", now);
         expect(t.targetWeekMs).toBe(24 * HOUR);
         expect(t.days[3]).toMatchObject({kind: "holiday", holidayName: "Fronleichnam", targetMs: 0});
+    });
+});
+
+describe("monthTotals", () => {
+    // Mo 28.09. und Do 01.10.2026, je 8 Stunden
+    const edge = [
+        b("1", "kommen", "2026-09-28T06:00:00Z"),
+        b("2", "gehen", "2026-09-28T14:00:00Z"),
+        b("3", "kommen", "2026-10-01T06:00:00Z"),
+        b("4", "gehen", "2026-10-01T14:00:00Z"),
+    ];
+    const afterOctober = new Date("2026-11-15T12:00:00Z");
+
+    it("zählt von Wochen am Monatsrand nur die Tage im Monat", () => {
+        const t = monthTotals(edge, "2026-10", [], [], "2026-11-15", afterOctober);
+        expect(t.weeks[0]).toMatchObject({week: 40, workMs: 8 * HOUR, targetMs: 16 * HOUR}); // Do und Fr
+        expect(t.weeks[4]).toMatchObject({week: 44, targetMs: 40 * HOUR}); // Mo bis Fr, ohne So 01.11.
+        expect(t.targetMonthMs).toBe(22 * 8 * HOUR); // 22 Arbeitstage im Oktober 2026
+        expect(t.workMs).toBe(8 * HOUR);
+    });
+
+    it("rechnet im laufenden Monat nur gegen das Soll bis heute", () => {
+        const now = new Date("2026-10-14T18:00:00Z"); // Mittwoch
+        const t = monthTotals(edge, "2026-10", [], [], "2026-10-14", now);
+        expect(t.targetToDateMs).toBe(10 * 8 * HOUR); // 01.10. bis 14.10.: 10 Arbeitstage
+        expect(t.diffMs).toBe(8 * HOUR - 80 * HOUR);
+        expect(t.weeks[2].diffMs).toBe(-24 * HOUR); // KW 42: Mo bis Mi ohne Arbeit
+        expect(t.weeks[3].diffMs).toBeNull(); // KW 43 liegt ganz in der Zukunft
+        expect(t.weeks[4].diffMs).toBeNull();
+    });
+
+    it("teilt die Woche am Jahreswechsel", () => {
+        const now = new Date("2027-02-01T12:00:00Z");
+        const december = monthTotals([], "2026-12", [], [], "2027-02-01", now);
+        const january = monthTotals([], "2027-01", [], [], "2027-02-01", now);
+        expect(december.weeks.at(-1)).toMatchObject({year: 2026, week: 53, targetMs: 4 * 8 * HOUR}); // Mo bis Do
+        expect(january.weeks[0]).toMatchObject({year: 2026, week: 53, targetMs: 8 * HOUR}); // nur Fr 01.01.
     });
 });

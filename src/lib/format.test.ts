@@ -1,6 +1,6 @@
 // src/lib/format.test.ts
 import {describe, expect, it} from "vitest";
-import {formatDifference, formatDuration} from "./format";
+import {formatDifference, formatDuration, formatMonth} from "./format";
 
 const MIN = 60_000;
 
@@ -28,5 +28,13 @@ describe("formatDifference", () => {
         expect(formatDifference(0)).toBe("±0 Min");
         expect(formatDifference(30_000)).toBe("±0 Min");
         expect(formatDifference(-30_000)).toBe("±0 Min");
+    });
+});
+
+describe("formatMonth", () => {
+    it("schreibt den Monat aus, auch am Jahresanfang und -ende", () => {
+        expect(formatMonth("2026-10")).toBe("Oktober 2026");
+        expect(formatMonth("2027-01")).toBe("Januar 2027");
+        expect(formatMonth("2026-12")).toBe("Dezember 2026");
     });
 });
