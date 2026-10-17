@@ -2,8 +2,8 @@ import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {Button} from "@/components/ui/button";
 import {deleteUser, fetchUsers} from "@/api/users";
 import type {User} from "@shared/user";
-import {UserCreateDialog} from "@features/users/pages/user-create-dialog";
-import {UserTable} from "@features/users/pages/user-table";
+import {UserCreateDialog} from "@features/users/components/user-create-dialog";
+import {UserTable} from "@features/users/components/user-table";
 
 export function Users() {
     const qc = useQueryClient();

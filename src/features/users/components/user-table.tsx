@@ -1,5 +1,5 @@
 import {Table, TableBody, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {UserRow} from "@features/users/pages/user-row";
+import {UserRow} from "@features/users/components/user-row";
 import type {User} from "@shared/user";
 
 type UserTableProps = {
