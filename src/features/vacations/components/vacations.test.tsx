@@ -34,7 +34,7 @@ function renderPage() {
     const router = createRouter({
         routeTree,
         defaultNotFoundComponent: NotFound,
-        history: createMemoryHistory({initialEntries: ["/user/reports/vacations"]}),
+        history: createMemoryHistory({initialEntries: ["/user/vacations"]}),
     });
     const queryClient = new QueryClient({defaultOptions: {queries: {retry: false}}});
     render(

@@ -21,7 +21,7 @@ const HEADINGS: Record<string, string> = {
     "/user/reports/daily": "Heute",
     "/user/reports/weekly": "Wochenbericht",
     "/user/reports/monthly": "Monatsbericht",
-    "/user/reports/vacations": "Urlaub",
+    "/user/vacations": "Urlaub",
     "/user/sick-leaves": "Krankmeldungen",
     "/user/projects": "Projekte",
     "/user/holidays": "Feiertage",

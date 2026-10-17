@@ -18,11 +18,11 @@ import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as UserIndexRouteImport } from './routes/user/index'
 import { Route as UserHolidaysRouteImport } from './routes/user/holidays'
 import { Route as UserSickLeavesRouteImport } from './routes/user/sick-leaves'
+import { Route as UserVacationsRouteImport } from './routes/user/vacations'
 import { Route as UserProjectsIndexRouteImport } from './routes/user/projects/index'
 import { Route as UserReportsIndexRouteImport } from './routes/user/reports/index'
 import { Route as UserReportsDailyRouteImport } from './routes/user/reports/daily'
 import { Route as UserReportsMonthlyRouteImport } from './routes/user/reports/monthly'
-import { Route as UserReportsVacationsRouteImport } from './routes/user/reports/vacations'
 import { Route as UserReportsWeeklyRouteImport } from './routes/user/reports/weekly'
 
 const IndexRoute = IndexRouteImport.update({
@@ -70,6 +70,11 @@ const UserSickLeavesRoute = UserSickLeavesRouteImport.update({
   path: '/user/sick-leaves',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UserVacationsRoute = UserVacationsRouteImport.update({
+  id: '/user/vacations',
+  path: '/user/vacations',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UserProjectsIndexRoute = UserProjectsIndexRouteImport.update({
   id: '/user/projects/',
   path: '/user/projects/',
@@ -90,11 +95,6 @@ const UserReportsMonthlyRoute = UserReportsMonthlyRouteImport.update({
   path: '/user/reports/monthly',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UserReportsVacationsRoute = UserReportsVacationsRouteImport.update({
-  id: '/user/reports/vacations',
-  path: '/user/reports/vacations',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const UserReportsWeeklyRoute = UserReportsWeeklyRouteImport.update({
   id: '/user/reports/weekly',
   path: '/user/reports/weekly',
@@ -109,11 +109,11 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminUsersRoute
   '/user/holidays': typeof UserHolidaysRoute
   '/user/sick-leaves': typeof UserSickLeavesRoute
+  '/user/vacations': typeof UserVacationsRoute
   '/admin/': typeof AdminIndexRoute
   '/user/': typeof UserIndexRoute
   '/user/reports/daily': typeof UserReportsDailyRoute
   '/user/reports/monthly': typeof UserReportsMonthlyRoute
-  '/user/reports/vacations': typeof UserReportsVacationsRoute
   '/user/reports/weekly': typeof UserReportsWeeklyRoute
   '/user/projects/': typeof UserProjectsIndexRoute
   '/user/reports/': typeof UserReportsIndexRoute
@@ -126,11 +126,11 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersRoute
   '/user/holidays': typeof UserHolidaysRoute
   '/user/sick-leaves': typeof UserSickLeavesRoute
+  '/user/vacations': typeof UserVacationsRoute
   '/admin': typeof AdminIndexRoute
   '/user': typeof UserIndexRoute
   '/user/reports/daily': typeof UserReportsDailyRoute
   '/user/reports/monthly': typeof UserReportsMonthlyRoute
-  '/user/reports/vacations': typeof UserReportsVacationsRoute
   '/user/reports/weekly': typeof UserReportsWeeklyRoute
   '/user/projects': typeof UserProjectsIndexRoute
   '/user/reports': typeof UserReportsIndexRoute
@@ -144,11 +144,11 @@ export interface FileRoutesById {
   '/admin/users': typeof AdminUsersRoute
   '/user/holidays': typeof UserHolidaysRoute
   '/user/sick-leaves': typeof UserSickLeavesRoute
+  '/user/vacations': typeof UserVacationsRoute
   '/admin/': typeof AdminIndexRoute
   '/user/': typeof UserIndexRoute
   '/user/reports/daily': typeof UserReportsDailyRoute
   '/user/reports/monthly': typeof UserReportsMonthlyRoute
-  '/user/reports/vacations': typeof UserReportsVacationsRoute
   '/user/reports/weekly': typeof UserReportsWeeklyRoute
   '/user/projects/': typeof UserProjectsIndexRoute
   '/user/reports/': typeof UserReportsIndexRoute
@@ -163,11 +163,11 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/user/holidays'
     | '/user/sick-leaves'
+    | '/user/vacations'
     | '/admin/'
     | '/user/'
     | '/user/reports/daily'
     | '/user/reports/monthly'
-    | '/user/reports/vacations'
     | '/user/reports/weekly'
     | '/user/projects/'
     | '/user/reports/'
@@ -180,11 +180,11 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/user/holidays'
     | '/user/sick-leaves'
+    | '/user/vacations'
     | '/admin'
     | '/user'
     | '/user/reports/daily'
     | '/user/reports/monthly'
-    | '/user/reports/vacations'
     | '/user/reports/weekly'
     | '/user/projects'
     | '/user/reports'
@@ -197,11 +197,11 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/user/holidays'
     | '/user/sick-leaves'
+    | '/user/vacations'
     | '/admin/'
     | '/user/'
     | '/user/reports/daily'
     | '/user/reports/monthly'
-    | '/user/reports/vacations'
     | '/user/reports/weekly'
     | '/user/projects/'
     | '/user/reports/'
@@ -215,11 +215,11 @@ export interface RootRouteChildren {
   AdminUsersRoute: typeof AdminUsersRoute
   UserHolidaysRoute: typeof UserHolidaysRoute
   UserSickLeavesRoute: typeof UserSickLeavesRoute
+  UserVacationsRoute: typeof UserVacationsRoute
   AdminIndexRoute: typeof AdminIndexRoute
   UserIndexRoute: typeof UserIndexRoute
   UserReportsDailyRoute: typeof UserReportsDailyRoute
   UserReportsMonthlyRoute: typeof UserReportsMonthlyRoute
-  UserReportsVacationsRoute: typeof UserReportsVacationsRoute
   UserReportsWeeklyRoute: typeof UserReportsWeeklyRoute
   UserProjectsIndexRoute: typeof UserProjectsIndexRoute
   UserReportsIndexRoute: typeof UserReportsIndexRoute
@@ -290,6 +290,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UserSickLeavesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/user/vacations': {
+      id: '/user/vacations'
+      path: '/user/vacations'
+      fullPath: '/user/vacations'
+      preLoaderRoute: typeof UserVacationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/user/projects/': {
       id: '/user/projects/'
       path: '/user/projects'
@@ -318,13 +325,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UserReportsMonthlyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/user/reports/vacations': {
-      id: '/user/reports/vacations'
-      path: '/user/reports/vacations'
-      fullPath: '/user/reports/vacations'
-      preLoaderRoute: typeof UserReportsVacationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/user/reports/weekly': {
       id: '/user/reports/weekly'
       path: '/user/reports/weekly'
@@ -343,11 +343,11 @@ const rootRouteChildren: RootRouteChildren = {
   AdminUsersRoute: AdminUsersRoute,
   UserHolidaysRoute: UserHolidaysRoute,
   UserSickLeavesRoute: UserSickLeavesRoute,
+  UserVacationsRoute: UserVacationsRoute,
   AdminIndexRoute: AdminIndexRoute,
   UserIndexRoute: UserIndexRoute,
   UserReportsDailyRoute: UserReportsDailyRoute,
   UserReportsMonthlyRoute: UserReportsMonthlyRoute,
-  UserReportsVacationsRoute: UserReportsVacationsRoute,
   UserReportsWeeklyRoute: UserReportsWeeklyRoute,
   UserProjectsIndexRoute: UserProjectsIndexRoute,
   UserReportsIndexRoute: UserReportsIndexRoute,

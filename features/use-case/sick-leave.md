@@ -13,8 +13,8 @@ kein Soll. Buchungen an Krankheitstagen bleiben gespeichert, zählen aber in kei
 
 Vorbild ist der Urlaub. Eine eigene Beschreibung gibt es dafür nicht, nur den Code:
 
-- Seite `../../src/features/reports/components/report-vacations-page.tsx`, Route `../../src/routes/user/reports/vacations.tsx`
-- Komponenten `../../src/features/vacations/components/` (`report-vacations.tsx`, `vacation-dialog.tsx`, `vacation-actions.tsx`)
+- Seite `../../src/features/vacations/components/vacations-page.tsx`, Route `../../src/routes/user/vacations.tsx`
+- Komponenten `../../src/features/vacations/components/` (`vacations-list.tsx`, `vacation-dialog.tsx`, `vacation-actions.tsx`)
 - Use Cases `../../src/features/vacations/use-cases/`
 - Services `../../shared/vacation-rules.ts`, Schema `../../shared/vacation.ts`, Function `../../netlify/functions/vacations.ts`
 
@@ -121,12 +121,12 @@ Gehen nach, ist der 15.10. weiter ein Krankheitstag mit Soll 0 und Arbeitszeit 0
 ## Bedienung
 
 Alles auf einer eigenen Seite im User-Bereich (wie „Feiertage“ unter `/user/holidays`), aufgebaut wie der
-Bericht „Urlaub“ (`report-vacations.tsx`).
+Seite „Urlaub“ (`vacations-list.tsx`).
 
-- **Menü:** Eintrag „Krankmeldungen“ nach `holidays`, Route `/user/sick-leaves`.
+- **Menü:** Eintrag „Krankmeldungen“ nach `vacations`, Route `/user/sick-leaves`.
 - **Kopf:** Überschrift „Krankmeldungen“. Darunter Name des Users, Jahr und Zahl der Einträge, z. B.
   „Jack · 2026 · 3 Einträge“. Rechts der Button „Krankmeldung eintragen“.
-- **Jahr wählen** wie im Bericht „Urlaub“: Pfeil „Vorheriges Jahr“ (←), Pfeil „Nächstes Jahr“ (→) und
+- **Jahr wählen** wie auf der Seite „Urlaub“: Pfeil „Vorheriges Jahr“ (←), Pfeil „Nächstes Jahr“ (→) und
   Button „Dieses Jahr“, deaktiviert, solange das laufende Jahr angezeigt wird. Beim Öffnen das laufende Jahr.
 - **Kennzahl:** eine Karte (`Summary`) „Krankheitstage“ mit der Gesamtzahl des Jahres nach Regel 4.
 - **Tabelle** (`DataTable`) mit allen Krankmeldungen, die zumindest teilweise im Jahr liegen,
@@ -194,7 +194,7 @@ durch die Krankmeldung.
 | Komponenten | `../../src/features/reports/components/report-daily-edit.tsx`, `../../src/features/reports/utils/day-kind-label.ts` | Buchungen an Krankheitstagen ausgegraut mit „zählt nicht (krank)“. Fall `"sick"` → „krank“.                                                                                                                                                                                                                                                                                                                         |
 | Seite       | `../../src/features/sick-leaves/components/sick-leaves-page.tsx`                                                    | neu: `SickLeavesPage`, wie `holidays-page.tsx`                                                                                                                                                                                                                                                                                                                                                                      |
 | Route       | `../../src/routes/user/sick-leaves.tsx`                                                                             | neu: `/user/sick-leaves`, bindet nur `SickLeavesPage` ein                                                                                                                                                                                                                                                                                                                                                           |
-| Menü        | `../../src/application/navigation/nav-items.ts`                                                                     | neue ID `sick-leaves`, Eintrag „Krankmeldungen“ nach `holidays`                                                                                                                                                                                                                                                                                                                                                     |
+| Menü        | `../../src/application/navigation/nav-items.ts`                                                                     | neue ID `sick-leaves`, Eintrag „Krankmeldungen“ nach `vacations`                                                                                                                                                                                                                                                                                                                                                    |
 
 Hinweise:
 

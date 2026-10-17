@@ -32,7 +32,7 @@ const columns: DataTableColumnDef<Row>[] = [
 
 const dayLabel = (n: number) => (n === 1 ? "1 Tag" : `${n} Tage`);
 
-export function ReportVacations() {
+export function VacationsList() {
     const [year, setYear] = useState(() => Number(localDay(new Date()).slice(0, 4)));
     const {currentUser, currentYear, rows, balance, isPending, error, retry} = useShowVacations(year);
     const loaded = !isPending && !error;
