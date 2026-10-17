@@ -1,5 +1,6 @@
 import {
     BaggageClaim,
+    CalendarClock,
     CalendarDays,
     CalendarHeart,
     CalendarRange,
@@ -63,7 +64,7 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     {id: "vacations", label: "Urlaube", icon: Parasol, to: "/user/vacations", children: []},
     {id: "sick-leaves", label: "Krankmeldungen", icon: Thermometer, to: "/user/sick-leaves", children: []},
     {id: "reports", label: "Report", icon: WorkflowIcon, to: "/user/reports", children: []},
-    {id: "reports-daily", label: "Heute", icon: WorkflowIcon, to: "/user/reports/daily", children: []},
+    {id: "reports-daily", label: "Heute", icon: CalendarClock, to: "/user/reports/daily", children: []},
     {id: "reports-weekly", label: "Woche", icon: CalendarDays, to: "/user/reports/weekly", children: []},
     {id: "reports-monthly", label: "Monat", icon: CalendarRange, to: "/user/reports/monthly", children: []},
 ] as const;
