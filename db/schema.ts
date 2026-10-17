@@ -14,6 +14,21 @@ export const vacations = mysqlTable(
     (t) => [index("idx_vacations_user_start").on(t.userId, t.startDate)],
 );
 
+// Krankmeldungen: Zeiträume ganzer Tage wie ein Urlaub. Buchungen an Krankheitstagen bleiben gespeichert.
+export const sickLeaves = mysqlTable(
+    "sick_leaves",
+    {
+        id: char("id", {length: 36}).primaryKey(),
+        userId: char("user_id", {length: 36})
+            .notNull()
+            .references(() => users.id),
+        startDate: date("start_date", {mode: "string"}).notNull(),
+        endDate: date("end_date", {mode: "string"}).notNull(), // inklusive
+        note: varchar("note", {length: 500}),
+    },
+    (t) => [index("idx_sick_leaves_user_start").on(t.userId, t.startDate)],
+);
+
 // Feiertage: ohne user_id gelten sie für alle, mit user_id nur für diesen User
 export const holidays = mysqlTable(
     "holidays",

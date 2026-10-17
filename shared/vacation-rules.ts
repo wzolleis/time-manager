@@ -18,12 +18,12 @@ export const dayCount = (start: string, end: string): number => Math.round((utc(
 /** Deutsches Datum: "2026-06-08" wird zu "08.06.2026" */
 export const germanDay = (day: string): string => day.split("-").reverse().join(".");
 
-/** null = gültig, sonst eine verständliche Fehlermeldung */
-export function checkRange(start: string, end: string): string | null {
+/** null = gültig, sonst eine verständliche Fehlermeldung. what nennt den Zeitraum in der Meldung zur Länge. */
+export function checkRange(start: string, end: string, what = "Ein Urlaub"): string | null {
     if (!isValidDay(start) || !isValidDay(end)) return "Ungültiges Datum";
     if (end < start) return "Das Ende liegt vor dem Beginn"; // ISO-Daten lassen sich als Text vergleichen
     if (dayCount(start, end) > MAX_VACATION_DAYS) {
-        return `Ein Urlaub darf höchstens ${MAX_VACATION_DAYS} Tage lang sein`;
+        return `${what} darf höchstens ${MAX_VACATION_DAYS} Tage lang sein`;
     }
     return null;
 }
@@ -60,8 +60,8 @@ export const VACATION_DAYS_PER_YEAR = 30;
 
 type DateRange = Pick<VacationRange, "startDate" | "endDate">;
 
-/** Der Teil des Urlaubs, der im Jahr liegt (sonst null) */
-function clipToYear(v: DateRange, year: number): DateRange | null {
+/** Der Teil des Zeitraums, der im Jahr liegt (sonst null) */
+export function clipToYear(v: DateRange, year: number): DateRange | null {
     const yearStart = `${year}-01-01`;
     const yearEnd = `${year}-12-31`;
     const startDate = v.startDate > yearStart ? v.startDate : yearStart;

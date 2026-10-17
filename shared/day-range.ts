@@ -51,3 +51,10 @@ export function isValidDay(day: string): boolean {
     const date = new Date(Date.UTC(y, m - 1, d));
     return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
 }
+
+/** Ein Zeitraum ganzer Tage ("JJJJ-MM-TT"), das Ende ist eingeschlossen */
+export type DayRange = {startDate: string; endDate: string};
+
+/** Liegt der Tag ("JJJJ-MM-TT") in einem der Zeiträume? Beginn und Ende zählen mit. */
+export const isInRanges = (day: string, ranges: DayRange[]): boolean =>
+    ranges.some((r) => r.startDate <= day && day <= r.endDate);
