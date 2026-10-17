@@ -38,7 +38,7 @@ const columns: DataTableColumnDef<Row>[] = [
 
 const dayLabel = (n: number) => (n === 1 ? "1 Tag" : `${n} Tage`);
 
-export function ReportSickLeaves() {
+export function SickLeavesList() {
     const [year, setYear] = useState(() => Number(localDay(new Date()).slice(0, 4)));
     const {currentUser, currentYear, rows, total, isPending, error, retry} = useShowSickLeaves(year);
     const loaded = !isPending && !error;

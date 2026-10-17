@@ -1,6 +1,6 @@
 ---
 name: sick-leave
-description: Beschreibt die Use Cases zur Krankmeldung. Der User trägt Krankheitstage ein, ändert und löscht sie und sieht sie im Bericht „Krankmeldungen“. Krankheitstage haben Soll 0, Buchungen an Krankheitstagen bleiben gespeichert, zählen aber nicht.
+description: Beschreibt die Use Cases zur Krankmeldung. Der User trägt Krankheitstage ein, ändert und löscht sie und sieht sie auf der Seite „Krankmeldungen“. Krankheitstage haben Soll 0, Buchungen an Krankheitstagen bleiben gespeichert, zählen aber nicht.
 ---
 
 # Krankmeldung
@@ -105,7 +105,7 @@ Feiertage im Beispiel: keine, zur Vereinfachung auch nicht Neujahr.
 | Mo 28.12.2026 – Fr 08.01.2027 | 12           | 10             | 2026: 4, 2027: 6 (Regel 4)     |
 
 **Krankheit im Urlaub:** Urlaub Mo 12.10. – Fr 23.10.2026 (10 Urlaubstage), krank Mi 14.10. – Fr 16.10.2026.
-Verbraucht werden 7 Urlaubstage, im Bericht „Krankmeldungen“ stehen 3 Krankheitstage.
+Verbraucht werden 7 Urlaubstage, auf der Seite „Krankmeldungen“ stehen 3 Krankheitstage.
 
 **Buchungen im Zeitraum:** Am Mi 14.10.2026 gibt es Kommen 08:00 und Gehen 12:00. Der User trägt eine
 Krankmeldung für den 14.10. ein. Der Dialog zeigt den Hinweis „Im Zeitraum gibt es 2 Buchungen. Sie
@@ -120,9 +120,10 @@ Gehen nach, ist der 15.10. weiter ein Krankheitstag mit Soll 0 und Arbeitszeit 0
 
 ## Bedienung
 
-Alles auf einer Seite unter den Berichten, aufgebaut wie der Bericht „Urlaub“ (`report-vacations.tsx`).
+Alles auf einer eigenen Seite im User-Bereich (wie „Feiertage“ unter `/user/holidays`), aufgebaut wie der
+Bericht „Urlaub“ (`report-vacations.tsx`).
 
-- **Menü:** Eintrag „Krankmeldungen“ nach `reports-vacations`, Route `/user/reports/sick-leaves`.
+- **Menü:** Eintrag „Krankmeldungen“ nach `holidays`, Route `/user/sick-leaves`.
 - **Kopf:** Überschrift „Krankmeldungen“. Darunter Name des Users, Jahr und Zahl der Einträge, z. B.
   „Jack · 2026 · 3 Einträge“. Rechts der Button „Krankmeldung eintragen“.
 - **Jahr wählen** wie im Bericht „Urlaub“: Pfeil „Vorheriges Jahr“ (←), Pfeil „Nächstes Jahr“ (→) und
@@ -167,7 +168,7 @@ durch die Krankmeldung.
 | Welche Daten werden geladen? | Krankmeldungen, Feiertage und Buchungen des Users                                                                                      |
 | Was kann schiefgehen?        | Laden schlägt fehl: Meldung mit „Erneut versuchen“. Regel verletzt: 422 mit Meldung.                                                   |
 | Was ist danach wahr?         | Die Krankmeldung ist gespeichert, die Buchungen sind unverändert. Invalidiert wird `["sick-leaves"]`, alle Berichte rechnen damit neu. |
-| Wer sieht das Ergebnis?      | Nur der User selbst, im Bericht „Krankmeldungen“ und in den übrigen Berichten über Soll und Arbeitszeit                                |
+| Wer sieht das Ergebnis?      | Nur der User selbst, auf der Seite „Krankmeldungen“ und in den Berichten über Soll und Arbeitszeit                                     |
 
 ## Umsetzung nach der Architektur
 
@@ -188,12 +189,12 @@ durch die Krankmeldung.
 | Use Cases   | `../../src/features/reports/use-cases/`                                                                             | laden zusätzlich `useSickLeaves` und reichen die Krankmeldungen an die Services weiter. Der Tagesbericht liefert je Buchung, ob sie ignoriert wird.                                                                                                                                                                                                                                                                 |
 | Use Cases   | `../../src/features/vacations/use-cases/`                                                                           | laden zusätzlich `useSickLeaves` für Regel 6                                                                                                                                                                                                                                                                                                                                                                        |
 | Use Cases   | `../../src/features/reports/use-cases/`                                                                             | laden zusätzlich `useSickLeaves`. `problem` bleibt unverändert. Neu `sickNotice(day)`: Hinweistext aus Regel 8 oder `null`. `useStampTime` liefert den Hinweis für heute.                                                                                                                                                                                                                                           |
-| Komponenten | `../../src/features/sick-leaves/components/`                                                                        | neu: `report-sick-leaves.tsx`, `sick-leave-dialog.tsx`, `sick-leave-actions.tsx`, zeigen nur an                                                                                                                                                                                                                                                                                                                     |
+| Komponenten | `../../src/features/sick-leaves/components/`                                                                        | neu: `sick-leaves-list.tsx`, `sick-leave-dialog.tsx`, `sick-leave-actions.tsx`, zeigen nur an                                                                                                                                                                                                                                                                                                                       |
 | Komponenten | `../../src/features/reports/components/`                                                                            | Stempelkarte, Nachtragen- und Bearbeiten-Dialog zeigen `sickNotice`                                                                                                                                                                                                                                                                                                                                                 |
 | Komponenten | `../../src/features/reports/components/report-daily-edit.tsx`, `../../src/features/reports/utils/day-kind-label.ts` | Buchungen an Krankheitstagen ausgegraut mit „zählt nicht (krank)“. Fall `"sick"` → „krank“.                                                                                                                                                                                                                                                                                                                         |
-| Seite       | `../../src/features/reports/components/report-sick-leaves-page.tsx`                                                 | neu: `ReportSickLeavesPage`, wie `report-vacations-page.tsx`                                                                                                                                                                                                                                                                                                                                                        |
-| Route       | `../../src/routes/user/reports/sick-leaves.tsx`                                                                     | neu: `/user/reports/sick-leaves`, bindet nur `ReportSickLeavesPage` ein                                                                                                                                                                                                                                                                                                                                             |
-| Menü        | `../../src/application/navigation/nav-items.ts`                                                                     | neue ID `reports-sick-leaves`, Eintrag „Krankmeldungen“ nach `reports-vacations`                                                                                                                                                                                                                                                                                                                                    |
+| Seite       | `../../src/features/sick-leaves/components/sick-leaves-page.tsx`                                                    | neu: `SickLeavesPage`, wie `holidays-page.tsx`                                                                                                                                                                                                                                                                                                                                                                      |
+| Route       | `../../src/routes/user/sick-leaves.tsx`                                                                             | neu: `/user/sick-leaves`, bindet nur `SickLeavesPage` ein                                                                                                                                                                                                                                                                                                                                                           |
+| Menü        | `../../src/application/navigation/nav-items.ts`                                                                     | neue ID `sick-leaves`, Eintrag „Krankmeldungen“ nach `holidays`                                                                                                                                                                                                                                                                                                                                                     |
 
 Hinweise:
 
@@ -217,4 +218,4 @@ Nach `../../agents/.agents/skills/architecture/testing.md`, jede Regel mit Gegen
   - `../../shared/vacation-rules.test.ts`: Beispiel „Krankheit im Urlaub“ (7 statt 10 Urlaubstage)
 - **Komponenten-Test** `../../src/features/sick-leaves/components/sick-leaves.test.tsx`: leere Tabelle mit
   „Keine Krankheitstage“, Hinweis auf Buchungen im Zeitraum
-- **Routing:** Eintrag `"/user/reports/sick-leaves": "Krankmeldungen"` in `../../src/tests/routes.test.tsx`
+- **Routing:** Eintrag `"/user/sick-leaves": "Krankmeldungen"` in `../../src/tests/routes.test.tsx`

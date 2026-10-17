@@ -34,7 +34,7 @@ function renderPage() {
     const router = createRouter({
         routeTree,
         defaultNotFoundComponent: NotFound,
-        history: createMemoryHistory({initialEntries: ["/user/reports/sick-leaves"]}),
+        history: createMemoryHistory({initialEntries: ["/user/sick-leaves"]}),
     });
     const queryClient = new QueryClient({defaultOptions: {queries: {retry: false}}});
     render(
