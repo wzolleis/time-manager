@@ -41,8 +41,11 @@ export function EntryActions({entry}: {entry: EntryRow}) {
         setOpen(next);
     };
 
+    const problem = update.problem({entry, time});
+
     const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>): void => {
         e.preventDefault();
+        if (problem) return;
         update.change(
             {entry, time, projectId: projectChoice === NO_PROJECT ? null : projectChoice},
             {onSuccess: () => setOpen(false)},
@@ -98,6 +101,7 @@ export function EntryActions({entry}: {entry: EntryRow}) {
                             </div>
                         )}
 
+                        {problem && <p className="text-sm text-destructive">{problem}</p>}
                         {update.error && (
                             <p role="alert" className="text-sm text-destructive">
                                 {update.error.message}
@@ -108,7 +112,7 @@ export function EntryActions({entry}: {entry: EntryRow}) {
                             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                                 Abbrechen
                             </Button>
-                            <Button type="submit" disabled={update.isSaving}>
+                            <Button type="submit" disabled={update.isSaving || problem !== null}>
                                 {update.isSaving ? "Speichere…" : "Speichern"}
                             </Button>
                         </DialogFooter>
