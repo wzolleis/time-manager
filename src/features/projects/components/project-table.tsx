@@ -1,5 +1,5 @@
 import {Table, TableBody, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {ProjectRow} from "@features/projects/pages/project-row";
+import {ProjectRow} from "@features/projects/components/project-row";
 import type {Project} from "@shared/project";
 
 type ProjectTableProps = {
