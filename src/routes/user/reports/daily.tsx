@@ -1,5 +1,5 @@
 import {createFileRoute} from "@tanstack/react-router";
-import {ReportDailyPage} from "@features/reports/pages/report-daily-page";
+import {ReportDailyPage} from "@features/reports/components/report-daily-page";
 
 export const Route = createFileRoute("/user/reports/daily")({
     component: ReportDailyPage,

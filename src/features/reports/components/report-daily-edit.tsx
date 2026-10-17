@@ -15,7 +15,7 @@ import {localDay} from "@shared/time-rules";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {EntryActions, type EntryRow} from "@features/time-stamp/components/time-entry-actions";
 import {Summary} from "@features/reports/components/report-daily";
-import {dayKindLabel} from "@features/reports/day-kind-label";
+import {dayKindLabel} from "@features/reports/components/day-kind-label";
 import {dayKind, targetMs} from "@shared/target-hours";
 import {holidayOn} from "@shared/holiday-rules";
 import {nextType} from "@shared/time-rules";

@@ -15,7 +15,7 @@ import {localDay} from "@shared/time-rules";
 import {isoWeek, weekDays} from "@shared/week";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {Summary} from "@features/reports/components/report-daily";
-import {dayKindLabel} from "@features/reports/day-kind-label";
+import {dayKindLabel} from "@features/reports/components/day-kind-label";
 
 type DayRow = {
     day: string; // "JJJJ-MM-TT", sortiert richtig
