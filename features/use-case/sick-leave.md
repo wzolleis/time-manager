@@ -13,21 +13,21 @@ kein Soll. Buchungen an Krankheitstagen bleiben gespeichert, zählen aber in kei
 
 Vorbild ist der Urlaub. Eine eigene Beschreibung gibt es dafür nicht, nur den Code:
 
-- Seite `src/features/reports/components/report-vacations-page.tsx`, Route `src/routes/user/reports/vacations.tsx`
-- Komponenten `src/features/vacations/components/` (`report-vacations.tsx`, `vacation-dialog.tsx`, `vacation-actions.tsx`)
-- Use Cases `src/features/vacations/use-cases/`
-- Services `shared/vacation-rules.ts`, Schema `shared/vacation.ts`, Function `netlify/functions/vacations.ts`
+- Seite `../../src/features/reports/components/report-vacations-page.tsx`, Route `../../src/routes/user/reports/vacations.tsx`
+- Komponenten `../../src/features/vacations/components/` (`report-vacations.tsx`, `vacation-dialog.tsx`, `vacation-actions.tsx`)
+- Use Cases `../../src/features/vacations/use-cases/`
+- Services `../../shared/vacation-rules.ts`, Schema `../../shared/vacation.ts`, Function `../../netlify/functions/vacations.ts`
 
-Umgesetzt wird nach dem Skill `architecture` (`agents/.agents/skills/architecture`), zuerst `use-case.md` lesen.
+Umgesetzt wird nach dem Skill `architecture` (`../../agents/.agents/skills/architecture`), zuerst `../../agents/.agents/skills/architecture/use-case.md` lesen.
 
 ## Use Cases
 
-| Use Case                                    | Hook                  |
-|---------------------------------------------|-----------------------|
-| Der User sieht seine Krankmeldungen.        | `useShowSickLeaves`   |
-| Der User trägt eine Krankmeldung ein.       | `useAddSickLeave`     |
-| Der User ändert eine Krankmeldung.          | `useChangeSickLeave`  |
-| Der User löscht eine Krankmeldung.          | `useDeleteSickLeave`  |
+| Use Case                              | Hook                 |
+|---------------------------------------|----------------------|
+| Der User sieht seine Krankmeldungen.  | `useShowSickLeaves`  |
+| Der User trägt eine Krankmeldung ein. | `useAddSickLeave`    |
+| Der User ändert eine Krankmeldung.    | `useChangeSickLeave` |
+| Der User löscht eine Krankmeldung.    | `useDeleteSickLeave` |
 
 Dazu kommen Änderungen an vorhandenen Use Cases:
 
@@ -41,13 +41,13 @@ Dazu kommen Änderungen an vorhandenen Use Cases:
 
 Eine Krankmeldung ist ein Zeitraum ganzer Tage, wie ein Urlaub:
 
-| Feld        | Typ                      | Inhalt                                              |
-|-------------|--------------------------|-----------------------------------------------------|
-| `id`        | UUID                     |                                                     |
-| `userId`    | UUID                     | der kranke User                                     |
-| `startDate` | Tag `JJJJ-MM-TT`         | erster Krankheitstag                                |
-| `endDate`   | Tag `JJJJ-MM-TT`         | letzter Krankheitstag, inklusive                    |
-| `note`      | Text, optional, max. 500 | Notiz des Users, z. B. „Attest liegt vor“           |
+| Feld        | Typ                      | Inhalt                                    |
+|-------------|--------------------------|-------------------------------------------|
+| `id`        | UUID                     |                                           |
+| `userId`    | UUID                     | der kranke User                           |
+| `startDate` | Tag `JJJJ-MM-TT`         | erster Krankheitstag                      |
+| `endDate`   | Tag `JJJJ-MM-TT`         | letzter Krankheitstag, inklusive          |
+| `note`      | Text, optional, max. 500 | Notiz des Users, z. B. „Attest liegt vor“ |
 
 Tabelle `sick_leaves`, im Code `SickLeave`, wie `vacations` / `Vacation`. Die Buchungen
 (`time_entries`) ändern sich durch eine Krankmeldung nicht.
@@ -97,12 +97,12 @@ Tabelle `sick_leaves`, im Code `SickLeave`, wie `vacations` / `Vacation`. Die Bu
 
 Feiertage im Beispiel: keine, zur Vereinfachung auch nicht Neujahr.
 
-| Krankmeldung                     | Kalendertage | Krankheitstage | Grund                          |
-|----------------------------------|--------------|----------------|--------------------------------|
-| Mi 14.10.2026                    | 1            | 1              |                                |
-| Mi 14.10.2026 – Di 20.10.2026    | 7            | 5              | Sa 17. und So 18. zählen nicht |
-| Sa 17.10.2026 – So 18.10.2026    | 2            | 0              | nur Wochenende                 |
-| Mo 28.12.2026 – Fr 08.01.2027    | 12           | 10             | 2026: 4, 2027: 6 (Regel 4)     |
+| Krankmeldung                  | Kalendertage | Krankheitstage | Grund                          |
+|-------------------------------|--------------|----------------|--------------------------------|
+| Mi 14.10.2026                 | 1            | 1              |                                |
+| Mi 14.10.2026 – Di 20.10.2026 | 7            | 5              | Sa 17. und So 18. zählen nicht |
+| Sa 17.10.2026 – So 18.10.2026 | 2            | 0              | nur Wochenende                 |
+| Mo 28.12.2026 – Fr 08.01.2027 | 12           | 10             | 2026: 4, 2027: 6 (Regel 4)     |
 
 **Krankheit im Urlaub:** Urlaub Mo 12.10. – Fr 23.10.2026 (10 Urlaubstage), krank Mi 14.10. – Fr 16.10.2026.
 Verbraucht werden 7 Urlaubstage, im Bericht „Krankmeldungen“ stehen 3 Krankheitstage.
@@ -131,14 +131,14 @@ Alles auf einer Seite unter den Berichten, aufgebaut wie der Bericht „Urlaub�
 - **Tabelle** (`DataTable`) mit allen Krankmeldungen, die zumindest teilweise im Jahr liegen,
   aufsteigend nach Beginn:
 
-  | Spalte         | Inhalt                                           |
-  |----------------|--------------------------------------------------|
-  | Beginn         | `TT.MM.JJJJ`                                     |
-  | Ende           | `TT.MM.JJJJ`                                     |
-  | Kalendertage   | `dayCount`                                       |
-  | Krankheitstage | Arbeitstage im ganzen Zeitraum (`countWorkdays`) |
-  | Notiz          | Notiz oder leer                                  |
-  | (Aktionen)     | „Bearbeiten“ und „Löschen“                       |
+| Spalte         | Inhalt                                           |
+|----------------|--------------------------------------------------|
+| Beginn         | `TT.MM.JJJJ`                                     |
+| Ende           | `TT.MM.JJJJ`                                     |
+| Kalendertage   | `dayCount`                                       |
+| Krankheitstage | Arbeitstage im ganzen Zeitraum (`countWorkdays`) |
+| Notiz          | Notiz oder leer                                  |
+| (Aktionen)     | „Bearbeiten“ und „Löschen“                       |
 
   Ohne Einträge wird die leere Tabelle mit dem Hinweis „Keine Krankheitstage“ gezeigt.
 - **Dialog** zum Eintragen und Bearbeiten wie `vacation-dialog.tsx`: Felder Beginn, Ende und Notiz.
@@ -152,48 +152,48 @@ Alles auf einer Seite unter den Berichten, aufgebaut wie der Bericht „Urlaub�
   Stempeln, wenn heute ein Krankheitstag ist.
 - **Tagesbericht:** Buchungen an einem Krankheitstag werden weiter angezeigt, aber ausgegraut und mit
   „zählt nicht (krank)“ markiert. Bearbeiten und Löschen bleiben möglich.
-- **Laden und Fehler** wie in `views.md`: „Lade…“, bei einem Fehler die Meldung mit „Erneut versuchen“.
+- **Laden und Fehler** wie in `../../agents/.agents/skills/architecture/views.md`: „Lade…“, bei einem Fehler die Meldung mit „Erneut versuchen“.
 
 Nicht dabei: halbe Tage, Upload eines Attests, Krankmeldung für andere User, Löschen von Buchungen
 durch die Krankmeldung.
 
 ## Fragen zum Use Case
 
-| Frage                         | Antwort                                                                                     |
-|-------------------------------|---------------------------------------------------------------------------------------------|
-| Wer möchte was?               | Der User sieht, trägt ein, ändert und löscht seine Krankmeldungen (Hooks siehe oben)        |
-| Wer darf das?                 | Jeder User für sich selbst, im User-Bereich. Der Server prüft.                              |
-| Welche Regeln gelten?         | Regeln 1 bis 9 oben, als Services in `shared/`. Die Function prüft sie noch einmal.         |
-| Welche Daten werden geladen?  | Krankmeldungen, Feiertage und Buchungen des Users                                           |
-| Was kann schiefgehen?         | Laden schlägt fehl: Meldung mit „Erneut versuchen“. Regel verletzt: 422 mit Meldung.        |
-| Was ist danach wahr?          | Die Krankmeldung ist gespeichert, die Buchungen sind unverändert. Invalidiert wird `["sick-leaves"]`, alle Berichte rechnen damit neu. |
-| Wer sieht das Ergebnis?       | Nur der User selbst, im Bericht „Krankmeldungen“ und in den übrigen Berichten über Soll und Arbeitszeit |
+| Frage                        | Antwort                                                                                                                                |
+|------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| Wer möchte was?              | Der User sieht, trägt ein, ändert und löscht seine Krankmeldungen (Hooks siehe oben)                                                   |
+| Wer darf das?                | Jeder User für sich selbst, im User-Bereich. Der Server prüft.                                                                         |
+| Welche Regeln gelten?        | Regeln 1 bis 9 oben, als Services in `../../shared/`. Die Function prüft sie noch einmal.                                              |
+| Welche Daten werden geladen? | Krankmeldungen, Feiertage und Buchungen des Users                                                                                      |
+| Was kann schiefgehen?        | Laden schlägt fehl: Meldung mit „Erneut versuchen“. Regel verletzt: 422 mit Meldung.                                                   |
+| Was ist danach wahr?         | Die Krankmeldung ist gespeichert, die Buchungen sind unverändert. Invalidiert wird `["sick-leaves"]`, alle Berichte rechnen damit neu. |
+| Wer sieht das Ergebnis?      | Nur der User selbst, im Bericht „Krankmeldungen“ und in den übrigen Berichten über Soll und Arbeitszeit                                |
 
 ## Umsetzung nach der Architektur
 
-| Baustein   | Datei                                                             | Inhalt                                                                                   |
-|------------|-------------------------------------------------------------------|------------------------------------------------------------------------------------------|
-| Schema     | `db/schema.ts`, neue Migration in `db/migrations/`                | neu: Tabelle `sick_leaves` mit Index auf `user_id, start_date`, wie `vacations`          |
-| Schema     | `shared/sick-leave.ts`                                            | neu: `SickLeave`, `SickLeaveCreate`, `SickLeaveUpdate` mit drizzle-zod, wie `shared/vacation.ts` |
-| Service    | `shared/sick-leave-rules.ts`                                      | neu: `checkSickLeave(existing, candidate)` (Regeln 2, 3), `isSickDay(day, sickLeaves)`, `sickDaysInYear(sickLeaves, year, holidays)`, `withoutSickDays(entries, sickLeaves)` (Buchungen außerhalb von Krankheitstagen, nur für die Summen nach Regel 7). `checkRange`, `dayCount`, `countWorkdays` aus `vacation-rules.ts` wiederverwenden, Range-Funktionen bei Bedarf in `shared/day-range.ts` verschieben. |
-| Service    | `shared/target-hours.ts`                                          | `DayKind` um `"sick"` erweitern. `dayKind` und `targetMs` bekommen die Krankmeldungen als Parameter. |
-| Service    | `shared/time-report.ts`                                           | `dayTotals`, `weekTotals`, `monthTotals` bekommen die Krankmeldungen als Parameter und summieren nur `withoutSickDays(entries, …)`. `firstBookingDay` weiter mit allen Buchungen. |
-| Service    | `shared/vacation-rules.ts`                                        | `workdaysInYear`, `vacationBalance`, `checkYearLimit` lassen Krankheitstage aus (Regel 6) |
-| Service    | `shared/time-rules.ts`                                            | unverändert. `checkSequence`, `findMissingGehen`, `findPartner` und `firstBookingDay` bekommen weiter alle Buchungen. |
-| Function   | `netlify/functions/sick-leaves.ts`                                | neu: `GET/POST /api/sick-leaves`, `GET/PATCH/DELETE /api/sick-leaves/:id`, wie `vacations.ts`. Die Buchungen werden nicht geprüft und nicht geändert. |
-| Function   | `netlify/functions/vacations.ts`                                  | Jahresgrenze ohne Krankheitstage (Regel 6)                                               |
-| API        | `src/api/sick-leaves.ts`                                          | neu: `fetchSickLeaves`, `createSickLeave`, `updateSickLeave`, `deleteSickLeave`          |
-| View       | `src/views/sick-leaves.ts`                                        | neu: `useSickLeaves(userId)`, Key `["sick-leaves", userId]`                              |
-| Use Cases  | `src/features/sick-leaves/use-cases/`                             | neu: `use-show-sick-leaves.ts`, `use-add-sick-leave.ts`, `use-change-sick-leave.ts`, `use-delete-sick-leave.ts`. Add und Change liefern `problem` und `entriesInRange` (Zahl für den Hinweis). Alle invalidieren nur `["sick-leaves"]`. |
-| Use Cases  | `src/features/reports/use-cases/`                                 | laden zusätzlich `useSickLeaves` und reichen die Krankmeldungen an die Services weiter. Der Tagesbericht liefert je Buchung, ob sie ignoriert wird. |
-| Use Cases  | `src/features/vacations/use-cases/`                               | laden zusätzlich `useSickLeaves` für Regel 6                                             |
-| Use Cases  | `src/features/time-stamp/use-cases/`                              | laden zusätzlich `useSickLeaves`. `problem` bleibt unverändert. Neu `sickNotice(day)`: Hinweistext aus Regel 8 oder `null`. `useStampTime` liefert den Hinweis für heute. |
-| Komponenten| `src/features/sick-leaves/components/`                            | neu: `report-sick-leaves.tsx`, `sick-leave-dialog.tsx`, `sick-leave-actions.tsx`, zeigen nur an |
-| Komponenten| `src/features/time-stamp/components/`                             | Stempelkarte, Nachtragen- und Bearbeiten-Dialog zeigen `sickNotice`                      |
-| Komponenten| `src/features/reports/components/report-daily-edit.tsx`, `src/features/reports/utils/day-kind-label.ts` | Buchungen an Krankheitstagen ausgegraut mit „zählt nicht (krank)“. Fall `"sick"` → „krank“. |
-| Seite      | `src/features/reports/components/report-sick-leaves-page.tsx`     | neu: `ReportSickLeavesPage`, wie `report-vacations-page.tsx`                             |
-| Route      | `src/routes/user/reports/sick-leaves.tsx`                         | neu: `/user/reports/sick-leaves`, bindet nur `ReportSickLeavesPage` ein                  |
-| Menü       | `src/application/navigation/nav-items.ts`                         | neue ID `reports-sick-leaves`, Eintrag „Krankmeldungen“ nach `reports-vacations`         |
+| Baustein    | Datei                                                                                                               | Inhalt                                                                                                                                                                                                                                                                                                                                                                                                              |
+|-------------|---------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Schema      | `../../db/schema.ts`, neue Migration in `../../db/migrations/`                                                      | neu: Tabelle `sick_leaves` mit Index auf `user_id, start_date`, wie `vacations`                                                                                                                                                                                                                                                                                                                                     |
+| Schema      | `../../shared/sick-leave.ts`                                                                                        | neu: `SickLeave`, `SickLeaveCreate`, `SickLeaveUpdate` mit drizzle-zod, wie `../../shared/vacation.ts`                                                                                                                                                                                                                                                                                                              |
+| Service     | `../../shared/sick-leave-rules.ts`                                                                                  | neu: `checkSickLeave(existing, candidate)` (Regeln 2, 3), `isSickDay(day, sickLeaves)`, `sickDaysInYear(sickLeaves, year, holidays)`, `withoutSickDays(entries, sickLeaves)` (Buchungen außerhalb von Krankheitstagen, nur für die Summen nach Regel 7). `checkRange`, `dayCount`, `countWorkdays` aus `vacation-rules.ts` wiederverwenden, Range-Funktionen bei Bedarf in `../../shared/day-range.ts` verschieben. |
+| Service     | `../../shared/target-hours.ts`                                                                                      | `DayKind` um `"sick"` erweitern. `dayKind` und `targetMs` bekommen die Krankmeldungen als Parameter.                                                                                                                                                                                                                                                                                                                |
+| Service     | `../../shared/time-report.ts`                                                                                       | `dayTotals`, `weekTotals`, `monthTotals` bekommen die Krankmeldungen als Parameter und summieren nur `withoutSickDays(entries, …)`. `firstBookingDay` weiter mit allen Buchungen.                                                                                                                                                                                                                                   |
+| Service     | `../../shared/vacation-rules.ts`                                                                                    | `workdaysInYear`, `vacationBalance`, `checkYearLimit` lassen Krankheitstage aus (Regel 6)                                                                                                                                                                                                                                                                                                                           |
+| Service     | `../../shared/time-rules.ts`                                                                                        | unverändert. `checkSequence`, `findMissingGehen`, `findPartner` und `firstBookingDay` bekommen weiter alle Buchungen.                                                                                                                                                                                                                                                                                               |
+| Function    | `../../netlify/functions/sick-leaves.ts`                                                                            | neu: `GET/POST /api/sick-leaves`, `GET/PATCH/DELETE /api/sick-leaves/:id`, wie `vacations.ts`. Die Buchungen werden nicht geprüft und nicht geändert.                                                                                                                                                                                                                                                               |
+| Function    | `../../netlify/functions/vacations.ts`                                                                              | Jahresgrenze ohne Krankheitstage (Regel 6)                                                                                                                                                                                                                                                                                                                                                                          |
+| API         | `../../src/api/sick-leaves.ts`                                                                                      | neu: `fetchSickLeaves`, `createSickLeave`, `updateSickLeave`, `deleteSickLeave`                                                                                                                                                                                                                                                                                                                                     |
+| View        | `../../src/views/sick-leaves.ts`                                                                                    | neu: `useSickLeaves(userId)`, Key `["sick-leaves", userId]`                                                                                                                                                                                                                                                                                                                                                         |
+| Use Cases   | `../../src/features/sick-leaves/use-cases/`                                                                         | neu: `use-show-sick-leaves.ts`, `use-add-sick-leave.ts`, `use-change-sick-leave.ts`, `use-delete-sick-leave.ts`. Add und Change liefern `problem` und `entriesInRange` (Zahl für den Hinweis). Alle invalidieren nur `["sick-leaves"]`.                                                                                                                                                                             |
+| Use Cases   | `../../src/features/reports/use-cases/`                                                                             | laden zusätzlich `useSickLeaves` und reichen die Krankmeldungen an die Services weiter. Der Tagesbericht liefert je Buchung, ob sie ignoriert wird.                                                                                                                                                                                                                                                                 |
+| Use Cases   | `../../src/features/vacations/use-cases/`                                                                           | laden zusätzlich `useSickLeaves` für Regel 6                                                                                                                                                                                                                                                                                                                                                                        |
+| Use Cases   | `../../src/features/time-stamp/use-cases/`                                                                          | laden zusätzlich `useSickLeaves`. `problem` bleibt unverändert. Neu `sickNotice(day)`: Hinweistext aus Regel 8 oder `null`. `useStampTime` liefert den Hinweis für heute.                                                                                                                                                                                                                                           |
+| Komponenten | `../../src/features/sick-leaves/components/`                                                                        | neu: `report-sick-leaves.tsx`, `sick-leave-dialog.tsx`, `sick-leave-actions.tsx`, zeigen nur an                                                                                                                                                                                                                                                                                                                     |
+| Komponenten | `../../src/features/time-stamp/components/`                                                                         | Stempelkarte, Nachtragen- und Bearbeiten-Dialog zeigen `sickNotice`                                                                                                                                                                                                                                                                                                                                                 |
+| Komponenten | `../../src/features/reports/components/report-daily-edit.tsx`, `../../src/features/reports/utils/day-kind-label.ts` | Buchungen an Krankheitstagen ausgegraut mit „zählt nicht (krank)“. Fall `"sick"` → „krank“.                                                                                                                                                                                                                                                                                                                         |
+| Seite       | `../../src/features/reports/components/report-sick-leaves-page.tsx`                                                 | neu: `ReportSickLeavesPage`, wie `report-vacations-page.tsx`                                                                                                                                                                                                                                                                                                                                                        |
+| Route       | `../../src/routes/user/reports/sick-leaves.tsx`                                                                     | neu: `/user/reports/sick-leaves`, bindet nur `ReportSickLeavesPage` ein                                                                                                                                                                                                                                                                                                                                             |
+| Menü        | `../../src/application/navigation/nav-items.ts`                                                                     | neue ID `reports-sick-leaves`, Eintrag „Krankmeldungen“ nach `reports-vacations`                                                                                                                                                                                                                                                                                                                                    |
 
 Hinweise:
 
@@ -205,16 +205,16 @@ Hinweise:
 
 ## Tests
 
-Nach `testing.md`, jede Regel mit Gegenprobe (Regel absichtlich brechen, Test muss fehlschlagen):
+Nach `../../agents/.agents/skills/architecture/testing.md`, jede Regel mit Gegenprobe (Regel absichtlich brechen, Test muss fehlschlagen):
 
 - **Service-Tests** ohne Mocks:
-  - `shared/sick-leave-rules.test.ts`: Regeln 2 und 3 (auch Ändern ohne Vergleich mit sich selbst),
+  - `../../shared/sick-leave-rules.test.ts`: Regeln 2 und 3 (auch Ändern ohne Vergleich mit sich selbst),
     Krankheitstage aus den Beispielen inklusive Jahreswechsel, `withoutSickDays`
-  - `shared/target-hours.test.ts`: `dayKind` = `"sick"`, Reihenfolge gegenüber Wochenende, Feiertag,
+  - `../../shared/target-hours.test.ts`: `dayKind` = `"sick"`, Reihenfolge gegenüber Wochenende, Feiertag,
     Urlaub und Beginn der Zeiterfassung, `targetMs` = 0
-  - `shared/time-report.test.ts`: Tag mit Buchungen und Krankmeldung hat Arbeitszeit 0 und Differenz 0,
+  - `../../shared/time-report.test.ts`: Tag mit Buchungen und Krankmeldung hat Arbeitszeit 0 und Differenz 0,
     ohne Krankmeldung zählen dieselben Buchungen wieder, Woche und Monat summieren ohne den Krankheitstag
-  - `shared/vacation-rules.test.ts`: Beispiel „Krankheit im Urlaub“ (7 statt 10 Urlaubstage)
-- **Komponenten-Test** `src/features/sick-leaves/components/sick-leaves.test.tsx`: leere Tabelle mit
+  - `../../shared/vacation-rules.test.ts`: Beispiel „Krankheit im Urlaub“ (7 statt 10 Urlaubstage)
+- **Komponenten-Test** `../../src/features/sick-leaves/components/sick-leaves.test.tsx`: leere Tabelle mit
   „Keine Krankheitstage“, Hinweis auf Buchungen im Zeitraum
-- **Routing:** Eintrag `"/user/reports/sick-leaves": "Krankmeldungen"` in `src/tests/routes.test.tsx`
+- **Routing:** Eintrag `"/user/reports/sick-leaves": "Krankmeldungen"` in `../../src/tests/routes.test.tsx`

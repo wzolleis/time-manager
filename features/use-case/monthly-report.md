@@ -17,7 +17,7 @@ Vorbild ist der Wochenbericht. Eine eigene Beschreibung gibt es dafür nicht, nu
 - Use Case `../../src/features/reports/use-cases/use-show-weekly-report.ts`
 - Service `weekTotals` in `../../shared/time-report.ts`
 
-Umgesetzt wird nach dem Skill `architecture` (`../../agents/.agents/skills/architecture`), zuerst `use-case.md` lesen.
+Umgesetzt wird nach dem Skill `architecture` (`../../agents/.agents/skills/architecture`), zuerst `../../agents/.agents/skills/architecture/use-case.md` lesen.
 
 ## Inhalt
 
@@ -26,12 +26,12 @@ Umgesetzt wird nach dem Skill `architecture` (`../../agents/.agents/skills/archi
 Angezeigt werden alle Kalenderwochen, die mindestens einen Tag im gewählten Monat haben, aufsteigend
 sortiert. Spalten:
 
-| Spalte      | Inhalt                                                                  |
-|-------------|-------------------------------------------------------------------------|
-| Woche       | `KW <n>/<Jahr> (<von>–<bis>)`                                           |
-| Soll        | Summe des Tagessolls der Tage dieser Woche im Monat                     |
-| Arbeitszeit | Summe der Arbeitszeit der Tage dieser Woche im Monat                    |
-| Differenz   | Arbeitszeit minus Soll der vergangenen Tage, siehe [Regeln](#regeln)    |
+| Spalte      | Inhalt                                                               |
+|-------------|----------------------------------------------------------------------|
+| Woche       | `KW <n>/<Jahr> (<von>–<bis>)`                                        |
+| Soll        | Summe des Tagessolls der Tage dieser Woche im Monat                  |
+| Arbeitszeit | Summe der Arbeitszeit der Tage dieser Woche im Monat                 |
+| Differenz   | Arbeitszeit minus Soll der vergangenen Tage, siehe [Regeln](#regeln) |
 
 Eine Woche, die bis heute weder Soll noch Arbeitszeit hat (z. B. ganz vor dem Beginn der Zeiterfassung
 oder nur ein Sonntag am Monatsende), zeigt „–“ als Differenz, so wie ein freier Tag im Wochenbericht.
@@ -78,13 +78,13 @@ Drei Karten wie im Wochenbericht (Komponente `Summary` aus `../../src/components
 
 **Oktober 2026** (01.10. ist ein Donnerstag, 31.10. ein Samstag):
 
-| Woche                       | Tage im Monat |
-|-----------------------------|---------------|
-| KW 40/2026 (01.10.–04.10.)  | 4             |
-| KW 41/2026 (05.10.–11.10.)  | 7             |
-| KW 42/2026 (12.10.–18.10.)  | 7             |
-| KW 43/2026 (19.10.–25.10.)  | 7             |
-| KW 44/2026 (26.10.–31.10.)  | 6             |
+| Woche                      | Tage im Monat |
+|----------------------------|---------------|
+| KW 40/2026 (01.10.–04.10.) | 4             |
+| KW 41/2026 (05.10.–11.10.) | 7             |
+| KW 42/2026 (12.10.–18.10.) | 7             |
+| KW 43/2026 (19.10.–25.10.) | 7             |
+| KW 44/2026 (26.10.–31.10.) | 6             |
 
 KW 40 beginnt eigentlich am 28.09., KW 44 endet eigentlich am 01.11. Diese Tage zählen nicht.
 
@@ -108,55 +108,55 @@ Differenz, KW 42 hat das Soll von Mittwoch bis Freitag. Ein Monat vor dem 14.10.
   - Button „Dieser Monat“, entspricht „Diese Woche“ im Wochenbericht: springt zurück zum laufenden
     Monat und ist deaktiviert, solange der laufende Monat angezeigt wird
 - Beim Öffnen zeigt der Bericht den laufenden Monat.
-- Laden und Fehler wie in `views.md`: „Lade…“, bei einem Fehler die Meldung mit „Erneut versuchen“
+- Laden und Fehler wie in `../../agents/.agents/skills/architecture/views.md`: „Lade…“, bei einem Fehler die Meldung mit „Erneut versuchen“
   (`ReportError` aus `../../src/features/reports/components/report-error.tsx`).
 
 ## Fragen zum Use Case
 
-| Frage                         | Antwort                                                                |
-|-------------------------------|------------------------------------------------------------------------|
-| Wer möchte was?               | Der User sieht seinen Monatsbericht: `useShowMonthlyReport`            |
-| Wer darf das?                 | Jeder User für sich selbst, im User-Bereich. Der Server prüft.         |
-| Welche Regeln gelten?         | Regeln 1 bis 6 oben, als Service in `../../shared`                          |
-| Welche Daten werden geladen?  | Buchungen, Urlaube und Feiertage des Users                             |
-| Was kann schiefgehen?         | Laden schlägt fehl: Meldung mit „Erneut versuchen“                     |
-| Was ist danach wahr?          | Nichts, der Use Case liest nur                                         |
-| Wer sieht das Ergebnis?       | Nur der User selbst                                                    |
+| Frage                        | Antwort                                                        |
+|------------------------------|----------------------------------------------------------------|
+| Wer möchte was?              | Der User sieht seinen Monatsbericht: `useShowMonthlyReport`    |
+| Wer darf das?                | Jeder User für sich selbst, im User-Bereich. Der Server prüft. |
+| Welche Regeln gelten?        | Regeln 1 bis 6 oben, als Service in `../../shared/`            |
+| Welche Daten werden geladen? | Buchungen, Urlaube und Feiertage des Users                     |
+| Was kann schiefgehen?        | Laden schlägt fehl: Meldung mit „Erneut versuchen“             |
+| Was ist danach wahr?         | Nichts, der Use Case liest nur                                 |
+| Wer sieht das Ergebnis?      | Nur der User selbst                                            |
 
 ## Umsetzung nach der Architektur
 
 Lesender Use Case: Views und ein Service, kein Repository.
 
-| Baustein   | Datei                                                         | Inhalt                                                       |
-|------------|---------------------------------------------------------------|--------------------------------------------------------------|
-| Views      | `../../src/views/time-entries.ts`, `vacations.ts`, `holidays.ts`    | vorhanden: `useTimeEntries`, `useVacations`, `useHolidays`   |
-| Service    | `../../shared/week.ts`                                              | neu: die Wochen eines Monats mit ihren Tagen im Monat        |
-| Service    | `../../shared/time-report.ts`                                       | neu: `monthTotals`, Summen je Woche und für den Monat        |
-| Use Case   | `../../src/features/reports/use-cases/use-show-monthly-report.ts`   | neu: `useShowMonthlyReport(month)`, setzt Views und Service zusammen |
-| Komponente | `../../src/features/reports/components/report-monthly.tsx`          | neu: zeigt nur an                                            |
-| Seite      | `../../src/features/reports/components/report-monthly-page.tsx`     | neu: `ReportMonthlyPage`                                     |
-| Route      | `../../src/routes/user/reports/monthly.tsx`                         | neu: `/user/reports/monthly`, bindet nur `ReportMonthlyPage` ein |
-| Menü       | `../../src/application/navigation/nav-items.ts`                     | neuer Eintrag „Monat“ nach `reports-weekly`, wie „Woche“     |
+| Baustein   | Datei                                                             | Inhalt                                                               |
+|------------|-------------------------------------------------------------------|----------------------------------------------------------------------|
+| Views      | `../../src/views/time-entries.ts`, `vacations.ts`, `holidays.ts`  | vorhanden: `useTimeEntries`, `useVacations`, `useHolidays`           |
+| Service    | `../../shared/week.ts`                                            | neu: die Wochen eines Monats mit ihren Tagen im Monat                |
+| Service    | `../../shared/time-report.ts`                                     | neu: `monthTotals`, Summen je Woche und für den Monat                |
+| Use Case   | `../../src/features/reports/use-cases/use-show-monthly-report.ts` | neu: `useShowMonthlyReport(month)`, setzt Views und Service zusammen |
+| Komponente | `../../src/features/reports/components/report-monthly.tsx`        | neu: zeigt nur an                                                    |
+| Seite      | `../../src/features/reports/components/report-monthly-page.tsx`   | neu: `ReportMonthlyPage`                                             |
+| Route      | `../../src/routes/user/reports/monthly.tsx`                       | neu: `/user/reports/monthly`, bindet nur `ReportMonthlyPage` ein     |
+| Menü       | `../../src/application/navigation/nav-items.ts`                   | neuer Eintrag „Monat“ nach `reports-weekly`, wie „Woche“             |
 
 Hinweise:
 
 - `weekTotals(entries, days, …)` rechnet für eine beliebige Liste von Tagen. Übergibt man nur die Tage
   einer Woche, die im Monat liegen, gelten Regel 1 und 3 ohne weitere Logik. `monthTotals` kann darauf
   aufbauen.
-- Der Monat wird als Text `JJJJ-MM` übergeben, wie Tage als `JJJJ-MM-TT` (siehe `service.md`).
+- Der Monat wird als Text `JJJJ-MM` übergeben, wie Tage als `JJJJ-MM-TT` (siehe `../../agents/.agents/skills/architecture/service.md`).
 - Die aktuelle Zeit kommt als Parameter in den Service (`today`, `now`), nicht über `new Date()`.
 
 ## Tests
 
-Nach `testing.md`:
+Nach `../../agents/.agents/skills/architecture/testing.md`:
 
-- **Service-Test** in `../../shared/time-report.test.ts` (und `shared/week.test.ts` für die Wochen eines
+- **Service-Test** in `../../shared/time-report.test.ts` (und `../../shared/week.test.ts` für die Wochen eines
   Monats), ohne Mocks:
   - angebrochene Wochen am Monatsanfang und -ende zählen nur die Tage im Monat (Oktober 2026)
   - Woche über den Jahreswechsel (Dezember 2026 und Januar 2027)
   - im laufenden Monat zählen künftige Tage nicht zur Differenz
   - Beginn der Zeiterfassung mitten im Monat und Monat ohne jede Buchung
 - **Service-Test** für Regel 6 auch in `../../shared/target-hours.test.ts` (`targetMs`, `dayKind`) und
-  `shared/time-rules.test.ts` (`firstBookingDay`), weil sie für alle Berichte gilt
+  `../../shared/time-rules.test.ts` (`firstBookingDay`), weil sie für alle Berichte gilt
 - **Routing:** Eintrag `"/user/reports/monthly": "Monatsbericht"` in `../../src/tests/routes.test.tsx`.
 - Kein eigener Komponenten-Test nötig, solange die Komponente nur anzeigt.
