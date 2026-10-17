@@ -19,7 +19,7 @@ const HEADINGS: Record<string, string> = {
     "/user": "User Dashboard",
     "/user/time-stamp": "Zeiterfassung",
     "/user/reports": "Report",
-    "/user/reports/daily": "Tagesbericht bearbeiten",
+    "/user/reports/daily": "Heute",
     "/user/reports/weekly": "Wochenbericht",
     "/user/reports/monthly": "Monatsbericht",
     "/user/reports/vacations": "Urlaub",

@@ -10,7 +10,7 @@ import {localDayRange} from "@shared/day-range";
 import {holidayOn} from "@shared/holiday-rules";
 import {isSickDay} from "@shared/sick-leave-rules";
 import {dayKind, targetMs} from "@shared/target-hours";
-import {dayTotals} from "@shared/time-report";
+import {dayDiffMs, dayTotals} from "@shared/time-report";
 import {firstBookingDay, localDay, nextType} from "@shared/time-rules";
 import type {EntryRow} from "@features/time-stamp/time-entry-row";
 
@@ -72,8 +72,7 @@ export function useShowDailyReport(day: string) {
         target,
         kind: dayKind(day, vacationList, holidayList, sickList, report.trackingStart),
         holidayName: holidayOn(day, holidayList)?.name,
-        elapsed: day <= today, // ISO-Daten lassen sich als Text vergleichen
-        diff: report.totals.workMs - target,
+        diff: dayDiffMs(day, today, report.totals.workMs, target), // null: Zukunft oder freier Tag ohne Arbeit
         isPending: entries.isPending || vacations.isPending || holidays.isPending || sickLeaves.isPending,
         error: entries.error ?? vacations.error ?? holidays.error ?? sickLeaves.error,
         retry: () => Promise.all([entries.refetch(), vacations.refetch(), holidays.refetch(), sickLeaves.refetch()]),

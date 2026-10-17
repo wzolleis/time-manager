@@ -53,6 +53,13 @@ export function dayTotals(
     return {workMs, breakMs, running, missingGehen};
 }
 
+/**
+ * Differenz eines Tages ("JJJJ-MM-TT") gegen das Soll. null: der Tag liegt nach heute, oder er hat weder
+ * Soll noch Arbeitszeit (freier Tag ohne Arbeit). today ist der heutige Tag "JJJJ-MM-TT".
+ */
+export const dayDiffMs = (day: string, today: string, workMs: number, target: number): number | null =>
+    day > today || (target === 0 && workMs === 0) ? null : workMs - target; // ISO-Daten lassen sich als Text vergleichen
+
 export type WeekDayTotals = DayTotals & {
     day: string; // "JJJJ-MM-TT"
     count: number; // Buchungen an diesem Tag, auch die an Krankheitstagen
@@ -87,8 +94,6 @@ export function weekTotals(
         // Alle Buchungen gehen in die Summen ein, damit Nachtschichten am Tageswechsel stimmen
         const totals = dayTotals(entries, range, sickLeaves, now);
         const target = targetMs(day, vacations, holidays, sickLeaves, trackingStart);
-        const elapsed = day <= today; // Tage nach heute zählen nicht zur Differenz
-        const noDifference = !elapsed || (target === 0 && totals.workMs === 0);
 
         return {
             ...totals,
@@ -97,7 +102,7 @@ export function weekTotals(
             targetMs: target,
             kind: dayKind(day, vacations, holidays, sickLeaves, trackingStart),
             holidayName: holidayOn(day, holidays)?.name,
-            diffMs: noDifference ? null : totals.workMs - target,
+            diffMs: dayDiffMs(day, today, totals.workMs, target),
         };
     });
 

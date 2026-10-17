@@ -1,7 +1,7 @@
 // shared/time-report.test.ts
 import {describe, expect, it} from "vitest";
 import {localDayRange} from "./day-range";
-import {dayTotals, monthTotals, weekTotals} from "./time-report";
+import {dayDiffMs, dayTotals, monthTotals, weekTotals} from "./time-report";
 import type {Booking} from "./time-rules";
 import {weekDays} from "./week";
 
@@ -77,6 +77,24 @@ describe("dayTotals", () => {
         const t = dayTotals(workday.slice(0, 1), day, [], new Date("2026-06-10T08:30:00Z"));
         expect(t.missingGehen).toBe(false);
         expect(t.running).toBe(true);
+    });
+});
+
+describe("dayDiffMs", () => {
+    const today = "2026-10-14";
+
+    it("rechnet Arbeitszeit minus Soll für heute und vergangene Tage", () => {
+        expect(dayDiffMs("2026-10-14", today, 8.5 * HOUR, 8 * HOUR)).toBe(0.5 * HOUR);
+        expect(dayDiffMs("2026-10-12", today, 0, 8 * HOUR)).toBe(-8 * HOUR);
+        expect(dayDiffMs("2026-10-17", "2026-10-18", 2 * HOUR, 0)).toBe(2 * HOUR); // Wochenende mit Arbeit
+    });
+
+    it("keine Differenz für künftige Tage", () => {
+        expect(dayDiffMs("2026-10-15", today, 0, 8 * HOUR)).toBeNull();
+    });
+
+    it("keine Differenz an einem freien Tag ohne Arbeit", () => {
+        expect(dayDiffMs("2026-10-13", today, 0, 0)).toBeNull();
     });
 });
 

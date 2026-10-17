@@ -56,7 +56,7 @@ export function ReportDailyEdit() {
     return (
         <div className="space-y-4">
             <div>
-                <h1 className="text-2xl font-semibold">Tagesbericht bearbeiten</h1>
+                <h1 className="text-2xl font-semibold">Heute</h1>
                 <p className="text-sm text-muted-foreground">
                     {currentUser.name} · {formatDate(report.range.start)}
                 </p>
@@ -106,8 +106,8 @@ export function ReportDailyEdit() {
                 />
                 <Summary
                     title="Differenz"
-                    value={report.elapsed ? formatDifference(report.diff) : "–"}
-                    valueClassName={report.elapsed ? diffClass(report.diff) : undefined}
+                    value={report.diff === null ? "–" : formatDifference(report.diff)}
+                    valueClassName={report.diff === null ? undefined : diffClass(report.diff)}
                 />
             </div>
 
