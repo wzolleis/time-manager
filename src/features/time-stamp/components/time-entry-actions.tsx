@@ -12,6 +12,7 @@ import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {formatTime} from "@/lib/format";
+import {localDay} from "@shared/time-rules";
 import {useProjects} from "@/views/projects";
 import {TimeEntryDelete} from "@features/time-stamp/components/time-entry-delete";
 import {useChangeTimeEntry} from "@features/time-stamp/use-cases/use-change-time-entry";
@@ -42,6 +43,7 @@ export function EntryActions({entry}: {entry: EntryRow}) {
     };
 
     const problem = update.problem({entry, time});
+    const sickNotice = update.sickNotice(localDay(entry.bookedAt)); // der Tag bleibt beim Bearbeiten gleich
 
     const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>): void => {
         e.preventDefault();
@@ -101,6 +103,7 @@ export function EntryActions({entry}: {entry: EntryRow}) {
                             </div>
                         )}
 
+                        {sickNotice && <p className="text-sm text-muted-foreground">{sickNotice}</p>}
                         {problem && <p className="text-sm text-destructive">{problem}</p>}
                         {update.error && (
                             <p role="alert" className="text-sm text-destructive">

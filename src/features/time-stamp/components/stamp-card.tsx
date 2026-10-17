@@ -16,7 +16,7 @@ const formatSince = (iso: string) => {
 };
 
 export function StampCard() {
-    const {currentUser, now, last, isIn, missing, projectName, projects, ...stamping} = useStampTime();
+    const {currentUser, now, last, isIn, missing, projectName, projects, sickNotice, ...stamping} = useStampTime();
     const [projectChoice, setProjectChoice] = useState(NO_PROJECT);
 
     if (!currentUser) {
@@ -50,6 +50,7 @@ export function StampCard() {
             </CardHeader>
 
             <CardContent className="space-y-4">
+                {sickNotice && <p className="text-sm text-muted-foreground">{sickNotice}</p>}
                 {missing ? (
                     <div className="space-y-3">
                         <p className="text-sm text-destructive">

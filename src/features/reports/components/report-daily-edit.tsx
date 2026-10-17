@@ -7,28 +7,34 @@ import {diffClass, formatDate, formatDifference, formatDuration, formatTime} fro
 import {addDays} from "@shared/day-range";
 import {localDay} from "@shared/time-rules";
 import {EntryActions} from "@features/time-stamp/components/time-entry-actions";
-import type {EntryRow} from "@features/time-stamp/time-entry-row";
 import {TimeEntryCreateDialog} from "@features/time-stamp/components/time-entry-create-dialog";
 import {ReportError} from "@features/reports/components/report-error";
-import {useShowDailyReport} from "@features/reports/use-cases/use-show-daily-report";
+import {type DailyReportRow, useShowDailyReport} from "@features/reports/use-cases/use-show-daily-report";
 import {dayKindLabel} from "@features/reports/utils/day-kind-label";
 
+// Buchungen an einem Krankheitstag bleiben sichtbar, aber ausgegraut
+const muted = (row: DailyReportRow, text: string) =>
+    row.ignored ? <span className="text-muted-foreground">{text}</span> : text;
+
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
-const columns: DataTableColumnDef<EntryRow>[] = [
+const columns: DataTableColumnDef<DailyReportRow>[] = [
     {
         accessorKey: "bookedAt",
         header: "Uhrzeit",
-        cell: ({getValue}) => `${formatTime(getValue<Date>())} Uhr`,
+        cell: ({getValue, row}) => muted(row.original, `${formatTime(getValue<Date>())} Uhr`),
     },
     {
         accessorKey: "type",
         header: "Buchung",
-        cell: ({getValue}) => (getValue<EntryRow["type"]>() === "kommen" ? "Kommen" : "Gehen"),
+        cell: ({getValue, row}) => {
+            const label = getValue<DailyReportRow["type"]>() === "kommen" ? "Kommen" : "Gehen";
+            return muted(row.original, row.original.ignored ? `${label} · zählt nicht (krank)` : label);
+        },
     },
     {
         accessorKey: "projectName",
         header: "Projekt",
-        cell: ({getValue}) => getValue<string | null>() ?? "–",
+        cell: ({getValue, row}) => muted(row.original, getValue<string | null>() ?? "–"),
     },
     {
         id: "actions",

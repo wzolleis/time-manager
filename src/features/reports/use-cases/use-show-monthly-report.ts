@@ -3,6 +3,7 @@ import {toBooking} from "@/api/time-entries";
 import {useNow} from "@/lib/use-now";
 import {useCurrentUser} from "@/lib/user-context";
 import {useHolidays} from "@/views/holidays";
+import {useSickLeaves} from "@/views/sick-leaves";
 import {useTimeEntries} from "@/views/time-entries";
 import {useVacations} from "@/views/vacations";
 import {monthTotals} from "@shared/time-report";
@@ -18,6 +19,7 @@ export function useShowMonthlyReport(month: string) {
     const entries = useTimeEntries(userId);
     const vacations = useVacations(userId);
     const holidays = useHolidays(userId);
+    const sickLeaves = useSickLeaves(userId);
 
     const today = localDay(new Date(now));
 
@@ -28,10 +30,11 @@ export function useShowMonthlyReport(month: string) {
                 month,
                 vacations.data ?? [],
                 holidays.data ?? [],
+                sickLeaves.data ?? [],
                 today,
                 new Date(now),
             ),
-        [entries.data, vacations.data, holidays.data, month, today, now],
+        [entries.data, vacations.data, holidays.data, sickLeaves.data, month, today, now],
     );
 
     return {
@@ -40,8 +43,8 @@ export function useShowMonthlyReport(month: string) {
         totals,
         futureMonth: `${month}-01` > today,
         partial: totals.targetToDateMs !== totals.targetMonthMs,
-        isPending: entries.isPending || vacations.isPending || holidays.isPending,
-        error: entries.error ?? vacations.error ?? holidays.error,
-        retry: () => Promise.all([entries.refetch(), vacations.refetch(), holidays.refetch()]),
+        isPending: entries.isPending || vacations.isPending || holidays.isPending || sickLeaves.isPending,
+        error: entries.error ?? vacations.error ?? holidays.error ?? sickLeaves.error,
+        retry: () => Promise.all([entries.refetch(), vacations.refetch(), holidays.refetch(), sickLeaves.refetch()]),
     };
 }

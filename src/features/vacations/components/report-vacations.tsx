@@ -21,7 +21,7 @@ const columns: DataTableColumnDef<Row>[] = [
         cell: ({getValue}) => germanDay(getValue<string>()),
     },
     {accessorKey: "days", header: "Kalendertage", enableSorting: false},
-    {accessorKey: "workdays", header: "Urlaubstage", enableSorting: false}, // ohne Wochenenden und Feiertage
+    {accessorKey: "workdays", header: "Urlaubstage", enableSorting: false}, // ohne Wochenenden, Feiertage und Krankheitstage
     {
         id: "actions",
         header: "",

@@ -1,8 +1,8 @@
-import {localDayRange} from "./day-range";
+import {type DayRange, localDayRange} from "./day-range";
 import {type HolidayRange, holidayOn} from "./holiday-rules";
+import {withoutSickDays} from "./sick-leave-rules";
 import {dayKind, type DayKind, targetMs} from "./target-hours";
 import {type Booking, buildPeriods, firstBookingDay} from "./time-rules";
-import type {VacationRange} from "./vacation-rules";
 import {monthWeeks} from "./week";
 
 export type DayTotals = {
@@ -12,8 +12,15 @@ export type DayTotals = {
     missingGehen: boolean; // an diesem vergangenen Tag fehlt das gehen
 };
 
-export function dayTotals(entries: Booking[], range: {start: Date; end: Date}, now: Date): DayTotals {
-    const {work, breaks} = buildPeriods(entries);
+/** Summen eines Tages. Buchungen an Krankheitstagen zählen nicht, auch keine laufende Arbeitszeit. */
+export function dayTotals(
+    entries: Booking[],
+    range: {start: Date; end: Date},
+    sickLeaves: DayRange[],
+    now: Date,
+): DayTotals {
+    // Ein Buchungspaar liegt immer an einem Tag, die Abfolge bleibt ohne die Krankheitstage gültig
+    const {work, breaks} = buildPeriods(withoutSickDays(entries, sickLeaves));
     const start = range.start.getTime();
     const end = range.end.getTime();
     const nowMs = now.getTime();
@@ -48,7 +55,7 @@ export function dayTotals(entries: Booking[], range: {start: Date; end: Date}, n
 
 export type WeekDayTotals = DayTotals & {
     day: string; // "JJJJ-MM-TT"
-    count: number; // Buchungen an diesem Tag
+    count: number; // Buchungen an diesem Tag, auch die an Krankheitstagen
     targetMs: number;
     kind: DayKind;
     holidayName?: string;
@@ -59,7 +66,7 @@ export type WeekTotals = {
     days: WeekDayTotals[];
     workMs: number;
     breakMs: number;
-    targetWeekMs: number; // ohne Urlaubs- und Feiertage
+    targetWeekMs: number; // ohne Urlaubs-, Krankheits- und Feiertage
     targetToDateMs: number; // Soll der Tage bis heute
     diffMs: number; // gegen das Soll bis heute, damit die Differenz mitten in der Woche aussagekräftig ist
 };
@@ -68,17 +75,18 @@ export type WeekTotals = {
 export function weekTotals(
     entries: Booking[],
     days: string[],
-    vacations: Pick<VacationRange, "startDate" | "endDate">[],
+    vacations: DayRange[],
     holidays: Pick<HolidayRange, "date" | "name">[],
+    sickLeaves: DayRange[],
     today: string,
     now: Date,
 ): WeekTotals {
-    const trackingStart = firstBookingDay(entries);
+    const trackingStart = firstBookingDay(entries); // mit allen Buchungen, auch denen an Krankheitstagen
     const rows: WeekDayTotals[] = days.map((day) => {
         const range = localDayRange(day);
         // Alle Buchungen gehen in die Summen ein, damit Nachtschichten am Tageswechsel stimmen
-        const totals = dayTotals(entries, range, now);
-        const target = targetMs(day, vacations, holidays, trackingStart);
+        const totals = dayTotals(entries, range, sickLeaves, now);
+        const target = targetMs(day, vacations, holidays, sickLeaves, trackingStart);
         const elapsed = day <= today; // Tage nach heute zählen nicht zur Differenz
         const noDifference = !elapsed || (target === 0 && totals.workMs === 0);
 
@@ -87,7 +95,7 @@ export function weekTotals(
             day,
             count: entries.filter((e) => e.bookedAt >= range.start && e.bookedAt < range.end).length,
             targetMs: target,
-            kind: dayKind(day, vacations, holidays, trackingStart),
+            kind: dayKind(day, vacations, holidays, sickLeaves, trackingStart),
             holidayName: holidayOn(day, holidays)?.name,
             diffMs: noDifference ? null : totals.workMs - target,
         };
@@ -124,7 +132,7 @@ export type MonthWeekTotals = {
 export type MonthTotals = {
     weeks: MonthWeekTotals[];
     workMs: number;
-    targetMonthMs: number; // ohne Urlaubs- und Feiertage
+    targetMonthMs: number; // ohne Urlaubs-, Krankheits- und Feiertage
     targetToDateMs: number; // Soll der Tage bis heute
     diffMs: number; // gegen das Soll bis heute
     running: boolean;
@@ -137,13 +145,14 @@ export type MonthTotals = {
 export function monthTotals(
     entries: Booking[],
     month: string,
-    vacations: Pick<VacationRange, "startDate" | "endDate">[],
+    vacations: DayRange[],
     holidays: Pick<HolidayRange, "date" | "name">[],
+    sickLeaves: DayRange[],
     today: string,
     now: Date,
 ): MonthTotals {
     const parts = monthWeeks(month).map(({year, week, days}) => {
-        const t = weekTotals(entries, days, vacations, holidays, today, now);
+        const t = weekTotals(entries, days, vacations, holidays, sickLeaves, today, now);
         const row: MonthWeekTotals = {
             year,
             week,

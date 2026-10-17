@@ -62,6 +62,7 @@ export function TimeEntryCreateDialog({
     };
 
     const problem = create.problem({type, day, time});
+    const sickNotice = create.sickNotice(day);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -145,6 +146,7 @@ export function TimeEntryCreateDialog({
                         </div>
                     )}
 
+                    {sickNotice && <p className="text-sm text-muted-foreground">{sickNotice}</p>}
                     {problem && <p className="text-sm text-destructive">{problem}</p>}
                     {create.error && (
                         <p role="alert" className="text-sm text-destructive">

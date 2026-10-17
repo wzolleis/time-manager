@@ -2,6 +2,7 @@ import {useMemo} from "react";
 import {useNow} from "@/lib/use-now";
 import {useCurrentUser} from "@/lib/user-context";
 import {useHolidays} from "@/views/holidays";
+import {useSickLeaves} from "@/views/sick-leaves";
 import {useTimeEntries} from "@/views/time-entries";
 import {useVacations} from "@/views/vacations";
 import {weekTotals} from "@shared/time-report";
@@ -17,14 +18,23 @@ export function useShowWeeklyReport(anchor: string) {
     const entries = useTimeEntries(userId);
     const vacations = useVacations(userId);
     const holidays = useHolidays(userId);
+    const sickLeaves = useSickLeaves(userId);
 
     const today = localDay(new Date(now));
     const days = useMemo(() => weekDays(anchor), [anchor]);
 
     const totals = useMemo(() => {
         const all = (entries.data ?? []).map((e) => ({id: e.id, type: e.type, bookedAt: new Date(e.bookedAt)}));
-        return weekTotals(all, days, vacations.data ?? [], holidays.data ?? [], today, new Date(now));
-    }, [entries.data, vacations.data, holidays.data, days, today, now]);
+        return weekTotals(
+            all,
+            days,
+            vacations.data ?? [],
+            holidays.data ?? [],
+            sickLeaves.data ?? [],
+            today,
+            new Date(now),
+        );
+    }, [entries.data, vacations.data, holidays.data, sickLeaves.data, days, today, now]);
 
     return {
         currentUser,
@@ -34,8 +44,8 @@ export function useShowWeeklyReport(anchor: string) {
         thisWeek: weekDays(today)[0] === days[0],
         futureWeek: days[0] > today,
         partial: totals.targetToDateMs !== totals.targetWeekMs,
-        isPending: entries.isPending || vacations.isPending || holidays.isPending,
-        error: entries.error ?? vacations.error ?? holidays.error,
-        retry: () => Promise.all([entries.refetch(), vacations.refetch(), holidays.refetch()]),
+        isPending: entries.isPending || vacations.isPending || holidays.isPending || sickLeaves.isPending,
+        error: entries.error ?? vacations.error ?? holidays.error ?? sickLeaves.error,
+        retry: () => Promise.all([entries.refetch(), vacations.refetch(), holidays.refetch(), sickLeaves.refetch()]),
     };
 }

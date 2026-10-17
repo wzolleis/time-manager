@@ -2,8 +2,10 @@ import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {toBooking, updateTimeEntry} from "@/api/time-entries";
 import {formatTime} from "@/lib/format";
 import {useCurrentUser} from "@/lib/user-context";
+import {useSickLeaves} from "@/views/sick-leaves";
 import {useTimeEntries} from "@/views/time-entries";
 import {localTimeToUtc} from "@shared/day-range";
+import {isSickDay, sickDayMessage} from "@shared/sick-leave-rules";
 import type {TimeEntryUpdate} from "@shared/time-entry";
 import {checkSequence, localDay} from "@shared/time-rules";
 
@@ -25,6 +27,7 @@ export function useChangeTimeEntry() {
     const {currentUser} = useCurrentUser();
     const qc = useQueryClient();
     const entries = useTimeEntries(currentUser?.id); // für die Prüfung der Abfolge
+    const sickLeaves = useSickLeaves(currentUser?.id); // für den Hinweis an Krankheitstagen
 
     const save = useMutation({
         mutationFn: async ({entry, time, projectId}: Change) => {
@@ -50,6 +53,8 @@ export function useChangeTimeEntry() {
 
     return {
         problem,
+        // Hinweis, wenn der Tag ("JJJJ-MM-TT") ein Krankheitstag ist. Speichern bleibt möglich.
+        sickNotice: (day: string) => (isSickDay(day, sickLeaves.data ?? []) ? sickDayMessage(day) : null),
         change: save.mutate,
         isSaving: save.isPending,
         error: save.error,

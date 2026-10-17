@@ -3,8 +3,10 @@ import {createTimeEntry} from "@/api/time-entries";
 import {useNow} from "@/lib/use-now";
 import {useCurrentUser} from "@/lib/user-context";
 import {useProjects} from "@/views/projects";
+import {useSickLeaves} from "@/views/sick-leaves";
 import {useTimeEntries} from "@/views/time-entries";
-import {findMissingGehen} from "@shared/time-rules";
+import {isSickDay, sickDayMessage} from "@shared/sick-leave-rules";
+import {findMissingGehen, localDay} from "@shared/time-rules";
 
 type Stamp = {type: "kommen" | "gehen"; projectId: string | null};
 
@@ -17,6 +19,7 @@ export function useStampTime() {
 
     const entries = useTimeEntries(userId);
     const projects = useProjects();
+    const sickLeaves = useSickLeaves(userId);
 
     const save = useMutation({
         mutationFn: ({type, projectId}: Stamp) =>
@@ -38,6 +41,7 @@ export function useStampTime() {
               new Date(now),
           )
         : null;
+    const today = localDay(new Date(now));
 
     return {
         currentUser,
@@ -47,6 +51,8 @@ export function useStampTime() {
         missing, // Kommen eines vergangenen Tages ohne Gehen: erst nachtragen, dann wieder stempeln
         projectName: isIn ? projects.data?.find((p) => p.id === last.projectId)?.name : undefined,
         projects: projects.data,
+        // Hinweis, wenn heute ein Krankheitstag ist: Stempeln geht, zählt aber nicht
+        sickNotice: isSickDay(today, sickLeaves.data ?? []) ? sickDayMessage(today) : null,
         isPending: entries.isPending,
         isLoaded: entries.isSuccess,
         loadError: entries.error,

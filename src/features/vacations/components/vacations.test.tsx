@@ -14,7 +14,7 @@ const USER = {
     avatarUrl: null,
 };
 
-function mockApi(vacations: unknown[], holidays: unknown[] = []) {
+function mockApi(vacations: unknown[], holidays: unknown[] = [], sickLeaves: unknown[] = []) {
     vi.stubGlobal(
         "fetch",
         vi.fn(async (input: RequestInfo | URL) => {
@@ -24,6 +24,7 @@ function mockApi(vacations: unknown[], holidays: unknown[] = []) {
             if (pathname === "/api/users") return Response.json([USER]);
             if (pathname === "/api/vacations") return Response.json(vacations);
             if (pathname === "/api/holidays") return Response.json(holidays);
+            if (pathname === "/api/sick-leaves") return Response.json(sickLeaves);
             return Response.json({error: `Nicht gemockt: ${pathname}`}, {status: 404});
         }),
     );
@@ -128,5 +129,19 @@ describe("Urlaubsseite", () => {
         expect(screen.getByText("4")).toBeTruthy(); // Urlaubstage in der Tabelle
         expect(screen.getByText("4 Tage")).toBeTruthy(); // geplant
         expect(screen.getByText("26 Tage")).toBeTruthy(); // ungeplant
+    });
+
+    it("Krankheitstage im Urlaub verbrauchen keinen Urlaubstag", async () => {
+        mockApi(
+            [{id: "a", userId: USER.id, startDate: "2026-10-12", endDate: "2026-10-23"}], // 10 Arbeitstage
+            [],
+            [{id: "k", userId: USER.id, startDate: "2026-10-14", endDate: "2026-10-16", note: null}], // Mi bis Fr
+        );
+        renderPage();
+
+        await screen.findByText("Genommen");
+        expect(screen.getByText("7")).toBeTruthy(); // Urlaubstage in der Tabelle
+        expect(screen.getByText("7 Tage")).toBeTruthy(); // geplant
+        expect(screen.getByText("23 Tage")).toBeTruthy(); // ungeplant
     });
 });

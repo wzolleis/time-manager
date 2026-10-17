@@ -4,6 +4,7 @@ import {
     checkRange,
     checkVacation,
     checkYearLimit,
+    countVacationDays,
     countWorkdays,
     dayCount,
     findOverlap,
@@ -120,7 +121,7 @@ describe("vacationBalance", () => {
     const today = "2026-06-10"; // Mittwoch
 
     it("ohne Urlaub ist das ganze Kontingent ungeplant", () => {
-        expect(vacationBalance([], 2026, today, [])).toEqual({
+        expect(vacationBalance([], 2026, today, [], [])).toEqual({
             taken: 0,
             planned: 0,
             unplanned: VACATION_DAYS_PER_YEAR,
@@ -134,7 +135,7 @@ describe("vacationBalance", () => {
             v("b", "2026-06-08", "2026-06-12"), // läuft: Mo bis Mi genommen, Do und Fr geplant
             v("c", "2026-08-03", "2026-08-16"), // zwei Wochen in der Zukunft: 10
         ];
-        expect(vacationBalance(vacations, 2026, today, [])).toEqual({
+        expect(vacationBalance(vacations, 2026, today, [], [])).toEqual({
             taken: 8,
             planned: 12,
             unplanned: 10,
@@ -144,23 +145,23 @@ describe("vacationBalance", () => {
 
     it("Wochenenden zählen nicht", () => {
         const vacations = [v("a", "2026-06-13", "2026-06-14")]; // Sa und So
-        expect(vacationBalance(vacations, 2026, today, []).planned).toBe(0);
+        expect(vacationBalance(vacations, 2026, today, [], []).planned).toBe(0);
     });
 
     it("ein Urlaub über Silvester wird auf beide Jahre aufgeteilt", () => {
         const vacations = [v("a", "2026-12-28", "2027-01-08")]; // Mo 28.12. bis Fr 8.1.
-        expect(vacationBalance(vacations, 2026, today, []).planned).toBe(4); // 28. bis 31.12.
-        expect(vacationBalance(vacations, 2027, today, []).planned).toBe(6); // 1. bis 8.1.
+        expect(vacationBalance(vacations, 2026, today, [], []).planned).toBe(4); // 28. bis 31.12.
+        expect(vacationBalance(vacations, 2027, today, [], []).planned).toBe(6); // 1. bis 8.1.
     });
 
     it("Urlaub aus anderen Jahren zählt nicht", () => {
         const vacations = [v("a", "2025-06-02", "2025-06-06")];
-        expect(vacationBalance(vacations, 2026, today, []).taken).toBe(0);
+        expect(vacationBalance(vacations, 2026, today, [], []).taken).toBe(0);
     });
 
     it("mehr als 30 Tage: ungeplant bleibt 0, der Überhang wird ausgewiesen", () => {
         const vacations = [v("a", "2026-07-06", "2026-08-21")]; // 7 Wochen = 35 Arbeitstage
-        expect(vacationBalance(vacations, 2026, today, [])).toEqual({
+        expect(vacationBalance(vacations, 2026, today, [], [])).toEqual({
             taken: 0,
             planned: 35,
             unplanned: 0,
@@ -170,15 +171,15 @@ describe("vacationBalance", () => {
 
     it("ein vergangenes Jahr ist vollständig genommen", () => {
         const vacations = [v("a", "2025-12-29", "2025-12-31")];
-        expect(vacationBalance(vacations, 2025, today, [])).toMatchObject({taken: 3, planned: 0});
+        expect(vacationBalance(vacations, 2025, today, [], [])).toMatchObject({taken: 3, planned: 0});
     });
 });
 
 describe("workdaysInYear", () => {
     it("zählt nur Arbeitstage im Jahr, Urlaub über Silvester anteilig", () => {
         const vacations = [v("a", "2026-06-08", "2026-06-14"), v("b", "2026-12-28", "2027-01-08")];
-        expect(workdaysInYear(vacations, 2026, [])).toBe(5 + 4);
-        expect(workdaysInYear(vacations, 2027, [])).toBe(6);
+        expect(workdaysInYear(vacations, 2026, [], [])).toBe(5 + 4);
+        expect(workdaysInYear(vacations, 2027, [], [])).toBe(6);
     });
 });
 
@@ -187,39 +188,39 @@ describe("checkYearLimit", () => {
     const existing = [v("a", "2026-07-06", "2026-08-07")];
 
     it("genau 30 Tage sind erlaubt", () => {
-        expect(checkYearLimit(existing, v("new", "2026-10-05", "2026-10-09"), [])).toBeNull();
+        expect(checkYearLimit(existing, v("new", "2026-10-05", "2026-10-09"), [], [])).toBeNull();
     });
 
     it("mehr als 30 Tage werden abgelehnt, mit Anzahl der freien Tage", () => {
-        expect(checkYearLimit(existing, v("new", "2026-10-05", "2026-10-12"), [])).toBe(
+        expect(checkYearLimit(existing, v("new", "2026-10-05", "2026-10-12"), [], [])).toBe(
             "2026 wären es 31 Urlaubstage, erlaubt sind 30 (noch frei: 5)",
         );
     });
 
     it("Wochenenden zählen nicht zum Kontingent", () => {
-        expect(checkYearLimit(existing, v("new", "2026-10-03", "2026-10-11"), [])).toBeNull(); // Sa bis So, 5 Arbeitstage
+        expect(checkYearLimit(existing, v("new", "2026-10-03", "2026-10-11"), [], [])).toBeNull(); // Sa bis So, 5 Arbeitstage
     });
 
     it("beim Bearbeiten ersetzt der neue Zeitraum den alten", () => {
         // Urlaub a von 25 auf 30 Tage verlängern
-        expect(checkYearLimit(existing, v("a", "2026-07-06", "2026-08-14"), [])).toBeNull();
-        expect(checkYearLimit(existing, v("a", "2026-07-06", "2026-08-17"), [])).not.toBeNull();
+        expect(checkYearLimit(existing, v("a", "2026-07-06", "2026-08-14"), [], [])).toBeNull();
+        expect(checkYearLimit(existing, v("a", "2026-07-06", "2026-08-17"), [], [])).not.toBeNull();
     });
 
     it("prüft bei einem Urlaub über Silvester beide Jahre", () => {
         const full2027 = [v("b", "2027-02-01", "2027-03-12")]; // 30 Arbeitstage
-        expect(checkYearLimit(full2027, v("new", "2026-12-28", "2027-01-04"), [])).toMatch(/^2027 wären es 32/); // Fr 1.1. und Mo 4.1.
+        expect(checkYearLimit(full2027, v("new", "2026-12-28", "2027-01-04"), [], [])).toMatch(/^2027 wären es 32/); // Fr 1.1. und Mo 4.1.
     });
 
     it("Urlaub in anderen Jahren stört nicht", () => {
         const other = [v("b", "2025-01-06", "2025-02-14")]; // 30 Tage in 2025
-        expect(checkYearLimit(other, v("new", "2026-01-05", "2026-01-09"), [])).toBeNull();
+        expect(checkYearLimit(other, v("new", "2026-01-05", "2026-01-09"), [], [])).toBeNull();
     });
 
     it("schon überzogene Jahre lassen sich verkleinern, aber nicht vergrößern", () => {
         const over = [v("a", "2026-07-06", "2026-08-21")]; // 35 Tage, z. B. Altdaten
-        expect(checkYearLimit(over, v("a", "2026-07-06", "2026-08-18"), [])).toBeNull(); // 32 Tage
-        expect(checkYearLimit(over, v("a", "2026-07-06", "2026-08-24"), [])).not.toBeNull(); // 36 Tage
+        expect(checkYearLimit(over, v("a", "2026-07-06", "2026-08-18"), [], [])).toBeNull(); // 32 Tage
+        expect(checkYearLimit(over, v("a", "2026-07-06", "2026-08-24"), [], [])).not.toBeNull(); // 36 Tage
     });
 });
 
@@ -233,17 +234,36 @@ describe("Feiertage im Urlaub", () => {
 
     it("verbrauchen keinen Urlaubstag", () => {
         const vacations = [v("a", "2026-09-28", "2026-10-02")];
-        expect(vacationBalance(vacations, 2026, today, holidays)).toMatchObject({planned: 4, unplanned: 26});
-        expect(workdaysInYear(vacations, 2026, holidays)).toBe(4);
+        expect(vacationBalance(vacations, 2026, today, holidays, [])).toMatchObject({planned: 4, unplanned: 26});
+        expect(workdaysInYear(vacations, 2026, holidays, [])).toBe(4);
     });
 
     it("werden bei der 30-Tage-Grenze berücksichtigt", () => {
         // 25 Arbeitstage plus eine Woche mit Feiertag = 29, also noch erlaubt
         const existing = [v("a", "2026-07-06", "2026-08-07")];
-        expect(checkYearLimit(existing, v("new", "2026-09-28", "2026-10-02"), holidays)).toBeNull();
-        expect(checkYearLimit(existing, v("new", "2026-09-28", "2026-10-02"), [])).toBeNull(); // genau 30
-        expect(checkYearLimit(existing, v("new", "2026-09-28", "2026-10-05"), holidays)).toBeNull(); // 30
-        expect(checkYearLimit(existing, v("new", "2026-09-28", "2026-10-05"), [])).not.toBeNull(); // 31
+        expect(checkYearLimit(existing, v("new", "2026-09-28", "2026-10-02"), holidays, [])).toBeNull();
+        expect(checkYearLimit(existing, v("new", "2026-09-28", "2026-10-02"), [], [])).toBeNull(); // genau 30
+        expect(checkYearLimit(existing, v("new", "2026-09-28", "2026-10-05"), holidays, [])).toBeNull(); // 30
+        expect(checkYearLimit(existing, v("new", "2026-09-28", "2026-10-05"), [], [])).not.toBeNull(); // 31
+    });
+});
+
+describe("Krankheit im Urlaub", () => {
+    const today = "2026-06-10";
+    const vacations = [v("a", "2026-10-12", "2026-10-23")]; // 10 Urlaubstage
+    const sick = [{startDate: "2026-10-14", endDate: "2026-10-16"}]; // 3 Krankheitstage
+
+    it("verbraucht keinen Urlaubstag", () => {
+        expect(countVacationDays("2026-10-12", "2026-10-23", [], sick)).toBe(7);
+        expect(workdaysInYear(vacations, 2026, [], sick)).toBe(7);
+        expect(vacationBalance(vacations, 2026, today, [], sick)).toMatchObject({planned: 7, unplanned: 23});
+    });
+
+    it("wird bei der 30-Tage-Grenze berücksichtigt", () => {
+        const existing = [v("b", "2026-07-06", "2026-08-07")]; // 25 Arbeitstage
+        const candidate = v("new", "2026-10-12", "2026-10-19"); // 6 Arbeitstage, davon 3 krank
+        expect(checkYearLimit(existing, candidate, [], [])).not.toBeNull(); // 31
+        expect(checkYearLimit(existing, candidate, [], sick)).toBeNull(); // 28
     });
 });
 
@@ -251,16 +271,18 @@ describe("checkVacation", () => {
     const existing = [v("a", "2026-07-06", "2026-08-07")]; // 25 Arbeitstage
 
     it("akzeptiert einen freien Zeitraum innerhalb des Jahresurlaubs", () => {
-        expect(checkVacation(existing, v("new", "2026-10-05", "2026-10-09"), [])).toBeNull();
+        expect(checkVacation(existing, v("new", "2026-10-05", "2026-10-09"), [], [])).toBeNull();
     });
 
     it("meldet zuerst einen ungültigen Zeitraum, dann eine Überschneidung, dann den Jahresurlaub", () => {
-        expect(checkVacation(existing, v("new", "2026-08-07", "2026-08-03"), [])).toBe("Das Ende liegt vor dem Beginn");
-        expect(checkVacation(existing, v("new", "2026-08-03", "2026-10-30"), [])).toBe(overlapMessage(existing[0]));
-        expect(checkVacation(existing, v("new", "2026-10-05", "2026-10-12"), [])).toContain("erlaubt sind 30");
+        expect(checkVacation(existing, v("new", "2026-08-07", "2026-08-03"), [], [])).toBe(
+            "Das Ende liegt vor dem Beginn",
+        );
+        expect(checkVacation(existing, v("new", "2026-08-03", "2026-10-30"), [], [])).toBe(overlapMessage(existing[0]));
+        expect(checkVacation(existing, v("new", "2026-10-05", "2026-10-12"), [], [])).toContain("erlaubt sind 30");
     });
 
     it("vergleicht einen bearbeiteten Urlaub nicht mit sich selbst", () => {
-        expect(checkVacation(existing, v("a", "2026-07-06", "2026-08-03"), [])).toBeNull();
+        expect(checkVacation(existing, v("a", "2026-07-06", "2026-08-03"), [], [])).toBeNull();
     });
 });

@@ -2,10 +2,11 @@ import {useMemo} from "react";
 import {useNow} from "@/lib/use-now";
 import {useCurrentUser} from "@/lib/user-context";
 import {useHolidays} from "@/views/holidays";
+import {useSickLeaves} from "@/views/sick-leaves";
 import {useVacations} from "@/views/vacations";
 import {localDay} from "@shared/time-rules";
 import type {Vacation} from "@shared/vacation";
-import {countWorkdays, dayCount, vacationBalance} from "@shared/vacation-rules";
+import {countVacationDays, dayCount, vacationBalance} from "@shared/vacation-rules";
 
 export type VacationRow = Vacation & {days: number; workdays: number};
 
@@ -17,6 +18,7 @@ export function useShowVacations(year: number) {
 
     const vacations = useVacations(userId);
     const holidays = useHolidays(userId);
+    const sickLeaves = useSickLeaves(userId); // Krankheitstage im Urlaub verbrauchen keinen Urlaubstag
 
     const today = localDay(new Date(now));
 
@@ -28,13 +30,13 @@ export function useShowVacations(year: number) {
                 .map((v) => ({
                     ...v,
                     days: dayCount(v.startDate, v.endDate),
-                    workdays: countWorkdays(v.startDate, v.endDate, holidays.data ?? []),
+                    workdays: countVacationDays(v.startDate, v.endDate, holidays.data ?? [], sickLeaves.data ?? []),
                 })),
-        [vacations.data, holidays.data, year],
+        [vacations.data, holidays.data, sickLeaves.data, year],
     );
     const balance = useMemo(
-        () => vacationBalance(vacations.data ?? [], year, today, holidays.data ?? []),
-        [vacations.data, holidays.data, year, today],
+        () => vacationBalance(vacations.data ?? [], year, today, holidays.data ?? [], sickLeaves.data ?? []),
+        [vacations.data, holidays.data, sickLeaves.data, year, today],
     );
 
     return {
@@ -42,8 +44,8 @@ export function useShowVacations(year: number) {
         currentYear: Number(today.slice(0, 4)),
         rows,
         balance,
-        isPending: vacations.isPending || holidays.isPending,
-        error: vacations.error ?? holidays.error,
-        retry: () => Promise.all([vacations.refetch(), holidays.refetch()]),
+        isPending: vacations.isPending || holidays.isPending || sickLeaves.isPending,
+        error: vacations.error ?? holidays.error ?? sickLeaves.error,
+        retry: () => Promise.all([vacations.refetch(), holidays.refetch(), sickLeaves.refetch()]),
     };
 }

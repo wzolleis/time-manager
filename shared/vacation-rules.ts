@@ -1,4 +1,4 @@
-import {addDays, isValidDay} from "./day-range";
+import {addDays, type DayRange, isInRanges, isValidDay} from "./day-range";
 import {type HolidayDay, isHoliday} from "./holiday-rules";
 import {weekdayIndex} from "./week";
 
@@ -53,15 +53,24 @@ export function countWorkdays(start: string, end: string, holidays: HolidayDay[]
 }
 
 /** Liegt der Tag ("JJJJ-MM-TT") in einem der Urlaube? Beginn und Ende zählen mit. */
-export const isVacationDay = (day: string, vacations: Pick<VacationRange, "startDate" | "endDate">[]): boolean =>
-    vacations.some((v) => v.startDate <= day && day <= v.endDate);
+export const isVacationDay = (day: string, vacations: DayRange[]): boolean => isInRanges(day, vacations);
+
+/**
+ * Urlaubstage im Zeitraum: Arbeitstage ohne Feiertage und ohne Krankheitstage.
+ * Ein Krankheitstag im Urlaub verbraucht keinen Urlaubstag (§ 9 BUrlG).
+ */
+export function countVacationDays(start: string, end: string, holidays: HolidayDay[], sickLeaves: DayRange[]): number {
+    let count = 0;
+    for (let day = start; day <= end; day = addDays(day, 1)) {
+        if (weekdayIndex(day) < 5 && !isHoliday(day, holidays) && !isInRanges(day, sickLeaves)) count++;
+    }
+    return count;
+}
 
 export const VACATION_DAYS_PER_YEAR = 30;
 
-type DateRange = Pick<VacationRange, "startDate" | "endDate">;
-
 /** Der Teil des Zeitraums, der im Jahr liegt (sonst null) */
-export function clipToYear(v: DateRange, year: number): DateRange | null {
+export function clipToYear(v: DayRange, year: number): DayRange | null {
     const yearStart = `${year}-01-01`;
     const yearEnd = `${year}-12-31`;
     const startDate = v.startDate > yearStart ? v.startDate : yearStart;
@@ -69,11 +78,16 @@ export function clipToYear(v: DateRange, year: number): DateRange | null {
     return startDate <= endDate ? {startDate, endDate} : null;
 }
 
-/** Eingetragene Urlaubstage (Arbeitstage) eines Kalenderjahrs */
-export const workdaysInYear = (vacations: DateRange[], year: number, holidays: HolidayDay[]): number =>
+/** Eingetragene Urlaubstage (Arbeitstage ohne Krankheitstage) eines Kalenderjahrs */
+export const workdaysInYear = (
+    vacations: DayRange[],
+    year: number,
+    holidays: HolidayDay[],
+    sickLeaves: DayRange[],
+): number =>
     vacations.reduce((sum, v) => {
         const part = clipToYear(v, year);
-        return part ? sum + countWorkdays(part.startDate, part.endDate, holidays) : sum;
+        return part ? sum + countVacationDays(part.startDate, part.endDate, holidays, sickLeaves) : sum;
     }, 0);
 
 export type VacationBalance = {
@@ -86,14 +100,16 @@ export type VacationBalance = {
 /**
  * Urlaubskonto eines Kalenderjahrs. Resturlaub verfällt am Jahresende, deshalb zählt jeder Urlaub
  * nur mit den Arbeitstagen, die in diesem Jahr liegen (ein Urlaub über Silvester wird aufgeteilt).
- * Feiertage im Urlaub verbrauchen keinen Urlaubstag.
+ * Feiertage und Krankheitstage im Urlaub verbrauchen keinen Urlaubstag.
  */
 export function vacationBalance(
-    vacations: DateRange[],
+    vacations: DayRange[],
     year: number,
     today: string,
     holidays: HolidayDay[],
+    sickLeaves: DayRange[],
 ): VacationBalance {
+    const count = (start: string, end: string) => countVacationDays(start, end, holidays, sickLeaves);
     let taken = 0;
     let planned = 0;
 
@@ -103,11 +119,11 @@ export function vacationBalance(
         const {startDate: start, endDate: end} = part;
 
         // ISO-Daten lassen sich als Text vergleichen
-        if (end <= today) taken += countWorkdays(start, end, holidays);
-        else if (start > today) planned += countWorkdays(start, end, holidays);
+        if (end <= today) taken += count(start, end);
+        else if (start > today) planned += count(start, end);
         else {
-            taken += countWorkdays(start, today, holidays);
-            planned += countWorkdays(addDays(today, 1), end, holidays);
+            taken += count(start, today);
+            planned += count(addDays(today, 1), end);
         }
     }
 
@@ -129,16 +145,17 @@ export function checkYearLimit(
     existing: VacationRange[],
     candidate: VacationRange,
     holidays: HolidayDay[],
+    sickLeaves: DayRange[],
 ): string | null {
     const others = existing.filter((v) => v.id !== candidate.id); // beim Bearbeiten den alten Stand ersetzen
     const firstYear = Number(candidate.startDate.slice(0, 4));
     const lastYear = Number(candidate.endDate.slice(0, 4));
 
     for (let year = firstYear; year <= lastYear; year++) {
-        const before = workdaysInYear(existing, year, holidays);
-        const after = workdaysInYear([...others, candidate], year, holidays);
+        const before = workdaysInYear(existing, year, holidays, sickLeaves);
+        const after = workdaysInYear([...others, candidate], year, holidays, sickLeaves);
         if (after > VACATION_DAYS_PER_YEAR && after > before) {
-            const free = Math.max(0, VACATION_DAYS_PER_YEAR - workdaysInYear(others, year, holidays));
+            const free = Math.max(0, VACATION_DAYS_PER_YEAR - workdaysInYear(others, year, holidays, sickLeaves));
             return `${year} wären es ${after} Urlaubstage, erlaubt sind ${VACATION_DAYS_PER_YEAR} (noch frei: ${free})`;
         }
     }
@@ -153,10 +170,11 @@ export function checkVacation(
     existing: VacationRange[],
     candidate: VacationRange,
     holidays: HolidayDay[],
+    sickLeaves: DayRange[],
 ): string | null {
     const problem = checkRange(candidate.startDate, candidate.endDate);
     if (problem) return problem;
     const clash = findOverlap(existing, candidate);
     if (clash) return overlapMessage(clash);
-    return checkYearLimit(existing, candidate, holidays);
+    return checkYearLimit(existing, candidate, holidays, sickLeaves);
 }
