@@ -18,6 +18,8 @@ export const TimeEntryDelete = ({entry}: {entry: EntryRow}) => {
     const remove = useDeleteTimeEntry();
     const isKommen = entry.type === "kommen";
     const typeLabel = isKommen ? "Kommen" : "Gehen";
+    const singleProblem = remove.problem({id: entry.id, pair: false});
+    const pairProblem = remove.problem({id: entry.id, pair: true});
 
     return (
         <>
@@ -34,20 +36,30 @@ export const TimeEntryDelete = ({entry}: {entry: EntryRow}) => {
                         </AlertDialogTitle>
                         <AlertDialogDescription>
                             Kommen und Gehen gehören zusammen. Löschst du nur diese Buchung, muss die Abfolge danach
-                            noch stimmen, sonst lehnt der Server das ab. Mit Gegenstück verschwindet zusätzlich{" "}
+                            noch stimmen. Mit Gegenstück verschwindet zusätzlich{" "}
                             {isKommen ? "das folgende Gehen" : "das vorhergehende Kommen"}.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
+                    {singleProblem && (
+                        <p className="text-sm text-destructive">
+                            Nur diese Buchung zu löschen geht nicht: {singleProblem}
+                        </p>
+                    )}
+                    {pairProblem && (
+                        <p className="text-sm text-destructive">Mit Gegenstück zu löschen geht nicht: {pairProblem}</p>
+                    )}
                     <AlertDialogFooter className="flex-wrap">
                         <AlertDialogCancel>Abbrechen</AlertDialogCancel>
                         <AlertDialogAction
                             className={buttonVariants({variant: "outline", size: "sm"})}
+                            disabled={singleProblem !== null}
                             onClick={() => remove.remove({id: entry.id, pair: false})}
                         >
                             Nur diese
                         </AlertDialogAction>
                         <AlertDialogAction
                             className={buttonVariants({variant: "destructive", size: "sm"})}
+                            disabled={pairProblem !== null}
                             onClick={() => remove.remove({id: entry.id, pair: true})}
                         >
                             Mit Gegenstück

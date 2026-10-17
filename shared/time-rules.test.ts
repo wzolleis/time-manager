@@ -1,5 +1,13 @@
 import {describe, expect, it} from "vitest";
-import {type Booking, buildPeriods, checkSequence, findMissingGehen, localDay, nextType} from "./time-rules";
+import {
+    type Booking,
+    buildPeriods,
+    checkSequence,
+    findMissingGehen,
+    findPartner,
+    localDay,
+    nextType,
+} from "./time-rules";
 
 const b = (id: string, type: Booking["type"], iso: string): Booking => ({
     id,
@@ -232,5 +240,18 @@ describe("localDay", () => {
         it("meldet nichts ohne Buchungen", () => {
             expect(findMissingGehen([], new Date("2026-06-10T09:00:00Z"))).toBeNull();
         });
+    });
+});
+
+describe("findPartner", () => {
+    it("findet zum kommen das folgende gehen und zum gehen das kommen davor", () => {
+        const shuffled = [workday[2], workday[0], workday[3], workday[1]]; // Reihenfolge egal
+        expect(findPartner(shuffled, "3")?.id).toBe("4");
+        expect(findPartner(shuffled, "2")?.id).toBe("1");
+    });
+
+    it("liefert null ohne Gegenstück oder bei unbekannter ID", () => {
+        expect(findPartner(workday.slice(0, 3), "3")).toBeNull(); // laufendes kommen
+        expect(findPartner(workday, "x")).toBeNull();
     });
 });

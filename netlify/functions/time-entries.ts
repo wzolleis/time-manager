@@ -7,7 +7,7 @@ import {db} from "./lib/db";
 import {hasDbCode} from "./lib/db-errors";
 import {timeEntries, timeEntryProjects} from "../../db/schema";
 import {TimeEntryCreateSchema, TimeEntryUpdateSchema} from "../../shared/time-entry";
-import {type Booking, checkSequence} from "../../shared/time-rules";
+import {type Booking, checkSequence, findPartner} from "../../shared/time-rules";
 import {withTiming} from "./lib/timing";
 
 import {IdSchema, isApiPath, notFound} from "./lib/id";
@@ -154,15 +154,10 @@ const handler = async (req: Request, context: Context) => {
                 const current = await getEntry(tx, id);
                 if (!current) throw new NotFoundError();
 
-                const existing = (await lockBookings(tx, current.userId)).sort(
-                    (a, b) => a.bookedAt.getTime() - b.bookedAt.getTime(),
-                );
+                const existing = await lockBookings(tx, current.userId);
                 const toDelete = new Set([id]);
-                if (pair) {
-                    const i = existing.findIndex((b) => b.id === id);
-                    const partner = current.type === "kommen" ? existing[i + 1] : existing[i - 1];
-                    if (partner) toDelete.add(partner.id);
-                }
+                const partner = pair ? findPartner(existing, id) : null;
+                if (partner) toDelete.add(partner.id);
 
                 ensureValid(existing.filter((b) => !toDelete.has(b.id)));
                 await tx.delete(timeEntries).where(inArray(timeEntries.id, [...toDelete]));

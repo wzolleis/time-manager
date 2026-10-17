@@ -1,7 +1,9 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {createTimeEntry} from "@/api/time-entries";
+import {createTimeEntry, toBooking} from "@/api/time-entries";
 import {useCurrentUser} from "@/lib/user-context";
+import {useTimeEntries} from "@/views/time-entries";
 import {localTimeToUtc} from "@shared/day-range";
+import {checkSequence} from "@shared/time-rules";
 
 type Addition = {
     type: "kommen" | "gehen";
@@ -14,6 +16,7 @@ type Addition = {
 export function useAddTimeEntry() {
     const {currentUser} = useCurrentUser();
     const qc = useQueryClient();
+    const entries = useTimeEntries(currentUser?.id); // für die Prüfung der Abfolge
 
     const save = useMutation({
         mutationFn: ({type, day, time, projectId}: Addition) =>
@@ -26,8 +29,16 @@ export function useAddTimeEntry() {
         onSuccess: () => qc.invalidateQueries({queryKey: ["time-entries"]}),
     });
 
+    /** Service, null = alles in Ordnung. Ohne Uhrzeit gibt es noch nichts zu prüfen. */
+    const problem = ({type, day, time}: Pick<Addition, "type" | "day" | "time">) => {
+        if (!time) return null;
+        const added = {id: "neu", type, bookedAt: localTimeToUtc(day, time)};
+        return checkSequence([...(entries.data ?? []).map(toBooking), added]);
+    };
+
     return {
         currentUser,
+        problem,
         add: save.mutate,
         isSaving: save.isPending,
         error: save.error,

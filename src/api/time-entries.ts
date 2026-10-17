@@ -1,8 +1,12 @@
 import {request} from "./http";
 import type {TimeEntry, TimeEntryCreate, TimeEntryUpdate} from "@shared/time-entry";
+import type {Booking} from "@shared/time-rules";
 
 // Über JSON kommt bookedAt als ISO-String an, nicht als Date
 export type TimeEntryDto = Omit<TimeEntry, "bookedAt"> & {bookedAt: string};
+
+/** Buchung für die Regeln in shared/time-rules */
+export const toBooking = (e: TimeEntryDto): Booking => ({id: e.id, type: e.type, bookedAt: new Date(e.bookedAt)});
 
 export const fetchTimeEntries = (userId: string) => request<TimeEntryDto[]>(`/api/time-entries?userId=${userId}`);
 

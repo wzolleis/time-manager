@@ -61,9 +61,11 @@ export function TimeEntryCreateDialog({
         setOpen(next);
     };
 
+    const problem = create.problem({type, day, time});
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!currentUser) return;
+        if (!currentUser || problem) return;
         create.add(
             {type, day, time, projectId: projectChoice === NO_PROJECT ? null : projectChoice},
             {onSuccess: () => setOpen(false)},
@@ -143,6 +145,7 @@ export function TimeEntryCreateDialog({
                         </div>
                     )}
 
+                    {problem && <p className="text-sm text-destructive">{problem}</p>}
                     {create.error && (
                         <p role="alert" className="text-sm text-destructive">
                             {create.error.message}
@@ -153,7 +156,7 @@ export function TimeEntryCreateDialog({
                         <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                             Abbrechen
                         </Button>
-                        <Button type="submit" disabled={create.isSaving}>
+                        <Button type="submit" disabled={create.isSaving || problem !== null}>
                             {create.isSaving ? "Speichere…" : "Speichern"}
                         </Button>
                     </DialogFooter>

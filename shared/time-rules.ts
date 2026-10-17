@@ -79,3 +79,12 @@ export function findMissingGehen(entries: Booking[], now: Date): Booking | null 
     if (last?.type === "kommen" && localDay(last.bookedAt) < localDay(now)) return last;
     return null;
 }
+
+/** Das Gegenstück einer Buchung: zum kommen das folgende gehen, zum gehen das kommen davor (sonst null) */
+export function findPartner(entries: Booking[], id: string): Booking | null {
+    const list = sorted(entries);
+    const i = list.findIndex((e) => e.id === id);
+    if (i < 0) return null;
+    const partner = list[i].type === "kommen" ? list[i + 1] : list[i - 1];
+    return partner ?? null;
+}
