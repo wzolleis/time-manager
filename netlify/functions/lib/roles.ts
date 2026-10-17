@@ -84,11 +84,19 @@ export async function isAdmin(userId: string): Promise<boolean> {
 }
 
 /**
- * Darf der angemeldete User die Daten dieses Users lesen und ändern (Urlaube, Krankmeldungen)?
+ * Darf der angemeldete User die Daten dieses Users lesen und ändern (Buchungen, Urlaube, Krankmeldungen)?
  * Ja für sich selbst, ein Administrator für alle.
  */
 export const mayAccessUser = async (sessionUserId: string, userId: string): Promise<boolean> =>
     sessionUserId === userId || isAdmin(sessionUserId);
+
+/** Fremde Daten ohne Administrator-Rolle. Wird in der Function geworfen und im catch zu 403 (forbidden). */
+export class ForbiddenError extends Error {}
+
+/** Wirft ForbiddenError, wenn der angemeldete User nicht auf die Daten dieses Users zugreifen darf */
+export async function ensureAccess(sessionUserId: string, userId: string): Promise<void> {
+    if (!(await mayAccessUser(sessionUserId, userId))) throw new ForbiddenError();
+}
 
 /**
  * Sperrt alle Administrator-Zuordnungen bis zum Ende der Transaktion und liefert die User-IDs.

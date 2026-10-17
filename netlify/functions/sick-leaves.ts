@@ -9,7 +9,7 @@ import {sickLeaves, users} from "../../db/schema";
 import {checkSickLeave} from "../../shared/sick-leave-rules";
 import {SickLeaveCreateSchema, SickLeaveUpdateSchema} from "../../shared/sick-leave";
 import {IdSchema, isApiPath, notFound} from "./lib/id";
-import {forbidden, mayAccessUser} from "./lib/roles";
+import {ensureAccess, forbidden, ForbiddenError} from "./lib/roles";
 import {type Session, withSession} from "./lib/session";
 import {RuleError, ruleViolation} from "./lib/rule-error";
 
@@ -21,13 +21,6 @@ type Executor = Pick<typeof db, "select">;
 class NotFoundError extends Error {}
 
 class UnknownUserError extends Error {}
-
-class ForbiddenError extends Error {}
-
-// Jeder User für sich selbst, ein Administrator für alle
-const checkAccess = async (session: Session, userId: string) => {
-    if (!(await mayAccessUser(session.user.id, userId))) throw new ForbiddenError();
-};
 
 const ListQuerySchema = z.object({userId: z.string().uuid().optional()});
 
@@ -63,7 +56,7 @@ const handler = async (req: Request, context: Context, session: Session) => {
             if (req.method === "GET") {
                 const q = ListQuerySchema.parse(Object.fromEntries(url.searchParams));
                 const userId = q.userId ?? session.user.id; // ohne Angabe die eigenen
-                await checkAccess(session, userId);
+                await ensureAccess(session.user.id, userId);
                 const rows = await db
                     .select()
                     .from(sickLeaves)
@@ -74,7 +67,7 @@ const handler = async (req: Request, context: Context, session: Session) => {
 
             if (req.method === "POST") {
                 const input = SickLeaveCreateSchema.parse(await readBody(req));
-                await checkAccess(session, input.userId);
+                await ensureAccess(session.user.id, input.userId);
                 const id = randomUUID();
                 await db.transaction(async (tx) => {
                     await lockUser(tx, input.userId);
@@ -94,7 +87,7 @@ const handler = async (req: Request, context: Context, session: Session) => {
         if (req.method === "GET") {
             const row = await getSickLeave(db, id);
             if (!row) return notFound();
-            await checkAccess(session, row.userId);
+            await ensureAccess(session.user.id, row.userId);
             return Response.json(row);
         }
 
@@ -107,7 +100,7 @@ const handler = async (req: Request, context: Context, session: Session) => {
             await db.transaction(async (tx) => {
                 const current = await getSickLeave(tx, id);
                 if (!current) throw new NotFoundError();
-                await checkAccess(session, current.userId);
+                await ensureAccess(session.user.id, current.userId);
                 await lockUser(tx, current.userId);
 
                 // Wurde nur ein Datum gesendet, gilt für das andere der gespeicherte Wert
@@ -127,7 +120,7 @@ const handler = async (req: Request, context: Context, session: Session) => {
         if (req.method === "DELETE") {
             const row = await getSickLeave(db, id);
             if (!row) return notFound();
-            await checkAccess(session, row.userId);
+            await ensureAccess(session.user.id, row.userId);
             const [result] = await db.delete(sickLeaves).where(eq(sickLeaves.id, id));
             return result.affectedRows > 0 ? new Response(null, {status: 204}) : notFound();
         }

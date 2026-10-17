@@ -11,7 +11,8 @@ import {type Booking, checkSequence, findPartner} from "../../shared/time-rules"
 import {withTiming} from "./lib/timing";
 
 import {IdSchema, isApiPath, notFound} from "./lib/id";
-import {withSession} from "./lib/session";
+import {ensureAccess, forbidden, ForbiddenError} from "./lib/roles";
+import {type Session, withSession} from "./lib/session";
 import {RuleError, ruleViolation} from "./lib/rule-error";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -70,7 +71,8 @@ const readBody = async (req: Request): Promise<unknown> => {
     }
 };
 
-const handler = async (req: Request, context: Context) => {
+// Jeder User sieht und ändert nur seine eigenen Buchungen, ein Administrator die aller User
+const handler = async (req: Request, context: Context, session: Session) => {
     try {
         if (!isApiPath(req.url, "time-entries")) return notFound();
         const url = new URL(req.url);
@@ -80,10 +82,12 @@ const handler = async (req: Request, context: Context) => {
         if (rawId === undefined) {
             if (req.method === "GET") {
                 const q = ListQuerySchema.parse(Object.fromEntries(url.searchParams));
+                const userId = q.userId ?? session.user.id; // ohne Angabe die eigenen
+                await ensureAccess(session.user.id, userId);
                 const rows = await selectEntries(db)
                     .where(
                         and(
-                            q.userId ? eq(timeEntries.userId, q.userId) : undefined,
+                            eq(timeEntries.userId, userId),
                             q.from ? gte(timeEntries.bookedAt, q.from) : undefined,
                             q.to ? lt(timeEntries.bookedAt, q.to) : undefined,
                         ),
@@ -94,6 +98,7 @@ const handler = async (req: Request, context: Context) => {
 
             if (req.method === "POST") {
                 const input = TimeEntryCreateSchema.parse(await readBody(req));
+                await ensureAccess(session.user.id, input.userId);
                 const id = randomUUID();
                 await db.transaction(async (tx) => {
                     const existing = await lockBookings(tx, input.userId);
@@ -116,7 +121,9 @@ const handler = async (req: Request, context: Context) => {
 
         if (req.method === "GET") {
             const entry = await getEntry(db, id);
-            return entry ? Response.json(entry) : notFound();
+            if (!entry) return notFound();
+            await ensureAccess(session.user.id, entry.userId);
+            return Response.json(entry);
         }
 
         if (req.method === "PATCH") {
@@ -129,6 +136,7 @@ const handler = async (req: Request, context: Context) => {
             await db.transaction(async (tx) => {
                 const current = await getEntry(tx, id);
                 if (!current) throw new NotFoundError();
+                await ensureAccess(session.user.id, current.userId);
 
                 const existing = await lockBookings(tx, current.userId);
                 const changed: Booking = {
@@ -153,6 +161,7 @@ const handler = async (req: Request, context: Context) => {
             await db.transaction(async (tx) => {
                 const current = await getEntry(tx, id);
                 if (!current) throw new NotFoundError();
+                await ensureAccess(session.user.id, current.userId);
 
                 const existing = await lockBookings(tx, current.userId);
                 const toDelete = new Set([id]);
@@ -170,6 +179,7 @@ const handler = async (req: Request, context: Context) => {
         if (err instanceof z.ZodError) return Response.json({errors: err.issues}, {status: 400});
         if (err instanceof RuleError) return ruleViolation(err);
         if (err instanceof NotFoundError) return notFound();
+        if (err instanceof ForbiddenError) return forbidden();
         if (hasDbCode(err, "ER_NO_REFERENCED_ROW_2")) {
             return Response.json({error: "User oder Projekt existiert nicht"}, {status: 400});
         }

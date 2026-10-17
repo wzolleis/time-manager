@@ -124,6 +124,6 @@ eine Abfrage nicht (`retry` in `src/query-client.ts`).
 # Daten eines Users
 
 Die Rolle entscheidet, ob ein Endpoint aufgerufen werden darf, aber nicht, wessen Daten.
-Urlaube und Krankmeldungen darf jeder User nur für sich selbst lesen und ändern, ein Administrator
-für alle. Das prüft `mayAccessUser` aus `netlify/functions/lib/roles.ts` gegen die `userId` der Anfrage
-bzw. des gespeicherten Datensatzes, sonst gibt es `403`. Ohne `?userId=` liefert die Liste die eigenen Daten.
+Buchungen, Urlaube und Krankmeldungen darf jeder User nur für sich selbst lesen und ändern, ein Administrator
+für alle. Das prüft `ensureAccess` aus `netlify/functions/lib/roles.ts` gegen die `userId` der Anfrage
+bzw. des gespeicherten Datensatzes. Sie wirft `ForbiddenError`, die Function antwortet dann mit `403`. Ohne `?userId=` liefert die Liste die eigenen Daten.

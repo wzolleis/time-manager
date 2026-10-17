@@ -346,6 +346,12 @@ wt_step "'vitest' trägt keine Krankmeldung für andere ein" 403 "notwendigen Re
   "{\"userId\":\"$ADMIN_ID\",\"startDate\":\"2026-08-03\",\"endDate\":\"2026-08-07\"}"
 wt_step "'vitest' löscht die eigene Krankmeldung" 204 "" DELETE "$SICK/$SICK2"
 
+wt_step "'vitest' sieht die eigenen Buchungen" 200 "\"id\":\"$KOMMEN1\"" GET "$ENTRY?userId=$USER_ID"
+wt_step "'vitest' sieht eine eigene Buchung" 200 "\"id\":\"$KOMMEN1\"" GET "$ENTRY/$KOMMEN1"
+wt_step "'vitest' sieht keine fremden Buchungen" 403 "notwendigen Rechte" GET "$ENTRY?userId=$ADMIN_ID"
+wt_step "'vitest' bucht nicht für andere" 403 "notwendigen Rechte" POST $ENTRY \
+  "{\"userId\":\"$ADMIN_ID\",\"type\":\"kommen\",\"bookedAt\":\"2026-06-11T06:00:00Z\"}"
+
 WT_COOKIES="$ADMIN_COOKIES"
 wt_step "Der Administrator sieht die Urlaube von 'vitest'" 200 '"startDate":"2026-06-13"' GET "$VAC?userId=$USER_ID"
 
