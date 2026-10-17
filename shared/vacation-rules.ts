@@ -144,3 +144,19 @@ export function checkYearLimit(
     }
     return null;
 }
+
+/**
+ * null = gültig, sonst eine verständliche Fehlermeldung. Prüft in der Reihenfolge des Servers:
+ * Zeitraum, Überschneidung mit einem anderen Urlaub, Jahresurlaub.
+ */
+export function checkVacation(
+    existing: VacationRange[],
+    candidate: VacationRange,
+    holidays: HolidayDay[],
+): string | null {
+    const problem = checkRange(candidate.startDate, candidate.endDate);
+    if (problem) return problem;
+    const clash = findOverlap(existing, candidate);
+    if (clash) return overlapMessage(clash);
+    return checkYearLimit(existing, candidate, holidays);
+}

@@ -1,5 +1,4 @@
 import {type ComponentProps, useId, useState} from "react";
-import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {Button} from "@/components/ui/button";
 import {
     Dialog,
@@ -12,12 +11,11 @@ import {
 } from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
-import {createVacation, updateVacation} from "@/api/vacations";
-import {useHolidays} from "@/views/holidays";
-import {useCurrentUser} from "@/lib/user-context";
 import {localDay} from "@shared/time-rules";
-import {checkRange, countWorkdays, dayCount} from "@shared/vacation-rules";
-import type {Vacation, VacationUpdate} from "@shared/vacation";
+import {dayCount} from "@shared/vacation-rules";
+import type {Vacation} from "@shared/vacation";
+import {useAddVacation} from "@features/vacations/use-cases/use-add-vacation";
+import {useChangeVacation} from "@features/vacations/use-cases/use-change-vacation";
 
 type Props = {
     vacation?: Vacation; // mit Urlaub: bearbeiten, ohne: neu anlegen
@@ -27,33 +25,21 @@ type Props = {
 };
 
 export function VacationDialog({vacation, label, variant = "outline", size = "sm"}: Props) {
-    const {currentUser} = useCurrentUser();
-    const qc = useQueryClient();
     const uid = useId();
-    const holidays = useHolidays(currentUser?.id);
+    const add = useAddVacation();
+    const change = useChangeVacation();
+    const save = vacation ? change : add;
+    const {currentUser} = save;
 
     const [open, setOpen] = useState(false);
     const [start, setStart] = useState("");
     const [end, setEnd] = useState("");
 
-    const save = useMutation({
-        mutationFn: async () => {
-            if (vacation) {
-                // Nur Geändertes senden
-                const patch: VacationUpdate = {};
-                if (start !== vacation.startDate) patch.startDate = start;
-                if (end !== vacation.endDate) patch.endDate = end;
-                if (Object.keys(patch).length === 0) return;
-                await updateVacation(vacation.id, patch);
-            } else {
-                await createVacation({userId: currentUser!.id, startDate: start, endDate: end});
-            }
-        },
-        onSuccess: async () => {
-            await qc.invalidateQueries({queryKey: ["vacations"]});
-            setOpen(false);
-        },
-    });
+    const submit = () => {
+        const close = {onSuccess: () => setOpen(false)};
+        if (vacation) change.change({vacation, startDate: start, endDate: end}, close);
+        else add.add({startDate: start, endDate: end}, close);
+    };
 
     // Beim Öffnen immer mit den gespeicherten Werten bzw. mit heute starten
     const handleOpenChange = (next: boolean) => {
@@ -72,7 +58,13 @@ export function VacationDialog({vacation, label, variant = "outline", size = "sm
         if (end < value) setEnd(value); // das Ende zieht mit, wenn es sonst davor läge
     };
 
-    const problem = start && end ? checkRange(start, end) : "Bitte Beginn und Ende wählen";
+    const range = {startDate: start, endDate: end};
+    const problem =
+        !start || !end
+            ? "Bitte Beginn und Ende wählen"
+            : vacation
+              ? change.problem({vacation, ...range})
+              : add.problem(range);
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -85,7 +77,7 @@ export function VacationDialog({vacation, label, variant = "outline", size = "sm
                 <form
                     onSubmit={(e) => {
                         e.preventDefault();
-                        save.mutate();
+                        if (!problem) submit();
                     }}
                     className="space-y-4"
                 >
@@ -122,11 +114,10 @@ export function VacationDialog({vacation, label, variant = "outline", size = "sm
                     </div>
 
                     <p className={problem ? "text-sm text-destructive" : "text-sm text-muted-foreground"}>
-                        {problem ??
-                            `${dayCount(start, end)} Kalendertage · ${countWorkdays(start, end, holidays.data ?? [])} Urlaubstage`}
+                        {problem ?? `${dayCount(start, end)} Kalendertage · ${save.workdays(range)} Urlaubstage`}
                     </p>
 
-                    {save.isError && (
+                    {save.error && (
                         <p role="alert" className="text-sm text-destructive">
                             {save.error.message}
                         </p>
@@ -136,8 +127,8 @@ export function VacationDialog({vacation, label, variant = "outline", size = "sm
                         <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                             Abbrechen
                         </Button>
-                        <Button type="submit" disabled={save.isPending || problem !== null}>
-                            {save.isPending ? "Speichere…" : "Speichern"}
+                        <Button type="submit" disabled={save.isSaving || problem !== null}>
+                            {save.isSaving ? "Speichere…" : "Speichern"}
                         </Button>
                     </DialogFooter>
                 </form>

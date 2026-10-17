@@ -1,19 +1,12 @@
-import {useMemo, useState} from "react";
-import {useQuery} from "@tanstack/react-query";
+import {useState} from "react";
 import {Button} from "@/components/ui/button";
-import {fetchVacations} from "@/api/vacations";
-import {useHolidays} from "@/views/holidays";
-import {useNow} from "@/lib/use-now";
-import {useCurrentUser} from "@/lib/user-context";
-import {localDay} from "@shared/time-rules";
-import {countWorkdays, dayCount, germanDay, VACATION_DAYS_PER_YEAR, vacationBalance} from "@shared/vacation-rules";
-import type {Vacation} from "@shared/vacation";
+import {germanDay, VACATION_DAYS_PER_YEAR} from "@shared/vacation-rules";
 import {VacationActions} from "@features/vacations/components/vacation-actions";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {VacationDialog} from "@features/vacations/components/vacation-dialog";
 import {Summary} from "@/components/summary";
-
-type Row = Vacation & {days: number; workdays: number};
+import {useShowVacations, type VacationRow as Row} from "@features/vacations/use-cases/use-show-vacations";
+import {localDay} from "@shared/time-rules";
 
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
 const columns: DataTableColumnDef<Row>[] = [
@@ -40,37 +33,9 @@ const columns: DataTableColumnDef<Row>[] = [
 const dayLabel = (n: number) => (n === 1 ? "1 Tag" : `${n} Tage`);
 
 export function ReportVacations() {
-    const {currentUser} = useCurrentUser();
-    const userId = currentUser?.id;
-    const now = useNow();
-    const today = localDay(new Date(now));
-    const currentYear = Number(today.slice(0, 4));
-    const [year, setYear] = useState(currentYear);
-
-    const vacations = useQuery({
-        queryKey: ["vacations", userId],
-        queryFn: () => fetchVacations(userId!),
-        enabled: !!userId,
-    });
-
-    const holidays = useHolidays(userId);
-
-    // Nur Urlaube, die zumindest teilweise im gewählten Jahr liegen
-    const rows = useMemo<Row[]>(
-        () =>
-            (vacations.data ?? [])
-                .filter((v) => v.startDate <= `${year}-12-31` && v.endDate >= `${year}-01-01`)
-                .map((v) => ({
-                    ...v,
-                    days: dayCount(v.startDate, v.endDate),
-                    workdays: countWorkdays(v.startDate, v.endDate, holidays.data ?? []),
-                })),
-        [vacations.data, holidays.data, year],
-    );
-    const balance = useMemo(
-        () => vacationBalance(vacations.data ?? [], year, today, holidays.data ?? []),
-        [vacations.data, holidays.data, year, today],
-    );
+    const [year, setYear] = useState(() => Number(localDay(new Date()).slice(0, 4)));
+    const {currentUser, currentYear, rows, balance, isPending, error, retry} = useShowVacations(year);
+    const loaded = !isPending && !error;
 
     if (!currentUser) {
         return <p className="text-sm text-muted-foreground">Bitte zuerst einen User anlegen und auswählen.</p>;
@@ -101,12 +66,7 @@ export function ReportVacations() {
                 </Button>
             </div>
 
-            {holidays.isError && (
-                <p role="alert" className="text-sm text-destructive">
-                    Feiertage konnten nicht geladen werden: {holidays.error.message}
-                </p>
-            )}
-            {vacations.isSuccess && (
+            {loaded && (
                 <div className="grid gap-4 sm:grid-cols-3">
                     <Summary title="Genommen" value={dayLabel(balance.taken)} hint="bis einschließlich heute" />
                     <Summary title="Geplant" value={dayLabel(balance.planned)} hint="ab morgen eingetragen" />
@@ -123,18 +83,18 @@ export function ReportVacations() {
                 </div>
             )}
 
-            {vacations.isPending && <p className="text-sm text-muted-foreground">Lade…</p>}
-            {vacations.isError && (
+            {isPending && <p className="text-sm text-muted-foreground">Lade…</p>}
+            {error && (
                 <div className="space-y-2">
                     <p role="alert" className="text-sm text-destructive">
-                        {vacations.error.message}
+                        {error.message}
                     </p>
-                    <Button variant="outline" onClick={() => vacations.refetch()}>
+                    <Button variant="outline" onClick={retry}>
                         Erneut versuchen
                     </Button>
                 </div>
             )}
-            {vacations.isSuccess && (
+            {loaded && (
                 <DataTable columns={columns} data={rows} emptyText={`Für ${year} ist kein Urlaub eingetragen.`} />
             )}
         </div>

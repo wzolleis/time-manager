@@ -2,6 +2,7 @@
 import {describe, expect, it} from "vitest";
 import {
     checkRange,
+    checkVacation,
     checkYearLimit,
     countWorkdays,
     dayCount,
@@ -243,5 +244,23 @@ describe("Feiertage im Urlaub", () => {
         expect(checkYearLimit(existing, v("new", "2026-09-28", "2026-10-02"), [])).toBeNull(); // genau 30
         expect(checkYearLimit(existing, v("new", "2026-09-28", "2026-10-05"), holidays)).toBeNull(); // 30
         expect(checkYearLimit(existing, v("new", "2026-09-28", "2026-10-05"), [])).not.toBeNull(); // 31
+    });
+});
+
+describe("checkVacation", () => {
+    const existing = [v("a", "2026-07-06", "2026-08-07")]; // 25 Arbeitstage
+
+    it("akzeptiert einen freien Zeitraum innerhalb des Jahresurlaubs", () => {
+        expect(checkVacation(existing, v("new", "2026-10-05", "2026-10-09"), [])).toBeNull();
+    });
+
+    it("meldet zuerst einen ungültigen Zeitraum, dann eine Überschneidung, dann den Jahresurlaub", () => {
+        expect(checkVacation(existing, v("new", "2026-08-07", "2026-08-03"), [])).toBe("Das Ende liegt vor dem Beginn");
+        expect(checkVacation(existing, v("new", "2026-08-03", "2026-10-30"), [])).toBe(overlapMessage(existing[0]));
+        expect(checkVacation(existing, v("new", "2026-10-05", "2026-10-12"), [])).toContain("erlaubt sind 30");
+    });
+
+    it("vergleicht einen bearbeiteten Urlaub nicht mit sich selbst", () => {
+        expect(checkVacation(existing, v("a", "2026-07-06", "2026-08-03"), [])).toBeNull();
     });
 });

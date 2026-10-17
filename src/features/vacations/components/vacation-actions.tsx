@@ -1,4 +1,3 @@
-import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -12,17 +11,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import {Button, buttonVariants} from "@/components/ui/button";
 import {VacationDialog} from "@features/vacations/components/vacation-dialog";
-import {deleteVacation} from "@/api/vacations";
 import {germanDay} from "@shared/vacation-rules";
 import type {Vacation} from "@shared/vacation";
+import {useDeleteVacation} from "@features/vacations/use-cases/use-delete-vacation";
 
 export function VacationActions({vacation}: {vacation: Vacation}) {
-    const qc = useQueryClient();
-
-    const remove = useMutation({
-        mutationFn: () => deleteVacation(vacation.id),
-        onSuccess: () => qc.invalidateQueries({queryKey: ["vacations"]}),
-    });
+    const remove = useDeleteVacation();
 
     return (
         <div className="space-y-1">
@@ -31,8 +25,8 @@ export function VacationActions({vacation}: {vacation: Vacation}) {
 
                 <AlertDialog onOpenChange={(next) => next && remove.reset()}>
                     <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="sm" disabled={remove.isPending}>
-                            {remove.isPending ? "Lösche…" : "Löschen"}
+                        <Button variant="destructive" size="sm" disabled={remove.isDeleting}>
+                            {remove.isDeleting ? "Lösche…" : "Löschen"}
                         </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
@@ -47,7 +41,7 @@ export function VacationActions({vacation}: {vacation: Vacation}) {
                             <AlertDialogCancel>Abbrechen</AlertDialogCancel>
                             <AlertDialogAction
                                 className={buttonVariants({variant: "destructive"})}
-                                onClick={() => remove.mutate()}
+                                onClick={() => remove.remove(vacation.id)}
                             >
                                 Löschen
                             </AlertDialogAction>
@@ -56,7 +50,7 @@ export function VacationActions({vacation}: {vacation: Vacation}) {
                 </AlertDialog>
             </div>
 
-            {remove.isError && (
+            {remove.error && (
                 <p role="alert" className="text-right text-sm text-destructive">
                     {remove.error.message}
                 </p>

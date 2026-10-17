@@ -129,9 +129,4 @@ describe("Urlaubsseite", () => {
         expect(screen.getByText("4 Tage")).toBeTruthy(); // geplant
         expect(screen.getByText("26 Tage")).toBeTruthy(); // ungeplant
     });
-
-    it("bietet das Eintragen an", async () => {
-        mockApi([]);
-        renderPage();
-    });
 });
