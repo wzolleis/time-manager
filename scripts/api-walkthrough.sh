@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# API-Walkthrough: Anmeldung, Rollen, Users, Projekte, Zeitbuchungen, Projektzuordnung.
+# API-Walkthrough: Anmeldung, Rollen, Users, Projekte, Zeitbuchungen, Projektzuordnung, Urlaub, Krankmeldung.
 # Läuft mit einem Wegwerf-User "vitest" und räumt hinterher auf.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -26,6 +26,11 @@ purge_user() {
   wt_call GET "/api/vacations?userId=$uid"
   for id in $(printf '%s' "$WT_BODY" | grep -o '"id":"[^"]*"' | cut -d'"' -f4); do
     wt_call DELETE "/api/vacations/$id"
+  done
+
+  wt_call GET "/api/sick-leaves?userId=$uid"
+  for id in $(printf '%s' "$WT_BODY" | grep -o '"id":"[^"]*"' | cut -d'"' -f4); do
+    wt_call DELETE "/api/sick-leaves/$id"
   done
 
   wt_call DELETE "/api/users/$uid"
@@ -289,8 +294,33 @@ wt_step "Der Zeitraum ist nach dem Löschen wieder frei" 201 '"startDate":"2026-
 
 wt_step "Gelöschter Urlaub ist weg" 410 "Nicht gefunden" GET "$VAC/$VAC2"
 
+# --- Krankmeldung ---------------------------------------------------------
+
+SICK="/api/sick-leaves"
+sick() { printf '{"userId":"%s","startDate":"%s","endDate":"%s"}' "$USER_ID" "$1" "$2"; }
+
+wt_step "Krankmeldung im Urlaub ist erlaubt (10.06. bis 11.06.)" 201 '"startDate":"2026-06-10"' POST $SICK \
+  "$(sick 2026-06-10 2026-06-11)"
+SICK1=$(wt_id "$WT_BODY")
+
+wt_step "Überschneidung mit einer Krankmeldung wird abgelehnt" 422 "Krankmeldung vom 10.06.2026" POST $SICK \
+  "$(sick 2026-06-11 2026-06-12)"
+
+wt_step "Ende vor Beginn wird abgelehnt" 400 "vor dem Beginn" POST $SICK "$(sick 2026-07-10 2026-07-01)"
+
+wt_step "Notiz ändern" 200 '"note":"Attest liegt vor"' PATCH "$SICK/$SICK1" '{"note":"Attest liegt vor"}'
+
+wt_step "Verlängern ohne Vergleich mit sich selbst" 200 '"endDate":"2026-06-12"' \
+  PATCH "$SICK/$SICK1" '{"endDate":"2026-06-12"}'
+
+wt_step "Liste enthält die Krankmeldung" 200 '"note":"Attest liegt vor"' GET "$SICK?userId=$USER_ID"
+
+wt_step "Krankmeldung löschen" 204 "" DELETE "$SICK/$SICK1"
+
+wt_step "Gelöschte Krankmeldung ist weg" 410 "Nicht gefunden" GET "$SICK/$SICK1"
+
 # --- Unbekannte IDs (Netlify wiederholt eine 410 mit .html) ------------------
-for r in users projects time-entries vacations; do
+for r in users projects time-entries vacations sick-leaves; do
   wt_step "Unbekannte ID liefert 410 ($r)" 410 "Nicht gefunden" GET "/api/$r/$UNKNOWN_ID"
 done
 
