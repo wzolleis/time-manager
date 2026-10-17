@@ -14,8 +14,8 @@ import {dayTotals} from "@shared/time-report";
 import {localDay} from "@shared/time-rules";
 import {cn} from "@/lib/utils";
 import {dayKind, targetMs} from "@shared/target-hours";
-import {dayKindLabel} from "@features/reports/components/day-kind-label";
 import {holidayOn} from "@shared/holiday-rules";
+import {dayKindLabel} from "@features/reports/utils/day-kind-label";
 
 type Row = {
     id: string;
