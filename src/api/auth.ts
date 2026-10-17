@@ -1,4 +1,3 @@
-// src/api/auth.ts
 import type {Login, PasswordChange, PasswordReset} from "@shared/auth";
 import type {User} from "@shared/user";
 import {ApiError, request} from "@/api/http";

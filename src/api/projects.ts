@@ -1,4 +1,3 @@
-// src/api/projects.ts
 import {request} from "./http";
 import type {Project, ProjectCreate, ProjectUpdate} from "@shared/project";
 

@@ -1,4 +1,3 @@
-// src/api/users.ts
 import type {User, UserCreate, UserUpdate} from "@shared/user";
 import {request} from "@/api/http";
 

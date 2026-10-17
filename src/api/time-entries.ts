@@ -1,4 +1,3 @@
-// src/api/time-entries.ts
 import {request} from "./http";
 import type {TimeEntry, TimeEntryCreate, TimeEntryUpdate} from "@shared/time-entry";
 
