@@ -1,7 +1,7 @@
 import {localDayRange} from "./day-range";
 import {type HolidayRange, holidayOn} from "./holiday-rules";
 import {dayKind, type DayKind, targetMs} from "./target-hours";
-import {type Booking, buildPeriods} from "./time-rules";
+import {type Booking, buildPeriods, firstBookingDay} from "./time-rules";
 import type {VacationRange} from "./vacation-rules";
 import {monthWeeks} from "./week";
 
@@ -73,11 +73,12 @@ export function weekTotals(
     today: string,
     now: Date,
 ): WeekTotals {
+    const trackingStart = firstBookingDay(entries);
     const rows: WeekDayTotals[] = days.map((day) => {
         const range = localDayRange(day);
         // Alle Buchungen gehen in die Summen ein, damit Nachtschichten am Tageswechsel stimmen
         const totals = dayTotals(entries, range, now);
-        const target = targetMs(day, vacations, holidays);
+        const target = targetMs(day, vacations, holidays, trackingStart);
         const elapsed = day <= today; // Tage nach heute zählen nicht zur Differenz
         const noDifference = !elapsed || (target === 0 && totals.workMs === 0);
 
@@ -86,7 +87,7 @@ export function weekTotals(
             day,
             count: entries.filter((e) => e.bookedAt >= range.start && e.bookedAt < range.end).length,
             targetMs: target,
-            kind: dayKind(day, vacations, holidays),
+            kind: dayKind(day, vacations, holidays, trackingStart),
             holidayName: holidayOn(day, holidays)?.name,
             diffMs: noDifference ? null : totals.workMs - target,
         };
@@ -117,7 +118,7 @@ export type MonthWeekTotals = {
     targetMs: number;
     workMs: number;
     running: boolean;
-    diffMs: number | null; // null: alle Tage der Woche liegen in der Zukunft
+    diffMs: number | null; // null: alle Tage in der Zukunft, oder bis heute weder Soll noch Arbeit
 };
 
 export type MonthTotals = {
@@ -150,7 +151,7 @@ export function monthTotals(
             targetMs: t.targetWeekMs,
             workMs: t.workMs,
             running: t.days.some((d) => d.running),
-            diffMs: days[0] > today ? null : t.diffMs,
+            diffMs: days[0] > today || (t.targetToDateMs === 0 && t.workMs === 0) ? null : t.diffMs,
         };
         return {row, targetToDateMs: t.targetToDateMs};
     });

@@ -8,4 +8,6 @@ export const dayKindLabel = (kind: DayKind, holidayName?: string): string | unde
           ? "Urlaub"
           : kind === "weekend"
             ? "Wochenende"
-            : undefined;
+            : kind === "untracked"
+              ? "vor Beginn der Zeiterfassung"
+              : undefined;

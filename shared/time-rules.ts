@@ -88,3 +88,9 @@ export function findPartner(entries: Booking[], id: string): Booking | null {
     const partner = list[i].type === "kommen" ? list[i + 1] : list[i - 1];
     return partner ?? null;
 }
+
+/** Tag ("JJJJ-MM-TT") der ersten Buchung, also der Beginn der Zeiterfassung (null: noch keine Buchung) */
+export function firstBookingDay(entries: Booking[]): string | null {
+    const first = sorted(entries)[0];
+    return first ? localDay(first.bookedAt) : null;
+}

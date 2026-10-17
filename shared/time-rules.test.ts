@@ -5,6 +5,7 @@ import {
     checkSequence,
     findMissingGehen,
     findPartner,
+    firstBookingDay,
     localDay,
     nextType,
 } from "./time-rules";
@@ -253,5 +254,16 @@ describe("findPartner", () => {
     it("liefert null ohne Gegenstück oder bei unbekannter ID", () => {
         expect(findPartner(workday.slice(0, 3), "3")).toBeNull(); // laufendes kommen
         expect(findPartner(workday, "x")).toBeNull();
+    });
+});
+
+describe("firstBookingDay", () => {
+    it("liefert den lokalen Tag der frühesten Buchung, unabhängig von der Reihenfolge", () => {
+        const late = b("x", "kommen", "2026-06-09T22:30:00Z"); // 10.06. 00:30 in Berlin
+        expect(firstBookingDay([workday[2], late, workday[0]])).toBe("2026-06-10");
+    });
+
+    it("liefert null ohne Buchungen", () => {
+        expect(firstBookingDay([])).toBeNull();
     });
 });

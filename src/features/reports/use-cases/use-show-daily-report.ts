@@ -9,7 +9,7 @@ import {localDayRange} from "@shared/day-range";
 import {holidayOn} from "@shared/holiday-rules";
 import {dayKind, targetMs} from "@shared/target-hours";
 import {dayTotals} from "@shared/time-report";
-import {localDay, nextType} from "@shared/time-rules";
+import {firstBookingDay, localDay, nextType} from "@shared/time-rules";
 import type {EntryRow} from "@features/time-stamp/time-entry-row";
 
 /** Der User sieht seinen Tagesbericht für einen Tag "JJJJ-MM-TT" */
@@ -44,6 +44,7 @@ export function useShowDailyReport(day: string) {
         const all = dtos.map((e) => ({id: e.id, type: e.type, bookedAt: new Date(e.bookedAt)}));
         return {
             rows,
+            trackingStart: firstBookingDay(all),
             totals: dayTotals(all, range, new Date(now)),
             next: nextType(all, range.end), // was ist am Ende dieses Tages als Nächstes dran
         };
@@ -51,7 +52,7 @@ export function useShowDailyReport(day: string) {
 
     const vacationList = vacations.data ?? [];
     const holidayList = holidays.data ?? [];
-    const target = targetMs(day, vacationList, holidayList);
+    const target = targetMs(day, vacationList, holidayList, report.trackingStart);
 
     return {
         currentUser,
@@ -61,7 +62,7 @@ export function useShowDailyReport(day: string) {
         totals: report.totals,
         next: report.next,
         target,
-        kind: dayKind(day, vacationList, holidayList),
+        kind: dayKind(day, vacationList, holidayList, report.trackingStart),
         holidayName: holidayOn(day, holidayList)?.name,
         elapsed: day <= today, // ISO-Daten lassen sich als Text vergleichen
         diff: report.totals.workMs - target,

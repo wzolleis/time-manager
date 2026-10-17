@@ -33,6 +33,9 @@ sortiert. Spalten:
 | Arbeitszeit | Summe der Arbeitszeit der Tage dieser Woche im Monat                    |
 | Differenz   | Arbeitszeit minus Soll der vergangenen Tage, siehe [Regeln](#regeln)    |
 
+Eine Woche, die bis heute weder Soll noch Arbeitszeit hat (z. B. ganz vor dem Beginn der Zeiterfassung
+oder nur ein Sonntag am Monatsende), zeigt „–“ als Differenz, so wie ein freier Tag im Wochenbericht.
+
 - `<n>` und `<Jahr>` sind Nummer und Jahr der ISO-Kalenderwoche, wie `isoWeek` in `shared/week.ts`
   sie liefert. So schreibt sie auch der Wochenbericht („KW 42/2026“).
 - `<von>–<bis>` sind der erste und der letzte Tag der Woche **innerhalb des Monats**, ohne Jahr,
@@ -58,9 +61,18 @@ Drei Karten wie im Wochenbericht (Komponente `Summary` aus `src/components/summa
    das Soll der Tage bis einschließlich heute gerechnet. Eine Woche, deren Tage im Monat alle in der
    Zukunft liegen, zeigt „–“ als Differenz.
 4. **Soll eines Tages** wie im Wochenbericht: `targetMs` aus `shared/target-hours.ts`, also 8 Stunden
-   an Arbeitstagen und 0 am Wochenende, an Feiertagen und im Urlaub.
+   an Arbeitstagen und 0 am Wochenende, an Feiertagen, im Urlaub und vor Beginn der Zeiterfassung
+   (Regel 6).
 5. **Arbeitszeit eines Tages** wie im Wochenbericht: `dayTotals` aus `shared/time-report.ts`. Dabei gehen
    alle Buchungen des Users ein, damit Nachtschichten am Tageswechsel stimmen.
+6. **Soll erst ab Beginn der Zeiterfassung.** Vor dem Tag der ersten Buchung (Kommen oder Gehen) des
+   Users ist das Soll 0. Das gilt auch für den angebrochenen Monat, in dem die Erfassung beginnt, und für
+   Monate in der Vergangenheit. Hat der User noch gar keine Buchung, ist das Soll überall 0.
+   Grund: Die Zeiterfassung beginnt nicht am Jahresanfang, Tage davor dürfen keine Minusstunden ergeben.
+   Urlaube zählen nicht als Buchung. Die Regel gilt für **alle Berichte** (Tages-, Wochen- und
+   Monatsbericht), deshalb steckt sie im gemeinsamen Service `targetMs` und nicht in `monthTotals`.
+   Den Tag der ersten Buchung liefert `firstBookingDay` aus `shared/time-rules.ts`. Im Tagesbericht
+   steht dann beim Soll der Hinweis „vor Beginn der Zeiterfassung“.
 
 ## Beispiele
 
@@ -84,6 +96,10 @@ KW 40 beginnt eigentlich am 28.09., KW 44 endet eigentlich am 01.11. Diese Tage 
 **Laufender Monat:** Ist heute Mittwoch, der 14.10.2026, rechnet die Differenz von KW 42 nur mit dem
 Soll von Montag bis Mittwoch. KW 43 und KW 44 zeigen „–“ als Differenz.
 
+**Beginn der Zeiterfassung:** Ist die erste Buchung am Mittwoch, 14.10.2026, dann hat der Oktober ein
+Soll von 13 Arbeitstagen (14.10. bis 30.10.). KW 40 und KW 41 haben kein Soll und zeigen „–“ als
+Differenz, KW 42 hat das Soll von Mittwoch bis Freitag. Ein Monat vor dem 14.10.2026 hat kein Soll.
+
 ## Bedienung
 
 - Überschrift „Monatsbericht“. Darunter der Name des Users und der Monat, z. B. „Oktober 2026“.
@@ -101,7 +117,7 @@ Soll von Montag bis Mittwoch. KW 43 und KW 44 zeigen „–“ als Differenz.
 |-------------------------------|------------------------------------------------------------------------|
 | Wer möchte was?               | Der User sieht seinen Monatsbericht: `useShowMonthlyReport`            |
 | Wer darf das?                 | Jeder User für sich selbst, im User-Bereich. Der Server prüft.         |
-| Welche Regeln gelten?         | Regeln 1 bis 5 oben, als Service in `shared/`                          |
+| Welche Regeln gelten?         | Regeln 1 bis 6 oben, als Service in `shared/`                          |
 | Welche Daten werden geladen?  | Buchungen, Urlaube und Feiertage des Users                             |
 | Was kann schiefgehen?         | Laden schlägt fehl: Meldung mit „Erneut versuchen“                     |
 | Was ist danach wahr?          | Nichts, der Use Case liest nur                                         |
@@ -120,7 +136,7 @@ Lesender Use Case: Views und ein Service, kein Repository.
 | Komponente | `src/features/reports/components/report-monthly.tsx`          | neu: zeigt nur an                                            |
 | Seite      | `src/features/reports/components/report-monthly-page.tsx`     | neu: `ReportMonthlyPage`                                     |
 | Route      | `src/routes/user/reports/monthly.tsx`                         | neu: `/user/reports/monthly`, bindet nur `ReportMonthlyPage` ein |
-| Menü       | `src/application/navigation/nav-items.ts`                     | neuer Eintrag „Monatsbericht“ nach `reports-weekly`          |
+| Menü       | `src/application/navigation/nav-items.ts`                     | neuer Eintrag „Monat“ nach `reports-weekly`, wie „Woche“     |
 
 Hinweise:
 
@@ -139,5 +155,8 @@ Nach `testing.md`:
   - angebrochene Wochen am Monatsanfang und -ende zählen nur die Tage im Monat (Oktober 2026)
   - Woche über den Jahreswechsel (Dezember 2026 und Januar 2027)
   - im laufenden Monat zählen künftige Tage nicht zur Differenz
+  - Beginn der Zeiterfassung mitten im Monat und Monat ohne jede Buchung
+- **Service-Test** für Regel 6 auch in `shared/target-hours.test.ts` (`targetMs`, `dayKind`) und
+  `shared/time-rules.test.ts` (`firstBookingDay`), weil sie für alle Berichte gilt
 - **Routing:** Eintrag `"/user/reports/monthly": "Monatsbericht"` in `src/tests/routes.test.tsx`.
 - Kein eigener Komponenten-Test nötig, solange die Komponente nur anzeigt.

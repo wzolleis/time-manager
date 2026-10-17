@@ -20,6 +20,9 @@ const workday = [
     b("4", "gehen", "2026-06-10T15:00:00Z"), // 17:00
 ];
 
+// Erste Buchung lange vor den Testtagen, damit das Soll an allen Testtagen zählt
+const started = [b("s1", "kommen", "2026-01-05T07:00:00Z"), b("s2", "gehen", "2026-01-05T15:00:00Z")];
+
 describe("dayTotals", () => {
     it("summiert Arbeitszeit und Pause eines vollständigen Tages", () => {
         const t = dayTotals(workday, day, new Date("2026-06-10T20:00:00Z"));
@@ -82,7 +85,7 @@ describe("weekTotals", () => {
     const now = new Date("2026-06-10T20:00:00Z"); // Mittwoch abends
 
     it("rechnet die Differenz mitten in der Woche gegen das Soll bis heute", () => {
-        const t = weekTotals(workday, week, [], [], "2026-06-10", now);
+        const t = weekTotals([...started, ...workday], week, [], [], "2026-06-10", now);
         expect(t.targetWeekMs).toBe(40 * HOUR);
         expect(t.targetToDateMs).toBe(24 * HOUR); // Mo bis Mi
         expect(t.workMs).toBe(8.5 * HOUR);
@@ -90,18 +93,18 @@ describe("weekTotals", () => {
     });
 
     it("zeigt keine Differenz für künftige Tage und freie Tage ohne Arbeit", () => {
-        const t = weekTotals(workday, week, [], [], "2026-06-10", now);
+        const t = weekTotals([...started, ...workday], week, [], [], "2026-06-10", now);
         const diffs = Object.fromEntries(t.days.map((d) => [d.day, d.diffMs]));
         expect(diffs["2026-06-09"]).toBe(-8 * HOUR); // vergangener Arbeitstag ohne Buchung
         expect(diffs["2026-06-10"]).toBe(0.5 * HOUR);
         expect(diffs["2026-06-11"]).toBeNull(); // Zukunft
-        expect(weekTotals([], week, [], [], "2026-06-14", now).days[6].diffMs).toBeNull(); // Sonntag ohne Arbeit
+        expect(weekTotals(started, week, [], [], "2026-06-14", now).days[6].diffMs).toBeNull(); // Sonntag ohne Arbeit
     });
 
     it("senkt das Wochensoll an Urlaubs- und Feiertagen", () => {
         const vacations = [{startDate: "2026-06-08", endDate: "2026-06-08"}];
         const holidays = [{date: "2026-06-11", name: "Fronleichnam"}];
-        const t = weekTotals([], week, vacations, holidays, "2026-06-10", now);
+        const t = weekTotals(started, week, vacations, holidays, "2026-06-10", now);
         expect(t.targetWeekMs).toBe(24 * HOUR);
         expect(t.days[3]).toMatchObject({kind: "holiday", holidayName: "Fronleichnam", targetMs: 0});
     });
@@ -137,9 +140,28 @@ describe("monthTotals", () => {
 
     it("teilt die Woche am Jahreswechsel", () => {
         const now = new Date("2027-02-01T12:00:00Z");
-        const december = monthTotals([], "2026-12", [], [], "2027-02-01", now);
-        const january = monthTotals([], "2027-01", [], [], "2027-02-01", now);
+        const december = monthTotals(started, "2026-12", [], [], "2027-02-01", now);
+        const january = monthTotals(started, "2027-01", [], [], "2027-02-01", now);
         expect(december.weeks.at(-1)).toMatchObject({year: 2026, week: 53, targetMs: 4 * 8 * HOUR}); // Mo bis Do
         expect(january.weeks[0]).toMatchObject({year: 2026, week: 53, targetMs: 8 * HOUR}); // nur Fr 01.01.
+    });
+});
+
+describe("Beginn der Zeiterfassung im Bericht", () => {
+    // Erste Buchung am Mi 14.10.2026
+    const fromMidOctober = [b("1", "kommen", "2026-10-14T06:00:00Z"), b("2", "gehen", "2026-10-14T14:00:00Z")];
+    const afterOctober = new Date("2026-11-15T12:00:00Z");
+
+    it("zählt das Soll erst ab dem Tag der ersten Buchung", () => {
+        const t = monthTotals(fromMidOctober, "2026-10", [], [], "2026-11-15", afterOctober);
+        expect(t.targetMonthMs).toBe(13 * 8 * HOUR); // 14.10. bis 31.10.: 13 Arbeitstage
+        expect(t.weeks[0]).toMatchObject({week: 40, targetMs: 0, diffMs: null}); // ganz vor dem Beginn
+        expect(t.weeks[2]).toMatchObject({week: 42, targetMs: 3 * 8 * HOUR}); // Mi bis Fr
+    });
+
+    it("ohne Buchungen hat ein Monat kein Soll, auch in der Vergangenheit", () => {
+        const t = monthTotals([], "2026-10", [], [], "2026-11-15", afterOctober);
+        expect(t.targetMonthMs).toBe(0);
+        expect(t.weeks.every((w) => w.diffMs === null)).toBe(true);
     });
 });
