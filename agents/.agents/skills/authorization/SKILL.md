@@ -120,3 +120,10 @@ zeigt die UI eine Fehlermeldung an, dass der Benutzer nicht die notwendigen Rech
 Der Text kommt vom Backend ("Dir fehlen die notwendigen Rechte für diese Aktion") und erscheint
 dort, wo die Seite oder der Dialog ohnehin Fehler anzeigt. Bei `401` und `403` wiederholt React Query
 eine Abfrage nicht (`retry` in `src/query-client.ts`).
+
+# Daten eines Users
+
+Die Rolle entscheidet, ob ein Endpoint aufgerufen werden darf, aber nicht, wessen Daten.
+Urlaube und Krankmeldungen darf jeder User nur für sich selbst lesen und ändern, ein Administrator
+für alle. Das prüft `mayAccessUser` aus `netlify/functions/lib/roles.ts` gegen die `userId` der Anfrage
+bzw. des gespeicherten Datensatzes, sonst gibt es `403`. Ohne `?userId=` liefert die Liste die eigenen Daten.

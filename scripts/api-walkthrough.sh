@@ -319,6 +319,41 @@ wt_step "Krankmeldung löschen" 204 "" DELETE "$SICK/$SICK1"
 
 wt_step "Gelöschte Krankmeldung ist weg" 410 "Nicht gefunden" GET "$SICK/$SICK1"
 
+# --- Eigene Daten ----------------------------------------------------------
+
+wt_call GET /api/auth/me
+ADMIN_ID=$(wt_id "$WT_BODY")
+
+# Mit einer eigenen Session als 'vitest' (ohne Administrator-Rolle)
+ADMIN_COOKIES="$WT_COOKIES"
+TEST_COOKIES="$(mktemp)"
+curl -s -o /dev/null -c "$TEST_COOKIES" -H "Content-Type: application/json" \
+  -d "{\"email\":\"$TEST_EMAIL\",\"password\":\"vitest-neu-12345\"}" "$WT_BASE/api/auth/login"
+WT_COOKIES="$TEST_COOKIES"
+
+wt_step "'vitest' sieht die eigenen Urlaube" 200 '"startDate":"2026-06-13"' GET "$VAC?userId=$USER_ID"
+wt_step "'vitest' sieht ohne userId die eigenen Urlaube" 200 '"startDate":"2026-06-13"' GET "$VAC"
+wt_step "'vitest' sieht einen eigenen Urlaub" 200 '"startDate":"2026-06-09"' GET "$VAC/$VAC1"
+wt_step "'vitest' sieht keine fremden Urlaube" 403 "notwendigen Rechte" GET "$VAC?userId=$ADMIN_ID"
+wt_step "'vitest' trägt keinen Urlaub für andere ein" 403 "notwendigen Rechte" POST $VAC \
+  "{\"userId\":\"$ADMIN_ID\",\"startDate\":\"2026-08-03\",\"endDate\":\"2026-08-07\"}"
+
+wt_step "'vitest' trägt eine eigene Krankmeldung ein" 201 '"startDate":"2026-07-01"' POST $SICK \
+  "$(sick 2026-07-01 2026-07-02)"
+SICK2=$(wt_id "$WT_BODY")
+wt_step "'vitest' sieht keine fremden Krankmeldungen" 403 "notwendigen Rechte" GET "$SICK?userId=$ADMIN_ID"
+wt_step "'vitest' trägt keine Krankmeldung für andere ein" 403 "notwendigen Rechte" POST $SICK \
+  "{\"userId\":\"$ADMIN_ID\",\"startDate\":\"2026-08-03\",\"endDate\":\"2026-08-07\"}"
+wt_step "'vitest' löscht die eigene Krankmeldung" 204 "" DELETE "$SICK/$SICK2"
+
+WT_COOKIES="$ADMIN_COOKIES"
+wt_step "Der Administrator sieht die Urlaube von 'vitest'" 200 '"startDate":"2026-06-13"' GET "$VAC?userId=$USER_ID"
+
+curl -s -o /dev/null -b "$TEST_COOKIES" -X POST "$WT_BASE/api/auth/logout"
+rm -f "$TEST_COOKIES"
+TEST_COOKIES=""
+ADMIN_COOKIES=""
+
 # --- Unbekannte IDs (Netlify wiederholt eine 410 mit .html) ------------------
 for r in users projects time-entries vacations sick-leaves; do
   wt_step "Unbekannte ID liefert 410 ($r)" 410 "Nicht gefunden" GET "/api/$r/$UNKNOWN_ID"

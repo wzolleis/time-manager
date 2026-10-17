@@ -1,5 +1,5 @@
 // netlify/functions/lib/roles.ts
-import {eq} from "drizzle-orm";
+import {and, eq} from "drizzle-orm";
 import {db} from "./db";
 import {endpointRoles, userRoles} from "../../../db/schema";
 import {ADMIN_ROLE_ID, USER_ROLE_ID} from "../../../shared/role";
@@ -72,6 +72,23 @@ export async function hasEndpointAccess(userId: string, path: string, method: st
         .where(eq(endpointRoles.method, method as Method));
     return roleIds.includes(requiredRoleId(entries, path));
 }
+
+/** Hat der User die Rolle "Administrator"? */
+export async function isAdmin(userId: string): Promise<boolean> {
+    const rows = await db
+        .select({roleId: userRoles.roleId})
+        .from(userRoles)
+        .where(and(eq(userRoles.userId, userId), eq(userRoles.roleId, ADMIN_ROLE_ID)))
+        .limit(1);
+    return rows.length > 0;
+}
+
+/**
+ * Darf der angemeldete User die Daten dieses Users lesen und ändern (Urlaube, Krankmeldungen)?
+ * Ja für sich selbst, ein Administrator für alle.
+ */
+export const mayAccessUser = async (sessionUserId: string, userId: string): Promise<boolean> =>
+    sessionUserId === userId || isAdmin(sessionUserId);
 
 /**
  * Sperrt alle Administrator-Zuordnungen bis zum Ende der Transaktion und liefert die User-IDs.

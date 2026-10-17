@@ -1,6 +1,6 @@
 import type {Config, Context} from "@netlify/functions";
 import {randomUUID} from "node:crypto";
-import {and, asc, eq, isNull, or} from "drizzle-orm";
+import {asc, eq, isNull, or} from "drizzle-orm";
 import {z} from "zod";
 import {db} from "./lib/db";
 import {hasDbCode} from "./lib/db-errors";
@@ -9,7 +9,8 @@ import {holidays, sickLeaves, users, vacations} from "../../db/schema";
 import {checkRange, checkYearLimit, findOverlap, overlapMessage} from "../../shared/vacation-rules";
 import {VacationCreateSchema, VacationUpdateSchema} from "../../shared/vacation";
 import {IdSchema, isApiPath, notFound} from "./lib/id";
-import {withSession} from "./lib/session";
+import {forbidden, mayAccessUser} from "./lib/roles";
+import {type Session, withSession} from "./lib/session";
 import {RuleError, ruleViolation} from "./lib/rule-error";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -18,6 +19,13 @@ type Executor = Pick<typeof db, "select">;
 class NotFoundError extends Error {}
 
 class UnknownUserError extends Error {}
+
+class ForbiddenError extends Error {}
+
+// Jeder User für sich selbst, ein Administrator für alle
+const checkAccess = async (session: Session, userId: string) => {
+    if (!(await mayAccessUser(session.user.id, userId))) throw new ForbiddenError();
+};
 
 const ListQuerySchema = z.object({userId: z.string().uuid().optional()});
 
@@ -56,7 +64,7 @@ const readBody = async (req: Request): Promise<unknown> => {
     }
 };
 
-const handler = async (req: Request, context: Context) => {
+const handler = async (req: Request, context: Context, session: Session) => {
     try {
         if (!isApiPath(req.url, "vacations")) return notFound();
         const url = new URL(req.url);
@@ -66,16 +74,19 @@ const handler = async (req: Request, context: Context) => {
         if (rawId === undefined) {
             if (req.method === "GET") {
                 const q = ListQuerySchema.parse(Object.fromEntries(url.searchParams));
+                const userId = q.userId ?? session.user.id; // ohne Angabe die eigenen
+                await checkAccess(session, userId);
                 const rows = await db
                     .select()
                     .from(vacations)
-                    .where(and(q.userId ? eq(vacations.userId, q.userId) : undefined))
+                    .where(eq(vacations.userId, userId))
                     .orderBy(asc(vacations.startDate));
                 return Response.json(rows);
             }
 
             if (req.method === "POST") {
                 const input = VacationCreateSchema.parse(await readBody(req));
+                await checkAccess(session, input.userId);
                 const id = randomUUID();
                 await db.transaction(async (tx) => {
                     await lockUser(tx, input.userId);
@@ -102,7 +113,9 @@ const handler = async (req: Request, context: Context) => {
 
         if (req.method === "GET") {
             const row = await getVacation(db, id);
-            return row ? Response.json(row) : notFound();
+            if (!row) return notFound();
+            await checkAccess(session, row.userId);
+            return Response.json(row);
         }
 
         if (req.method === "PATCH") {
@@ -114,6 +127,7 @@ const handler = async (req: Request, context: Context) => {
             await db.transaction(async (tx) => {
                 const current = await getVacation(tx, id);
                 if (!current) throw new NotFoundError();
+                await checkAccess(session, current.userId);
                 await lockUser(tx, current.userId);
 
                 // Wurde nur ein Datum gesendet, gilt für das andere der gespeicherte Wert
@@ -142,6 +156,9 @@ const handler = async (req: Request, context: Context) => {
         }
 
         if (req.method === "DELETE") {
+            const row = await getVacation(db, id);
+            if (!row) return notFound();
+            await checkAccess(session, row.userId);
             const [result] = await db.delete(vacations).where(eq(vacations.id, id));
             return result.affectedRows > 0 ? new Response(null, {status: 204}) : notFound();
         }
@@ -153,6 +170,7 @@ const handler = async (req: Request, context: Context) => {
         if (err instanceof z.ZodError) return Response.json({errors: err.issues}, {status: 400});
         if (err instanceof RuleError) return ruleViolation(err);
         if (err instanceof NotFoundError) return notFound();
+        if (err instanceof ForbiddenError) return forbidden();
         if (err instanceof UnknownUserError || hasDbCode(err, "ER_NO_REFERENCED_ROW_2")) {
             return Response.json({error: "User existiert nicht"}, {status: 400});
         }
