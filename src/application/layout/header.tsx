@@ -3,7 +3,7 @@ import {UserDropdown} from "@features/users/components/user-dropdown";
 import {Bell} from "lucide-react";
 import {StartEnd} from "@/components/utils/start-end";
 import {MenuButton} from "@/components/buttons/menu-button";
-import {Breadcrumb} from "@/application/breadcrumb/components/breadcrumb";
+import {Breadcrumb} from "@/application/breadcrumb/breadcrumb";
 import {useNavigate} from "@tanstack/react-router";
 import {NAVIGATION_ITEMS, type NavItem} from "@/application/navigation/nav-items";
 import {useCurrentUser} from "@/lib/user-context";
