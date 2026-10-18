@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# API-Walkthrough: Anmeldung, Rollen, Users, Projekte, Zeitbuchungen, Projektzuordnung, Urlaub, Krankmeldung.
+# API-Walkthrough: Anmeldung, Rollen, Users, Projekte, Zeitbuchungen, Projektzuordnung, Urlaub, Krankmeldung,
+# Agent-Tokens.
 # Läuft mit einem Wegwerf-User "vitest" und räumt hinterher auf.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -10,6 +11,7 @@ TEST_PASSWORD="vitest-passwort-1"
 UNKNOWN_ID="00000000-0000-4000-8000-000000000000"
 USER_ID=""
 PROJECT_IDS=""
+ADMIN_TOKEN_ID=""
 ADMIN_COOKIES=""
 TEST_COOKIES=""
 # Feste IDs der Rollen, wie in shared/role.ts
@@ -42,6 +44,8 @@ cleanup() {
   if [ -n "$ADMIN_COOKIES" ]; then WT_COOKIES="$ADMIN_COOKIES"; fi
   if [ -n "$TEST_COOKIES" ]; then rm -f "$TEST_COOKIES"; fi
   for pid in $PROJECT_IDS; do wt_call DELETE "/api/projects/$pid"; done
+  # Die Tokens von 'vitest' verschwinden mit dem User, das des Admins nicht
+  if [ -n "$ADMIN_TOKEN_ID" ]; then wt_call DELETE "/api/api-tokens/$ADMIN_TOKEN_ID"; fi
   if [ -n "$USER_ID" ]; then purge_user "$USER_ID"; fi
 }
 # shellcheck disable=SC2034
@@ -359,6 +363,52 @@ curl -s -o /dev/null -b "$TEST_COOKIES" -X POST "$WT_BASE/api/auth/logout"
 rm -f "$TEST_COOKIES"
 TEST_COOKIES=""
 ADMIN_COOKIES=""
+
+# --- Agent-Tokens ----------------------------------------------------------
+
+TOK="/api/api-tokens"
+ADMIN_TOK="/api/admin/api-tokens"
+
+wt_step "Admin erzeugt ein eigenes Token ohne Ablauf" 201 '"expiresAt":null' POST $TOK \
+  '{"name":"walkthrough admin","expiresInDays":null}'
+ADMIN_TOKEN_ID=$(wt_id "$WT_BODY")
+if [[ "$WT_BODY" != *'"token":"tm_'* ]]; then echo "${C_BAD}Antwort enthält kein Token!${C_OFF}"; WT_FAIL=$((WT_FAIL + 1)); fi
+
+wt_step "Token ohne Namen wird abgelehnt" 400 "Namen" POST $TOK '{"name":"  ","expiresInDays":30}'
+wt_step "Unbekannte Gültigkeit wird abgelehnt" 400 "expiresInDays" POST $TOK '{"name":"x","expiresInDays":7}'
+
+wt_step "Liste der eigenen Tokens enthält es" 200 "\"id\":\"$ADMIN_TOKEN_ID\"" GET $TOK
+if [[ "$WT_BODY" == *tokenHash* || "$WT_BODY" == *'"token"'* ]]; then
+  echo "${C_BAD}Liste enthält Hash oder Token!${C_OFF}"; WT_FAIL=$((WT_FAIL + 1))
+fi
+
+ADMIN_COOKIES="$WT_COOKIES"
+TEST_COOKIES="$(mktemp)"
+curl -s -o /dev/null -c "$TEST_COOKIES" -H "Content-Type: application/json" \
+  -d "{\"email\":\"$TEST_EMAIL\",\"password\":\"vitest-neu-12345\"}" "$WT_BASE/api/auth/login"
+WT_COOKIES="$TEST_COOKIES"
+
+wt_step "'vitest' erzeugt ein Token für 30 Tage" 201 '"name":"walkthrough vitest"' POST $TOK \
+  '{"name":"walkthrough vitest","expiresInDays":30}'
+TEST_TOKEN_ID=$(wt_id "$WT_BODY")
+wt_step "'vitest' sieht nur die eigenen Tokens" 200 "\"id\":\"$TEST_TOKEN_ID\"" GET $TOK
+if [[ "$WT_BODY" == *"$ADMIN_TOKEN_ID"* ]]; then
+  echo "${C_BAD}'vitest' sieht ein fremdes Token!${C_OFF}"; WT_FAIL=$((WT_FAIL + 1))
+fi
+wt_step "'vitest' widerruft kein fremdes Token" 410 "Nicht gefunden" DELETE "$TOK/$ADMIN_TOKEN_ID"
+wt_step "'vitest' sieht nicht die Tokens aller User" 403 "notwendigen Rechte" GET $ADMIN_TOK
+wt_step "'vitest' widerruft nicht über die Admin-Liste" 403 "notwendigen Rechte" DELETE "$ADMIN_TOK/$ADMIN_TOKEN_ID"
+
+WT_COOKIES="$ADMIN_COOKIES"
+curl -s -o /dev/null -b "$TEST_COOKIES" -X POST "$WT_BASE/api/auth/logout"
+rm -f "$TEST_COOKIES"
+TEST_COOKIES=""
+ADMIN_COOKIES=""
+
+wt_step "Admin sieht das Token von 'vitest' mit Namen des Users" 200 '"userName":"vitest"' GET $ADMIN_TOK
+wt_step "Admin widerruft das Token von 'vitest'" 204 "" DELETE "$ADMIN_TOK/$TEST_TOKEN_ID"
+wt_step "Widerrufenes Token ist unbekannt" 410 "Nicht gefunden" DELETE "$ADMIN_TOK/$TEST_TOKEN_ID"
+wt_step "Admin widerruft das eigene Token" 204 "" DELETE "$TOK/$ADMIN_TOKEN_ID"
 
 # --- Unbekannte IDs (Netlify wiederholt eine 410 mit .html) ------------------
 for r in users projects time-entries vacations sick-leaves; do
