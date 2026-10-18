@@ -35,8 +35,9 @@ Technische Grundlage: Skill `authorization` (`../../agents/.agents/skills/`), Fu
 | Welche Use Cases?             | Zeiterfassung und Berichte (siehe Tools), sonst nichts                            |
 | Wessen Daten?                 | Immer nur die des Users, dem das Token gehört, auch bei Administratoren          |
 
-Folge der Entscheidungen: Custom Connectors in claude.ai verlangen OAuth und funktionieren damit nicht.
-Agents, bei denen man einen Header konfigurieren kann (Claude Code, Cursor, MCP Inspector), funktionieren.
+Folge der Entscheidungen: Jeder Client, bei dem man einen festen `Authorization`-Header eintragen kann,
+funktioniert (Claude Code, Claude API, Cursor, MCP Inspector). In claude.ai und Claude Desktop geht das
+nur eingeschränkt, siehe „Einbinden in Claude“.
 
 ## Begriffe
 
@@ -216,10 +217,83 @@ Nach dem Skill `architecture` (`testing.md`): Functions haben keine Unit-Tests, 
 | „Lösch das Kommen um 13:00, das war ein Versehen.“ (Kommen 08:00, Gehen 12:00, Kommen 13:00) | `get_daily_report` → `delete_time_entry {id: <Kommen 13:00>}`, gültig, übrig bleibt 08:00–12:00 |
 | „Lösch meine Buchungen von 13 bis 17 Uhr.“ (Kommen 08:00, Gehen 12:00, Kommen 13:00, Gehen 17:00) | `delete_time_entry {id: <Kommen 13:00>}` scheitert, weil dann zwei Gehen aufeinander folgen. Der Agent löscht erst Gehen 17:00, dann Kommen 13:00, beides gültig |
 
+## Einbinden in Claude
+
+Geprüft gegen die Doku von Anthropic im Oktober 2026. Vor der Doku in `README.md` noch einmal prüfen,
+die Connectors ändern sich häufig.
+
+| Client                       | Mit dem Agent-Token                                                          |
+|------------------------------|------------------------------------------------------------------------------|
+| Claude Code                  | ✅ direkt mit `claude mcp add`                                               |
+| Claude API (MCP-Connector)   | ✅ direkt, Token als `authorization_token`                                   |
+| claude.ai und Claude Desktop | ⚠️ nur über „Request headers“: Beta für wenige Accounts, und nur sinnvoll bei Free, Pro und Max |
+| claude.ai bei Team/Enterprise | ❌ ein Header gilt für die ganze Organisation, dafür bräuchte es OAuth      |
+
+### Claude Code
+
+Läuft auf dem Rechner des Users und verbindet sich von dort mit `/api/mcp`:
+
+```bash
+claude mcp add --transport http time-manager https://<host>/api/mcp \
+  --header "Authorization: Bearer tm_…"
+```
+
+- `--scope local` (Standard) und `--scope user` speichern in `~/.claude.json`, `--scope project` schreibt
+  `.mcp.json` ins Repo. In `.mcp.json` nie das Token selbst, sondern eine Variable:
+  `"headers": {"Authorization": "Bearer ${TIME_MANAGER_TOKEN}"}`. Claude Code setzt `${VAR}` und
+  `${VAR:-default}` in `url` und `headers` ein.
+- `/mcp` in Claude Code zeigt, ob der Server verbunden ist und wie viele Tools er hat.
+- Lokal gegen `netlify dev` mit `http://localhost:8888/api/mcp`.
+
+### Claude API
+
+Für eine eigene Anwendung, die Claude im Hintergrund nutzt, z. B. einen Bot. Die Anwendung schickt bei
+jedem Aufruf der Messages API die Adresse des MCP-Servers und das Token mit. Die Server von Anthropic
+rufen dann `/api/mcp` auf, nicht die Anwendung selbst. Deshalb muss der Server öffentlich erreichbar sein
+(Netlify ist das), die Aufrufe kommen aus `160.79.104.0/21`.
+
+```bash
+curl https://api.anthropic.com/v1/messages \
+  -H "X-API-Key: $ANTHROPIC_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -H "anthropic-beta: mcp-client-2025-11-20" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-opus-5-5",
+    "max_tokens": 2000,
+    "messages": [{"role": "user", "content": "Wie viel habe ich diese Woche gearbeitet?"}],
+    "mcp_servers": [{"type": "url", "name": "time-manager",
+                     "url": "https://<host>/api/mcp", "authorization_token": "tm_…"}],
+    "tools": [{"type": "mcp_toolset", "mcp_server_name": "time-manager"}]
+  }'
+```
+
+- `authorization_token` schickt Anthropic als `Authorization: Bearer …`, das passt zu `withToken`.
+- Die Antwort enthält die Aufrufe als Blöcke `mcp_tool_use` und `mcp_tool_result` und danach den Text von
+  Claude. Das Ergebnis eines Tools kommt dort als Text an, deshalb ist der Markdown-Teil in `content`
+  wichtig (siehe „Formate“).
+- Nur Tools werden unterstützt, keine Resources und Prompts. Das passt zu dieser Version.
+- Das Token gehört einem User. Eine Anwendung für mehrere User braucht pro User dessen Token.
+- Der Connector ist Beta und nicht für Zero Data Retention zugelassen.
+
+### claude.ai und Claude Desktop
+
+Beide nutzen dieselben Connectors („Customize > Connectors > Add custom connector“). Ein fester Header
+lässt sich dort nur unter „Request headers“ eintragen, mit „No sign-in“ und dem Wert
+`Bearer tm_…`. Das ist Beta und nur für wenige Accounts freigeschaltet.
+
+- **Free, Pro, Max:** Der User fügt den Connector in seinem eigenen Account hinzu. Mit „Request headers“
+  wäre das sein persönliches Token, das passt.
+- **Team, Enterprise:** Nur ein Owner fügt Connectors für die ganze Organisation hinzu. Ein Header gilt
+  dann für alle Mitglieder, alle würden als derselbe User buchen. Das widerspricht „nur eigene Daten“.
+  Hier hilft nur OAuth, bei dem sich jedes Mitglied selbst anmeldet.
+- Ohne Freischaltung für „Request headers“ geht es in claude.ai und Desktop gar nicht.
+- Die Aufrufe kommen wie bei der API von den Servern von Anthropic.
+
 ## Nicht Teil dieser Version
 
 - Krankmeldungen, Urlaube, Feiertage und Projekte anlegen oder ändern
 - Handeln für andere User, auch als Administrator
-- OAuth und damit Custom Connectors in claude.ai
+- OAuth und damit Custom Connectors in claude.ai für Team und Enterprise
 - MCP-Resources und -Prompts, nur Tools
 - Löschen mit Gegenstück in einem Aufruf, das gibt es nur in der UI
