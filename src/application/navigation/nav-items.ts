@@ -4,6 +4,7 @@ import {
     CalendarDays,
     CalendarHeart,
     CalendarRange,
+    KeyRound,
     LayoutDashboard,
     type LucideIcon,
     Parasol,
@@ -32,6 +33,8 @@ export const navItemIds = [
     "sick-leaves",
     "projects",
     "projects-new",
+    "api-tokens-admin",
+    "api-tokens",
 ] as const;
 export type NavItemId = ValuesOf<typeof navItemIds>;
 
@@ -58,6 +61,7 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     {id: "settings", label: "Einstellungen", icon: Settings, to: "/admin/settings", children: []},
     {id: "users", label: "Benutzer verwalten", icon: User, to: "/admin/users", children: []},
     {id: "holidays-admin", label: "Feiertage", icon: CalendarHeart, to: "/admin/holidays", children: []},
+    {id: "api-tokens-admin", label: "Agent-Zugänge", icon: KeyRound, to: "/admin/api-tokens", children: []},
     {id: "projects", label: "Projekte", icon: Target, to: "/user/projects", children: []},
     {id: "user", label: "User", icon: User, to: "/user", children: []},
     {id: "holidays", label: "Feiertage", icon: CalendarHeart, to: "/user/holidays", children: []},
@@ -67,4 +71,5 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     {id: "reports-daily", label: "Heute", icon: CalendarClock, to: "/user/reports/daily", children: []},
     {id: "reports-weekly", label: "Woche", icon: CalendarDays, to: "/user/reports/weekly", children: []},
     {id: "reports-monthly", label: "Monat", icon: CalendarRange, to: "/user/reports/monthly", children: []},
+    {id: "api-tokens", label: "Agent-Zugang", icon: KeyRound, to: "/user/api-tokens", children: []},
 ] as const;

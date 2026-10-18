@@ -12,10 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminApiTokensRouteImport } from './routes/admin/api-tokens'
 import { Route as AdminHolidaysRouteImport } from './routes/admin/holidays'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as UserIndexRouteImport } from './routes/user/index'
+import { Route as UserApiTokensRouteImport } from './routes/user/api-tokens'
 import { Route as UserHolidaysRouteImport } from './routes/user/holidays'
 import { Route as UserSickLeavesRouteImport } from './routes/user/sick-leaves'
 import { Route as UserVacationsRouteImport } from './routes/user/vacations'
@@ -40,6 +42,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminApiTokensRoute = AdminApiTokensRouteImport.update({
+  id: '/admin/api-tokens',
+  path: '/admin/api-tokens',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminHolidaysRoute = AdminHolidaysRouteImport.update({
   id: '/admin/holidays',
   path: '/admin/holidays',
@@ -58,6 +65,11 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
 const UserIndexRoute = UserIndexRouteImport.update({
   id: '/user/',
   path: '/user/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UserApiTokensRoute = UserApiTokensRouteImport.update({
+  id: '/user/api-tokens',
+  path: '/user/api-tokens',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UserHolidaysRoute = UserHolidaysRouteImport.update({
@@ -104,9 +116,11 @@ const UserReportsWeeklyRoute = UserReportsWeeklyRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/admin/api-tokens': typeof AdminApiTokensRoute
   '/admin/holidays': typeof AdminHolidaysRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/user/api-tokens': typeof UserApiTokensRoute
   '/user/holidays': typeof UserHolidaysRoute
   '/user/sick-leaves': typeof UserSickLeavesRoute
   '/user/vacations': typeof UserVacationsRoute
@@ -121,9 +135,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/admin/api-tokens': typeof AdminApiTokensRoute
   '/admin/holidays': typeof AdminHolidaysRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/user/api-tokens': typeof UserApiTokensRoute
   '/user/holidays': typeof UserHolidaysRoute
   '/user/sick-leaves': typeof UserSickLeavesRoute
   '/user/vacations': typeof UserVacationsRoute
@@ -139,9 +155,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/admin/api-tokens': typeof AdminApiTokensRoute
   '/admin/holidays': typeof AdminHolidaysRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
+  '/user/api-tokens': typeof UserApiTokensRoute
   '/user/holidays': typeof UserHolidaysRoute
   '/user/sick-leaves': typeof UserSickLeavesRoute
   '/user/vacations': typeof UserVacationsRoute
@@ -158,9 +176,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
+    | '/admin/api-tokens'
     | '/admin/holidays'
     | '/admin/settings'
     | '/admin/users'
+    | '/user/api-tokens'
     | '/user/holidays'
     | '/user/sick-leaves'
     | '/user/vacations'
@@ -175,9 +195,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/dashboard'
+    | '/admin/api-tokens'
     | '/admin/holidays'
     | '/admin/settings'
     | '/admin/users'
+    | '/user/api-tokens'
     | '/user/holidays'
     | '/user/sick-leaves'
     | '/user/vacations'
@@ -192,9 +214,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/dashboard'
+    | '/admin/api-tokens'
     | '/admin/holidays'
     | '/admin/settings'
     | '/admin/users'
+    | '/user/api-tokens'
     | '/user/holidays'
     | '/user/sick-leaves'
     | '/user/vacations'
@@ -210,9 +234,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
+  AdminApiTokensRoute: typeof AdminApiTokensRoute
   AdminHolidaysRoute: typeof AdminHolidaysRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminUsersRoute: typeof AdminUsersRoute
+  UserApiTokensRoute: typeof UserApiTokensRoute
   UserHolidaysRoute: typeof UserHolidaysRoute
   UserSickLeavesRoute: typeof UserSickLeavesRoute
   UserVacationsRoute: typeof UserVacationsRoute
@@ -248,6 +274,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/api-tokens': {
+      id: '/admin/api-tokens'
+      path: '/admin/api-tokens'
+      fullPath: '/admin/api-tokens'
+      preLoaderRoute: typeof AdminApiTokensRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/holidays': {
       id: '/admin/holidays'
       path: '/admin/holidays'
@@ -274,6 +307,13 @@ declare module '@tanstack/react-router' {
       path: '/user'
       fullPath: '/user/'
       preLoaderRoute: typeof UserIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/user/api-tokens': {
+      id: '/user/api-tokens'
+      path: '/user/api-tokens'
+      fullPath: '/user/api-tokens'
+      preLoaderRoute: typeof UserApiTokensRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/user/holidays': {
@@ -338,9 +378,11 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
+  AdminApiTokensRoute: AdminApiTokensRoute,
   AdminHolidaysRoute: AdminHolidaysRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminUsersRoute: AdminUsersRoute,
+  UserApiTokensRoute: UserApiTokensRoute,
   UserHolidaysRoute: UserHolidaysRoute,
   UserSickLeavesRoute: UserSickLeavesRoute,
   UserVacationsRoute: UserVacationsRoute,

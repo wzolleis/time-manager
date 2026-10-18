@@ -46,3 +46,7 @@ export const formatMonth = (month: string) => {
         year: "numeric",
     });
 };
+
+/** Tag und Uhrzeit kurz: "19.10.2026, 08:00" */
+export const formatDateTime = (d: Date | string) =>
+    new Date(d).toLocaleString("de-DE", {timeZone: TZ, dateStyle: "medium", timeStyle: "short"});

@@ -16,6 +16,7 @@ const HEADINGS: Record<string, string> = {
     "/admin/users": "Benutzerverwaltung",
     "/admin/settings": "Einstellungen",
     "/admin/holidays": "Feiertage für alle",
+    "/admin/api-tokens": "Agent-Zugänge",
     "/user": "User Dashboard",
     "/user/reports": "Report",
     "/user/reports/daily": "Heute",
@@ -25,6 +26,7 @@ const HEADINGS: Record<string, string> = {
     "/user/sick-leaves": "Krankmeldungen",
     "/user/projects": "Projekte",
     "/user/holidays": "Feiertage",
+    "/user/api-tokens": "Agent-Zugang",
 };
 
 const TEST_USER = {
@@ -57,6 +59,7 @@ function mockApi() {
             if (pathname === "/api/vacations") return Response.json([]);
             if (pathname === "/api/sick-leaves") return Response.json([]);
             if (pathname === "/api/holidays") return Response.json([]);
+            if (pathname === "/api/api-tokens" || pathname === "/api/admin/api-tokens") return Response.json([]);
 
             // Nicht gemockte Aufrufe fallen auf, statt still zu scheitern
             return Response.json({error: `Nicht gemockt: ${pathname}`}, {status: 404});
