@@ -71,6 +71,20 @@
       "when": 1792271005184,
       "tag": "0009_sick_leaves",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1792360241126,
+      "tag": "0010_api_tokens",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1792360241457,
+      "tag": "0011_api_tokens_roles",
+      "breakpoints": true
     }
   ]
 }

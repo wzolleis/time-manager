@@ -63,6 +63,23 @@ export const sessions = mysqlTable(
     (t) => [index("idx_sessions_user").on(t.userId), index("idx_sessions_expires").on(t.expiresAt)],
 );
 
+// Agent-Tokens für /api/mcp. Gespeichert wird nur der SHA-256-Hash, das Token selbst sieht der User einmal.
+export const apiTokens = mysqlTable(
+    "api_tokens",
+    {
+        id: char("id", {length: 36}).primaryKey(),
+        userId: char("user_id", {length: 36})
+            .notNull()
+            .references(() => users.id, {onDelete: "cascade"}),
+        name: varchar("name", {length: 100}).notNull(),
+        tokenHash: char("token_hash", {length: 64}).notNull().unique(),
+        createdAt: datetime("created_at", {mode: "date", fsp: 0}).notNull(),
+        lastUsedAt: datetime("last_used_at", {mode: "date", fsp: 0}),
+        expiresAt: datetime("expires_at", {mode: "date", fsp: 0}), // null: kein Ablauf
+    },
+    (t) => [index("idx_api_tokens_user").on(t.userId)],
+);
+
 // Rollen. "Administrator" und "User" sind fest vorgegeben, ihre IDs stehen in shared/role.ts.
 export const roles = mysqlTable("roles", {
     id: char("id", {length: 36}).primaryKey(),
