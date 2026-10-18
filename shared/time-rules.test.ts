@@ -2,6 +2,7 @@ import {describe, expect, it} from "vitest";
 import {
     type Booking,
     buildPeriods,
+    checkProject,
     checkSequence,
     findMissingGehen,
     findPartner,
@@ -265,5 +266,20 @@ describe("firstBookingDay", () => {
 
     it("liefert null ohne Buchungen", () => {
         expect(firstBookingDay([])).toBeNull();
+    });
+});
+
+describe("checkProject", () => {
+    it("erlaubt ein Projekt beim kommen", () => {
+        expect(checkProject("kommen", "0effae8f-a1cb-49fd-ac9e-fbf53bb844b6")).toBeNull();
+    });
+
+    it("lehnt ein Projekt beim gehen ab", () => {
+        expect(checkProject("gehen", "0effae8f-a1cb-49fd-ac9e-fbf53bb844b6")).not.toBeNull();
+    });
+
+    it("erlaubt ein gehen ohne Projekt", () => {
+        expect(checkProject("gehen", null)).toBeNull();
+        expect(checkProject("gehen", undefined)).toBeNull();
     });
 });

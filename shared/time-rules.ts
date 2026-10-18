@@ -94,3 +94,8 @@ export function firstBookingDay(entries: Booking[]): string | null {
     const first = sorted(entries)[0];
     return first ? localDay(first.bookedAt) : null;
 }
+
+/** null = gültig, sonst eine Fehlermeldung. Ein Projekt gibt es nur beim kommen, es gilt für das ganze Paar. */
+export function checkProject(type: Booking["type"], projectId: string | null | undefined): string | null {
+    return type === "gehen" && projectId ? 'Ein Projekt kann nur beim "kommen" gebucht werden' : null;
+}

@@ -7,7 +7,7 @@ import {db} from "./lib/db";
 import {hasDbCode} from "./lib/db-errors";
 import {timeEntries, timeEntryProjects} from "../../db/schema";
 import {TimeEntryCreateSchema, TimeEntryUpdateSchema} from "../../shared/time-entry";
-import {type Booking, checkSequence, findPartner} from "../../shared/time-rules";
+import {type Booking, checkProject, checkSequence, findPartner} from "../../shared/time-rules";
 import {withTiming} from "./lib/timing";
 
 import {IdSchema, isApiPath, notFound} from "./lib/id";
@@ -58,6 +58,11 @@ const ensureValid = (bookings: Booking[]) => {
     if (problem) throw new RuleError(problem);
 };
 
+const ensureProject = (type: Booking["type"], projectId: string | null | undefined) => {
+    const problem = checkProject(type, projectId);
+    if (problem) throw new RuleError(problem);
+};
+
 const setProject = async (tx: Tx, entryId: string, projectId: string | null) => {
     await tx.delete(timeEntryProjects).where(eq(timeEntryProjects.timeEntryId, entryId));
     if (projectId) await tx.insert(timeEntryProjects).values({timeEntryId: entryId, projectId});
@@ -99,6 +104,7 @@ const handler = async (req: Request, context: Context, session: Session) => {
             if (req.method === "POST") {
                 const input = TimeEntryCreateSchema.parse(await readBody(req));
                 await ensureAccess(session.user.id, input.userId);
+                ensureProject(input.type, input.projectId);
                 const id = randomUUID();
                 await db.transaction(async (tx) => {
                     const existing = await lockBookings(tx, input.userId);
@@ -137,6 +143,7 @@ const handler = async (req: Request, context: Context, session: Session) => {
                 const current = await getEntry(tx, id);
                 if (!current) throw new NotFoundError();
                 await ensureAccess(session.user.id, current.userId);
+                ensureProject(current.type, projectId);
 
                 const existing = await lockBookings(tx, current.userId);
                 const changed: Booking = {

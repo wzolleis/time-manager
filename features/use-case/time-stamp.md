@@ -95,7 +95,8 @@ Projekt für das ganze Buchungspaar.
    es für diesen Tag nach, an jedem späteren Tag. Vorher kann er nicht stempeln (`findMissingGehen`).
 5. **Keine zwei Buchungen zur selben Zeit.**
 6. **Projekt nur beim Kommen.** Beim Gehen wird kein Projekt gespeichert, auch nicht beim Nachtragen oder
-   Ändern.
+   Ändern. Die UI bietet die Auswahl beim Gehen nicht an, die API lehnt ein Gehen mit Projekt ab
+   (`checkProject`).
 7. **Pausen** ergeben sich aus Gehen und dem nächsten Kommen am selben Tag. Zwischen zwei Tagen gibt es
    keine Pause.
 8. **Krankheitstage.** Buchungen an einem Krankheitstag sind möglich, die UI weist darauf hin, dass sie
