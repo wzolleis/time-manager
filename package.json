@@ -29,6 +29,7 @@
   "dependencies": {
     "@base-ui/react": "^1.9.0",
     "@fontsource-variable/geist": "^5.3.0",
+    "@modelcontextprotocol/sdk": "^1.32.1",
     "@radix-ui/themes": "^3.3.0",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/query-async-storage-persister": "^5.104.1",
