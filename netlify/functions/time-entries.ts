@@ -141,7 +141,7 @@ const handler = async (req: Request, context: Context, session: Session) => {
                 const existing = await lockBookings(tx, current.userId);
                 const changed: Booking = {
                     id,
-                    type: fields.type ?? current.type,
+                    type: current.type,
                     bookedAt: fields.bookedAt ?? current.bookedAt,
                 };
                 ensureValid(existing.map((b) => (b.id === id ? changed : b)));

@@ -15,7 +15,8 @@ export const TimeEntryCreateSchema = createInsertSchema(timeEntries, createRefin
     .extend({projectId: z.uuid().nullish()});
 
 export const TimeEntryUpdateSchema = createUpdateSchema(timeEntries, updateRefine)
-    .omit({id: true, userId: true}) // die Buchung wandert nicht zu einem anderen User
+    // Die Buchung wandert nicht zu einem anderen User, ein anderer Typ würde die Abfolge zerstören
+    .omit({id: true, userId: true, type: true})
     .extend({projectId: z.uuid().nullish()});
 
 export type TimeEntry = z.infer<typeof TimeEntrySchema>;

@@ -21,6 +21,11 @@ describe("TimeEntryUpdateSchema", () => {
         expect(Object.keys(r)).toEqual(["projectId"]);
     });
 
+    it("ignoriert einen geänderten Typ", () => {
+        const r = TimeEntryUpdateSchema.parse({type: "gehen", projectId: null});
+        expect(Object.keys(r)).toEqual(["projectId"]);
+    });
+
     it("lehnt eine ungültige Zeit ab", () => {
         expect(TimeEntryUpdateSchema.safeParse({bookedAt: "kein-datum"}).success).toBe(false);
     });
