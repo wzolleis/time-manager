@@ -68,6 +68,31 @@ Arbeitsspeicher.
 - Ändert der Anwender sein Passwort, werden alle seine anderen Sessions gelöscht. Die aktuelle bleibt bestehen.
 - Setzt der Administrator ein Passwort zurück, werden alle Sessions dieses Anwenders gelöscht.
 
+## Agent-Tokens
+
+Ein Agent (z. B. Claude Code) meldet sich nicht mit Passwort und Cookie an, sondern mit einem persönlichen
+API-Token im Header `Authorization: Bearer tm_…`. Beschreibung: `features/boundaries/mcp-token.md`.
+
+- Tabelle `api_tokens`, aufgebaut wie `sessions`: gespeichert wird nur der SHA-256-Hash. Das Token
+  (`tm_` + 32 zufällige Bytes als base64url) steht nur in der Antwort auf `POST /api/api-tokens`.
+- Der User wählt beim Erzeugen die Gültigkeit (30 Tage, 90 Tage, 1 Jahr oder kein Ablauf,
+  `expires_at` = `null`). Widerrufen löscht die Zeile.
+- Geprüft wird mit `withToken` aus `netlify/functions/lib/api-token.ts`, analog zu `withSession`: ohne
+  gültiges Token `401` mit `WWW-Authenticate: Bearer`, danach dieselbe Rollenprüfung. `withToken` liest
+  kein Session-Cookie, und `withSession` kein Token. Ein Endpoint nimmt also genau eine der beiden
+  Anmeldungen an. Gedacht ist `withToken` nur für `/api/mcp`.
+- Passwortänderung und Reset lassen die Tokens bestehen. Wird der User gelöscht, verschwinden sie.
+
+| Endpoint                           | Zweck                                                    |
+|------------------------------------|----------------------------------------------------------|
+| `GET /api/api-tokens`              | Eigene Tokens ohne Hash                                  |
+| `POST /api/api-tokens`             | Token erzeugen (`name`, `expiresInDays`), einmalig `token` |
+| `DELETE /api/api-tokens/:id`       | Eigenes Token widerrufen                                 |
+| `GET /api/admin/api-tokens`        | Admin: Tokens aller User mit `userName`                  |
+| `DELETE /api/admin/api-tokens/:id` | Admin: beliebiges Token widerrufen                       |
+
+Umgesetzt in `netlify/functions/api-tokens.ts`.
+
 ## Frontend
 
 - Der `UserProvider` fragt `GET /api/auth/me`. Ohne Session zeigt er die Login-Seite

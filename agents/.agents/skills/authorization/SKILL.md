@@ -88,6 +88,10 @@ Beispiel:
 | `/api/holidays/:id` | `DELETE` | Administrator             |
 | `/api/holidays`     | `GET`    | (kein Eintrag, also User) |
 
+Die Agent-Tokens aller User (`GET /api/admin/api-tokens`, `DELETE /api/admin/api-tokens/:id`) haben einen
+Eintrag mit der Rolle Administrator (Migration `0011_api_tokens_roles.sql`). Die eigenen Tokens unter
+`/api/api-tokens` haben keinen und gelten für die Rolle "User". `withToken` prüft die Rolle wie `withSession`.
+
 Der Admin-Reset `POST /api/auth/reset-password` braucht unbedingt einen Eintrag mit der Rolle
 Administrator, sonst kann jeder angemeldete User fremde Passwörter setzen.
 Ausnahme vom Pfadmuster: `/api/auth/:action` umfasst auch Login, Logout, `/me` und die eigene

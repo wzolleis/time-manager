@@ -30,7 +30,8 @@ src/views/
 ├ projects.ts        useProjects()
 ├ holidays.ts        useHolidays(userId), useGlobalHolidays()
 ├ users.ts           useUsers()
-└ roles.ts           useRoles(), useUserRoles(userId)
+├ roles.ts           useRoles(), useUserRoles(userId)
+└ api-tokens.ts      useApiTokens(userId), useAllApiTokens()
 ```
 
 `src/views/` ist der einzige Ort, an dem `useQuery` für Serverdaten steht. `src/api/` bleibt ohne React.

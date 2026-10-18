@@ -83,6 +83,7 @@ Query Keys beginnen immer mit dem Namen des Aggregats. Danach folgen Parameter, 
 | Feiertage          | `["holidays", userId]`, `["holidays", "global"]` | `["holidays"]`                  |
 | User               | `["users"]`                                      | `["users"]`                     |
 | Rollen eines Users | `["users", id, "roles"]`                         | `setQueryData` mit der Antwort  |
+| Agent-Tokens       | `["api-tokens", userId]`, `["api-tokens", "all"]` | `["api-tokens"]`               |
 
 - **Mit dem Präfix invalidieren**, also `["vacations"]` statt `["vacations", userId]`. tanstack/query
   trifft damit alle Keys, die so beginnen, auch die anderer User in der Admin-Ansicht.

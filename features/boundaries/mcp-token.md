@@ -12,8 +12,14 @@ deshalb mit einem persönlichen API-Token aus, das er bei jedem Aufruf von `/api
 `Authorization: Bearer …` mitschickt. Der User erzeugt das Token in der UI und kann es jederzeit
 widerrufen, ein Administrator kann die Tokens aller User widerrufen.
 
-Der Use Case ist **noch nicht umgesetzt**. Diese Beschreibung ist der Auftrag dafür. Wofür die Tokens
-gebraucht werden, steht in `mcp-enable.md`, die Tokens werden vor dem MCP-Server umgesetzt.
+Der Use Case ist umgesetzt, `/api/mcp` selbst noch nicht (`mcp-enable.md`). Diese Beschreibung hält
+fest, wie sich die Tokens verhalten. Code:
+
+- Seiten `../../src/features/api-tokens/components/` (`api-tokens-page.tsx`, `admin-api-tokens-page.tsx`)
+- Use Cases `../../src/features/api-tokens/use-cases/`
+- Services `../../shared/api-token-rules.ts`, Schema `../../shared/api-token.ts`
+- Function `../../netlify/functions/api-tokens.ts`, Prüfung `withToken` in
+  `../../netlify/functions/lib/api-token.ts`
 
 Technische Grundlage: Skills `authentication` (Sessions) und `authorization` (`endpoint_roles`,
 `ensureAccess`) in `../../agents/.agents/skills/`, Vorbild für die Prüfung ist `withSession` in
@@ -92,11 +98,12 @@ Mit Session-Cookie, also aus der UI, wie jeder andere Endpoint mit `withSession`
 |------------------------------------|---------------|--------------------------------------------------------------------------|
 | `GET /api/api-tokens`              | User          | eigene Tokens: `id`, `name`, `createdAt`, `lastUsedAt`, `expiresAt`      |
 | `POST /api/api-tokens`             | User          | `{name, expiresInDays: 30 \| 90 \| 365 \| null}` → `201` mit den Feldern oben und einmalig `token` |
-| `DELETE /api/api-tokens/:id`       | User          | widerruft ein eigenes Token, `204`; fremdes oder unbekanntes `404`       |
+| `DELETE /api/api-tokens/:id`       | User          | widerruft ein eigenes Token, `204`; fremdes oder unbekanntes `410`       |
 | `GET /api/admin/api-tokens`        | Administrator | Tokens aller User, zusätzlich `userId` und `userName`                    |
-| `DELETE /api/admin/api-tokens/:id` | Administrator | widerruft ein beliebiges Token, `204`; unbekanntes `404`                 |
+| `DELETE /api/admin/api-tokens/:id` | Administrator | widerruft ein beliebiges Token, `204`; unbekanntes `410`                 |
 
-Die beiden Admin-Endpoints bekommen per Migration einen Eintrag mit der Rolle Administrator in
+„Nicht gefunden“ ist wie überall `410`, nicht `404` (`notFound` in `lib/id.ts`). Die beiden Admin-Endpoints
+bekommen per Migration einen Eintrag mit der Rolle Administrator in
 `endpoint_roles` (Skill `authorization`).
 
 ## UI
@@ -139,10 +146,11 @@ Nach dem Skill `architecture` (`testing.md`): Functions haben keine Unit-Tests, 
   abgelaufene Tokens sind markiert.
 - **`scripts/api-walkthrough.sh`** gegen `netlify dev`:
   - Token erzeugen, Liste enthält es ohne Hash und ohne Token
-  - `/api/mcp` ohne, mit falschem, mit abgelaufenem und mit widerrufenem Token → `401`
-  - `DELETE` auf das Token eines anderen Users als User → `404`
+  - `DELETE` auf das Token eines anderen Users als User → `410`
   - User ruft `GET /api/admin/api-tokens` auf → `403`
-  - Administrator widerruft das Token eines Users, danach → `401` an `/api/mcp`
+  - Administrator widerruft das Token eines Users
+  - Kommt mit `mcp-enable.md`: `/api/mcp` ohne, mit falschem, mit abgelaufenem und mit widerrufenem
+    Token → `401`. Bis dahin gibt es keinen Endpoint mit `withToken`.
 
 ## Nicht Teil dieser Version
 
