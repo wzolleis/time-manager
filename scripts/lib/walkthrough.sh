@@ -33,6 +33,8 @@ Aufruf: <skript> [-s | -f | -a] [-h]
   -h, --help         Diese Hilfe
 
 Umgebungsvariablen: API_USER (E-Mail), API_PASSWORD, BASE_URL (Standard http://localhost:8888)
+API_USER und API_PASSWORD können auch in .env.local neben dem Skript stehen (Zeilen KEY=VALUE),
+gesetzte Umgebungsvariablen gehen vor. Fehlt beides, fragt das Skript nach.
 Während einer Pause: beliebige Taste = weiter, q = beenden (mit Aufräumen)
 EOF
 }
@@ -56,6 +58,7 @@ wt_init() {
   if [ "$WT_MODE" = "step" ]; then WT_STEPPING=1; else WT_STEPPING=0; fi
 
   WT_BASE="${BASE_URL:-http://localhost:8888}"
+  wt_load_env_local "$(dirname "$0")/.env.local"
   WT_AUTH_USER="${API_USER:-}"
   WT_AUTH_PASSWORD="${API_PASSWORD:-}"
   if [ -z "$WT_AUTH_USER" ]; then read -r -p "E-Mail: " WT_AUTH_USER; fi
@@ -69,6 +72,30 @@ wt_init() {
   echo "${C_BOLD}Ziel:${C_OFF} $WT_BASE   ${C_BOLD}Modus:${C_OFF} $WT_MODE"
 }
 
+# Liest API_USER und API_PASSWORD aus einer Datei mit Zeilen KEY=VALUE (z. B. scripts/.env.local).
+# Die Datei wird nicht ausgeführt, nur gelesen. Schon gesetzte Umgebungsvariablen haben Vorrang.
+wt_load_env_local() {
+  local file="$1" line key value
+  [ -f "$file" ] || return 0
+  while IFS= read -r line || [ -n "$line" ]; do
+    line="${line%$'\r'}"
+    [[ "$line" =~ ^[[:space:]]*(export[[:space:]]+)?(API_USER|API_PASSWORD)[[:space:]]*=(.*)$ ]] || continue
+    key="${BASH_REMATCH[2]}"
+    value="${BASH_REMATCH[3]}"
+    # Umschließende Anführungszeichen entfernen: "…" oder '…'
+    if [[ "$value" =~ ^\"(.*)\"$ ]] || [[ "$value" =~ ^\'(.*)\'$ ]]; then value="${BASH_REMATCH[1]}"; fi
+    if [ -z "${!key:-}" ]; then printf -v "$key" '%s' "$value"; fi
+  done < "$file"
+}
+
+# Bricht vor dem ersten Schritt ab: ohne Aufräumen und ohne Ergebnis, es ist noch nichts passiert
+wt_abort() {
+  echo "${C_BAD}$1${C_OFF}"
+  trap - EXIT
+  rm -f "$WT_COOKIES"
+  exit 1
+}
+
 # Meldet sich an und merkt sich das Session-Cookie für alle weiteren Aufrufe
 wt_login() {
   WT_COOKIES="$(mktemp)"
@@ -79,9 +106,12 @@ wt_login() {
   body=$(printf '{"email":"%s","password":"%s"}' "$WT_AUTH_USER" "$pw")
   status=$(curl -s -o /dev/null -w '%{http_code}' -c "$WT_COOKIES" \
     -H "Content-Type: application/json" -d "$body" "$WT_BASE/api/auth/login") || status="000"
+  # 000: curl hat keine Antwort bekommen, unter WT_BASE läuft kein Server
+  if [ "$status" = "000" ]; then
+    wt_abort "der Server läuft nicht, bitte mit npx netlify dev starten"
+  fi
   if [ "$status" != "200" ]; then
-    echo "${C_BAD}Anmeldung fehlgeschlagen (HTTP $status)${C_OFF}"
-    exit 1
+    wt_abort "Anmeldung fehlgeschlagen (HTTP $status)"
   fi
 }
 
