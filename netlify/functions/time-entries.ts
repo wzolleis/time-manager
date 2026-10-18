@@ -10,7 +10,7 @@ import {TimeEntryCreateSchema, TimeEntryUpdateSchema} from "../../shared/time-en
 import {type Booking, checkProject, checkSequence, findPartner} from "../../shared/time-rules";
 import {withTiming} from "./lib/timing";
 
-import {IdSchema, isApiPath, notFound} from "./lib/id";
+import {IdSchema, isApiPath, notFound, pathParams} from "./lib/id";
 import {ensureAccess, forbidden, ForbiddenError} from "./lib/roles";
 import {type Session, withSession} from "./lib/session";
 import {RuleError, ruleViolation} from "./lib/rule-error";
@@ -77,11 +77,11 @@ const readBody = async (req: Request): Promise<unknown> => {
 };
 
 // Jeder User sieht und ändert nur seine eigenen Buchungen, ein Administrator die aller User
-const handler = async (req: Request, context: Context, session: Session) => {
+const handler = async (req: Request, _context: Context, session: Session) => {
     try {
         if (!isApiPath(req.url, "time-entries")) return notFound();
         const url = new URL(req.url);
-        const rawId = context.params.id;
+        const rawId = pathParams(req.url, config.path).id;
 
         // Sammlung: /api/time-entries
         if (rawId === undefined) {
@@ -142,7 +142,7 @@ const handler = async (req: Request, context: Context, session: Session) => {
             await db.transaction(async (tx) => {
                 const current = await getEntry(tx, id);
                 if (!current) throw new NotFoundError();
-                await ensureAccess(session.user.id, current.userId);
+                await ensureAccess(session.user.id, current.userId, tx);
                 ensureProject(current.type, projectId);
 
                 const existing = await lockBookings(tx, current.userId);
@@ -168,7 +168,7 @@ const handler = async (req: Request, context: Context, session: Session) => {
             await db.transaction(async (tx) => {
                 const current = await getEntry(tx, id);
                 if (!current) throw new NotFoundError();
-                await ensureAccess(session.user.id, current.userId);
+                await ensureAccess(session.user.id, current.userId, tx);
 
                 const existing = await lockBookings(tx, current.userId);
                 const toDelete = new Set([id]);

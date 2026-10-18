@@ -8,7 +8,7 @@ import {apiTokens, users} from "../../db/schema";
 import {ApiTokenCreateSchema} from "../../shared/api-token";
 import {tokenExpiry} from "../../shared/api-token-rules";
 import {generateApiToken, hashApiToken} from "./lib/api-token";
-import {IdSchema, isApiPath, notFound} from "./lib/id";
+import {IdSchema, isApiPath, notFound, pathParams} from "./lib/id";
 import {type Session, withSession} from "./lib/session";
 
 // Der Hash verlässt nie das Backend
@@ -97,11 +97,11 @@ async function allTokens(req: Request, id: string | undefined): Promise<Response
 
 // Jeder User verwaltet nur seine eigenen Tokens, ein Administrator sieht und widerruft die aller User.
 // Erzeugen kann ein Token nur der User selbst.
-const handler = async (req: Request, context: Context, session: Session) => {
+const handler = async (req: Request, _context: Context, session: Session) => {
     try {
         const admin = isApiPath(req.url, "admin/api-tokens");
         if (!admin && !isApiPath(req.url, "api-tokens")) return notFound();
-        const id = context.params.id;
+        const id = pathParams(req.url, config.path).id;
         return admin ? await allTokens(req, id) : await ownTokens(req, id, session);
     } catch (err) {
         if (err instanceof z.ZodError) return Response.json({errors: err.issues}, {status: 400});

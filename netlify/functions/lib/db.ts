@@ -2,6 +2,7 @@ import {drizzle} from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import * as schema from "../../../db/schema";
 import {timed} from "./timing";
+import {afterRequest} from "./after-request";
 
 // Unter netlify dev nur die lokale Datenbank: ohne .env.local fiele netlify dev auf die
 // Netlify-Projekteinstellungen zurück, und das ist die Produktion (features/boundaries/local-environment.md)
@@ -54,5 +55,11 @@ pool.getConnection = async () => {
     instrument(conn); // für Abfragen innerhalb von Transaktionen
     return conn;
 };
+
+// netlify dev startet für jede Anfrage einen eigenen Worker und beendet ihn nicht. Eine offene Verbindung
+// hielte ihn und sich selbst am Leben, bis die Datenbank "Too many connections" meldet. Deshalb dort den
+// Pool nach der Anfrage schließen, der Worker bekommt ohnehin keine zweite. In der Produktion nutzt eine
+// warme Instanz den Pool weiter.
+if (process.env.NETLIFY_DEV === "true") afterRequest(() => pool.end());
 
 export const db = drizzle(pool, {schema, mode: "default"});

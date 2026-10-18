@@ -6,9 +6,9 @@ import {db} from "./lib/db";
 import {users} from "../../db/schema";
 import {LoginSchema, PasswordChangeSchema, PasswordResetSchema} from "../../shared/auth";
 import {withTiming} from "./lib/timing";
-import {isApiPath, notFound} from "./lib/id";
+import {isApiPath, notFound, pathParams} from "./lib/id";
 import {hashPassword, verifyPassword} from "./lib/password";
-import {endpointPath, forbidden, hasEndpointAccess} from "./lib/roles";
+import {forbidden, hasEndpointAccess} from "./lib/roles";
 import {
     clearSessionCookie,
     createSession,
@@ -90,22 +90,12 @@ async function resetPassword(req: Request, session: Session): Promise<Response> 
     return new Response(null, {status: 204});
 }
 
-// Netlify wiederholt eine 403 mit /api/auth/reset-password.html usw. Diese Wiederholungen
-// müssen wieder 403 liefern, sonst kommt beim Aufrufer die 410 an (siehe lib/roles.ts).
-async function retryOrNotFound(req: Request): Promise<Response> {
-    if (req.method === "POST" && endpointPath(req.url) === "/api/auth/reset-password") {
-        const session = await getSession(req);
-        if (session && !(await hasEndpointAccess(session.user.id, "/api/auth/reset-password", req.method))) {
-            return forbidden();
-        }
-    }
-    return notFound();
-}
-
-const handler = async (req: Request, context: Context) => {
+const handler = async (req: Request, _context: Context) => {
     try {
-        if (!isApiPath(req.url, "auth")) return await retryOrNotFound(req);
-        const action = context.params.action;
+        if (!isApiPath(req.url, "auth")) return notFound();
+        // Netlify wiederholt eine 403 mit /api/auth/reset-password.html usw., die Wiederholung bekommt
+        // wieder 403 (siehe isApiPath und pathParams in lib/id.ts)
+        const action = pathParams(req.url, config.path).action;
 
         if (action === "login") {
             return req.method === "POST" ? await login(req) : new Response(null, {status: 405});

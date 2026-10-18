@@ -3,8 +3,12 @@ import {and, eq} from "drizzle-orm";
 import {db} from "./db";
 import {endpointRoles, userRoles} from "../../../db/schema";
 import {ADMIN_ROLE_ID, USER_ROLE_ID} from "../../../shared/role";
+import {stripRetrySuffix} from "./id";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+// Innerhalb einer Transaktion immer tx übergeben: der Pool hat nur eine Verbindung (lib/db.ts), eine
+// Abfrage über db würde auf die Verbindung der Transaktion warten und nie fertig werden
+type Executor = Pick<typeof db, "select">;
 type Method = (typeof endpointRoles.$inferSelect)["method"];
 
 const METHODS: readonly string[] = endpointRoles.method.enumValues;
@@ -13,13 +17,6 @@ export const forbidden = () =>
     Response.json({error: "Dir fehlen die notwendigen Rechte für diese Aktion"}, {status: 403});
 
 export const lastAdmin = () => Response.json({error: "Es muss mindestens ein Administrator bleiben"}, {status: 409});
-
-// Netlify wiederholt eine 403 (wie eine 404) mit .html, .htm, /index.html und /index.htm
-// und gibt die Antwort der letzten Wiederholung zurück
-const RETRY_SUFFIX = /(\/index\.html?|\.html?)$/;
-
-/** Der Pfad ohne die Endung, die Netlify bei der Wiederholung einer 403 oder 404 anhängt */
-export const stripRetrySuffix = (path: string) => path.replace(RETRY_SUFFIX, "");
 
 /**
  * Der Pfad, gegen den die Muster aus endpoint_roles geprüft werden. Die Wiederholungen von Netlify
@@ -74,8 +71,8 @@ export async function hasEndpointAccess(userId: string, path: string, method: st
 }
 
 /** Hat der User die Rolle "Administrator"? */
-export async function isAdmin(userId: string): Promise<boolean> {
-    const rows = await db
+export async function isAdmin(userId: string, ex: Executor = db): Promise<boolean> {
+    const rows = await ex
         .select({roleId: userRoles.roleId})
         .from(userRoles)
         .where(and(eq(userRoles.userId, userId), eq(userRoles.roleId, ADMIN_ROLE_ID)))
@@ -87,15 +84,18 @@ export async function isAdmin(userId: string): Promise<boolean> {
  * Darf der angemeldete User die Daten dieses Users lesen und ändern (Buchungen, Urlaube, Krankmeldungen)?
  * Ja für sich selbst, ein Administrator für alle.
  */
-export const mayAccessUser = async (sessionUserId: string, userId: string): Promise<boolean> =>
-    sessionUserId === userId || isAdmin(sessionUserId);
+export const mayAccessUser = async (sessionUserId: string, userId: string, ex: Executor = db): Promise<boolean> =>
+    sessionUserId === userId || isAdmin(sessionUserId, ex);
 
 /** Fremde Daten ohne Administrator-Rolle. Wird in der Function geworfen und im catch zu 403 (forbidden). */
 export class ForbiddenError extends Error {}
 
-/** Wirft ForbiddenError, wenn der angemeldete User nicht auf die Daten dieses Users zugreifen darf */
-export async function ensureAccess(sessionUserId: string, userId: string): Promise<void> {
-    if (!(await mayAccessUser(sessionUserId, userId))) throw new ForbiddenError();
+/**
+ * Wirft ForbiddenError, wenn der angemeldete User nicht auf die Daten dieses Users zugreifen darf.
+ * In einer Transaktion mit tx als ex aufrufen.
+ */
+export async function ensureAccess(sessionUserId: string, userId: string, ex: Executor = db): Promise<void> {
+    if (!(await mayAccessUser(sessionUserId, userId, ex))) throw new ForbiddenError();
 }
 
 /**

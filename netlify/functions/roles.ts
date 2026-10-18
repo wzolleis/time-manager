@@ -7,13 +7,13 @@ import {roles, userRoles, users} from "../../db/schema";
 import {ADMIN_ROLE_ID, UserRolesSchema} from "../../shared/role";
 import {hasDbCode} from "./lib/db-errors";
 import {withTiming} from "./lib/timing";
-import {IdSchema, notFound} from "./lib/id";
+import {IdSchema, notFound, pathParams, stripRetrySuffix} from "./lib/id";
 import {withSession} from "./lib/session";
 import {lastAdmin, lockAdmins} from "./lib/roles";
 
 // Nur diese beiden Pfade, alles andere (auch Netlifys .html-Varianten) bekommt 410 ohne DB-Zugriff
 const isRolesPath = (url: string) =>
-    /^(\/api|\/\.netlify\/functions)\/(roles|users\/[^/.]+\/roles)\/?$/.test(new URL(url).pathname);
+    /^(\/api|\/\.netlify\/functions)\/(roles|users\/[^/.]+\/roles)\/?$/.test(stripRetrySuffix(new URL(url).pathname));
 
 const readBody = async (req: Request): Promise<unknown> => {
     try {
@@ -37,10 +37,10 @@ const getUserRoles = async (tx: Db, userId: string) =>
 const userExists = async (tx: Db, id: string) =>
     (await tx.select({id: users.id}).from(users).where(eq(users.id, id)).limit(1)).length > 0;
 
-const handler = async (req: Request, context: Context) => {
+const handler = async (req: Request, _context: Context) => {
     try {
         if (!isRolesPath(req.url)) return notFound();
-        const rawId = context.params.id;
+        const rawId = pathParams(req.url, config.path).id;
 
         // Alle Rollen: /api/roles
         if (rawId === undefined) {

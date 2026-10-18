@@ -8,7 +8,7 @@ import {withTiming} from "./lib/timing";
 import {holidays, sickLeaves, users, vacations} from "../../db/schema";
 import {checkRange, checkYearLimit, findOverlap, overlapMessage} from "../../shared/vacation-rules";
 import {VacationCreateSchema, VacationUpdateSchema} from "../../shared/vacation";
-import {IdSchema, isApiPath, notFound} from "./lib/id";
+import {IdSchema, isApiPath, notFound, pathParams} from "./lib/id";
 import {ensureAccess, forbidden, ForbiddenError} from "./lib/roles";
 import {type Session, withSession} from "./lib/session";
 import {RuleError, ruleViolation} from "./lib/rule-error";
@@ -57,11 +57,11 @@ const readBody = async (req: Request): Promise<unknown> => {
     }
 };
 
-const handler = async (req: Request, context: Context, session: Session) => {
+const handler = async (req: Request, _context: Context, session: Session) => {
     try {
         if (!isApiPath(req.url, "vacations")) return notFound();
         const url = new URL(req.url);
-        const rawId = context.params.id;
+        const rawId = pathParams(req.url, config.path).id;
 
         // Sammlung: /api/vacations
         if (rawId === undefined) {
@@ -120,7 +120,7 @@ const handler = async (req: Request, context: Context, session: Session) => {
             await db.transaction(async (tx) => {
                 const current = await getVacation(tx, id);
                 if (!current) throw new NotFoundError();
-                await ensureAccess(session.user.id, current.userId);
+                await ensureAccess(session.user.id, current.userId, tx);
                 await lockUser(tx, current.userId);
 
                 // Wurde nur ein Datum gesendet, gilt für das andere der gespeicherte Wert

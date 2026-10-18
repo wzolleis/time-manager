@@ -1,5 +1,6 @@
 import {AsyncLocalStorage} from "node:async_hooks";
 import type {Context} from "@netlify/functions";
+import {runAfterRequest} from "./after-request";
 
 type Mark = {name: string; ms: number};
 type Handler = (req: Request, context: Context) => Promise<Response>;
@@ -29,6 +30,7 @@ export function withTiming(name: string, handler: Handler): Handler {
         const start = performance.now();
         const res = await storage.run(marks, () => handler(req, context));
         const total = round(performance.now() - start);
+        await runAfterRequest();
 
         console.log(
             `[timing] ${JSON.stringify({

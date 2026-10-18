@@ -8,7 +8,7 @@ import {withTiming} from "./lib/timing";
 import {holidays, users} from "../../db/schema";
 import {findHolidayClash, holidayClashMessage, type HolidayRange} from "../../shared/holiday-rules";
 import {HolidayCreateSchema, HolidayUpdateSchema} from "../../shared/holiday";
-import {IdSchema, isApiPath, notFound} from "./lib/id";
+import {IdSchema, isApiPath, notFound, pathParams} from "./lib/id";
 import {withSession} from "./lib/session";
 import {RuleError, ruleViolation} from "./lib/rule-error";
 
@@ -49,11 +49,11 @@ const readBody = async (req: Request): Promise<unknown> => {
     }
 };
 
-const handler = async (req: Request, context: Context) => {
+const handler = async (req: Request, _context: Context) => {
     try {
         if (!isApiPath(req.url, "holidays")) return notFound();
         const url = new URL(req.url);
-        const rawId = context.params.id;
+        const rawId = pathParams(req.url, config.path).id;
 
         // Sammlung: /api/holidays
         if (rawId === undefined) {

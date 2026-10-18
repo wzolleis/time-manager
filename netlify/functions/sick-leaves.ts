@@ -8,7 +8,7 @@ import {withTiming} from "./lib/timing";
 import {sickLeaves, users} from "../../db/schema";
 import {checkSickLeave} from "../../shared/sick-leave-rules";
 import {SickLeaveCreateSchema, SickLeaveUpdateSchema} from "../../shared/sick-leave";
-import {IdSchema, isApiPath, notFound} from "./lib/id";
+import {IdSchema, isApiPath, notFound, pathParams} from "./lib/id";
 import {ensureAccess, forbidden, ForbiddenError} from "./lib/roles";
 import {type Session, withSession} from "./lib/session";
 import {RuleError, ruleViolation} from "./lib/rule-error";
@@ -45,11 +45,11 @@ const readBody = async (req: Request): Promise<unknown> => {
     }
 };
 
-const handler = async (req: Request, context: Context, session: Session) => {
+const handler = async (req: Request, _context: Context, session: Session) => {
     try {
         if (!isApiPath(req.url, "sick-leaves")) return notFound();
         const url = new URL(req.url);
-        const rawId = context.params.id;
+        const rawId = pathParams(req.url, config.path).id;
 
         // Sammlung: /api/sick-leaves
         if (rawId === undefined) {
@@ -100,7 +100,7 @@ const handler = async (req: Request, context: Context, session: Session) => {
             await db.transaction(async (tx) => {
                 const current = await getSickLeave(tx, id);
                 if (!current) throw new NotFoundError();
-                await ensureAccess(session.user.id, current.userId);
+                await ensureAccess(session.user.id, current.userId, tx);
                 await lockUser(tx, current.userId);
 
                 // Wurde nur ein Datum gesendet, gilt für das andere der gespeicherte Wert

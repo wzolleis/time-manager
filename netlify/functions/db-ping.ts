@@ -1,11 +1,12 @@
 import type {Config} from "@netlify/functions";
 import mysql from "mysql2/promise";
 import {withSession} from "./lib/session";
+import {withTiming} from "./lib/timing";
 
 let cold = true;
 const round = (ms: number) => Math.round(ms * 10) / 10;
 
-export default withSession(async () => {
+const handler = withSession(async () => {
     const wasCold = cold;
     cold = false;
 
@@ -43,5 +44,7 @@ export default withSession(async () => {
         return Response.json({error: e.code ?? "unbekannt", message: e.message}, {status: 500});
     }
 });
+
+export default withTiming("db-ping", handler);
 
 export const config: Config = {path: "/api/db-ping"};
