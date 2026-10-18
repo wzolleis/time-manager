@@ -35,13 +35,16 @@ Schlägt er nicht fehl, prüft er nichts.
 | Formatierung für die Anzeige                     | `src/lib/`                     | `src/lib/<name>.test.ts` |
 | Bedienung: Klick, Eingabe, Anzeige von Fehlern   | Komponente                     | neben der Komponente, `*.test.tsx` |
 | Jede Route lässt sich anzeigen                   | Routing                        | `src/tests/routes.test.tsx` |
-| Endpoint mit Datenbank, Rechte, HTTP-Status      | Netlify Function               | `scripts/api-walkthrough.sh` gegen `netlify dev` |
+| Endpoint mit Datenbank, Rechte, HTTP-Status      | Netlify Function               | `scripts/api-walkthrough.sh` gegen `npm run dev:test` |
 
 - **Regeln gehören in den Service-Test**, nicht in den Komponenten-Test. Die Komponente prüft nur,
   dass die Meldung des Service angezeigt wird, nicht jeden Fall der Regel.
 - **Netlify Functions haben keine Unit-Tests.** Sie brauchen die Datenbank. Ihr Verhalten
   (Statuscodes, Rechte, Regeln auf dem Server) prüft der API-Walkthrough. Läuft eine neue Logik in
   einer Function ohne DB, gehört sie als Funktion nach `lib/` und bekommt dort ihren Test.
+- **Der Walkthrough läuft gegen die Testdatenbank.** `npm run dev:test` startet `netlify dev` auf
+  Port 8889 mit `time_manager_test`, das ist der Standard von `scripts/api-walkthrough.sh`. Nie gegen
+  die Produktion (`features/boundaries/local-environment.md`).
 
 ## Wie Tests geschrieben werden
 

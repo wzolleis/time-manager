@@ -1,7 +1,7 @@
 // scripts/grant-admin.ts
 // Gibt einem User die Rolle Administrator, z. B. für den ersten Administrator.
 // Aufruf: node scripts/grant-admin.ts <email>
-import "dotenv/config";
+import "./lib/env.ts";
 import mysql from "mysql2/promise";
 import {ADMIN_ROLE_ID} from "../shared/role.ts";
 

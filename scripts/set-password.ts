@@ -1,7 +1,7 @@
 // scripts/set-password.ts
 // Setzt das Passwort eines Users direkt in der Datenbank, z. B. für den ersten Administrator.
 // Aufruf: node scripts/set-password.ts <email>   (das Passwort wird verdeckt abgefragt)
-import "dotenv/config";
+import "./lib/env.ts";
 import bcrypt from "bcryptjs";
 import mysql from "mysql2/promise";
 import {stdin, stdout} from "node:process";

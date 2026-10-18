@@ -32,7 +32,8 @@ Aufruf: <skript> [-s | -f | -a] [-h]
   -a, --auto         Nie pausieren (CI), Exit-Code 1 bei Fehlern
   -h, --help         Diese Hilfe
 
-Umgebungsvariablen: API_USER (E-Mail), API_PASSWORD, BASE_URL (Standard http://localhost:8888)
+Umgebungsvariablen: API_USER (E-Mail), API_PASSWORD, BASE_URL (Standard http://localhost:8889, die Testdatenbank
+über npm run dev:test; http://localhost:8888 ist npx netlify dev mit der lokalen Datenbank)
 API_USER und API_PASSWORD können auch in .env.local neben dem Skript stehen (Zeilen KEY=VALUE),
 gesetzte Umgebungsvariablen gehen vor. Fehlt beides, fragt das Skript nach.
 Während einer Pause: beliebige Taste = weiter, q = beenden (mit Aufräumen)
@@ -57,7 +58,7 @@ wt_init() {
   fi
   if [ "$WT_MODE" = "step" ]; then WT_STEPPING=1; else WT_STEPPING=0; fi
 
-  WT_BASE="${BASE_URL:-http://localhost:8888}"
+  WT_BASE="${BASE_URL:-http://localhost:8889}" # npm run dev:test, Testdatenbank
   wt_load_env_local "$(dirname "$0")/.env.local"
   WT_AUTH_USER="${API_USER:-}"
   WT_AUTH_PASSWORD="${API_PASSWORD:-}"
@@ -108,7 +109,10 @@ wt_login() {
     -H "Content-Type: application/json" -d "$body" "$WT_BASE/api/auth/login") || status="000"
   # 000: curl hat keine Antwort bekommen, unter WT_BASE läuft kein Server
   if [ "$status" = "000" ]; then
-    wt_abort "der Server läuft nicht, bitte mit npx netlify dev starten"
+    if [ "$WT_BASE" = "http://localhost:8889" ]; then
+      wt_abort "der Server läuft nicht, bitte mit npm run dev:test starten"
+    fi
+    wt_abort "der Server läuft nicht unter $WT_BASE, bitte starten (npx netlify dev für Port 8888)"
   fi
   if [ "$status" != "200" ]; then
     wt_abort "Anmeldung fehlgeschlagen (HTTP $status)"

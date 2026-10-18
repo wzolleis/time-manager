@@ -15,6 +15,7 @@ dist-ssr
 #env
 .env
 .env.*
+!.env.local.example
 
 #netlify
 deno.lock

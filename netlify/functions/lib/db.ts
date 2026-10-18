@@ -3,6 +3,16 @@ import mysql from "mysql2/promise";
 import * as schema from "../../../db/schema";
 import {timed} from "./timing";
 
+// Unter netlify dev nur die lokale Datenbank: ohne .env.local fiele netlify dev auf die
+// Netlify-Projekteinstellungen zurück, und das ist die Produktion (features/boundaries/local-environment.md)
+const LOCAL_HOSTS = ["127.0.0.1", "localhost"];
+if (process.env.NETLIFY_DEV === "true" && !LOCAL_HOSTS.includes(process.env.DB_HOST ?? "")) {
+    throw new Error(
+        `netlify dev verwendet nur die lokale Datenbank, DB_HOST ist "${process.env.DB_HOST}". ` +
+            "Fehlt .env.local? Siehe features/boundaries/local-environment.md",
+    );
+}
+
 export const pool = mysql.createPool({
     host: process.env.DB_HOST,
     port: Number(process.env.DB_PORT ?? 3306),

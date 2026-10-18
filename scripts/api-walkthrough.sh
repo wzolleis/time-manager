@@ -18,24 +18,43 @@ TEST_COOKIES=""
 ADMIN_ROLE_ID="c8d47966-f04b-4e73-a752-b48266371049"
 USER_ROLE_ID="65c4543a-6a98-44c6-b953-6329d1688bd0"
 
+# Aufruf beim Aufräumen: Erfolg (2xx) oder schon weg (410), sonst Meldung mit Aufruf und Antwort
+purge_call() {
+  wt_call "$1" "$2"
+  case "$WT_STATUS" in
+    2??|410) return 0 ;;
+  esac
+  echo "${C_BAD}Aufräumen gescheitert: $1 $2 → $WT_STATUS ${WT_BODY}${C_OFF}"
+  return 1
+}
+
+# Löscht den Test-User mit allem, was auf ihn verweist. Gibt 1 zurück, sobald ein Aufruf scheitert.
 purge_user() {
   local uid="$1" ids id
-  wt_call GET "/api/time-entries?userId=$uid"
+  purge_call GET "/api/time-entries?userId=$uid" || return 1
+  # Von der letzten zur ersten Buchung, damit die Abfolge nach jedem Löschen gültig bleibt
   ids=$(printf '%s' "$WT_BODY" | grep -o '"id":"[^"]*"' | cut -d'"' -f4 \
         | awk '{a[NR]=$0} END{for(i=NR;i>=1;i--) print a[i]}')
-  for id in $ids; do wt_call DELETE "/api/time-entries/$id"; done
+  for id in $ids; do purge_call DELETE "/api/time-entries/$id" || return 1; done
 
-  wt_call GET "/api/vacations?userId=$uid"
+  purge_call GET "/api/vacations?userId=$uid" || return 1
   for id in $(printf '%s' "$WT_BODY" | grep -o '"id":"[^"]*"' | cut -d'"' -f4); do
-    wt_call DELETE "/api/vacations/$id"
+    purge_call DELETE "/api/vacations/$id" || return 1
   done
 
-  wt_call GET "/api/sick-leaves?userId=$uid"
+  purge_call GET "/api/sick-leaves?userId=$uid" || return 1
   for id in $(printf '%s' "$WT_BODY" | grep -o '"id":"[^"]*"' | cut -d'"' -f4); do
-    wt_call DELETE "/api/sick-leaves/$id"
+    purge_call DELETE "/api/sick-leaves/$id" || return 1
   done
 
-  wt_call DELETE "/api/users/$uid"
+  # Eigene Feiertage des Users (nicht die globalen): holidays.user_id hat kein onDelete cascade
+  purge_call GET "/api/holidays?userId=$uid" || return 1
+  for id in $(printf '%s' "$WT_BODY" | grep -o "{[^{}]*\"userId\":\"$uid\"[^{}]*}" \
+              | grep -o '"id":"[^"]*"' | cut -d'"' -f4); do
+    purge_call DELETE "/api/holidays/$id" || return 1
+  done
+
+  purge_call DELETE "/api/users/$uid"
 }
 
 cleanup() {
@@ -46,7 +65,7 @@ cleanup() {
   for pid in $PROJECT_IDS; do wt_call DELETE "/api/projects/$pid"; done
   # Die Tokens von 'vitest' verschwinden mit dem User, das des Admins nicht
   if [ -n "$ADMIN_TOKEN_ID" ]; then wt_call DELETE "/api/api-tokens/$ADMIN_TOKEN_ID"; fi
-  if [ -n "$USER_ID" ]; then purge_user "$USER_ID"; fi
+  if [ -n "$USER_ID" ]; then purge_user "$USER_ID" || echo "Der Test-User bleibt, der nächste Lauf räumt ihn auf."; fi
 }
 # shellcheck disable=SC2034
 WT_CLEANUP=cleanup
@@ -58,7 +77,7 @@ wt_init "$@"
 wt_call GET /api/users
 if [ "$WT_STATUS" != "200" ]; then
   echo "Server nicht nutzbar: Status $WT_STATUS ($WT_BODY)"
-  echo "Läuft 'npx netlify dev'? Stimmen E-Mail und Passwort?"
+  echo "Läuft 'npm run dev:test'? Stimmen E-Mail und Passwort?"
   exit 1
 fi
 
@@ -66,7 +85,7 @@ OLD=$(printf '%s' "$WT_BODY" | grep -o "{[^{}]*\"email\":\"$TEST_EMAIL\"[^{}]*}"
       | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)
 if [ -n "$OLD" ]; then
   echo "Test-User eines früheren Laufs gefunden, räume auf …"
-  purge_user "$OLD"
+  purge_user "$OLD" || { echo "Abbruch: der Test-User eines früheren Laufs lässt sich nicht löschen."; exit 1; }
 fi
 
 # --- Anmeldung -------------------------------------------------------------

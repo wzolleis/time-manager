@@ -1,0 +1,30 @@
+# Lokale Datenbank für npx netlify dev und den API-Walkthrough (features/boundaries/local-environment.md).
+# Immer mit den npm-Skripten starten (db:up, db:down, db:reset): sie übergeben --env-file .env.local.
+services:
+    db:
+        image: mariadb:10.11 # dieselbe Reihe wie die Produktion (10.11.19)
+        container_name: time-manager-db
+        restart: unless-stopped
+        command:
+            - --default-time-zone=+00:00
+            - --character-set-server=latin1 # wie die Produktion
+            - --collation-server=latin1_swedish_ci
+            - --wait_timeout=300 # vergessene Verbindungen nach 5 Minuten schließen
+        environment:
+            MARIADB_DATABASE: ${DB_NAME:?DB_NAME fehlt in .env.local}
+            MARIADB_USER: ${DB_USER:?DB_USER fehlt in .env.local}
+            MARIADB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD fehlt in .env.local}
+            MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD fehlt in .env.local}
+            DB_TEST_NAME: ${DB_TEST_NAME:?DB_TEST_NAME fehlt in .env.local}
+        ports:
+            - "127.0.0.1:${DB_PORT:-3307}:3306" # nur vom eigenen Rechner erreichbar
+        volumes:
+            - time-manager-mariadb:/var/lib/mysql
+            - ./db/docker/init:/docker-entrypoint-initdb.d:ro
+        healthcheck:
+            test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+            interval: 5s
+            retries: 20
+
+volumes:
+    time-manager-mariadb:

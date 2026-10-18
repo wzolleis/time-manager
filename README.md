@@ -1,4 +1,32 @@
-# React + TypeScript + Vite
+# Zeiterfassung
+
+## Lokale Umgebung
+
+Lokal läuft die Anwendung mit einer eigenen MariaDB in Docker (OrbStack), nie gegen die Produktion.
+Details und Regeln: `features/boundaries/local-environment.md`.
+
+Einmal aufsetzen:
+
+```bash
+brew install --cask orbstack && open -a OrbStack
+cp .env.local.example .env.local      # Passwörter eintragen
+npm run db:up                         # Container time-manager-db, Port 127.0.0.1:3307
+npm run db:migrate && npm run db:migrate:test
+npm run db:seed && npm run db:seed:test   # Administrator aus scripts/.env.local (API_USER, API_PASSWORD)
+```
+
+Im Alltag:
+
+| Befehl                         | Zweck                                                        |
+|--------------------------------|--------------------------------------------------------------|
+| `npx netlify dev`              | Anwendung auf Port 8888 mit der lokalen Datenbank `time_manager` |
+| `npm run dev:test`             | Anwendung auf Port 8889 mit der Testdatenbank `time_manager_test` |
+| `scripts/api-walkthrough.sh`   | API-Walkthrough gegen Port 8889 (`-a` ohne Pausen)            |
+| `npm run db:down` / `db:up`    | Container stoppen / starten, die Daten bleiben                |
+| `npm run db:reset`             | Volume löschen, beide Datenbanken leer (danach migrieren und seeden) |
+| `npm run db:migrate:prod`      | Migrationen auf die Produktion, mit `.env.production`         |
+
+## React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

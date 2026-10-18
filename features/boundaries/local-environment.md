@@ -11,11 +11,13 @@ Der Entwickler startet die Anwendung mit `npx netlify dev`. Sie verbindet sich m
 MariaDB-Datenbank in einem Docker-Container. Migrationen, Skripte und `scripts/api-walkthrough.sh` laufen
 ebenfalls gegen diesen Container.
 
-Die Umgebung ist **noch nicht umgesetzt**. Diese Beschreibung ist der Auftrag dafür.
+Die Umgebung ist **umgesetzt**. Diese Beschreibung hält fest, wie sie sich verhält. Code: `compose.yaml`,
+`db/docker/init/`, `scripts/lib/env.ts`, `scripts/seed-local.ts`, `netlify/functions/lib/db.ts`, die
+Skripte `db:*` und `dev:test` in `package.json`.
 
-## Ausgangslage
+## Ausgangslage vor der Umsetzung
 
-Wichtig, weil sie heute ein Risiko ist:
+Bis Oktober 2026 galt, und das war ein Risiko:
 
 - **`.env` im Projektverzeichnis enthält die Zugangsdaten der Produktion** (`DB_HOST`, `DB_PORT`,
   `DB_USER`, `DB_PASSWORD`, `DB_NAME`).
@@ -29,7 +31,7 @@ Wichtig, weil sie heute ein Risiko ist:
 - Die Produktion ist **MariaDB 10.11.19** (`10.11.19-MariaDB-deb12`) auf einem Shared Hosting
   (`connectionLimit: 1` in
   `netlify/functions/lib/db.ts`).
-- Auf dem Rechner ist Docker noch nicht installiert (`docker: command not found`). Es wird OrbStack.
+- Docker war nicht installiert. Es wurde OrbStack.
 - Unit-Tests (`npm run test:run`) brauchen keine Datenbank, daran ändert sich nichts.
 
 ## Entscheidungen
@@ -110,9 +112,13 @@ Neue npm-Skripte in `package.json`:
 | `db:reset`             | `docker compose --env-file .env.local down -v && npm run db:up`             | Volume löschen, beide Datenbanken neu und leer |
 | `db:migrate`           | `drizzle-kit migrate` (wie bisher, liest jetzt `.env.local`)                 | Migrationen auf die lokale Datenbank         |
 | `db:migrate:prod`      | `APP_ENV=production drizzle-kit migrate`                                     | Migrationen auf die Produktion               |
-| `db:migrate:test`      | `DB_NAME=time_manager_test drizzle-kit migrate`, über `DB_TEST_NAME`        | Migrationen auf die Testdatenbank            |
+| `db:migrate:test`      | `DB_NAME=time_manager_test drizzle-kit migrate`                             | Migrationen auf die Testdatenbank            |
 | `db:seed`              | `node scripts/seed-local.ts`                                                | ersten Administrator anlegen                 |
-| `dev:test`             | `DB_NAME=time_manager_test netlify dev --port 8889`, über `DB_TEST_NAME`    | Anwendung gegen die Testdatenbank           |
+| `db:seed:test`         | `DB_NAME=time_manager_test node scripts/seed-local.ts`                      | ebenso in der Testdatenbank                  |
+| `dev:test`             | `DB_NAME=time_manager_test npx netlify dev --port 8889`                     | Anwendung gegen die Testdatenbank           |
+
+Der Name `time_manager_test` steht in den Skripten fest, ein npm-Skript kann `.env.local` nicht lesen.
+`DB_TEST_NAME` in `.env.local` braucht nur das Init-Skript, beide Werte müssen gleich sein.
 
 `DB_NAME=… ` vor dem Befehl ist eine Umgebungsvariable im Prozess. Sie gewinnt gegen die Datei. So
 zeigen `db:migrate:test` und `dev:test` auf die Testdatenbank, ohne eine zweite Datei.
@@ -146,7 +152,7 @@ npm run db:up
 npm run db:migrate                    # time_manager
 npm run db:migrate:test               # time_manager_test
 npm run db:seed                       # Administrator aus scripts/.env.local in time_manager
-DB_NAME=time_manager_test npm run db:seed   # und in time_manager_test
+npm run db:seed:test                  # und in time_manager_test
 npx netlify dev
 ```
 
@@ -154,7 +160,7 @@ npx netlify dev
 
 ```bash
 npm run dev:test                                           # eigenes Terminal, Port 8889
-BASE_URL=http://localhost:8889 scripts/api-walkthrough.sh -a
+scripts/api-walkthrough.sh -a                              # Standard ist Port 8889
 ```
 
 Dabei bleiben die lokale Entwicklung auf 8888 und ihre Daten unberührt, beide Server können gleichzeitig
@@ -285,9 +291,35 @@ Reihenfolge, jeder Schritt ist ein eigener Commit:
 6. **Doku:** Abschnitt „Lokale Umgebung“ in `README.md` mit „Erstes Aufsetzen“. Im Skill `architecture`
    (`testing.md`) der Hinweis, dass der Walkthrough gegen `dev:test` läuft.
 
+## Eigenheiten von `netlify dev`
+
+Bei der Umsetzung aufgefallen, wichtig für jede Function:
+
+- **`netlify dev` liest `.env.local`** und stellt sie vor die Projekteinstellungen (Log: `Injected
+  .env.local file env vars`). Eine Umgebungsvariable im Prozess gewinnt (`defined in process`).
+- **Ein Worker pro Anfrage.** `netlify dev` startet für jede Anfrage einen eigenen Worker-Thread
+  (`"cold":true` in jeder Zeile `[timing]`) und beendet ihn nicht.
+  - Eine offene DB-Verbindung hielte den Worker und sich selbst am Leben, nach etwa 150 Anfragen meldet
+    MariaDB `Too many connections`.
+  - Deshalb schließt `lib/db.ts` unter `netlify dev` (`NETLIFY_DEV=true`) den Pool nach jeder Anfrage,
+    über `afterRequest` aus `lib/after-request.ts`, ausgeführt von `withTiming`. Jede Function muss
+    deshalb mit `withTiming` exportiert werden.
+  - `--wait_timeout=300` in `compose.yaml` schließt trotzdem liegen gebliebene Verbindungen.
+- **Eine Verbindung pro Pool, auch in Transaktionen.** `connectionLimit: 1`: Eine Abfrage über `db`
+  innerhalb von `db.transaction` wartet auf die Verbindung der Transaktion und wird nie fertig. In einer
+  Transaktion immer `tx` verwenden, auch für `ensureAccess(…, tx)`.
+- **Wiederholung einer 403.** Netlify wiederholt eine 403 mit `.html`, `.htm`, `/index.html` und
+  `/index.htm` und gibt die letzte Antwort zurück, in den Wiederholungen ohne `context.params`.
+  - `isApiPath` und `IdSchema` lassen die Endungen zu.
+  - Die Parameter der Route kommen aus `pathParams(req.url, config.path)` statt aus `context.params`
+    (`lib/id.ts`). So bekommt auch jede Wiederholung wieder 403.
+
 ## Prüfen
 
-Nach der Umsetzung, ohne Unit-Tests, weil alles davon Docker und die DB braucht:
+Nach der Umsetzung, ohne Unit-Tests, weil alles davon Docker und die DB braucht. Am 19.10.2026 geprüft
+sind: `db:up` zweimal, `ps` mit Port, das Log von `netlify dev`, beide Migrationen, der Seed mit
+Abbruch bei fremdem Host, der Walkthrough gegen 8889 mit 109 von 109 Schritten und 0 offenen
+Verbindungen danach. Noch nicht geprüft: Neustart von OrbStack, `db:reset`, `db:migrate:prod`, IntelliJ.
 
 - `npm run db:up` zweimal hintereinander: der zweite Aufruf ändert nichts, beide enden mit „Healthy“.
 - OrbStack beenden und wieder öffnen: Der Container läuft wieder, ohne `db:up`. Nach `db:down` und
@@ -303,8 +335,8 @@ Nach der Umsetzung, ohne Unit-Tests, weil alles davon Docker und die DB braucht:
   `DB_HOST` und greifen nicht auf die Produktion zu.
 - Mit `DB_HOST=example.com npm run db:seed` bricht das Skript ab und schreibt nichts.
 - Ein Eintrag in der UI, dann `db:down` und `db:up`: Der Eintrag ist noch da. Nach `db:reset` ist er weg.
-- `npm run dev:test` und `BASE_URL=http://localhost:8889 scripts/api-walkthrough.sh -a`: alle Schritte
-  bestehen, in `time_manager` hat sich nichts geändert.
+- `npm run dev:test` und `scripts/api-walkthrough.sh -a`: alle Schritte bestehen, in `time_manager` hat
+  sich nichts geändert.
 - IntelliJ verbindet sich mit beiden Datenbanken.
 
 ## Nicht Teil dieser Version
