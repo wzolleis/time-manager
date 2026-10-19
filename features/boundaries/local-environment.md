@@ -155,6 +155,10 @@ npm run db:seed                       # Administrator aus scripts/.env.local in 
 npm run db:seed:test                  # und in time_manager_test
 npx netlify dev
 ```
+### Orbstack starten
+```bash
+open -a OrbStack
+```
 
 ### Walkthrough gegen die Testdatenbank
 
