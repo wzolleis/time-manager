@@ -86,7 +86,7 @@ Buchungen.“ (anderer Tag).
 
 ### Formate
 
-Aus `../../src/lib/format.ts`:
+Aus `../../shared/format.ts`:
 
 | Funktion           | Beispiele                                  | Regel                                               |
 |--------------------|--------------------------------------------|-----------------------------------------------------|
@@ -236,7 +236,7 @@ Nach `../../agents/.agents/skills/architecture/testing.md`. Vorhanden:
     künftige Tage, freier Tag ohne Arbeit; `describe("Buchungen an Krankheitstagen")`
   - `../../shared/target-hours.test.ts`: `targetMs` und `dayKind` mit Reihenfolge der Tagesarten
   - `../../shared/time-rules.test.ts`: `nextType`, `firstBookingDay`
-  - `../../src/lib/format.test.ts`: Formate
+  - `../../shared/format.test.ts`: Formate
 - **Routing:** Eintrag `"/user/reports/daily": "Heute"` in
   `../../src/tests/routes.test.tsx`
 

@@ -26,6 +26,27 @@ Im Alltag:
 | `npm run db:reset`             | Volume löschen, beide Datenbanken leer (danach migrieren und seeden) |
 | `npm run db:migrate:prod`      | Migrationen auf die Produktion, mit `.env.production`         |
 
+## Agent verbinden (MCP)
+
+Ein Agent bedient die Zeiterfassung über den MCP-Server unter `/api/mcp`: stempeln, Buchungen nachtragen,
+ändern und löschen, Tages-, Wochen- und Monatsbericht. Beschreibung: `features/boundaries/mcp-enable.md`.
+
+1. In der Anwendung unter „Agent-Zugang“ ein Token erzeugen. Es wird nur einmal angezeigt.
+2. Den Agent verbinden, z. B. Claude Code:
+
+```bash
+claude mcp add --transport http time-manager https://<host>/api/mcp \
+  --header "Authorization: Bearer tm_…"
+```
+
+Lokal gegen `npx netlify dev` mit `http://localhost:8888/api/mcp`. In einer `.mcp.json` im Repo nie das
+Token selbst, sondern eine Variable: `"headers": {"Authorization": "Bearer ${TIME_MANAGER_TOKEN}"}`.
+`/mcp` in Claude Code zeigt, ob der Server verbunden ist. Zum Ausprobieren ohne Agent:
+`npx @modelcontextprotocol/inspector`.
+
+Andere Clients (Claude API, claude.ai, Claude Desktop): siehe „Einbinden in Claude“ in
+`features/boundaries/mcp-enable.md`.
+
 ## React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

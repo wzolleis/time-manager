@@ -92,6 +92,18 @@ Die Agent-Tokens aller User (`GET /api/admin/api-tokens`, `DELETE /api/admin/api
 Eintrag mit der Rolle Administrator (Migration `0011_api_tokens_roles.sql`). Die eigenen Tokens unter
 `/api/api-tokens` haben keinen und gelten für die Rolle "User". `withToken` prüft die Rolle wie `withSession`.
 
+## /api/mcp
+
+Der MCP-Server für Agents (`features/boundaries/mcp-enable.md`, Function `netlify/functions/mcp.ts`) hat
+keinen Eintrag in `endpoint_roles` und gilt damit für die Rolle "User". Er wird mit `withToken` exportiert
+und nimmt nur ein Agent-Token an, kein Session-Cookie.
+
+- Jedes Tool arbeitet nur mit den Daten des Users, dem das Token gehört, **auch bei einem Administrator**.
+  Kein Tool hat eine `userId` als Eingabe, `ensureAccess` kommt deshalb nicht vor.
+- Eine fremde Buchung behandeln die Tools wie eine unbekannte („Buchung nicht gefunden“), nicht mit `403`.
+- Schreibende Tools nutzen `lib/time-entries-store.ts` mit einem `authorize`, das nur den eigenen User
+  zulässt, damit die Regeln dieselben sind wie bei `/api/time-entries`.
+
 Der Admin-Reset `POST /api/auth/reset-password` braucht unbedingt einen Eintrag mit der Rolle
 Administrator, sonst kann jeder angemeldete User fremde Passwörter setzen.
 Ausnahme vom Pfadmuster: `/api/auth/:action` umfasst auch Login, Logout, `/me` und die eigene

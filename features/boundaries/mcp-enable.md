@@ -11,7 +11,12 @@ Der User sagt seinem Agent z. B. „stempel mich ein für Projekt Alpha“ oder 
 diesen Monat?“. Der Agent ruft dafür Tools des MCP-Servers der Anwendung auf. Die Tools bieten dieselben
 Use Cases wie die UI und halten dieselben Regeln ein. Es gibt keine eigene Fachlogik für den Agent.
 
-Der Use Case ist **noch nicht umgesetzt**. Diese Beschreibung ist der Auftrag dafür.
+Der Use Case ist umgesetzt. Diese Beschreibung hält fest, wie sich der Server verhält. Code:
+
+- Function `../../netlify/functions/mcp.ts`
+- Tools `../../netlify/functions/lib/mcp-tools/` (`time-entries.ts`, `reports.ts`), Berichte und Formate
+  ohne DB in `report-view.ts` und `view.ts`
+- Regeln der Buchungen `../../netlify/functions/lib/time-entries-store.ts`, Texte `../../shared/format.ts`
 
 Fachliche Grundlage, vor der Umsetzung lesen:
 
@@ -174,8 +179,9 @@ Reihenfolge, jeder Schritt ist ein eigener Commit mit Tests. Vorher ist `mcp-tok
    Regel 1). `time-entries.ts` ruft nur noch diese Funktionen auf, das Verhalten der REST-API ändert sich
    nicht. `scripts/api-walkthrough.sh` muss ohne Änderung durchlaufen.
 2. **Formatierer nach `shared/format.ts`:** `formatDuration`, `formatDifference`, `formatDayShort` und
-   `formatTime` liegen heute in `src/lib/format.ts` und sind damit nur im Client verfügbar. Sie ziehen um,
-   die UI importiert sie von dort, damit Agent und UI dieselben Texte zeigen.
+   `formatTime` lagen in `src/lib/format.ts` und waren damit nur im Client verfügbar. Sie ziehen um,
+   die UI importiert sie von dort, damit Agent und UI dieselben Texte zeigen. Mit ihnen `dayKindLabel`;
+   in `src/lib/format.ts` bleibt nur `diffClass` (Tailwind-Klassen).
 3. **Function `netlify/functions/mcp.ts`**, `config.path = "/api/mcp"`, exportiert mit `withToken`.
    `McpServer` aus `@modelcontextprotocol/sdk` mit dem Streamable-HTTP-Transport im zustandslosen Modus
    (ohne Session-ID, JSON-Antworten statt SSE), pro Request neu erzeugt. `GET` und `DELETE` auf
@@ -185,6 +191,8 @@ Reihenfolge, jeder Schritt ist ein eigener Commit mit Tests. Vorher ist `mcp-tok
    (`IncomingMessage`/`ServerResponse`, wie bei Express). Vor dem Umsetzen in der installierten
    SDK-Version nachsehen, ob es einen Transport für Web-`Request`/`Response` gibt, und den nehmen. Gibt es
    keinen, einen kleinen Adapter in `lib/` schreiben, der den `Request` in Node-Objekte umsetzt.
+   Ergebnis: Das SDK (1.32) hat `WebStandardStreamableHTTPServerTransport`, ein Adapter ist nicht nötig.
+   Der Client muss `Accept: application/json, text/event-stream` schicken, sonst antwortet er mit `406`.
 4. **Tools** in `netlify/functions/lib/mcp-tools/`, ein File pro Gruppe (`time-entries.ts`,
    `reports.ts`). Die Berichte bauen die Ergebnisse aus den Services in `shared/` (Regel 2).
 5. **Doku:** Abschnitt „/api/mcp“ im Skill `authorization`, `README.md` mit dem Befehl zum Verbinden.

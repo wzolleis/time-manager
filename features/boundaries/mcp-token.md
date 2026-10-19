@@ -12,7 +12,7 @@ deshalb mit einem persönlichen API-Token aus, das er bei jedem Aufruf von `/api
 `Authorization: Bearer …` mitschickt. Der User erzeugt das Token in der UI und kann es jederzeit
 widerrufen, ein Administrator kann die Tokens aller User widerrufen.
 
-Der Use Case ist umgesetzt, `/api/mcp` selbst noch nicht (`mcp-enable.md`). Diese Beschreibung hält
+Der Use Case ist umgesetzt, `/api/mcp` nutzt die Tokens (`mcp-enable.md`). Diese Beschreibung hält
 fest, wie sich die Tokens verhalten. Code:
 
 - Seiten `../../src/features/api-tokens/components/` (`api-tokens-page.tsx`, `admin-api-tokens-page.tsx`)
@@ -149,8 +149,9 @@ Nach dem Skill `architecture` (`testing.md`): Functions haben keine Unit-Tests, 
   - `DELETE` auf das Token eines anderen Users als User → `410`
   - User ruft `GET /api/admin/api-tokens` auf → `403`
   - Administrator widerruft das Token eines Users
-  - Kommt mit `mcp-enable.md`: `/api/mcp` ohne, mit falschem, mit abgelaufenem und mit widerrufenem
-    Token → `401`. Bis dahin gibt es keinen Endpoint mit `withToken`.
+  - `/api/mcp` ohne Token, mit Session-Cookie statt Token, mit falschem und mit widerrufenem Token →
+    `401`. Ein abgelaufenes Token lässt sich über die API nicht erzeugen, den Ablauf prüft der Unit-Test
+    von `isTokenExpired`.
 
 ## Nicht Teil dieser Version
 

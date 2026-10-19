@@ -32,7 +32,7 @@ Schlägt er nicht fehl, prüft er nichts.
 | Regel oder Berechnung (Urlaub, Buchungen, Soll)  | [Service](service.md)          | `shared/<thema>.test.ts` |
 | Schema: was ist gültig, was nicht                | Zod-Schema                     | `shared/<aggregat>.test.ts` |
 | Hilfsfunktion auf dem Server (Pfade, IDs, Rollen)| `netlify/functions/lib/`       | `netlify/functions/lib/<name>.test.ts` |
-| Formatierung für die Anzeige                     | `src/lib/`                     | `src/lib/<name>.test.ts` |
+| Formatierung für die Anzeige                     | `shared/format.ts`             | `shared/format.test.ts` |
 | Bedienung: Klick, Eingabe, Anzeige von Fehlern   | Komponente                     | neben der Komponente, `*.test.tsx` |
 | Jede Route lässt sich anzeigen                   | Routing                        | `src/tests/routes.test.tsx` |
 | Endpoint mit Datenbank, Rechte, HTTP-Status      | Netlify Function               | `scripts/api-walkthrough.sh` gegen `npm run dev:test` |
