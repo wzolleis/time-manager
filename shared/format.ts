@@ -51,15 +51,21 @@ export const formatDateTime = (d: Date | string) =>
     new Date(d).toLocaleString("de-DE", {timeZone: TZ, dateStyle: "medium", timeStyle: "short"});
 
 /** Hinweis zum Soll: warum ein Tag kein Arbeitstag ist */
-export const dayKindLabel = (kind: DayKind, holidayName?: string): string | undefined =>
-    kind === "holiday"
-        ? `Feiertag: ${holidayName}`
-        : kind === "sick"
-          ? "krank"
-          : kind === "vacation"
-            ? "Urlaub"
-            : kind === "weekend"
-              ? "Wochenende"
-              : kind === "untracked"
-                ? "vor Beginn der Zeiterfassung"
-                : undefined;
+export function dayKindLabel(kind: DayKind, holidayName?: string): string | undefined {
+    switch (kind) {
+        case "holiday":
+            return `Feiertag: ${holidayName}`;
+        case "sick":
+            return "krank";
+        case "vacation":
+            return "Urlaub";
+        case "weekend":
+            return "Wochenende";
+        case "untracked":
+            return "vor Beginn der Zeiterfassung";
+        case "workday":
+            return undefined;
+        default:
+            return kind satisfies never; // ein neuer DayKind fällt hier beim Kompilieren auf
+    }
+}
