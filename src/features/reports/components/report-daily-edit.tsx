@@ -4,7 +4,7 @@ import {Input} from "@/components/ui/input";
 import {Summary} from "@/components/summary";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {diffClass} from "@/lib/format";
-import {formatDate, formatDifference, formatDuration, formatTime} from "@shared/format";
+import {formatDate, formatDifference, formatDuration, formatTime, dayKindLabel} from "@shared/format";
 import {addDays} from "@shared/day-range";
 import {localDay} from "@shared/time-rules";
 import {EntryActions} from "@features/reports/components/time-entry-actions";
@@ -12,7 +12,6 @@ import {TimeEntryCreateDialog} from "@features/reports/components/time-entry-cre
 import {StampCard} from "@features/reports/components/stamp-card";
 import {ReportError} from "@features/reports/components/report-error";
 import {type DailyReportRow, useShowDailyReport} from "@features/reports/use-cases/use-show-daily-report";
-import {dayKindLabel} from "@features/reports/utils/day-kind-label";
 
 // Buchungen an einem Krankheitstag bleiben sichtbar, aber ausgegraut
 const muted = (row: DailyReportRow, text: string) =>

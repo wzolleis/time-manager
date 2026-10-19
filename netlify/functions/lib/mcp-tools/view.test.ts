@@ -1,0 +1,64 @@
+import {describe, expect, it} from "vitest";
+import {formatDifference} from "../../../../shared/format";
+import {RuleError} from "../rule-error";
+import {NotFoundError} from "../time-entries-store";
+import {errorResult, localIso, mdTable, minutes} from "./view";
+
+const MIN = 60_000;
+
+describe("minutes", () => {
+    it("rundet den Betrag ab wie formatDifference, damit Zahl und Text zusammenpassen", () => {
+        expect(minutes(245 * MIN + 30_000)).toBe(245);
+        expect(minutes(-(245 * MIN + 30_000))).toBe(-245);
+        expect(formatDifference(-(245 * MIN + 30_000))).toBe("−4 Std 5 Min");
+    });
+
+    it("gibt unter einer Minute 0, nicht -0", () => {
+        expect(Object.is(minutes(-30_000), 0)).toBe(true);
+    });
+});
+
+describe("localIso", () => {
+    it("zeigt Berliner Zeit mit dem Offset von Sommer- und Winterzeit", () => {
+        expect(localIso(new Date("2026-10-19T06:00:00Z"))).toBe("2026-10-19T08:00:00+02:00");
+        expect(localIso(new Date("2026-12-01T07:30:15Z"))).toBe("2026-12-01T08:30:15+01:00");
+    });
+
+    it("stimmt am Tag der Umstellung vor und nach 3 Uhr", () => {
+        expect(localIso(new Date("2026-10-25T00:30:00Z"))).toBe("2026-10-25T02:30:00+02:00");
+        expect(localIso(new Date("2026-10-25T01:30:00Z"))).toBe("2026-10-25T02:30:00+01:00");
+    });
+});
+
+describe("mdTable", () => {
+    it("baut Kopf, Trennzeile und Zeilen und maskiert | im Inhalt", () => {
+        expect(mdTable(["Projekt", "ID"], [["A|B", "1"]])).toBe(
+            ["| Projekt | ID |", "| --- | --- |", "| A\\|B | 1 |"].join("\n"),
+        );
+    });
+});
+
+describe("errorResult", () => {
+    it("gibt eine verletzte Regel als Ergebnis mit isError und der Meldung zurück", () => {
+        expect(errorResult(new RuleError('Um 09:00 fehlt vorher ein "gehen"'))).toEqual({
+            content: [{type: "text", text: 'Um 09:00 fehlt vorher ein "gehen"'}],
+            isError: true,
+        });
+    });
+
+    it("meldet eine unbekannte oder fremde Buchung als nicht gefunden", () => {
+        expect(errorResult(new NotFoundError()).content).toEqual([{type: "text", text: "Buchung nicht gefunden"}]);
+    });
+
+    it("gibt unerwartete Fehler nicht im Wortlaut weiter", () => {
+        const log = console.error;
+        console.error = () => {};
+        try {
+            expect(errorResult(new Error("Access denied for user 'x'@'host'")).content).toEqual([
+                {type: "text", text: "Interner Fehler"},
+            ]);
+        } finally {
+            console.error = log;
+        }
+    });
+});

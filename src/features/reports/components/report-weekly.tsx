@@ -3,13 +3,12 @@ import {Button} from "@/components/ui/button";
 import {Summary} from "@/components/summary";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {diffClass} from "@/lib/format";
-import {formatDayMonth, formatDayShort, formatDifference, formatDuration} from "@shared/format";
+import {formatDayMonth, formatDayShort, formatDifference, formatDuration, dayKindLabel} from "@shared/format";
 import {addDays, localDayRange} from "@shared/day-range";
 import type {WeekDayTotals} from "@shared/time-report";
 import {localDay} from "@shared/time-rules";
 import {ReportError} from "@features/reports/components/report-error";
 import {useShowWeeklyReport} from "@features/reports/use-cases/use-show-weekly-report";
-import {dayKindLabel} from "@features/reports/utils/day-kind-label";
 
 type DayRow = WeekDayTotals & {isToday: boolean};
 

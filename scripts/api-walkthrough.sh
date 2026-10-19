@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # API-Walkthrough: Anmeldung, Rollen, Users, Projekte, Zeitbuchungen, Projektzuordnung, Urlaub, Krankmeldung,
-# Agent-Tokens.
+# Agent-Tokens, MCP-Server.
 # Läuft mit einem Wegwerf-User "vitest" und räumt hinterher auf.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -428,6 +428,113 @@ wt_step "Admin sieht das Token von 'vitest' mit Namen des Users" 200 '"userName"
 wt_step "Admin widerruft das Token von 'vitest'" 204 "" DELETE "$ADMIN_TOK/$TEST_TOKEN_ID"
 wt_step "Widerrufenes Token ist unbekannt" 410 "Nicht gefunden" DELETE "$ADMIN_TOK/$TEST_TOKEN_ID"
 wt_step "Admin widerruft das eigene Token" 204 "" DELETE "$TOK/$ADMIN_TOKEN_ID"
+ADMIN_TOKEN_ID=""
+
+# --- MCP-Server (/api/mcp) -------------------------------------------------
+# Als 'vitest' mit Agent-Token. 'vitest' hat Buchungen am 10.06.2026 und Urlaub am 09.–11.06. und 13.–14.06.
+
+MCP="/api/mcp"
+rpc() { printf '{"jsonrpc":"2.0","id":1,"method":"%s","params":%s}' "$1" "$2"; }
+tool() {
+  local args="${2:-}"
+  if [ -z "$args" ]; then args='{}'; fi
+  rpc tools/call "{\"name\":\"$1\",\"arguments\":$args}"
+}
+
+# mcp_step TITEL TOKEN ERWARTETER_TEXT TOOL [ARGUMENTE]: Aufruf eines Tools, das gelingen soll
+mcp_step() {
+  WT_TOKEN="$2"
+  wt_step "$1" 200 "$3" POST $MCP "$(tool "$4" "${5:-}")"
+  WT_TOKEN=""
+  if [[ "$WT_BODY" == *'"isError":true'* ]]; then echo "${C_BAD}Unerwartetes isError!${C_OFF}"; WT_FAIL=$((WT_FAIL + 1)); fi
+}
+
+# mcp_error_step TITEL TOKEN ERWARTETE_MELDUNG TOOL [ARGUMENTE]: Tool-Fehler mit isError, kein Protokollfehler
+mcp_error_step() {
+  WT_TOKEN="$2"
+  wt_step "$1" 200 "$3" POST $MCP "$(tool "$4" "${5:-}")"
+  WT_TOKEN=""
+  if [[ "$WT_BODY" != *'"isError":true'* ]]; then echo "${C_BAD}Kein isError!${C_OFF}"; WT_FAIL=$((WT_FAIL + 1)); fi
+}
+
+wt_step "Admin erzeugt ein Token für den MCP-Server" 201 '"token":"tm_' POST $TOK '{"name":"walkthrough mcp","expiresInDays":30}'
+ADMIN_TOKEN_ID=$(wt_id "$WT_BODY")
+ADMIN_MCP_TOKEN=$(printf '%s' "$WT_BODY" | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
+
+ADMIN_COOKIES="$WT_COOKIES"
+TEST_COOKIES="$(mktemp)"
+curl -s -o /dev/null -c "$TEST_COOKIES" -H "Content-Type: application/json" \
+  -d "{\"email\":\"$TEST_EMAIL\",\"password\":\"vitest-neu-12345\"}" "$WT_BASE/api/auth/login"
+WT_COOKIES="$TEST_COOKIES"
+
+wt_step "'vitest' erzeugt ein Token für den MCP-Server" 201 '"token":"tm_' POST $TOK '{"name":"walkthrough mcp","expiresInDays":30}'
+MCP_TOKEN_ID=$(wt_id "$WT_BODY")
+MCP_TOKEN=$(printf '%s' "$WT_BODY" | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
+
+wt_step "/api/mcp mit Session-Cookie, ohne Token" 401 "Agent-Token" POST $MCP "$(rpc tools/list '{}')"
+WT_COOKIES=/dev/null
+wt_step "/api/mcp ohne Token" 401 "Agent-Token" POST $MCP "$(rpc tools/list '{}')"
+WT_TOKEN="tm_falsch"
+wt_step "/api/mcp mit falschem Token" 401 "Agent-Token" POST $MCP "$(rpc tools/list '{}')"
+WT_TOKEN="$MCP_TOKEN"
+wt_step "GET auf /api/mcp" 405 "" GET $MCP
+wt_step "initialize" 200 '"name":"time-manager"' POST $MCP \
+  "$(rpc initialize '{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"walkthrough","version":"1"}}')"
+wt_step "tools/list enthält die Tools" 200 '"name":"delete_time_entry"' POST $MCP "$(rpc tools/list '{}')"
+WT_TOKEN=""
+
+mcp_step "stamp Kommen" "$MCP_TOKEN" '"type":"kommen"' stamp '{"type":"kommen"}'
+STAMP_ID=$(wt_id "$WT_BODY")
+mcp_error_step "stamp Kommen ein zweites Mal" "$MCP_TOKEN" 'fehlt vorher ein \"gehen\"' stamp '{"type":"kommen"}'
+mcp_step "Gestempeltes Kommen löschen" "$MCP_TOKEN" "\"deletedId\":\"$STAMP_ID\"" delete_time_entry "{\"id\":\"$STAMP_ID\"}"
+
+mcp_error_step "add_time_entry Gehen mit Projekt" "$MCP_TOKEN" 'Ein Projekt kann nur beim \"kommen\"' add_time_entry \
+  "{\"type\":\"gehen\",\"day\":\"2026-06-15\",\"time\":\"12:00\",\"projectId\":\"$UNKNOWN_ID\"}"
+mcp_error_step "add_time_entry mit ungültigem Tag" "$MCP_TOKEN" "JJJJ-MM-TT" add_time_entry \
+  '{"type":"kommen","day":"2026-02-30","time":"08:00"}'
+
+mcp_step "Kommen 15.06. 08:00 nachtragen" "$MCP_TOKEN" '"bookedAt":"2026-06-15T08:00:00+02:00"' add_time_entry \
+  '{"type":"kommen","day":"2026-06-15","time":"08:00"}'
+mcp_step "Gehen 12:00 nachtragen" "$MCP_TOKEN" '"type":"gehen"' add_time_entry \
+  '{"type":"gehen","day":"2026-06-15","time":"12:00"}'
+MCP_GEHEN=$(wt_id "$WT_BODY")
+mcp_step "Kommen 13:00 nachtragen" "$MCP_TOKEN" '"time":"13:00"' add_time_entry \
+  '{"type":"kommen","day":"2026-06-15","time":"13:00"}'
+mcp_step "Gehen 17:00 nachtragen" "$MCP_TOKEN" '"time":"17:00"' add_time_entry \
+  '{"type":"gehen","day":"2026-06-15","time":"17:00"}'
+
+mcp_error_step "Gehen eines Paares mit folgendem Kommen löschen" "$MCP_TOKEN" 'fehlt vorher ein \"gehen\"' \
+  delete_time_entry "{\"id\":\"$MCP_GEHEN\"}"
+mcp_step "Nichts gelöscht: das Gehen ist noch da" "$MCP_TOKEN" "\"id\":\"$MCP_GEHEN\"" list_time_entries \
+  '{"from":"2026-06-15","to":"2026-06-15"}'
+
+mcp_step "Tagesbericht wie in der UI" "$MCP_TOKEN" "Arbeit 8 Std · Pause 1 Std · Soll 8 Std · Differenz ±0 Min" \
+  get_daily_report '{"day":"2026-06-15"}'
+mcp_step "Tagesbericht an einem Urlaubstag" "$MCP_TOKEN" '"kindText":"Urlaub"' \
+  get_daily_report '{"day":"2026-06-10"}'
+mcp_step "Wochenbericht" "$MCP_TOKEN" '"week":25' get_weekly_report '{"day":"2026-06-15"}'
+mcp_step "Monatsbericht" "$MCP_TOKEN" '"monthText":"Juni 2026"' get_monthly_report '{"month":"2026-06"}'
+
+mcp_error_step "Auch der Admin löscht keine fremde Buchung" "$ADMIN_MCP_TOKEN" "Buchung nicht gefunden" \
+  delete_time_entry "{\"id\":\"$MCP_GEHEN\"}"
+mcp_error_step "Auch der Admin ändert keine fremde Buchung" "$ADMIN_MCP_TOKEN" "Buchung nicht gefunden" \
+  change_time_entry "{\"id\":\"$MCP_GEHEN\",\"time\":\"11:00\"}"
+
+WT_COOKIES="$TEST_COOKIES"
+wt_step "'vitest' widerruft das Token" 204 "" DELETE "$TOK/$MCP_TOKEN_ID"
+WT_COOKIES=/dev/null
+WT_TOKEN="$MCP_TOKEN"
+wt_step "/api/mcp mit widerrufenem Token" 401 "Agent-Token" POST $MCP "$(rpc tools/list '{}')"
+WT_TOKEN=""
+# Abgelaufene Tokens: lassen sich über die API nicht erzeugen, die Prüfung testet isTokenExpired
+
+WT_COOKIES="$ADMIN_COOKIES"
+curl -s -o /dev/null -b "$TEST_COOKIES" -X POST "$WT_BASE/api/auth/logout"
+rm -f "$TEST_COOKIES"
+TEST_COOKIES=""
+ADMIN_COOKIES=""
+wt_step "Admin widerruft das MCP-Token" 204 "" DELETE "$TOK/$ADMIN_TOKEN_ID"
+ADMIN_TOKEN_ID=""
 
 # --- Unbekannte IDs (Netlify wiederholt eine 410 mit .html) ------------------
 for r in users projects time-entries vacations sick-leaves; do

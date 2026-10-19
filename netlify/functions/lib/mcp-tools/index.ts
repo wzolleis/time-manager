@@ -1,6 +1,11 @@
 // netlify/functions/lib/mcp-tools/index.ts
 import type {McpServer} from "@modelcontextprotocol/sdk/server/mcp.js";
 import type {SessionUser} from "../session";
+import {registerReportTools} from "./reports";
+import {registerTimeEntryTools} from "./time-entries";
 
 /** Meldet alle Tools am Server an. Jedes Tool arbeitet nur mit den Daten von user (Regel 3). */
-export function registerTools(_server: McpServer, _user: SessionUser): void {}
+export function registerTools(server: McpServer, user: SessionUser): void {
+    registerTimeEntryTools(server, user);
+    registerReportTools(server, user);
+}

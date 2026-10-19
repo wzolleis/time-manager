@@ -7,7 +7,7 @@
 #   wt_init "$@"
 #   wt_step "Titel" 201 "erwarteter Text" POST /api/x '{"a":1}'
 #
-# Stellt bereit: wt_init, wt_step, wt_call, wt_id, WT_BASE, WT_STATUS, WT_BODY
+# Stellt bereit: wt_init, wt_step, wt_call, wt_id, WT_BASE, WT_STATUS, WT_BODY, WT_TOKEN
 
 WT_MODE="step"          # step | until-fail | auto
 WT_STEPPING=1           # 1 = nach jedem Schritt pausieren
@@ -16,6 +16,7 @@ WT_STATUS=""; WT_BODY=""
 WT_CLEANUP="${WT_CLEANUP:-}"
 WT_AUTH_USER=""; WT_AUTH_PASSWORD=""
 WT_COOKIES=""           # Cookie-Datei mit der Session nach dem Login
+WT_TOKEN=""             # gesetzt: wt_call schickt es als Bearer-Token
 
 if [ -t 1 ]; then
   C_OK=$'\033[32m'; C_BAD=$'\033[31m'; C_DIM=$'\033[2m'; C_BOLD=$'\033[1m'; C_OFF=$'\033[0m'
@@ -124,6 +125,10 @@ wt_call() {
   local method="$1" path="$2" body="${3:-}" out
   local args=(-s -b "$WT_COOKIES" -X "$method" -w $'\n%{http_code}')
   if [ -n "$body" ]; then args+=(-H "Content-Type: application/json" -d "$body"); fi
+  # Agent-Token für /api/mcp; der MCP-Transport verlangt beide Formate im Accept-Header
+  if [ -n "$WT_TOKEN" ]; then
+    args+=(-H "Authorization: Bearer $WT_TOKEN" -H "Accept: application/json, text/event-stream")
+  fi
   if ! out=$(curl "${args[@]}" "$WT_BASE$path"); then
     WT_STATUS="000"
     WT_BODY="curl-Fehler (läuft der Server unter $WT_BASE?)"

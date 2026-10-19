@@ -1,0 +1,108 @@
+// netlify/functions/lib/mcp-tools/view.ts
+// Formate der Tool-Ergebnisse (features/boundaries/mcp-enable.md, „Formate“): Minuten statt Millisekunden,
+// Zeitpunkte als ISO mit Offset, Texte wie in der UI und Markdown-Tabellen. Ohne DB, damit testbar.
+import type {CallToolResult} from "@modelcontextprotocol/sdk/types.js";
+import {z} from "zod";
+import {formatDayShort, formatTime} from "../../../../shared/format";
+import {localTimeToUtc} from "../../../../shared/day-range";
+import {type Booking, localDay} from "../../../../shared/time-rules";
+import {hasDbCode} from "../db-errors";
+import {RuleError} from "../rule-error";
+import {NotFoundError, type StoredEntry} from "../time-entries-store";
+
+const TZ = "Europe/Berlin";
+
+/** Ganze Minuten wie in formatDuration und formatDifference: der Betrag wird abgerundet, das Vorzeichen bleibt */
+export const minutes = (ms: number): number => {
+    const m = Math.floor(Math.abs(ms) / 60_000);
+    return m === 0 ? 0 : Math.sign(ms) * m;
+};
+
+const isoFormat = new Intl.DateTimeFormat("sv-SE", {
+    timeZone: TZ,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+}); // ergibt "JJJJ-MM-TT HH:mm:ss"
+
+/** Zeitpunkt als ISO-8601 in Berliner Zeit mit Offset: "2026-10-19T08:00:00+02:00" */
+export function localIso(d: Date): string {
+    const local = isoFormat.format(d).replace(" ", "T");
+    const offset = Math.round((Date.parse(`${local}Z`) - Math.floor(d.getTime() / 1000) * 1000) / 60_000);
+    const abs = Math.abs(offset);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${local}${offset < 0 ? "-" : "+"}${pad(Math.floor(abs / 60))}:${pad(abs % 60)}`;
+}
+
+/** Tag ("JJJJ-MM-TT") kurz wie in der UI: "Mo., 19.10." */
+export const dayShort = (day: string): string => formatDayShort(localTimeToUtc(day, "12:00"));
+
+export const typeLabel = (type: Booking["type"]): string => (type === "kommen" ? "Kommen" : "Gehen");
+
+/** Markdown-Tabelle; ein "|" im Inhalt (z. B. im Projektnamen) wird maskiert */
+export function mdTable(head: string[], rows: string[][]): string {
+    const line = (cells: string[]) => `| ${cells.map((c) => c.replaceAll("|", "\\|")).join(" | ")} |`;
+    return [line(head), line(head.map(() => "---")), ...rows.map(line)].join("\n");
+}
+
+export const EntrySchema = z.object({
+    id: z.string(),
+    type: z.enum(["kommen", "gehen"]),
+    day: z.string().describe("Tag JJJJ-MM-TT, Berliner Zeit"),
+    time: z.string().describe("Uhrzeit HH:mm, Berliner Zeit"),
+    bookedAt: z.string().describe("Zeitpunkt ISO-8601 mit Offset"),
+    projectId: z.string().nullable(),
+    projectName: z.string().nullable(),
+});
+
+export type EntryView = z.infer<typeof EntrySchema>;
+
+export function entryView(e: StoredEntry, projectNames: Map<string, string>): EntryView {
+    return {
+        id: e.id,
+        type: e.type,
+        day: localDay(e.bookedAt),
+        time: formatTime(e.bookedAt),
+        bookedAt: localIso(e.bookedAt),
+        projectId: e.projectId,
+        projectName: e.projectId ? (projectNames.get(e.projectId) ?? null) : null,
+    };
+}
+
+/** Eine Buchung in einem Satz: "Kommen am Mo., 19.10. um 08:00 (Alpha)" */
+export const entryText = (e: EntryView): string =>
+    `${typeLabel(e.type)} am ${dayShort(e.day)} um ${e.time}${e.projectName ? ` (${e.projectName})` : ""}`;
+
+export const NOT_FOUND = "Buchung nicht gefunden";
+
+export const ok = (text: string, structured: Record<string, unknown>): CallToolResult => ({
+    content: [{type: "text", text}],
+    structuredContent: structured,
+});
+
+export const fail = (message: string): CallToolResult => ({content: [{type: "text", text: message}], isError: true});
+
+/**
+ * Ein Fehler als Ergebnis mit isError (Regel 4), damit der Agent die Meldung zeigen oder seinen Aufruf
+ * korrigieren kann. Unerwartete Fehler werden geloggt und nicht im Wortlaut weitergegeben.
+ */
+export function errorResult(err: unknown): CallToolResult {
+    if (err instanceof RuleError) return fail(err.message);
+    if (err instanceof NotFoundError) return fail(NOT_FOUND); // auch eine fremde Buchung (Regel 3)
+    if (hasDbCode(err, "ER_NO_REFERENCED_ROW_2")) return fail("Projekt existiert nicht");
+    console.error(err);
+    return fail("Interner Fehler");
+}
+
+/** Führt ein Tool aus und wandelt Fehler in ein Ergebnis mit isError */
+export async function run(fn: () => Promise<CallToolResult>): Promise<CallToolResult> {
+    try {
+        return await fn();
+    } catch (err) {
+        return errorResult(err);
+    }
+}

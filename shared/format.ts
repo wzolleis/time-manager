@@ -1,4 +1,6 @@
 // Texte für Zeiten, Tage und Dauern, wie UI und MCP-Server sie zeigen
+import type {DayKind} from "./target-hours";
+
 export const TZ = "Europe/Berlin";
 
 export const formatTime = (d: Date | string) =>
@@ -47,3 +49,17 @@ export const formatMonth = (month: string) => {
 /** Tag und Uhrzeit kurz: "19.10.2026, 08:00" */
 export const formatDateTime = (d: Date | string) =>
     new Date(d).toLocaleString("de-DE", {timeZone: TZ, dateStyle: "medium", timeStyle: "short"});
+
+/** Hinweis zum Soll: warum ein Tag kein Arbeitstag ist */
+export const dayKindLabel = (kind: DayKind, holidayName?: string): string | undefined =>
+    kind === "holiday"
+        ? `Feiertag: ${holidayName}`
+        : kind === "sick"
+          ? "krank"
+          : kind === "vacation"
+            ? "Urlaub"
+            : kind === "weekend"
+              ? "Wochenende"
+              : kind === "untracked"
+                ? "vor Beginn der Zeiterfassung"
+                : undefined;
