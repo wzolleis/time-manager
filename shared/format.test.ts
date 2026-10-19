@@ -1,4 +1,4 @@
-// src/lib/format.test.ts
+// shared/format.test.ts
 import {describe, expect, it} from "vitest";
 import {formatDifference, formatDuration, formatMonth} from "./format";
 

@@ -1,6 +1,6 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {toBooking, updateTimeEntry} from "@/api/time-entries";
-import {formatTime} from "@/lib/format";
+import {formatTime} from "@shared/format";
 import {useCurrentUser} from "@/lib/user-context";
 import {useSickLeaves} from "@/views/sick-leaves";
 import {useTimeEntries} from "@/views/time-entries";

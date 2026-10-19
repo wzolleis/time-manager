@@ -12,7 +12,7 @@ import {
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {formatTime} from "@/lib/format";
+import {formatTime} from "@shared/format";
 import {useProjects} from "@/views/projects";
 import {localDay} from "@shared/time-rules";
 import {useAddTimeEntry} from "@features/reports/use-cases/use-add-time-entry";

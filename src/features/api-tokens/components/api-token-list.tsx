@@ -1,6 +1,6 @@
 import {Button} from "@/components/ui/button";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
-import {formatDateTime} from "@/lib/format";
+import {formatDateTime} from "@shared/format";
 import {type ApiTokenScope, ApiTokenRevoke} from "@features/api-tokens/components/api-token-revoke";
 import type {ApiTokenRow} from "@features/api-tokens/use-cases/use-show-api-tokens";
 

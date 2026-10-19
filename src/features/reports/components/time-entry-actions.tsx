@@ -11,7 +11,7 @@ import {
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {formatTime} from "@/lib/format";
+import {formatTime} from "@shared/format";
 import {localDay} from "@shared/time-rules";
 import {useProjects} from "@/views/projects";
 import {TimeEntryDelete} from "@features/reports/components/time-entry-delete";

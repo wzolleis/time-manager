@@ -10,7 +10,7 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {Button, buttonVariants} from "@/components/ui/button";
-import {formatTime} from "@/lib/format";
+import {formatTime} from "@shared/format";
 import type {EntryRow} from "@features/reports/time-entry-row";
 import {useDeleteTimeEntry} from "@features/reports/use-cases/use-delete-time-entry";
 
