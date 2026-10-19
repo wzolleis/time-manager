@@ -227,8 +227,8 @@ Nach dem Skill `architecture` (`testing.md`): Functions haben keine Unit-Tests, 
 
 ## Einbinden in Claude
 
-Geprüft gegen die Doku von Anthropic im Oktober 2026. Vor der Doku in `README.md` noch einmal prüfen,
-die Connectors ändern sich häufig.
+Geprüft gegen die Doku von Anthropic im Oktober 2026, vor der Doku in `README.md` am 20.10.2026 noch
+einmal. Die Connectors ändern sich häufig.
 
 | Client                       | Mit dem Agent-Token                                                          |
 |------------------------------|------------------------------------------------------------------------------|
@@ -283,6 +283,9 @@ curl https://api.anthropic.com/v1/messages \
 - Nur Tools werden unterstützt, keine Resources und Prompts. Das passt zu dieser Version.
 - Das Token gehört einem User. Eine Anwendung für mehrere User braucht pro User dessen Token.
 - Der Connector ist Beta und nicht für Zero Data Retention zugelassen.
+- Neuer ist der Beta-Header `mcp-client-2026-09-15`. Er kann alles, was `mcp-client-2025-11-20` kann, und
+  hält zusätzlich die Tool-Liste des Servers im Gespräch fest (Block `mcp_tool_listing`). Beide
+  funktionieren mit `/api/mcp`.
 
 ### claude.ai und Claude Desktop
 
@@ -296,6 +299,11 @@ lässt sich dort nur unter „Request headers“ eintragen, mit „No sign-in“
   dann für alle Mitglieder, alle würden als derselbe User buchen. Das widerspricht „nur eigene Daten“.
   Hier hilft nur OAuth, bei dem sich jedes Mitglied selbst anmeldet.
 - Ohne Freischaltung für „Request headers“ geht es in claude.ai und Desktop gar nicht.
+- Claude schickt den Wert genau so, wie er eingetragen ist, ohne Schema davor. Der Wert muss also mit
+  `Bearer ` beginnen.
+- Request headers lassen sich nach dem Anlegen nicht ändern. Für ein neues Token (abgelaufen oder
+  widerrufen) den Connector entfernen und neu hinzufügen.
+- Im Free-Plan gibt es nur einen Custom Connector.
 - Die Aufrufe kommen wie bei der API von den Servern von Anthropic.
 
 ## Nicht Teil dieser Version
