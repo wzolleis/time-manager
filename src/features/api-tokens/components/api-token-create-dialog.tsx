@@ -58,9 +58,9 @@ export function ApiTokenCreateDialog() {
             <DialogTrigger asChild>
                 <Button>Token erzeugen</Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className={token ? "sm:max-w-xl" : undefined}>
                 {token ? (
-                    <div className="space-y-4">
+                    <div className="min-w-0 space-y-4">
                         <DialogHeader>
                             <DialogTitle>Token erzeugt</DialogTitle>
                             <DialogDescription>
@@ -80,7 +80,7 @@ export function ApiTokenCreateDialog() {
 
                         <div className="space-y-2 text-left">
                             <p className="text-sm font-medium">Einrichten in Claude Code</p>
-                            <pre className="overflow-x-auto rounded-md bg-muted p-3 text-xs">
+                            <pre className="rounded-md bg-muted p-3 font-mono text-xs break-all whitespace-pre-wrap">
                                 {claudeCommand(token)}
                             </pre>
                         </div>
