@@ -4,6 +4,7 @@ description: Der Wochenbericht zeigt an einem Krankheitstag in der Spalte „Tag
 type: change
 changes: weekly-report
 epics: report, krankmeldung
+state: resolved
 ---
 
 # Hinweis „krank“ im Wochenbericht

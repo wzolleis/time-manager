@@ -3,6 +3,7 @@ name: mcp-token
 description: Beschreibt die API-Tokens, mit denen sich ein Agent am MCP-Server (/api/mcp) als User ausweist. Der User erzeugt, sieht und widerruft seine Tokens auf der Seite „Agent-Zugang“ und wählt beim Erzeugen die Gültigkeit, ein Administrator sieht und widerruft die Tokens aller User auf der Seite „Agent-Zugänge“. Enthält Tabelle, Endpoints, UI, Prüfung mit withToken und die Schritte der Umsetzung.
 type: story
 epics: mcp, berechtigungen
+state: resolved
 ---
 
 # Agent-Tokens

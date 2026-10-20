@@ -3,6 +3,7 @@ name: yearly-report
 description: Beschreibt den Use Case Jahresbericht. Der User sieht Soll, Arbeitszeit und Differenz eines Jahres, aufgeteilt nach Monaten, mit Kennzahlen für das ganze Jahr. Das Jahr steht in der Adresse (/user/reports/yearly/2026).
 type: story
 epics: report
+state: resolved
 ---
 
 # Jahresbericht

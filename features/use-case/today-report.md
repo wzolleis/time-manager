@@ -3,6 +3,7 @@ name: today-report
 description: Beschreibt den Use Case Tagesbericht („Heute“). Der User stempelt dort, sieht Buchungen, Arbeitszeit, Pausen, Soll und Differenz eines Tages, standardmäßig des heutigen, und trägt Buchungen nach, ändert und löscht sie.
 type: story
 epics: report, zeiterfassung
+state: resolved
 ---
 
 # Tagesbericht

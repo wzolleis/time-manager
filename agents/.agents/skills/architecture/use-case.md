@@ -14,10 +14,10 @@ Ein Use Case ist eine Aufgabe, die ein Anwender mit der Software erledigt, formu
 Der Name beginnt mit einem Verb und nennt das Domain-Objekt: `useShowDailyReport`, `useAddVacation`,
 `useResetPassword`. Technische Wörter wie „fetch“, „post“ oder „mutation“ gehören nicht in den Namen.
 
-## Typ und Epic
+## Typ, Epic und Status
 
 Jeder Use Case ist in einer Markdown-Datei beschrieben, z. B. `features/use-case/today-report.md`.
-Im Frontmatter dieser Datei stehen optional sein Typ und seine Epics:
+Im Frontmatter dieser Datei stehen optional sein Typ und seine Epics, dazu immer sein Status:
 
 ```yaml
 ---
@@ -25,6 +25,7 @@ name: today-report-show-holiday
 type: change
 changes: today-report
 epics: report, feiertage
+state: open
 ---
 ```
 
@@ -42,6 +43,13 @@ epics: report, feiertage
 der Tagesbericht und der Wochenbericht zum Epic „report“ bei. Ein Use Case kann zu mehreren Epics
 beitragen. Ein Epic wird im Code nicht umgesetzt und ist kein Ordner. Es dient nur dazu, Use Cases zu
 finden, etwa „alle Use Cases, die etwas mit Reports machen“. Ein Epic kann mehrere Features betreffen.
+
+**Status.** Das Feld `state` steht direkt unter `epics` und gilt für jede Beschreibung, ob Story,
+Change oder Setup:
+
+- **open**: noch nicht umgesetzt.
+- **resolved**: umgesetzt. Wer eine Story oder einen Change umsetzt, setzt `state` im selben Commit auf
+  `resolved`.
 
 ## Bausteine
 

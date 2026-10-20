@@ -3,6 +3,7 @@ name: weekly-report
 description: Beschreibt den Use Case Wochenbericht. Der User sieht für eine Kalenderwoche (Montag bis Sonntag) je Tag Soll, Arbeitszeit, Pausen, Differenz und Zahl der Buchungen, dazu die Summen der Woche.
 type: story
 epics: report
+state: resolved
 ---
 
 # Wochenbericht

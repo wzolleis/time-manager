@@ -3,6 +3,7 @@ name: local-environment
 description: Beschreibt die lokale Umgebung mit eigener MariaDB-Datenbank in Docker (wie die Produktion, MariaDB 10.11). Die lokale Datenbank time_manager wird von npx netlify dev, den Skripten und den Migrationen verwendet, die Testdatenbank time_manager_test vom API-Walkthrough. Enthält Dateien, Variablen in .env.local, Befehle, Regeln zum Schutz der Produktion und die Schritte der Umsetzung.
 type: setup
 epics: entwicklung
+state: resolved
 ---
 
 # Lokale Umgebung

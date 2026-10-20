@@ -3,6 +3,7 @@ name: monthly-report
 description: Beschreibt den Use Case Monatsbericht. Der User sieht Soll, Arbeitszeit und Differenz eines Monats, aufgeteilt nach Kalenderwochen.
 type: story
 epics: report
+state: resolved
 ---
 
 # Monatsbericht

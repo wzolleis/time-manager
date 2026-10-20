@@ -3,6 +3,7 @@ name: sick-leave
 description: Beschreibt die Use Cases zur Krankmeldung. Der User trägt Krankheitstage ein, ändert und löscht sie und sieht sie auf der Seite „Krankmeldungen“. Krankheitstage haben Soll 0, Buchungen an Krankheitstagen bleiben gespeichert, zählen aber nicht.
 type: story
 epics: krankmeldung
+state: resolved
 ---
 
 # Krankmeldung

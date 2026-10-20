@@ -4,6 +4,7 @@ description: Die REST-API adressiert Daten eines Users über den Pfad /api/users
 type: change
 changes: today-report, monthly-report, time-stamp, sick-leave, holiday
 epics: api, berechtigungen
+state: open
 ---
 
 # Daten eines Users über den Pfad adressieren

@@ -3,6 +3,7 @@ name: mcp-enable
 description: Beschreibt den MCP-Server, mit dem ein Agent (z. B. Claude Code) die Anwendung bedient. Der Agent verbindet sich mit einem API-Token (mcp-token.md) mit /api/mcp und stempelt, trägt Buchungen nach, ändert und löscht sie und fragt Tages-, Wochen- und Monatsbericht ab. Enthält Tools, Formate der Ergebnisse, Regeln und die Schritte der Umsetzung.
 type: story
 epics: mcp
+state: resolved
 ---
 
 # MCP-Server
