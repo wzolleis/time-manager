@@ -1,8 +1,8 @@
 ---
 name: api-report-link
-description: Tag, Woche und Monat eines Berichts stehen im Pfad der Seite (/user/reports/daily/2026-10-21, /user/reports/weekly/2026-W43, /user/reports/monthly/2026-10). Im Wochenbericht führt jeder Tag per Link zum Tagesbericht, im Monatsbericht jede Kalenderwoche zum Wochenbericht.
+description: Tag, Woche und Monat eines Berichts stehen im Pfad der Seite (/user/reports/daily/2026-10-21, /user/reports/weekly/2026-W43, /user/reports/monthly/2026-10). Im Wochenbericht führt jeder Tag per Link zum Tagesbericht, im Monatsbericht jede Kalenderwoche zum Wochenbericht, im Jahresbericht jeder Monat zum Monatsbericht.
 type: change
-changes: today-report, weekly-report, monthly-report
+changes: today-report, weekly-report, monthly-report, yearly-report
 epics: report
 ---
 
@@ -16,6 +16,7 @@ den Bericht dieses Zeitraums:
 
 - Wochenbericht, Zeile „Mi 21.10.“ → Tagesbericht vom 21.10.2026
 - Monatsbericht, Zeile „KW 43/2026“ → Wochenbericht der KW 43/2026
+- Jahresbericht, Zeile „Oktober“ → Monatsbericht Oktober 2026
 
 Dazu bekommt jeder Bericht eine eigene Adresse, in der sein Zeitraum steht. Sie lässt sich auch als
 Lesezeichen speichern oder weitergeben, und der Zurück-Button des Browsers springt zum vorherigen
@@ -44,7 +45,10 @@ Report-Endpoint. Die MCP-Tools (`get_daily_report` usw.) bleiben unverändert.
 ## Verhalten
 
 1. **Links nach unten:** Im Wochenbericht ist der Tag in der Spalte „Tag“ ein Link auf den Tagesbericht.
-   Im Monatsbericht ist die Woche in der Spalte „Woche“ ein Link auf den Wochenbericht. Es sind echte
+   Im Monatsbericht ist die Woche in der Spalte „Woche“ ein Link auf den Wochenbericht. Im
+   Jahresbericht ist der Monat in der Spalte „Monat“ ein Link auf den Monatsbericht. Der Jahresbericht
+   (`../use-case/yearly-report.md`) hat seine Adresse `/user/reports/yearly/JJJJ` schon und bekommt
+   in diesem Change nur die Links. Es sind echte
    Links (`<Link>` von TanStack Router), damit Öffnen in neuem Tab funktioniert.
 2. **Blättern ändert die Adresse:** „Vorheriger/Nächster Tag“, „Vorherige/Nächste Woche“,
    „Vorheriger/Nächster Monat“, „Heute“/„Diese Woche“/„Dieser Monat“ und die Tagesauswahl im
@@ -86,7 +90,8 @@ Hinweise:
 
 Geändert wird nach dem Skill `architecture` (`../../agents/.agents/skills/architecture`), zuerst
 `../../agents/.agents/skills/architecture/use-case.md` lesen. Beschreibungen der betroffenen Use Cases:
-`../use-case/today-report.md`, `../use-case/weekly-report.md` und `../use-case/monthly-report.md`.
+`../use-case/today-report.md`, `../use-case/weekly-report.md`, `../use-case/monthly-report.md` und
+`../use-case/yearly-report.md`.
 
 ## Fertig, wenn
 
