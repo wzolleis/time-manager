@@ -23,7 +23,9 @@ const columns: DataTableColumnDef<DayRow>[] = [
             <span className={row.original.isToday ? "font-semibold" : undefined}>
                 {formatDayShort(localDayRange(row.original.day).start)}
                 {row.original.isToday && " · heute"}
-                {(row.original.kind === "vacation" || row.original.kind === "holiday") && (
+                {(row.original.kind === "vacation" ||
+                    row.original.kind === "holiday" ||
+                    row.original.kind === "sick") && (
                     <span className="ml-2 text-muted-foreground">
                         {dayKindLabel(row.original.kind, row.original.holidayName)}
                     </span>
@@ -79,12 +81,14 @@ export function ReportWeekly() {
     const rows: DayRow[] = totals.days.map((d) => ({...d, isToday: d.day === today}));
     const first = totals.days[0].day;
     const last = totals.days[totals.days.length - 1].day;
-    // Jeder Urlaubs- und Feiertag an einem Arbeitstag senkt das Wochensoll um ein Tagessoll
+    // Jeder Urlaubs-, Feier- und Krankheitstag an einem Arbeitstag senkt das Wochensoll um ein Tagessoll
     const vacationDays = rows.filter((r) => r.kind === "vacation").length;
     const holidayDays = rows.filter((r) => r.kind === "holiday").length;
+    const sickDays = rows.filter((r) => r.kind === "sick").length;
     const targetHint = [
         vacationDays > 0 && (vacationDays === 1 ? "1 Urlaubstag" : `${vacationDays} Urlaubstage`),
         holidayDays > 0 && (holidayDays === 1 ? "1 Feiertag" : `${holidayDays} Feiertage`),
+        sickDays > 0 && (sickDays === 1 ? "1 Krankheitstag" : `${sickDays} Krankheitstage`),
         partial && !futureWeek && `bis heute: ${formatDuration(totals.targetToDateMs)}`,
     ]
         .filter(Boolean)

@@ -49,8 +49,8 @@ Angezeigt werden die sieben Tage der Woche, Montag bis Sonntag (`weekDays`). Spa
 Hinweise in der Spalte „Tag“:
 
 - **heute:** der heutige Tag ist fett und trägt „· heute“.
-- **Urlaub / Feiertag:** „Urlaub“ bzw. „Feiertag: <Name>“ (`dayKindLabel`). Krankheitstage tragen
-  keinen Hinweis, man erkennt sie am Soll „–“.
+- **Urlaub / Feiertag / krank:** „Urlaub“, „Feiertag: <Name>“ bzw. „krank“ (`dayKindLabel`). Liegt ein
+  Feiertag in einer Krankmeldung, steht dort der Feiertag (Reihenfolge in `dayKind`).
 - **Gehen fehlt:** an einem vergangenen Tag fehlt zum letzten Kommen das Gehen (`missingGehen`).
 
 ### Kennzahlen oben
@@ -59,8 +59,9 @@ Vier Karten (Komponente `Summary` aus `../../src/components/summary.tsx`):
 
 - **Arbeitszeit:** Summe der Woche. Läuft gerade eine Arbeitszeit, der Hinweis „läuft noch“.
 - **Pausen:** Summe der Woche.
-- **Soll:** Soll der ganzen Woche (`targetWeekMs`). Hinweise, durch „·“ getrennt: Zahl der Urlaubstage
-  und Feiertage an Arbeitstagen, in der laufenden Woche „bis heute: …“ (`targetToDateMs`).
+- **Soll:** Soll der ganzen Woche (`targetWeekMs`). Hinweise, durch „·“ getrennt: Zahl der Urlaubs-,
+  Feier- und Krankheitstage an Arbeitstagen, z. B. „1 Urlaubstag · 1 Feiertag · 2 Krankheitstage“, in
+  der laufenden Woche dazu „bis heute: …“ (`targetToDateMs`).
 - **Differenz:** Arbeitszeit minus Soll bis heute. In der laufenden Woche der Hinweis „gegen das Soll
   bis heute“. Liegt die ganze Woche in der Zukunft, steht dort „–“.
 
@@ -71,8 +72,8 @@ Vier Karten (Komponente `Summary` aus `../../src/components/summary.tsx`):
    KW 53/2026 vom 28.12.2026 bis 03.01.2027.
 2. **Soll eines Tages** (`targetMs` in `../../shared/target-hours.ts`): 8 Stunden an Arbeitstagen, 0 am
    Wochenende, vor Beginn der Zeiterfassung, an Feiertagen, an Krankheitstagen und im Urlaub. Die
-   Reihenfolge steht in `dayKind`. Jeder Urlaubs- oder Feiertag an einem Arbeitstag senkt das Wochensoll
-   um ein Tagessoll.
+   Reihenfolge steht in `dayKind`. Jeder Urlaubs-, Feier- oder Krankheitstag an einem Arbeitstag senkt
+   das Wochensoll um ein Tagessoll.
 3. **Soll erst ab Beginn der Zeiterfassung.** Vor dem Tag der ersten Buchung (`firstBookingDay`) ist das
    Soll 0, damit Tage davor keine Minusstunden ergeben. Gilt für alle Berichte, siehe Regel 6 in
    `monthly-report.md`.
@@ -137,4 +138,5 @@ der Mittwoch noch offen ist), Differenz −4 Std („gegen das Soll bis heute“
 - `../../shared/week.test.ts`: `weekDays`, `isoWeek` (auch über den Jahreswechsel)
 - `../../shared/target-hours.test.ts`: `targetMs` und `dayKind`
 - **Routing:** `"/user/reports/weekly": "Wochenbericht"` in `../../src/tests/routes.test.tsx`
-- Kein eigener Komponenten-Test, die Komponente zeigt nur an.
+- `../../src/features/reports/components/report-weekly.test.tsx`: Hinweis „krank“ und Zahl der
+  Krankheitstage beim Soll, Feiertag in einer Krankmeldung zeigt den Feiertag
