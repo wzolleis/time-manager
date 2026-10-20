@@ -1,6 +1,8 @@
 ---
 name: time-stamp
 description: Beschreibt die Use Cases zur Zeiterfassung. Der User stempelt Kommen und Gehen, ordnet beim Kommen ein Projekt zu, trägt vergessene Buchungen nach, ändert und löscht sie. Enthält die Regeln für die Abfolge von Kommen und Gehen (Buchungspaar am selben Tag, keine zwei gleichen Buchungen hintereinander).
+type: story
+epics: zeiterfassung
 ---
 
 # Zeiterfassung

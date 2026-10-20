@@ -1,6 +1,8 @@
 ---
 name: holiday
 description: Beschreibt die Use Cases zu Feiertagen. Der Administrator pflegt die Feiertage für alle User, jeder User trägt zusätzlich eigene Feiertage ein, ändert und löscht sie. An einem Feiertag ist das Soll 0, im Urlaub verbraucht er keinen Urlaubstag.
+type: story
+epics: feiertage
 ---
 
 # Feiertage
