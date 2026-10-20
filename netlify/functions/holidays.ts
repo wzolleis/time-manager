@@ -9,7 +9,8 @@ import {holidays, users} from "../../db/schema";
 import {findHolidayClash, holidayClashMessage, type HolidayRange} from "../../shared/holiday-rules";
 import {HolidayCreateSchema, HolidayUpdateSchema} from "../../shared/holiday";
 import {IdSchema, isApiPath, notFound, pathParams} from "./lib/id";
-import {withSession} from "./lib/session";
+import {ensureAccess, forbidden, ForbiddenError, isAdmin} from "./lib/roles";
+import {type Session, withSession} from "./lib/session";
 import {RuleError, ruleViolation} from "./lib/rule-error";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -41,6 +42,12 @@ const checkClash = async (tx: Tx, candidate: HolidayRange) => {
     if (clash) throw new RuleError(holidayClashMessage(clash));
 };
 
+// Globale Feiertage (userId null) pflegt nur ein Administrator, eigene der User selbst
+const authorize = async (session: Session, ownerId: string | null, ex: Executor = db) => {
+    if (ownerId !== null) return ensureAccess(session.user.id, ownerId, ex);
+    if (!(await isAdmin(session.user.id, ex))) throw new ForbiddenError();
+};
+
 const readBody = async (req: Request): Promise<unknown> => {
     try {
         return await req.json();
@@ -49,7 +56,7 @@ const readBody = async (req: Request): Promise<unknown> => {
     }
 };
 
-const handler = async (req: Request, _context: Context) => {
+const handler = async (req: Request, _context: Context, session: Session) => {
     try {
         if (!isApiPath(req.url, "holidays")) return notFound();
         const url = new URL(req.url);
@@ -59,6 +66,7 @@ const handler = async (req: Request, _context: Context) => {
         if (rawId === undefined) {
             if (req.method === "GET") {
                 const q = ListQuerySchema.parse(Object.fromEntries(url.searchParams));
+                if (q.userId) await ensureAccess(session.user.id, q.userId);
                 const rows = await db
                     .select()
                     .from(holidays)
@@ -73,6 +81,7 @@ const handler = async (req: Request, _context: Context) => {
                 const input = HolidayCreateSchema.parse(await readBody(req));
                 const id = randomUUID();
                 await db.transaction(async (tx) => {
+                    await authorize(session, input.userId, tx);
                     if (input.userId) await lockUser(tx, input.userId);
                     await checkClash(tx, {id, ...input});
                     await tx.insert(holidays).values({id, ...input});
@@ -87,7 +96,9 @@ const handler = async (req: Request, _context: Context) => {
 
         if (req.method === "GET") {
             const row = await getHoliday(db, id);
-            return row ? Response.json(row) : notFound();
+            if (!row) return notFound();
+            if (row.userId) await ensureAccess(session.user.id, row.userId); // globale darf jeder lesen
+            return Response.json(row);
         }
 
         if (req.method === "PATCH") {
@@ -99,6 +110,7 @@ const handler = async (req: Request, _context: Context) => {
             await db.transaction(async (tx) => {
                 const current = await getHoliday(tx, id);
                 if (!current) throw new NotFoundError();
+                await authorize(session, current.userId, tx);
                 if (current.userId) await lockUser(tx, current.userId);
                 await checkClash(tx, {...current, ...patch});
                 await tx.update(holidays).set(patch).where(eq(holidays.id, id));
@@ -107,6 +119,9 @@ const handler = async (req: Request, _context: Context) => {
         }
 
         if (req.method === "DELETE") {
+            const row = await getHoliday(db, id);
+            if (!row) return notFound();
+            await authorize(session, row.userId);
             const [result] = await db.delete(holidays).where(eq(holidays.id, id));
             return result.affectedRows > 0 ? new Response(null, {status: 204}) : notFound();
         }
@@ -115,6 +130,7 @@ const handler = async (req: Request, _context: Context) => {
     } catch (err) {
         if (err instanceof z.ZodError) return Response.json({errors: err.issues}, {status: 400});
         if (err instanceof RuleError) return ruleViolation(err);
+        if (err instanceof ForbiddenError) return forbidden();
         if (err instanceof NotFoundError) return notFound();
         if (err instanceof UnknownUserError || hasDbCode(err, "ER_NO_REFERENCED_ROW_2")) {
             return Response.json({error: "User existiert nicht"}, {status: 400});
