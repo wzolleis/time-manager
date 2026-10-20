@@ -4,6 +4,7 @@ import {
     CalendarDays,
     CalendarHeart,
     CalendarRange,
+    CalendarSearch,
     KeyRound,
     LayoutDashboard,
     type LucideIcon,
@@ -24,6 +25,7 @@ export const navItemIds = [
     "reports-daily",
     "reports-weekly",
     "reports-monthly",
+    "reports-yearly",
     "admin",
     "user",
     "users",
@@ -71,5 +73,6 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     {id: "reports-daily", label: "Heute", icon: CalendarClock, to: "/user/reports/daily", children: []},
     {id: "reports-weekly", label: "Woche", icon: CalendarDays, to: "/user/reports/weekly", children: []},
     {id: "reports-monthly", label: "Monat", icon: CalendarRange, to: "/user/reports/monthly", children: []},
+    {id: "reports-yearly", label: "Jahr", icon: CalendarSearch, to: "/user/reports/yearly", children: []},
     {id: "api-tokens", label: "Agent-Zugang", icon: KeyRound, to: "/user/api-tokens", children: []},
 ] as const;

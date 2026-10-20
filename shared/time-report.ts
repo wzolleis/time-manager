@@ -3,7 +3,7 @@ import {type HolidayRange, holidayOn} from "./holiday-rules";
 import {withoutSickDays} from "./sick-leave-rules";
 import {dayKind, type DayKind, targetMs} from "./target-hours";
 import {type Booking, buildPeriods, firstBookingDay} from "./time-rules";
-import {monthWeeks} from "./week";
+import {monthWeeks, yearMonths} from "./week";
 
 export type DayTotals = {
     workMs: number;
@@ -181,5 +181,61 @@ export function monthTotals(
         targetToDateMs,
         diffMs: workMs - targetToDateMs,
         running: weeks.some((w) => w.running),
+    };
+}
+
+export type YearMonthTotals = {
+    month: string; // "JJJJ-MM"
+    targetMs: number;
+    workMs: number;
+    running: boolean;
+    diffMs: number | null; // null: ganzer Monat in der Zukunft, oder bis heute weder Soll noch Arbeit
+};
+
+export type YearTotals = {
+    months: YearMonthTotals[];
+    workMs: number;
+    targetYearMs: number; // ohne Urlaubs-, Krankheits- und Feiertage
+    targetToDateMs: number; // Soll der Tage bis heute
+    diffMs: number; // gegen das Soll bis heute
+    running: boolean;
+};
+
+/**
+ * Summen je Monat und für das Jahr ("JJJJ"). Jeder Monat zählt genau wie im Monatsbericht, das Jahr
+ * addiert nur. today ist der heutige Tag "JJJJ-MM-TT".
+ */
+export function yearTotals(
+    entries: Booking[],
+    year: string,
+    vacations: DayRange[],
+    holidays: Pick<HolidayRange, "date" | "name">[],
+    sickLeaves: DayRange[],
+    today: string,
+    now: Date,
+): YearTotals {
+    const parts = yearMonths(year).map((month) => {
+        const t = monthTotals(entries, month, vacations, holidays, sickLeaves, today, now);
+        const row: YearMonthTotals = {
+            month,
+            targetMs: t.targetMonthMs,
+            workMs: t.workMs,
+            running: t.running,
+            diffMs: `${month}-01` > today || (t.targetToDateMs === 0 && t.workMs === 0) ? null : t.diffMs,
+        };
+        return {row, targetToDateMs: t.targetToDateMs};
+    });
+
+    const months = parts.map((p) => p.row);
+    const workMs = months.reduce((sum, m) => sum + m.workMs, 0);
+    const targetToDateMs = parts.reduce((sum, p) => sum + p.targetToDateMs, 0);
+
+    return {
+        months,
+        workMs,
+        targetYearMs: months.reduce((sum, m) => sum + m.targetMs, 0),
+        targetToDateMs,
+        diffMs: workMs - targetToDateMs,
+        running: months.some((m) => m.running),
     };
 }

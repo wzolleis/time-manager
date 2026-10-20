@@ -46,6 +46,12 @@ export const formatMonth = (month: string) => {
     });
 };
 
+/** Nur der Name des Monats ("JJJJ-MM"): "Oktober" */
+export const formatMonthName = (month: string) => {
+    const [y, m] = month.split("-").map(Number);
+    return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString("de-DE", {timeZone: "UTC", month: "long"});
+};
+
 /** Tag und Uhrzeit kurz: "19.10.2026, 08:00" */
 export const formatDateTime = (d: Date | string) =>
     new Date(d).toLocaleString("de-DE", {timeZone: TZ, dateStyle: "medium", timeStyle: "short"});

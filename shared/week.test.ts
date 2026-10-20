@@ -1,6 +1,6 @@
 // shared/week.test.ts
 import {describe, expect, it} from "vitest";
-import {addMonths, isoWeek, isWeekend, monthWeeks, startOfWeek, weekDays} from "./week";
+import {addMonths, isoWeek, isValidYear, isWeekend, monthWeeks, startOfWeek, weekDays, yearMonths} from "./week";
 
 describe("startOfWeek", () => {
     it("liefert den Montag", () => {
@@ -53,6 +53,26 @@ describe("isWeekend", () => {
         expect(isWeekend("2026-10-03")).toBe(true); // Samstag
         expect(isWeekend("2026-10-04")).toBe(true); // Sonntag
         expect(isWeekend("2026-10-02")).toBe(false); // Freitag
+    });
+});
+
+describe("isValidYear", () => {
+    it("akzeptiert vierstellige Jahre ab 1970", () => {
+        expect(isValidYear("2026")).toBe(true);
+        expect(isValidYear("1970")).toBe(true);
+    });
+
+    it("lehnt alles andere ab", () => {
+        for (const year of ["26", "2026x", "0000", "1969", "20260", ""]) expect(isValidYear(year)).toBe(false);
+    });
+});
+
+describe("yearMonths", () => {
+    it("liefert Januar bis Dezember", () => {
+        const months = yearMonths("2026");
+        expect(months).toHaveLength(12);
+        expect(months[0]).toBe("2026-01");
+        expect(months[11]).toBe("2026-12");
     });
 });
 

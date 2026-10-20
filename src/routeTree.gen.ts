@@ -26,6 +26,8 @@ import { Route as UserReportsIndexRouteImport } from './routes/user/reports/inde
 import { Route as UserReportsDailyRouteImport } from './routes/user/reports/daily'
 import { Route as UserReportsMonthlyRouteImport } from './routes/user/reports/monthly'
 import { Route as UserReportsWeeklyRouteImport } from './routes/user/reports/weekly'
+import { Route as UserReportsYearlyIndexRouteImport } from './routes/user/reports/yearly/index'
+import { Route as UserReportsYearlyYearRouteImport } from './routes/user/reports/yearly/$year'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -112,6 +114,16 @@ const UserReportsWeeklyRoute = UserReportsWeeklyRouteImport.update({
   path: '/user/reports/weekly',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UserReportsYearlyIndexRoute = UserReportsYearlyIndexRouteImport.update({
+  id: '/user/reports/yearly/',
+  path: '/user/reports/yearly/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UserReportsYearlyYearRoute = UserReportsYearlyYearRouteImport.update({
+  id: '/user/reports/yearly/$year',
+  path: '/user/reports/yearly/$year',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -131,6 +143,8 @@ export interface FileRoutesByFullPath {
   '/user/reports/weekly': typeof UserReportsWeeklyRoute
   '/user/projects/': typeof UserProjectsIndexRoute
   '/user/reports/': typeof UserReportsIndexRoute
+  '/user/reports/yearly/$year': typeof UserReportsYearlyYearRoute
+  '/user/reports/yearly/': typeof UserReportsYearlyIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -150,6 +164,8 @@ export interface FileRoutesByTo {
   '/user/reports/weekly': typeof UserReportsWeeklyRoute
   '/user/projects': typeof UserProjectsIndexRoute
   '/user/reports': typeof UserReportsIndexRoute
+  '/user/reports/yearly/$year': typeof UserReportsYearlyYearRoute
+  '/user/reports/yearly': typeof UserReportsYearlyIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -170,6 +186,8 @@ export interface FileRoutesById {
   '/user/reports/weekly': typeof UserReportsWeeklyRoute
   '/user/projects/': typeof UserProjectsIndexRoute
   '/user/reports/': typeof UserReportsIndexRoute
+  '/user/reports/yearly/$year': typeof UserReportsYearlyYearRoute
+  '/user/reports/yearly/': typeof UserReportsYearlyIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -191,6 +209,8 @@ export interface FileRouteTypes {
     | '/user/reports/weekly'
     | '/user/projects/'
     | '/user/reports/'
+    | '/user/reports/yearly/$year'
+    | '/user/reports/yearly/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -210,6 +230,8 @@ export interface FileRouteTypes {
     | '/user/reports/weekly'
     | '/user/projects'
     | '/user/reports'
+    | '/user/reports/yearly/$year'
+    | '/user/reports/yearly'
   id:
     | '__root__'
     | '/'
@@ -229,6 +251,8 @@ export interface FileRouteTypes {
     | '/user/reports/weekly'
     | '/user/projects/'
     | '/user/reports/'
+    | '/user/reports/yearly/$year'
+    | '/user/reports/yearly/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -249,6 +273,8 @@ export interface RootRouteChildren {
   UserReportsWeeklyRoute: typeof UserReportsWeeklyRoute
   UserProjectsIndexRoute: typeof UserProjectsIndexRoute
   UserReportsIndexRoute: typeof UserReportsIndexRoute
+  UserReportsYearlyYearRoute: typeof UserReportsYearlyYearRoute
+  UserReportsYearlyIndexRoute: typeof UserReportsYearlyIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -372,6 +398,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UserReportsWeeklyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/user/reports/yearly/': {
+      id: '/user/reports/yearly/'
+      path: '/user/reports/yearly'
+      fullPath: '/user/reports/yearly/'
+      preLoaderRoute: typeof UserReportsYearlyIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/user/reports/yearly/$year': {
+      id: '/user/reports/yearly/$year'
+      path: '/user/reports/yearly/$year'
+      fullPath: '/user/reports/yearly/$year'
+      preLoaderRoute: typeof UserReportsYearlyYearRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -393,6 +433,8 @@ const rootRouteChildren: RootRouteChildren = {
   UserReportsWeeklyRoute: UserReportsWeeklyRoute,
   UserProjectsIndexRoute: UserProjectsIndexRoute,
   UserReportsIndexRoute: UserReportsIndexRoute,
+  UserReportsYearlyYearRoute: UserReportsYearlyYearRoute,
+  UserReportsYearlyIndexRoute: UserReportsYearlyIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -42,6 +42,13 @@ export function addMonths(month: string, delta: number): string {
     return new Date(Date.UTC(y, m - 1 + delta, 1)).toISOString().slice(0, 7);
 }
 
+/** Jahr als vierstelliger Text "JJJJ", ab 1970 */
+export const isValidYear = (year: string): boolean => /^\d{4}$/.test(year) && Number(year) >= 1970;
+
+/** Die Monate eines Jahres ("JJJJ") als "JJJJ-MM", Januar bis Dezember */
+export const yearMonths = (year: string): string[] =>
+    Array.from({length: 12}, (_, i) => `${year}-${String(i + 1).padStart(2, "0")}`);
+
 export type MonthWeek = {year: number; week: number; days: string[]};
 
 /** Die Kalenderwochen eines Monats ("JJJJ-MM"), jede nur mit ihren Tagen in diesem Monat */

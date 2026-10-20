@@ -1,6 +1,6 @@
 // shared/format.test.ts
 import {describe, expect, it} from "vitest";
-import {formatDifference, formatDuration, formatMonth} from "./format";
+import {formatDifference, formatDuration, formatMonth, formatMonthName} from "./format";
 
 const MIN = 60_000;
 
@@ -28,6 +28,13 @@ describe("formatDifference", () => {
         expect(formatDifference(0)).toBe("±0 Min");
         expect(formatDifference(30_000)).toBe("±0 Min");
         expect(formatDifference(-30_000)).toBe("±0 Min");
+    });
+});
+
+describe("formatMonthName", () => {
+    it("nennt nur den Monat", () => {
+        expect(formatMonthName("2026-10")).toBe("Oktober");
+        expect(formatMonthName("2027-01")).toBe("Januar");
     });
 });
 

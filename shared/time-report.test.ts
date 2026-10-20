@@ -1,8 +1,9 @@
 // shared/time-report.test.ts
 import {describe, expect, it} from "vitest";
 import {localDayRange} from "./day-range";
-import {dayDiffMs, dayTotals, monthTotals, weekTotals} from "./time-report";
+import {dayDiffMs, dayTotals, monthTotals, weekTotals, yearTotals} from "./time-report";
 import type {Booking} from "./time-rules";
+import {addDays} from "./day-range";
 import {weekDays} from "./week";
 
 const b = (id: string, type: Booking["type"], iso: string): Booking => ({
@@ -223,5 +224,44 @@ describe("Beginn der Zeiterfassung im Bericht", () => {
         const t = monthTotals([], "2026-10", [], [], [], "2026-11-15", afterOctober);
         expect(t.targetMonthMs).toBe(0);
         expect(t.weeks.every((w) => w.diffMs === null)).toBe(true);
+    });
+});
+
+describe("yearTotals", () => {
+    // Alle Tage eines Jahres, um gegen weekTotals über das ganze Jahr zu prüfen
+    const daysOf = (year: string) => {
+        const days: string[] = [];
+        for (let d = `${year}-01-01`; d.startsWith(year); d = addDays(d, 1)) days.push(d);
+        return days;
+    };
+    const afterYear = new Date("2027-02-01T12:00:00Z");
+
+    it("zählt jeden Tag des Jahres genau einmal, auch am Jahreswechsel", () => {
+        const t = yearTotals([...started, ...workday], "2026", [], [], [], "2027-02-01", afterYear);
+        const all = weekTotals([...started, ...workday], daysOf("2026"), [], [], [], "2027-02-01", afterYear);
+        expect(t.months).toHaveLength(12);
+        expect(t.targetYearMs).toBe(all.targetWeekMs);
+        expect(t.workMs).toBe(all.workMs);
+        expect(t.months[11].targetMs).toBe(
+            monthTotals(started, "2026-12", [], [], [], "2027-02-01", afterYear).targetMonthMs,
+        );
+    });
+
+    it("rechnet im laufenden Jahr nur gegen das Soll bis heute", () => {
+        const now = new Date("2026-10-14T18:00:00Z"); // Mittwoch
+        const t = yearTotals(started, "2026", [], [], [], "2026-10-14", now);
+        const toDate = weekTotals(started, daysOf("2026"), [], [], [], "2026-10-14", now).targetToDateMs;
+        expect(t.targetToDateMs).toBe(toDate);
+        expect(t.diffMs).toBe(t.workMs - toDate);
+        expect(t.months[9].diffMs).not.toBeNull(); // Oktober läuft
+        expect(t.months[10].diffMs).toBeNull(); // November liegt in der Zukunft
+        expect(t.months[11].diffMs).toBeNull();
+    });
+
+    it("hat vor dem Beginn der Zeiterfassung kein Soll", () => {
+        const fromMidOctober = [b("1", "kommen", "2026-10-14T06:00:00Z"), b("2", "gehen", "2026-10-14T14:00:00Z")];
+        const t = yearTotals(fromMidOctober, "2026", [], [], [], "2027-02-01", afterYear);
+        expect(t.months.slice(0, 9).every((m) => m.targetMs === 0 && m.diffMs === null)).toBe(true);
+        expect(t.months[9].targetMs).toBe(13 * 8 * HOUR); // 14.10. bis 31.10.
     });
 });
