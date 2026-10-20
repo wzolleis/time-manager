@@ -73,7 +73,7 @@ Die Beschreibung sagt dem Agent, wann er das Tool nimmt und welche Regel greifen
 | `list_time_entries`  | `from`, `to` (Tage)                              | Buchungen im Zeitraum mit Projektname                            | `useTimeEntries`     | readOnly             |
 | `add_time_entry`     | `type`, `day`, `time`, `projectId?`              | die angelegte Buchung                                            | `useAddTimeEntry`    |                      |
 | `change_time_entry`  | `id`, `time?`, `projectId?`                      | die geänderte Buchung                                            | `useChangeTimeEntry` |                      |
-| `delete_time_entry`  | `id`                                             | die ID der gelöschten Buchung                                    | `useDeleteTimeEntry` | destructive          |
+| `delete_time_entry`  | `id`, `pair?`                                    | die IDs der gelöschten Buchungen                                 | `useDeleteTimeEntry` | destructive          |
 | `get_daily_report`   | `day?` (Standard heute)                          | Buchungen, Arbeitszeit, Pausen, Soll, Differenz, Art des Tags    | `useShowDailyReport` | readOnly             |
 | `get_weekly_report`  | `day?` (Standard heute, Woche dieses Tags)       | KW, Zeilen pro Tag, Summen, Soll bis heute und Woche             | `useShowWeeklyReport`| readOnly             |
 | `get_monthly_report` | `month?` (`JJJJ-MM`, Standard aktueller Monat)   | Zeilen pro Kalenderwoche, Summen                                 | `useShowMonthlyReport`| readOnly            |
@@ -84,10 +84,12 @@ Bewusst anders als in der UI:
   Aufrufe aber manchmal, dann würde ein doppeltes `stamp` aus Kommen ein Gehen machen. Mit Typ scheitert
   die Wiederholung an Regel 2 der Zeiterfassung.
   Der Fehler ist an dieser Stelle gewollt: Der Agent meldet ihn und fragt den User.
-- **`delete_time_entry` löscht nur eine einzelne Buchung**, wie „Nur diese“ im Dialog. „Mit Gegenstück“
-  gibt es für den Agent nicht, damit er nie mehr löscht als die eine Buchung, die er nennt. Würde die
-  Abfolge danach nicht mehr stimmen, scheitert der Aufruf. Ein Paar löscht der Agent in zwei Aufrufen,
-  erst das Gehen, dann das Kommen; das sagt auch die Beschreibung des Tools.
+- **`delete_time_entry` löscht standardmäßig nur eine einzelne Buchung**, wie „Nur diese“ im Dialog.
+  Mit `pair: true` löscht es wie „Mit Gegenstück“ auch das Gegenstück, in einer Transaktion. Würde die
+  Abfolge danach nicht mehr stimmen, scheitert der Aufruf und nichts wird gelöscht. Früher gab es nur
+  die Einzelbuchung, und ein Paar sollte in zwei Aufrufen gelöscht werden, erst das Gehen, dann das
+  Kommen. Folgt nach dem Paar aber noch eine Buchung, scheitert jede Reihenfolge, weil schon nach dem
+  ersten Aufruf zwei gleiche Typen aufeinander folgen. Deshalb gibt es `pair`.
 
 ### Formate
 
@@ -210,6 +212,7 @@ Nach dem Skill `architecture` (`testing.md`): Functions haben keine Unit-Tests, 
   - `add_time_entry` Gehen mit Projekt → `isError` mit der Meldung aus `checkProject`
   - `delete_time_entry` mit der `id` einer Buchung eines anderen Users → nicht gefunden
   - `delete_time_entry` auf das Gehen eines Paares mit folgendem Kommen → `isError`, nichts gelöscht
+  - `delete_time_entry` mit `pair: true` auf das Kommen eines Paares mit folgendem Kommen → beide gelöscht
   - `get_daily_report` liefert dieselben Zahlen wie der Tagesbericht in der UI
 - Manuell mit dem MCP Inspector (`npx @modelcontextprotocol/inspector`) gegen `netlify dev`: alle Tools
   erscheinen, Beschreibungen und Schemas sind lesbar.
@@ -223,7 +226,8 @@ Nach dem Skill `architecture` (`testing.md`): Functions haben keine Unit-Tests, 
 | „Gestern habe ich vergessen auszustempeln, war 17:30.“ | `get_stamp_status` (fehlendes Gehen gestern) → `add_time_entry {type: "gehen", day: <gestern>, time: "17:30"}` |
 | „Wie viel habe ich diese Woche gearbeitet?“      | `get_weekly_report`                                                                 |
 | „Lösch das Kommen um 13:00, das war ein Versehen.“ (Kommen 08:00, Gehen 12:00, Kommen 13:00) | `get_daily_report` → `delete_time_entry {id: <Kommen 13:00>}`, gültig, übrig bleibt 08:00–12:00 |
-| „Lösch meine Buchungen von 13 bis 17 Uhr.“ (Kommen 08:00, Gehen 12:00, Kommen 13:00, Gehen 17:00) | `delete_time_entry {id: <Kommen 13:00>}` scheitert, weil dann zwei Gehen aufeinander folgen. Der Agent löscht erst Gehen 17:00, dann Kommen 13:00, beides gültig |
+| „Lösch meine Buchungen von 13 bis 17 Uhr.“ (Kommen 08:00, Gehen 12:00, Kommen 13:00, Gehen 17:00) | `delete_time_entry {id: <Kommen 13:00>, pair: true}`, gültig, übrig bleibt 08:00–12:00 |
+| „Lösch meine Buchungen von 8 bis 12 Uhr.“ (Kommen 08:00, Gehen 12:00, Kommen 13:00, Gehen 17:00) | `delete_time_entry {id: <Kommen 08:00>, pair: true}`, gültig. Einzeln ginge es in keiner Reihenfolge |
 
 ## Einbinden in Claude
 

@@ -486,7 +486,7 @@ WT_TOKEN=""
 mcp_step "stamp Kommen" "$MCP_TOKEN" '"type":"kommen"' stamp '{"type":"kommen"}'
 STAMP_ID=$(wt_id "$WT_BODY")
 mcp_error_step "stamp Kommen ein zweites Mal" "$MCP_TOKEN" 'fehlt vorher ein \"gehen\"' stamp '{"type":"kommen"}'
-mcp_step "Gestempeltes Kommen löschen" "$MCP_TOKEN" "\"deletedId\":\"$STAMP_ID\"" delete_time_entry "{\"id\":\"$STAMP_ID\"}"
+mcp_step "Gestempeltes Kommen löschen" "$MCP_TOKEN" "\"deletedIds\":[\"$STAMP_ID\"]" delete_time_entry "{\"id\":\"$STAMP_ID\"}"
 
 mcp_error_step "add_time_entry Gehen mit Projekt" "$MCP_TOKEN" 'Ein Projekt kann nur beim \"kommen\"' add_time_entry \
   "{\"type\":\"gehen\",\"day\":\"2026-06-15\",\"time\":\"12:00\",\"projectId\":\"$UNKNOWN_ID\"}"
@@ -495,6 +495,7 @@ mcp_error_step "add_time_entry mit ungültigem Tag" "$MCP_TOKEN" "JJJJ-MM-TT" ad
 
 mcp_step "Kommen 15.06. 08:00 nachtragen" "$MCP_TOKEN" '"bookedAt":"2026-06-15T08:00:00+02:00"' add_time_entry \
   '{"type":"kommen","day":"2026-06-15","time":"08:00"}'
+MCP_KOMMEN=$(wt_id "$WT_BODY")
 mcp_step "Gehen 12:00 nachtragen" "$MCP_TOKEN" '"type":"gehen"' add_time_entry \
   '{"type":"gehen","day":"2026-06-15","time":"12:00"}'
 MCP_GEHEN=$(wt_id "$WT_BODY")
@@ -519,6 +520,11 @@ mcp_error_step "Auch der Admin löscht keine fremde Buchung" "$ADMIN_MCP_TOKEN" 
   delete_time_entry "{\"id\":\"$MCP_GEHEN\"}"
 mcp_error_step "Auch der Admin ändert keine fremde Buchung" "$ADMIN_MCP_TOKEN" "Buchung nicht gefunden" \
   change_time_entry "{\"id\":\"$MCP_GEHEN\",\"time\":\"11:00\"}"
+
+mcp_step "Erstes Paar mit pair löschen, obwohl ein Kommen folgt" "$MCP_TOKEN" \
+  "\"deletedIds\":[\"$MCP_KOMMEN\",\"$MCP_GEHEN\"]" delete_time_entry "{\"id\":\"$MCP_KOMMEN\",\"pair\":true}"
+mcp_step "Übrig bleibt 13:00 bis 17:00" "$MCP_TOKEN" "Arbeit 4 Std · Pause 0 Min" \
+  get_daily_report '{"day":"2026-06-15"}'
 
 WT_COOKIES="$TEST_COOKIES"
 wt_step "'vitest' widerruft das Token" 204 "" DELETE "$TOK/$MCP_TOKEN_ID"

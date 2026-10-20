@@ -237,20 +237,29 @@ export function registerTimeEntryTools(server: McpServer, user: SessionUser): vo
         {
             title: "Buchung löschen",
             description:
-                "Löscht genau eine Buchung, nie ihr Gegenstück. Würde die Abfolge danach nicht mehr stimmen, " +
-                "scheitert der Aufruf und nichts wird gelöscht. Ein Paar löscht man in zwei Aufrufen: erst das " +
-                "Gehen, dann das Kommen.",
-            inputSchema: {id: z.uuid().describe("ID der Buchung")},
-            outputSchema: {deletedId: z.string()},
+                "Löscht eine Buchung, mit pair: true zusammen mit ihrem Gegenstück (zum Kommen das folgende " +
+                "Gehen, zum Gehen das Kommen davor). Würde die Abfolge danach nicht mehr stimmen, scheitert der " +
+                "Aufruf und nichts wird gelöscht. Ein ganzes Paar immer mit pair: true löschen: einzeln geht es " +
+                "nur, wenn danach keine Buchung mehr folgt.",
+            inputSchema: {
+                id: z.uuid().describe("ID der Buchung"),
+                pair: z.boolean().optional().describe("true: auch das Gegenstück löschen, Standard false"),
+            },
+            outputSchema: {deletedIds: z.array(z.string())},
             annotations: {destructiveHint: true},
         },
-        ({id}) =>
+        ({id, pair = false}) =>
             run(async () => {
                 const current = await getEntry(id);
                 if (!current || current.userId !== user.id) return fail(NOT_FOUND);
-                await deleteEntry(id, false, authorize);
-                const view = entryView(current, await loadProjectNames());
-                return ok(`Gelöscht: ${entryText(view)}.`, {deletedId: id});
+                // Vorher laden, damit der Text auch das Gegenstück nennen kann
+                const before = await listEntries(user.id);
+                const deletedIds = await deleteEntry(id, pair, authorize);
+                const names = await loadProjectNames();
+                const texts = before
+                    .filter((e) => deletedIds.includes(e.id))
+                    .map((e) => entryText(entryView(e, names)));
+                return ok(`Gelöscht: ${texts.join(", ")}.`, {deletedIds});
             }),
     );
 }
