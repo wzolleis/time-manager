@@ -13,7 +13,7 @@ Der User sieht für den laufenden oder einen beliebigen anderen Monat, wie viel 
 das zum Soll steht. Der Monatsbericht hat eine Zeile pro Kalenderwoche, so wie der Wochenbericht eine
 Zeile pro Tag hat.
 
-Vorbild ist der Wochenbericht. Eine eigene Beschreibung gibt es dafür nicht, nur den Code:
+Vorbild ist der Wochenbericht, beschrieben in `weekly-report.md`. Code:
 
 - Komponente `../../src/features/reports/components/report-weekly.tsx`
 - Use Case `../../src/features/reports/use-cases/use-show-weekly-report.ts`

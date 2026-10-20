@@ -2,7 +2,7 @@
 name: api-report-link
 description: Tag, Woche und Monat eines Berichts stehen im Pfad der Seite (/user/reports/daily/2026-10-21, /user/reports/weekly/2026-W43, /user/reports/monthly/2026-10). Im Wochenbericht führt jeder Tag per Link zum Tagesbericht, im Monatsbericht jede Kalenderwoche zum Wochenbericht.
 type: change
-changes: today-report, monthly-report
+changes: today-report, weekly-report, monthly-report
 epics: report
 ---
 
@@ -86,8 +86,7 @@ Hinweise:
 
 Geändert wird nach dem Skill `architecture` (`../../agents/.agents/skills/architecture`), zuerst
 `../../agents/.agents/skills/architecture/use-case.md` lesen. Beschreibungen der betroffenen Use Cases:
-`../use-case/today-report.md` und `../use-case/monthly-report.md`. Für den Wochenbericht gibt es noch
-keine Beschreibung, nur den Code (`report-weekly.tsx`, `use-show-weekly-report.ts`).
+`../use-case/today-report.md`, `../use-case/weekly-report.md` und `../use-case/monthly-report.md`.
 
 ## Fertig, wenn
 
@@ -99,6 +98,6 @@ keine Beschreibung, nur den Code (`report-weekly.tsx`, `use-show-weekly-report.t
   Wochenbericht dieser Woche; „Nächster Tag“ ändert die Adresse.
 - **Routing** in `../../src/tests/routes.test.tsx`: die neuen Adressen mit Zeitraum, z. B.
   `"/user/reports/daily/2026-10-21": "Heute"`, und die bestehenden ohne Zeitraum funktionieren weiter.
-- Die Beschreibungen `../use-case/today-report.md` und `../use-case/monthly-report.md` nennen die
-  neuen Adressen.
+- Die Beschreibungen `../use-case/today-report.md`, `../use-case/weekly-report.md` und
+  `../use-case/monthly-report.md` nennen die neuen Adressen.
 - Typprüfung und `npx vitest run` laufen durch.
