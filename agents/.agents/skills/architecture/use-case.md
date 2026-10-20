@@ -28,13 +28,15 @@ epics: report, feiertage
 ---
 ```
 
-**Typ.** Es gibt zwei Typen:
+**Typ.** Es gibt drei Typen:
 
 - **story**: eine neue Aufgabe des Anwenders. Ohne Angabe ist ein Use Case eine Story.
 - **change**: eine Änderung an einem bestehenden Use Case oder an seinem Code. Auch ein Change ist ein
   Use Case. Er wird als eigene Datei in `features/changes/` beschrieben, damit die Beschreibung des
   ursprünglichen Use Case nicht zu groß und unlesbar wird. Im Feld `changes` steht der `name` des
   Use Case, den er ändert.
+- **setup**: keine Aufgabe des Anwenders, sondern eine Voraussetzung für die Entwicklung oder den
+  Betrieb, z. B. die lokale Umgebung (`features/boundaries/local-environment.md`).
 
 **Epic.** Ein Epic ist ein größeres fachliches Ziel, zu dem mehrere Use Cases beitragen, z. B. tragen
 der Tagesbericht und der Wochenbericht zum Epic „report“ bei. Ein Use Case kann zu mehreren Epics
