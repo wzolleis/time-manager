@@ -2,7 +2,7 @@
 name: mcp-verwalte-feiertage
 description: Der MCP-Server bekommt Tools, mit denen der User über einen Agent die für ihn geltenden Feiertage liest und seine eigenen Feiertage hinzufügt, ändert und löscht.
 type: change
-changes: mcp-enable
+changes: mcp-enable, holiday
 epics: mcp, feiertage
 ---
 
@@ -47,7 +47,7 @@ Datumsangaben wie „8.8.2026“ selbst in JJJJ-MM-TT um.
 
 ## Code
 
-Für Feiertage gibt es noch keine Use-Case-Beschreibung. Bestehender Code:
+Feiertage und ihre Regeln beschreibt `../use-case/holiday.md`. Bestehender Code:
 
 - Schemas `HolidayCreateSchema` und `HolidayUpdateSchema` in `shared/holiday.ts`
 - Regeln in `shared/holiday-rules.ts`

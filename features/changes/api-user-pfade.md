@@ -2,7 +2,7 @@
 name: api-user-pfade
 description: Die REST-API adressiert Daten eines Users über den Pfad /api/users/:userId/… statt über ?userId= und userId im Body. Betrifft Buchungen, Urlaube, Krankmeldungen und eigene Feiertage; globale Feiertage bleiben unter /api/holidays und sind über endpoint_roles nur für Administratoren änderbar.
 type: change
-changes: today-report, monthly-report, time-stamp, sick-leave
+changes: today-report, monthly-report, time-stamp, sick-leave, holiday
 epics: api, berechtigungen
 ---
 
@@ -60,7 +60,8 @@ Künftig steht der User im Pfad, wie schon bei `/api/users/:id/roles`:
   `src/features/*/use-cases/` und die Komponenten-Tests mit gemockten Pfaden
 - `scripts/api-walkthrough.sh`, `eslint.config.js`
 - Dokumentation: Skills `architecture` (`SKILL.md`, `repository.md`, `views.md`) und `authorization`,
-  `features/boundaries/local-environment.md`, `features/use-case/sick-leave.md`
+  `features/boundaries/local-environment.md`, `features/use-case/sick-leave.md`,
+  `features/use-case/holiday.md` (Abschnitt „Schnittstelle“)
 
 ## Fertig, wenn
 
