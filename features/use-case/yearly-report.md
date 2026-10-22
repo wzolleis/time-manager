@@ -21,7 +21,7 @@ Vorbild ist der Monatsbericht, beschrieben in `monthly-report.md`. Code:
 - Use Case `../../src/features/reports/use-cases/use-show-monthly-report.ts`
 - Service `monthTotals` in `../../shared/time-report.ts`
 
-Die Adresse mit Zeitraum aus dem Change `../changes/api-report-link.md` gilt für den Jahresbericht von
+Die Adresse mit Zeitraum aus dem Change `../changes/report-links.md` gilt für den Jahresbericht von
 Anfang an: Das Jahr steht im Pfad, nicht im State der Komponente.
 
 Umgesetzt wird nach dem Skill `architecture` (`../../agents/.agents/skills/architecture`), zuerst
@@ -108,7 +108,7 @@ Drei Karten wie im Monatsbericht (Komponente `Summary` aus `../../src/components
 - Menü: neuer Eintrag „Jahr“ nach „Monat“ (`reports-yearly`, `/user/reports/yearly`).
 - Ein MCP-Tool `get_yearly_report` folgt als eigener Change.
 - Links von jedem Monat zum Monatsbericht (`/user/reports/monthly/2026-10`) kommen mit dem Change
-  `../changes/api-report-link.md`, weil der Monatsbericht erst dann eine Adresse mit Monat hat.
+  `../changes/report-links.md`, weil der Monatsbericht erst dann eine Adresse mit Monat hat.
 
 ## Fragen zum Use Case
 
@@ -144,7 +144,7 @@ Hinweise:
 - `yearTotals` liefert je Monat dieselben Felder wie eine Woche in `MonthTotals` (`targetMs`, `workMs`,
   `running`, `diffMs`) und für das Jahr `targetYearMs`, `targetToDateMs`, `workMs`, `diffMs`, `running`.
 - Die aktuelle Zeit kommt als Parameter in den Service (`today`, `now`), nicht über `new Date()`.
-- Keine zusätzliche Bibliothek für URL-State (z. B. nuqs), siehe `../changes/api-report-link.md`.
+- Keine zusätzliche Bibliothek für URL-State (z. B. nuqs), siehe `../changes/report-links.md`.
 - `../../src/routeTree.gen.ts` erzeugt das Router-Plugin, nicht von Hand ändern.
 
 ## Tests

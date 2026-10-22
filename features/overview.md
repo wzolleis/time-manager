@@ -10,8 +10,8 @@ Zuerst die offenen, dann die zurückgestellten, danach die erledigten, jeweils n
 
 | Name | Status | Typ |
 | --- | --- | --- |
-| [api-report-link](changes/api-report-link.md) | open | change |
 | [api-user-pfade](changes/api-user-pfade.md) | open | change |
+| [report-links](changes/report-links.md) | open | change |
 | [mcp-verwalte-feiertage](changes/mcp-verwalte-feiertage.md) | later | change |
 | [mcp-yearly-report](changes/mcp-yearly-report.md) | later | change |
 | [holiday](use-case/holiday.md) | resolved | story |
@@ -45,7 +45,7 @@ dann nach Name. Eine Beschreibung mit mehreren Epics steht bei jedem ihrer Epics
 |  | [mcp-yearly-report](changes/mcp-yearly-report.md) | change | later |
 |  | [mcp-enable](boundaries/mcp-enable.md) | story | resolved |
 |  | [mcp-token](boundaries/mcp-token.md) | story | resolved |
-| report | [api-report-link](changes/api-report-link.md) | change | open |
+| report | [report-links](changes/report-links.md) | change | open |
 |  | [mcp-yearly-report](changes/mcp-yearly-report.md) | change | later |
 |  | [monthly-report](use-case/monthly-report.md) | story | resolved |
 |  | [today-report](use-case/today-report.md) | story | resolved |

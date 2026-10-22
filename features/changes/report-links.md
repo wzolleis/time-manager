@@ -1,5 +1,5 @@
 ---
-name: api-report-link
+name: report-links
 description: Tag, Woche und Monat eines Berichts stehen im Pfad der Seite (/user/reports/daily/2026-10-21, /user/reports/weekly/2026-W43, /user/reports/monthly/2026-10). Im Wochenbericht führt jeder Tag per Link zum Tagesbericht, im Monatsbericht jede Kalenderwoche zum Wochenbericht, im Jahresbericht jeder Monat zum Monatsbericht.
 type: change
 changes: today-report, weekly-report, monthly-report, yearly-report

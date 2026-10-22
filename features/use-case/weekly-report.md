@@ -117,7 +117,7 @@ der Mittwoch noch offen ist), Differenz −4 Std („gegen das Soll bis heute“
   die Meldung mit „Erneut versuchen“ (`ReportError` aus
   `../../src/features/reports/components/report-error.tsx`).
 - Geplant: Adresse mit Woche (`/user/reports/weekly/2026-W43`) und Links von jedem Tag zum Tagesbericht,
-  siehe `../changes/api-report-link.md`.
+  siehe `../changes/report-links.md`.
 
 ## Fragen zum Use Case
 
