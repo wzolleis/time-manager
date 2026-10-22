@@ -68,10 +68,11 @@ const nameLink = (d: Description) => `[${d.name}](${d.link})`;
 
 const byState = [...descriptions].sort(byStateThenName).map((d) => [nameLink(d), d.state, d.type]);
 
+// Markdown kann keine Zellen verbinden: das Epic steht nur in der ersten Zeile seiner Gruppe
 const byEpic = descriptions
     .flatMap((d) => d.epics.map((epic) => ({epic, d})))
     .sort((a, b) => a.epic.localeCompare(b.epic) || byStateThenName(a.d, b.d))
-    .map(({epic, d}) => [epic, nameLink(d), d.type, d.state]);
+    .map(({epic, d}, i, rows) => [i > 0 && rows[i - 1].epic === epic ? "" : epic, nameLink(d), d.type, d.state]);
 
 const content = `# Übersicht: Use Cases und Changes
 
@@ -87,8 +88,8 @@ ${table(["Name", "Status", "Typ"], byState)}
 
 ## Nach Epic
 
-Nach Epic sortiert, innerhalb eines Epics die offenen zuerst. Eine Beschreibung mit mehreren Epics steht bei jedem
-ihrer Epics.
+Nach Epic sortiert, das Epic steht nur in der ersten Zeile seiner Gruppe. Innerhalb eines Epics die offenen zuerst,
+dann nach Name. Eine Beschreibung mit mehreren Epics steht bei jedem ihrer Epics.
 
 ${table(["Epic", "Name", "Typ", "Status"], byEpic)}
 `;
