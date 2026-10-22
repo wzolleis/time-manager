@@ -7,7 +7,7 @@ import {join, relative} from "node:path";
 const FEATURES = "features";
 const OUTPUT = join(FEATURES, "overview.md");
 const NO_EPIC = "(ohne Epic)";
-const STATE_ORDER = ["open", "resolved"];
+const STATE_ORDER = ["open", "later", "resolved"];
 
 type Description = {name: string; type: string; epics: string[]; state: string; link: string};
 
@@ -82,7 +82,7 @@ const content = `# Übersicht: Use Cases und Changes
 
 ## Nach Status
 
-Zuerst die offenen, danach die erledigten, jeweils nach Name sortiert.
+Zuerst die offenen, dann die zurückgestellten, danach die erledigten, jeweils nach Name sortiert.
 
 ${table(["Name", "Status", "Typ"], byState)}
 

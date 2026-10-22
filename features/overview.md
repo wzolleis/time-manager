@@ -6,14 +6,14 @@
 
 ## Nach Status
 
-Zuerst die offenen, danach die erledigten, jeweils nach Name sortiert.
+Zuerst die offenen, dann die zurückgestellten, danach die erledigten, jeweils nach Name sortiert.
 
 | Name | Status | Typ |
 | --- | --- | --- |
 | [api-report-link](changes/api-report-link.md) | open | change |
 | [api-user-pfade](changes/api-user-pfade.md) | open | change |
-| [mcp-verwalte-feiertage](changes/mcp-verwalte-feiertage.md) | open | change |
-| [mcp-yearly-report](changes/mcp-yearly-report.md) | open | change |
+| [mcp-verwalte-feiertage](changes/mcp-verwalte-feiertage.md) | later | change |
+| [mcp-yearly-report](changes/mcp-yearly-report.md) | later | change |
 | [holiday](use-case/holiday.md) | resolved | story |
 | [local-environment](boundaries/local-environment.md) | resolved | setup |
 | [mcp-enable](boundaries/mcp-enable.md) | resolved | story |
@@ -37,16 +37,16 @@ dann nach Name. Eine Beschreibung mit mehreren Epics steht bei jedem ihrer Epics
 | berechtigungen | [api-user-pfade](changes/api-user-pfade.md) | change | open |
 |  | [mcp-token](boundaries/mcp-token.md) | story | resolved |
 | entwicklung | [local-environment](boundaries/local-environment.md) | setup | resolved |
-| feiertage | [mcp-verwalte-feiertage](changes/mcp-verwalte-feiertage.md) | change | open |
+| feiertage | [mcp-verwalte-feiertage](changes/mcp-verwalte-feiertage.md) | change | later |
 |  | [holiday](use-case/holiday.md) | story | resolved |
 | krankmeldung | [sick-leave](use-case/sick-leave.md) | story | resolved |
 |  | [weekly-report-krank](changes/weekly-report-krank.md) | change | resolved |
-| mcp | [mcp-verwalte-feiertage](changes/mcp-verwalte-feiertage.md) | change | open |
-|  | [mcp-yearly-report](changes/mcp-yearly-report.md) | change | open |
+| mcp | [mcp-verwalte-feiertage](changes/mcp-verwalte-feiertage.md) | change | later |
+|  | [mcp-yearly-report](changes/mcp-yearly-report.md) | change | later |
 |  | [mcp-enable](boundaries/mcp-enable.md) | story | resolved |
 |  | [mcp-token](boundaries/mcp-token.md) | story | resolved |
 | report | [api-report-link](changes/api-report-link.md) | change | open |
-|  | [mcp-yearly-report](changes/mcp-yearly-report.md) | change | open |
+|  | [mcp-yearly-report](changes/mcp-yearly-report.md) | change | later |
 |  | [monthly-report](use-case/monthly-report.md) | story | resolved |
 |  | [today-report](use-case/today-report.md) | story | resolved |
 |  | [weekly-report](use-case/weekly-report.md) | story | resolved |

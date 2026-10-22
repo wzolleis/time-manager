@@ -4,7 +4,7 @@ description: Der MCP-Server bekommt Tools, mit denen der User über einen Agent 
 type: change
 changes: mcp-enable, holiday
 epics: mcp, feiertage
-state: open
+state: later
 ---
 
 # Feiertage über MCP verwalten

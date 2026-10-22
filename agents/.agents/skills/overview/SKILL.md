@@ -8,7 +8,8 @@ description: Erzeugt features/overview.md, die Übersicht über alle Use Cases, 
 Die Übersicht hilft dem Entwickler zu entscheiden, woran als nächstes gearbeitet wird. Sie zeigt alle
 Beschreibungen in `features/` in zwei Tabellen:
 
-- **Nach Status:** Name, Status, Typ. Zuerst die offenen, danach die erledigten, jeweils nach Name sortiert.
+- **Nach Status:** Name, Status, Typ. Zuerst die offenen, dann die zurückgestellten (`later`), danach die
+  erledigten, jeweils nach Name sortiert.
 - **Nach Epic:** Epic, Name, Typ, Status. Nach Epic sortiert, innerhalb eines Epics die offenen zuerst, dann nach
   Name. Das Epic steht nur in der ersten Zeile seiner Gruppe, in den folgenden Zeilen bleibt die Zelle leer. So
   wirkt die Spalte wie zusammengefasst, denn Markdown kann keine Zellen verbinden. Eine Beschreibung mit mehreren

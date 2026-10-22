@@ -48,6 +48,8 @@ finden, etwa „alle Use Cases, die etwas mit Reports machen“. Ein Epic kann m
 Change oder Setup:
 
 - **open**: noch nicht umgesetzt.
+- **later**: zurückgestellt, wird vorerst nicht umgesetzt. Soll daran gearbeitet werden, wird `state` wieder auf
+  `open` gesetzt.
 - **resolved**: umgesetzt. Wer eine Story oder einen Change umsetzt, setzt `state` im selben Commit auf
   `resolved`.
 

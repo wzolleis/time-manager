@@ -4,7 +4,7 @@ description: Der MCP-Server bekommt das Tool get_yearly_report. Es liefert den J
 type: change
 changes: mcp-enable, yearly-report
 epics: mcp, report
-state: open
+state: later
 ---
 
 # Jahresbericht über MCP
