@@ -1,14 +1,38 @@
-# Übersicht: Epics, Use Cases und Changes
+# Übersicht: Use Cases und Changes
 
-> **Nicht manuell bearbeiten.** Diese Datei wird von Claude aus dem Frontmatter der Beschreibungen in
-> `features/` erzeugt und aktualisiert (`name`, `type`, `epics`, `state`). Änderungen gehören in die
-> jeweilige Beschreibung; danach Claude bitten, die Übersicht neu zu erzeugen.
+> **Nicht manuell bearbeiten.** Diese Datei wird mit `node scripts/features-overview.ts` aus dem Frontmatter
+> der Beschreibungen in `features/` erzeugt (`name`, `type`, `epics`, `state`). Änderungen gehören in die
+> jeweilige Beschreibung; danach das Skript erneut ausführen.
 
-Sortiert nach Epic (A–Z), innerhalb eines Epics die offenen zuerst. Eine Beschreibung mit mehreren
-Epics steht bei jedem ihrer Epics.
+## Nach Status
 
-| Epic | Story | Type | State |
-|------|-------|------|-------|
+Zuerst die offenen, danach die erledigten, jeweils nach Name sortiert.
+
+| Name | Status | Typ |
+| --- | --- | --- |
+| [api-report-link](changes/api-report-link.md) | open | change |
+| [api-user-pfade](changes/api-user-pfade.md) | open | change |
+| [mcp-verwalte-feiertage](changes/mcp-verwalte-feiertage.md) | open | change |
+| [mcp-yearly-report](changes/mcp-yearly-report.md) | open | change |
+| [holiday](use-case/holiday.md) | resolved | story |
+| [local-environment](boundaries/local-environment.md) | resolved | setup |
+| [mcp-enable](boundaries/mcp-enable.md) | resolved | story |
+| [mcp-token](boundaries/mcp-token.md) | resolved | story |
+| [monthly-report](use-case/monthly-report.md) | resolved | story |
+| [sick-leave](use-case/sick-leave.md) | resolved | story |
+| [time-stamp](use-case/time-stamp.md) | resolved | story |
+| [today-report](use-case/today-report.md) | resolved | story |
+| [weekly-report](use-case/weekly-report.md) | resolved | story |
+| [weekly-report-krank](changes/weekly-report-krank.md) | resolved | change |
+| [yearly-report](use-case/yearly-report.md) | resolved | story |
+
+## Nach Epic
+
+Nach Epic sortiert, innerhalb eines Epics die offenen zuerst. Eine Beschreibung mit mehreren Epics steht bei jedem
+ihrer Epics.
+
+| Epic | Name | Typ | Status |
+| --- | --- | --- | --- |
 | api | [api-user-pfade](changes/api-user-pfade.md) | change | open |
 | berechtigungen | [api-user-pfade](changes/api-user-pfade.md) | change | open |
 | berechtigungen | [mcp-token](boundaries/mcp-token.md) | story | resolved |

@@ -12,6 +12,7 @@
     "db:down": "docker compose --env-file .env.local down",
     "db:reset": "docker compose --env-file .env.local down -v && npm run db:up",
     "db:seed": "node scripts/seed-local.ts",
+    "features:overview": "node scripts/features-overview.ts",
     "db:seed:test": "DB_NAME=time_manager_test node scripts/seed-local.ts",
     "dev": "vite",
     "dev:test": "DB_NAME=time_manager_test npx netlify dev --port 8889",
