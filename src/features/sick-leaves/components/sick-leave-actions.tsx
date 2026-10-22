@@ -41,7 +41,7 @@ export function SickLeaveActions({sickLeave}: {sickLeave: SickLeave}) {
                             <AlertDialogCancel>Abbrechen</AlertDialogCancel>
                             <AlertDialogAction
                                 className={buttonVariants({variant: "destructive"})}
-                                onClick={() => remove.remove(sickLeave.id)}
+                                onClick={() => remove.remove(sickLeave)}
                             >
                                 Löschen
                             </AlertDialogAction>

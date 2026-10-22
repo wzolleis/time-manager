@@ -20,7 +20,7 @@ export function useAddSickLeave() {
     const entries = useTimeEntries(currentUser?.id); // für den Hinweis auf Buchungen im Zeitraum
 
     const save = useMutation({
-        mutationFn: (data: Addition) => createSickLeave({userId: currentUser!.id, ...data}),
+        mutationFn: (data: Addition) => createSickLeave(currentUser!.id, data),
         onSuccess: () => qc.invalidateQueries({queryKey: ["sick-leaves"]}),
     });
 

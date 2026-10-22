@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # API-Walkthrough: Anmeldung, Rollen, Users, Projekte, Zeitbuchungen, Projektzuordnung, Urlaub, Krankmeldung,
-# Agent-Tokens, MCP-Server.
+# Feiertage, Rechte auf die Daten eines Users, Agent-Tokens, MCP-Server.
 # Läuft mit einem Wegwerf-User "vitest" und räumt hinterher auf.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -12,6 +12,7 @@ UNKNOWN_ID="00000000-0000-4000-8000-000000000000"
 USER_ID=""
 PROJECT_IDS=""
 ADMIN_TOKEN_ID=""
+GLOBAL_HOL=""
 ADMIN_COOKIES=""
 TEST_COOKIES=""
 # Feste IDs der Rollen, wie in shared/role.ts
@@ -31,27 +32,27 @@ purge_call() {
 # Löscht den Test-User mit allem, was auf ihn verweist. Gibt 1 zurück, sobald ein Aufruf scheitert.
 purge_user() {
   local uid="$1" ids id
-  purge_call GET "/api/time-entries?userId=$uid" || return 1
+  purge_call GET "/api/users/$uid/time-entries" || return 1
   # Von der letzten zur ersten Buchung, damit die Abfolge nach jedem Löschen gültig bleibt
   ids=$(printf '%s' "$WT_BODY" | grep -o '"id":"[^"]*"' | cut -d'"' -f4 \
         | awk '{a[NR]=$0} END{for(i=NR;i>=1;i--) print a[i]}')
-  for id in $ids; do purge_call DELETE "/api/time-entries/$id" || return 1; done
+  for id in $ids; do purge_call DELETE "/api/users/$uid/time-entries/$id" || return 1; done
 
-  purge_call GET "/api/vacations?userId=$uid" || return 1
+  purge_call GET "/api/users/$uid/vacations" || return 1
   for id in $(printf '%s' "$WT_BODY" | grep -o '"id":"[^"]*"' | cut -d'"' -f4); do
-    purge_call DELETE "/api/vacations/$id" || return 1
+    purge_call DELETE "/api/users/$uid/vacations/$id" || return 1
   done
 
-  purge_call GET "/api/sick-leaves?userId=$uid" || return 1
+  purge_call GET "/api/users/$uid/sick-leaves" || return 1
   for id in $(printf '%s' "$WT_BODY" | grep -o '"id":"[^"]*"' | cut -d'"' -f4); do
-    purge_call DELETE "/api/sick-leaves/$id" || return 1
+    purge_call DELETE "/api/users/$uid/sick-leaves/$id" || return 1
   done
 
   # Eigene Feiertage des Users (nicht die globalen): holidays.user_id hat kein onDelete cascade
-  purge_call GET "/api/holidays?userId=$uid" || return 1
+  purge_call GET "/api/users/$uid/holidays" || return 1
   for id in $(printf '%s' "$WT_BODY" | grep -o "{[^{}]*\"userId\":\"$uid\"[^{}]*}" \
               | grep -o '"id":"[^"]*"' | cut -d'"' -f4); do
-    purge_call DELETE "/api/holidays/$id" || return 1
+    purge_call DELETE "/api/users/$uid/holidays/$id" || return 1
   done
 
   purge_call DELETE "/api/users/$uid"
@@ -65,6 +66,7 @@ cleanup() {
   for pid in $PROJECT_IDS; do wt_call DELETE "/api/projects/$pid"; done
   # Die Tokens von 'vitest' verschwinden mit dem User, das des Admins nicht
   if [ -n "$ADMIN_TOKEN_ID" ]; then wt_call DELETE "/api/api-tokens/$ADMIN_TOKEN_ID"; fi
+  if [ -n "$GLOBAL_HOL" ]; then wt_call DELETE "/api/holidays/$GLOBAL_HOL"; fi
   if [ -n "$USER_ID" ]; then purge_user "$USER_ID" || echo "Der Test-User bleibt, der nächste Lauf räumt ihn auf."; fi
 }
 # shellcheck disable=SC2034
@@ -203,8 +205,8 @@ wt_step "Projektliste enthält das Projekt" 200 "$PNAME-neu" GET /api/projects
 
 # --- Zeitbuchungen (Sommerzeit: 08:00 Berlin = 06:00 UTC) -------------------
 
-ENTRY="/api/time-entries"
-booking() { printf '{"userId":"%s","type":"%s","bookedAt":"%s"}' "$USER_ID" "$1" "$2"; }
+ENTRY="/api/users/$USER_ID/time-entries"
+booking() { printf '{"type":"%s","bookedAt":"%s"}' "$1" "$2"; }
 
 wt_step "kommen 08:00 anlegen" 201 '"type":"kommen"' POST $ENTRY "$(booking kommen 2026-06-10T06:00:00Z)"
 KOMMEN1=$(wt_id "$WT_BODY")
@@ -221,10 +223,10 @@ KOMMEN2=$(wt_id "$WT_BODY")
 wt_step "gehen 17:00 anlegen" 201 '"type":"gehen"' POST $ENTRY "$(booking gehen 2026-06-10T15:00:00Z)"
 
 wt_step "Liste: vier Buchungen, Zeiten unverändert" 200 '"bookedAt":"2026-06-10T15:00:00.000Z"' \
-  GET "$ENTRY?userId=$USER_ID"
+  GET "$ENTRY"
 
 wt_step "Zeitraum-Filter (nur 12:00 und 12:30)" 200 '"bookedAt":"2026-06-10T10:30:00.000Z"' \
-  GET "$ENTRY?userId=$USER_ID&from=2026-06-10T10:00:00Z&to=2026-06-10T11:00:00Z"
+  GET "$ENTRY?from=2026-06-10T10:00:00Z&to=2026-06-10T11:00:00Z"
 
 wt_step "Korrektur: gehen auf 11:45 (innerhalb der Lücke)" 200 '"bookedAt":"2026-06-10T09:45:00.000Z"' \
   PATCH "$ENTRY/$GEHEN1" '{"bookedAt":"2026-06-10T09:45:00Z"}'
@@ -237,13 +239,12 @@ wt_step "Einzelnes mittleres kommen löschen wird abgelehnt" 422 "" DELETE "$ENT
 wt_step "Paar löschen mit ?pair=true" 204 "" DELETE "$ENTRY/$KOMMEN2?pair=true"
 
 wt_step "Liste: nur noch kommen und gehen" 200 '"bookedAt":"2026-06-10T09:45:00.000Z"' \
-  GET "$ENTRY?userId=$USER_ID"
+  GET "$ENTRY"
 
-wt_step "Unbekannter User wird abgelehnt" 400 "existiert nicht" POST $ENTRY \
-  "{\"userId\":\"$UNKNOWN_ID\",\"type\":\"kommen\",\"bookedAt\":\"2026-06-11T06:00:00Z\"}"
+wt_step "Unbekannter User wird abgelehnt" 400 "existiert nicht" POST "/api/users/$UNKNOWN_ID/time-entries" \
+  "$(booking kommen 2026-06-11T06:00:00Z)"
 
-wt_step "Ungültige Zeit wird abgelehnt" 400 "" POST $ENTRY \
-  "{\"userId\":\"$USER_ID\",\"type\":\"kommen\",\"bookedAt\":\"kein-datum\"}"
+wt_step "Ungültige Zeit wird abgelehnt" 400 "" POST $ENTRY "$(booking kommen kein-datum)"
 
 # --- Projektzuordnung ------------------------------------------------------
 
@@ -268,8 +269,8 @@ wt_step "Buchung bleibt bestehen, ohne Projekt" 200 '"projectId":null' GET "$ENT
 
 # --- Urlaub ----------------------------------------------------------------
 
-VAC="/api/vacations"
-vacation() { printf '{"userId":"%s","startDate":"%s","endDate":"%s"}' "$USER_ID" "$1" "$2"; }
+VAC="/api/users/$USER_ID/vacations"
+vacation() { printf '{"startDate":"%s","endDate":"%s"}' "$1" "$2"; }
 
 wt_step "Urlaub 08.06. bis 12.06. anlegen" 201 '"startDate":"2026-06-08"' POST $VAC \
   "$(vacation 2026-06-08 2026-06-12)"
@@ -291,10 +292,10 @@ wt_step "Ende vor Beginn wird abgelehnt" 400 "vor dem Beginn" POST $VAC \
 wt_step "Ungültiges Datum wird abgelehnt" 400 "" POST $VAC \
   "$(vacation 2026-02-30 2026-03-02)"
 
-wt_step "Unbekannter User wird abgelehnt" 400 "existiert nicht" POST $VAC \
-  "{\"userId\":\"$UNKNOWN_ID\",\"startDate\":\"2026-08-03\",\"endDate\":\"2026-08-07\"}"
+wt_step "Unbekannter User wird abgelehnt" 400 "existiert nicht" POST "/api/users/$UNKNOWN_ID/vacations" \
+  "$(vacation 2026-08-03 2026-08-07)"
 
-wt_step "Liste enthält beide Urlaube" 200 '"startDate":"2026-06-13"' GET "$VAC?userId=$USER_ID"
+wt_step "Liste enthält beide Urlaube" 200 '"startDate":"2026-06-13"' GET "$VAC"
 
 wt_step "Ende des ersten Urlaubs auf 11.06. ändern" 200 '"endDate":"2026-06-11"' \
   PATCH "$VAC/$VAC1" '{"endDate":"2026-06-11"}'
@@ -319,8 +320,8 @@ wt_step "Gelöschter Urlaub ist weg" 410 "Nicht gefunden" GET "$VAC/$VAC2"
 
 # --- Krankmeldung ---------------------------------------------------------
 
-SICK="/api/sick-leaves"
-sick() { printf '{"userId":"%s","startDate":"%s","endDate":"%s"}' "$USER_ID" "$1" "$2"; }
+SICK="/api/users/$USER_ID/sick-leaves"
+sick() { printf '{"startDate":"%s","endDate":"%s"}' "$1" "$2"; }
 
 wt_step "Krankmeldung im Urlaub ist erlaubt (10.06. bis 11.06.)" 201 '"startDate":"2026-06-10"' POST $SICK \
   "$(sick 2026-06-10 2026-06-11)"
@@ -336,7 +337,7 @@ wt_step "Notiz ändern" 200 '"note":"Attest liegt vor"' PATCH "$SICK/$SICK1" '{"
 wt_step "Verlängern ohne Vergleich mit sich selbst" 200 '"endDate":"2026-06-12"' \
   PATCH "$SICK/$SICK1" '{"endDate":"2026-06-12"}'
 
-wt_step "Liste enthält die Krankmeldung" 200 '"note":"Attest liegt vor"' GET "$SICK?userId=$USER_ID"
+wt_step "Liste enthält die Krankmeldung" 200 '"note":"Attest liegt vor"' GET "$SICK"
 
 wt_step "Krankmeldung löschen" 204 "" DELETE "$SICK/$SICK1"
 
@@ -346,6 +347,20 @@ wt_step "Gelöschte Krankmeldung ist weg" 410 "Nicht gefunden" GET "$SICK/$SICK1
 
 wt_call GET /api/auth/me
 ADMIN_ID=$(wt_id "$WT_BODY")
+ADMIN_VAC="/api/users/$ADMIN_ID/vacations"
+ADMIN_SICK="/api/users/$ADMIN_ID/sick-leaves"
+ADMIN_ENTRY="/api/users/$ADMIN_ID/time-entries"
+HOL="/api/users/$USER_ID/holidays"
+
+# Ein Datensatz eines anderen Users unter dem eigenen Pfad: "nicht gefunden", nicht 403
+wt_step "Urlaub von 'vitest' unter dem Pfad des Admins ist nicht gefunden" 410 "Nicht gefunden" \
+  GET "$ADMIN_VAC/$VAC1"
+wt_step "Buchung von 'vitest' unter dem Pfad des Admins ist nicht gefunden" 410 "Nicht gefunden" \
+  PATCH "$ADMIN_ENTRY/$KOMMEN1" '{"bookedAt":"2026-06-10T06:10:00Z"}'
+
+wt_step "Admin legt einen globalen Feiertag an" 201 '"userId":null' POST /api/holidays \
+  '{"date":"2026-06-24","name":"vitest global"}'
+GLOBAL_HOL=$(wt_id "$WT_BODY")
 
 # Mit einer eigenen Session als 'vitest' (ohne Administrator-Rolle)
 ADMIN_COOKIES="$WT_COOKIES"
@@ -354,29 +369,56 @@ curl -s -o /dev/null -c "$TEST_COOKIES" -H "Content-Type: application/json" \
   -d "{\"email\":\"$TEST_EMAIL\",\"password\":\"vitest-neu-12345\"}" "$WT_BASE/api/auth/login"
 WT_COOKIES="$TEST_COOKIES"
 
-wt_step "'vitest' sieht die eigenen Urlaube" 200 '"startDate":"2026-06-13"' GET "$VAC?userId=$USER_ID"
-wt_step "'vitest' sieht ohne userId die eigenen Urlaube" 200 '"startDate":"2026-06-13"' GET "$VAC"
+wt_step "'vitest' sieht die eigenen Urlaube" 200 '"startDate":"2026-06-13"' GET "$VAC"
 wt_step "'vitest' sieht einen eigenen Urlaub" 200 '"startDate":"2026-06-09"' GET "$VAC/$VAC1"
-wt_step "'vitest' sieht keine fremden Urlaube" 403 "notwendigen Rechte" GET "$VAC?userId=$ADMIN_ID"
-wt_step "'vitest' trägt keinen Urlaub für andere ein" 403 "notwendigen Rechte" POST $VAC \
-  "{\"userId\":\"$ADMIN_ID\",\"startDate\":\"2026-08-03\",\"endDate\":\"2026-08-07\"}"
+wt_step "'vitest' sieht keine fremden Urlaube" 403 "notwendigen Rechte" GET "$ADMIN_VAC"
+wt_step "'vitest' trägt keinen Urlaub für andere ein" 403 "notwendigen Rechte" POST "$ADMIN_VAC" \
+  "$(vacation 2026-08-03 2026-08-07)"
+wt_step "'vitest' ändert keinen Urlaub unter fremdem Pfad" 403 "notwendigen Rechte" \
+  PATCH "$ADMIN_VAC/$VAC1" '{"endDate":"2026-06-11"}'
 
 wt_step "'vitest' trägt eine eigene Krankmeldung ein" 201 '"startDate":"2026-07-01"' POST $SICK \
   "$(sick 2026-07-01 2026-07-02)"
 SICK2=$(wt_id "$WT_BODY")
-wt_step "'vitest' sieht keine fremden Krankmeldungen" 403 "notwendigen Rechte" GET "$SICK?userId=$ADMIN_ID"
-wt_step "'vitest' trägt keine Krankmeldung für andere ein" 403 "notwendigen Rechte" POST $SICK \
-  "{\"userId\":\"$ADMIN_ID\",\"startDate\":\"2026-08-03\",\"endDate\":\"2026-08-07\"}"
+wt_step "'vitest' sieht keine fremden Krankmeldungen" 403 "notwendigen Rechte" GET "$ADMIN_SICK"
+wt_step "'vitest' trägt keine Krankmeldung für andere ein" 403 "notwendigen Rechte" POST "$ADMIN_SICK" \
+  "$(sick 2026-08-03 2026-08-07)"
+wt_step "'vitest' löscht keine Krankmeldung unter fremdem Pfad" 403 "notwendigen Rechte" \
+  DELETE "$ADMIN_SICK/$SICK2"
 wt_step "'vitest' löscht die eigene Krankmeldung" 204 "" DELETE "$SICK/$SICK2"
 
-wt_step "'vitest' sieht die eigenen Buchungen" 200 "\"id\":\"$KOMMEN1\"" GET "$ENTRY?userId=$USER_ID"
+wt_step "'vitest' sieht die eigenen Buchungen" 200 "\"id\":\"$KOMMEN1\"" GET "$ENTRY"
 wt_step "'vitest' sieht eine eigene Buchung" 200 "\"id\":\"$KOMMEN1\"" GET "$ENTRY/$KOMMEN1"
-wt_step "'vitest' sieht keine fremden Buchungen" 403 "notwendigen Rechte" GET "$ENTRY?userId=$ADMIN_ID"
-wt_step "'vitest' bucht nicht für andere" 403 "notwendigen Rechte" POST $ENTRY \
-  "{\"userId\":\"$ADMIN_ID\",\"type\":\"kommen\",\"bookedAt\":\"2026-06-11T06:00:00Z\"}"
+wt_step "'vitest' sieht keine fremden Buchungen" 403 "notwendigen Rechte" GET "$ADMIN_ENTRY"
+wt_step "'vitest' bucht nicht für andere" 403 "notwendigen Rechte" POST "$ADMIN_ENTRY" \
+  "$(booking kommen 2026-06-11T06:00:00Z)"
+
+# Feiertage: globale nur lesen, eigene pflegen
+wt_step "'vitest' trägt einen eigenen Feiertag ein" 201 "\"userId\":\"$USER_ID\"" POST "$HOL" \
+  '{"date":"2026-06-25","name":"vitest eigener"}'
+OWN_HOL=$(wt_id "$WT_BODY")
+wt_step "'vitest' sieht globale und eigene Feiertage" 200 "\"id\":\"$GLOBAL_HOL\"" GET "$HOL"
+if [[ "$WT_BODY" != *"$OWN_HOL"* ]]; then echo "${C_BAD}Der eigene Feiertag fehlt in der Liste!${C_OFF}"; WT_FAIL=$((WT_FAIL + 1)); fi
+wt_step "'vitest' ändert den eigenen Feiertag" 200 '"name":"vitest geändert"' PATCH "$HOL/$OWN_HOL" \
+  '{"name":"vitest geändert"}'
+wt_step "Der eigene Feiertag ist unter /api/holidays nicht gefunden" 410 "Nicht gefunden" GET "/api/holidays/$OWN_HOL"
+wt_step "Der globale Feiertag ist unter dem eigenen Pfad nicht gefunden" 410 "Nicht gefunden" \
+  PATCH "$HOL/$GLOBAL_HOL" '{"name":"umbenannt"}'
+wt_step "'vitest' darf globale Feiertage lesen" 200 "\"id\":\"$GLOBAL_HOL\"" GET /api/holidays
+wt_step "'vitest' legt keinen globalen Feiertag an" 403 "notwendigen Rechte" POST /api/holidays \
+  '{"date":"2026-06-26","name":"vitest global 2"}'
+wt_step "'vitest' ändert keinen globalen Feiertag" 403 "notwendigen Rechte" PATCH "/api/holidays/$GLOBAL_HOL" \
+  '{"name":"umbenannt"}'
+wt_step "'vitest' löscht keinen globalen Feiertag" 403 "notwendigen Rechte" DELETE "/api/holidays/$GLOBAL_HOL"
+wt_step "'vitest' sieht keine fremden Feiertage" 403 "notwendigen Rechte" GET "/api/users/$ADMIN_ID/holidays"
+wt_step "'vitest' löscht den eigenen Feiertag" 204 "" DELETE "$HOL/$OWN_HOL"
 
 WT_COOKIES="$ADMIN_COOKIES"
-wt_step "Der Administrator sieht die Urlaube von 'vitest'" 200 '"startDate":"2026-06-13"' GET "$VAC?userId=$USER_ID"
+wt_step "Der Administrator sieht die Urlaube von 'vitest'" 200 '"startDate":"2026-06-13"' GET "$VAC"
+wt_step "Der Administrator trägt einen Feiertag für 'vitest' ein" 201 "\"userId\":\"$USER_ID\"" POST "$HOL" \
+  '{"date":"2026-06-26","name":"vitest vom Admin"}'
+wt_step "Der Administrator löscht den globalen Feiertag" 204 "" DELETE "/api/holidays/$GLOBAL_HOL"
+GLOBAL_HOL=""
 
 curl -s -o /dev/null -b "$TEST_COOKIES" -X POST "$WT_BASE/api/auth/logout"
 rm -f "$TEST_COOKIES"
@@ -543,7 +585,8 @@ wt_step "Admin widerruft das MCP-Token" 204 "" DELETE "$TOK/$ADMIN_TOKEN_ID"
 ADMIN_TOKEN_ID=""
 
 # --- Unbekannte IDs (Netlify wiederholt eine 410 mit .html) ------------------
-for r in users projects time-entries vacations sick-leaves; do
+for r in users projects holidays users/$USER_ID/time-entries users/$USER_ID/vacations users/$USER_ID/sick-leaves \
+         users/$USER_ID/holidays; do
   wt_step "Unbekannte ID liefert 410 ($r)" 410 "Nicht gefunden" GET "/api/$r/$UNKNOWN_ID"
 done
 

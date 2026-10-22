@@ -3,12 +3,14 @@ import {createHoliday} from "@/api/holidays";
 import {checkHoliday} from "@shared/holiday-rules";
 import type {HolidayCreate} from "@shared/holiday";
 
+type Addition = HolidayCreate & {userId: string | null};
+
 /** Ein Feiertag wird eingetragen: mit userId null für alle, sonst nur für diesen User */
 export function useAddHoliday() {
     const qc = useQueryClient();
 
     const save = useMutation({
-        mutationFn: (data: HolidayCreate) => createHoliday(data),
+        mutationFn: ({userId, ...data}: Addition) => createHoliday(userId, data),
         onSuccess: () => qc.invalidateQueries({queryKey: ["holidays"]}),
     });
 

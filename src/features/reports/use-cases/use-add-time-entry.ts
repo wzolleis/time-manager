@@ -23,8 +23,7 @@ export function useAddTimeEntry() {
 
     const save = useMutation({
         mutationFn: ({type, day, time, projectId}: Addition) =>
-            createTimeEntry({
-                userId: currentUser!.id,
+            createTimeEntry(currentUser!.id, {
                 type,
                 bookedAt: localTimeToUtc(day, time),
                 projectId: type === "kommen" ? (projectId ?? undefined) : undefined,

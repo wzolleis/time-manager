@@ -16,7 +16,7 @@ export function useChangeHoliday() {
             if (date !== holiday.date) patch.date = date;
             if (name.trim() !== holiday.name) patch.name = name;
             if (Object.keys(patch).length === 0) return;
-            await updateHoliday(holiday.id, patch);
+            await updateHoliday(holiday.userId, holiday.id, patch);
         },
         onSuccess: () => qc.invalidateQueries({queryKey: ["holidays"]}),
     });

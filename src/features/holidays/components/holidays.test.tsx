@@ -17,16 +17,15 @@ const USER = {
 const GLOBAL = {id: "g", userId: null, date: "2026-10-03", name: "Tag der Deutschen Einheit"};
 const OWN = {id: "o", userId: USER.id, date: "2026-11-01", name: "Allerheiligen"};
 
-// Der Server liefert ohne userId nur die globalen, mit userId auch die eigenen
+// Der Server liefert unter /api/holidays nur die globalen, unter /api/users/:userId/holidays auch die eigenen
 function mockApi() {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
         const raw = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
         const url = new URL(raw, "http://localhost");
         if (url.pathname === "/api/auth/me") return Response.json(USER);
         if (url.pathname === "/api/users") return Response.json([USER]);
-        if (url.pathname === "/api/holidays") {
-            return Response.json(url.searchParams.get("userId") ? [GLOBAL, OWN] : [GLOBAL]);
-        }
+        if (url.pathname === "/api/holidays") return Response.json([GLOBAL]);
+        if (url.pathname === `/api/users/${USER.id}/holidays`) return Response.json([GLOBAL, OWN]);
         return Response.json({error: `Nicht gemockt: ${url.pathname}`}, {status: 404});
     });
     vi.stubGlobal("fetch", fetchMock);

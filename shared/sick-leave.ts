@@ -10,12 +10,13 @@ const RANGE_LABEL = "Eine Krankmeldung";
 
 export const SickLeaveSchema = createSelectSchema(sickLeaves);
 
+// Der User steht im Pfad der API, nicht im Body
 export const SickLeaveCreateSchema = createInsertSchema(sickLeaves, {
     startDate: day,
     endDate: day,
     note: note.optional(),
 })
-    .omit({id: true})
+    .omit({id: true, userId: true})
     .superRefine((v, ctx) => {
         const problem = checkRange(v.startDate, v.endDate, RANGE_LABEL);
         if (problem) ctx.addIssue({code: "custom", message: problem, path: ["endDate"]});

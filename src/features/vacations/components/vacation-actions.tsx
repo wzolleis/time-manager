@@ -41,7 +41,7 @@ export function VacationActions({vacation}: {vacation: Vacation}) {
                             <AlertDialogCancel>Abbrechen</AlertDialogCancel>
                             <AlertDialogAction
                                 className={buttonVariants({variant: "destructive"})}
-                                onClick={() => remove.remove(vacation.id)}
+                                onClick={() => remove.remove(vacation)}
                             >
                                 Löschen
                             </AlertDialogAction>

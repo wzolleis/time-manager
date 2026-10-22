@@ -18,7 +18,7 @@ export function useAddVacation() {
     const sickLeaves = useSickLeaves(currentUser?.id); // Krankheitstage im Urlaub verbrauchen keinen Urlaubstag
 
     const save = useMutation({
-        mutationFn: (data: Addition) => createVacation({userId: currentUser!.id, ...data}),
+        mutationFn: (data: Addition) => createVacation(currentUser!.id, data),
         onSuccess: () => qc.invalidateQueries({queryKey: ["vacations"]}),
     });
 

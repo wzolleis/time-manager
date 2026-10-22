@@ -56,10 +56,11 @@ function mockApi() {
 
             if (pathname === "/api/auth/me") return Response.json(TEST_USER);
             if (pathname === "/api/users") return Response.json([TEST_USER]);
-            if (pathname === "/api/projects" || pathname === "/api/time-entries") return Response.json([]);
-            if (pathname === "/api/vacations") return Response.json([]);
-            if (pathname === "/api/sick-leaves") return Response.json([]);
-            if (pathname === "/api/holidays") return Response.json([]);
+            const user = `/api/users/${TEST_USER.id}`;
+            if (pathname === "/api/projects" || pathname === `${user}/time-entries`) return Response.json([]);
+            if (pathname === `${user}/vacations`) return Response.json([]);
+            if (pathname === `${user}/sick-leaves`) return Response.json([]);
+            if (pathname === "/api/holidays" || pathname === `${user}/holidays`) return Response.json([]);
             if (pathname === "/api/api-tokens" || pathname === "/api/admin/api-tokens") return Response.json([]);
 
             // Nicht gemockte Aufrufe fallen auf, statt still zu scheitern

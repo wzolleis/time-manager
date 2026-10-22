@@ -22,9 +22,9 @@ function mockApi(vacations: unknown[], holidays: unknown[] = [], sickLeaves: unk
             const {pathname} = new URL(raw, "http://localhost");
             if (pathname === "/api/auth/me") return Response.json(USER);
             if (pathname === "/api/users") return Response.json([USER]);
-            if (pathname === "/api/vacations") return Response.json(vacations);
-            if (pathname === "/api/holidays") return Response.json(holidays);
-            if (pathname === "/api/sick-leaves") return Response.json(sickLeaves);
+            if (pathname === `/api/users/${USER.id}/vacations`) return Response.json(vacations);
+            if (pathname === `/api/users/${USER.id}/holidays`) return Response.json(holidays);
+            if (pathname === `/api/users/${USER.id}/sick-leaves`) return Response.json(sickLeaves);
             return Response.json({error: `Nicht gemockt: ${pathname}`}, {status: 404});
         }),
     );

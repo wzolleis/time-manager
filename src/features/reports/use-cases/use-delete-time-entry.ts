@@ -13,7 +13,7 @@ export function useDeleteTimeEntry() {
     const entries = useTimeEntries(currentUser?.id); // für die Prüfung der Abfolge
 
     const remove = useMutation({
-        mutationFn: ({id, pair}: Deletion) => deleteTimeEntry(id, pair),
+        mutationFn: ({id, pair}: Deletion) => deleteTimeEntry(currentUser!.id, id, pair),
         onSuccess: () => qc.invalidateQueries({queryKey: ["time-entries"]}),
     });
 

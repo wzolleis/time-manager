@@ -30,10 +30,10 @@ function mockApi(data: {holidays?: unknown[]} = {}) {
             const {pathname} = new URL(raw, "http://localhost");
             if (pathname === "/api/auth/me") return Response.json(USER);
             if (pathname === "/api/users") return Response.json([USER]);
-            if (pathname === "/api/time-entries") return Response.json(ENTRIES);
-            if (pathname === "/api/sick-leaves") return Response.json([SICK]);
-            if (pathname === "/api/holidays") return Response.json(data.holidays ?? []);
-            if (["/api/projects", "/api/vacations"].includes(pathname)) return Response.json([]);
+            if (pathname === `/api/users/${USER.id}/time-entries`) return Response.json(ENTRIES);
+            if (pathname === `/api/users/${USER.id}/sick-leaves`) return Response.json([SICK]);
+            if (pathname === `/api/users/${USER.id}/holidays`) return Response.json(data.holidays ?? []);
+            if (["/api/projects", `/api/users/${USER.id}/vacations`].includes(pathname)) return Response.json([]);
             return Response.json({error: `Nicht gemockt: ${pathname}`}, {status: 404});
         }),
     );

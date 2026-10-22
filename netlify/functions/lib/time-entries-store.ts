@@ -84,14 +84,14 @@ export const listEntries = (userId: string, range: {from?: Date; to?: Date} = {}
         )
         .orderBy(asc(timeEntries.bookedAt));
 
-/** Legt eine Buchung an, wenn Projekt und Abfolge stimmen (sonst RuleError) */
-export async function createEntry(input: TimeEntryCreate): Promise<StoredEntry> {
+/** Legt eine Buchung des Users an, wenn Projekt und Abfolge stimmen (sonst RuleError) */
+export async function createEntry(userId: string, input: TimeEntryCreate): Promise<StoredEntry> {
     ensureProject(input.type, input.projectId);
     const id = randomUUID();
     await db.transaction(async (tx) => {
-        const existing = await lockBookings(tx, input.userId);
+        const existing = await lockBookings(tx, userId);
         ensureValid([...existing, {id, type: input.type, bookedAt: input.bookedAt}]);
-        await tx.insert(timeEntries).values({id, userId: input.userId, type: input.type, bookedAt: input.bookedAt});
+        await tx.insert(timeEntries).values({id, userId, type: input.type, bookedAt: input.bookedAt});
         if (input.projectId) await setProject(tx, id, input.projectId);
     });
     return (await getEntry(id))!;

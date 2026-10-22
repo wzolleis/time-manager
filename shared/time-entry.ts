@@ -10,8 +10,9 @@ export const TimeEntrySchema = createSelectSchema(timeEntries).extend({
     projectId: z.uuid().nullable(), // aus der Zuordnungstabelle, kommt per Join
 });
 
+// Der User steht im Pfad der API, nicht im Body
 export const TimeEntryCreateSchema = createInsertSchema(timeEntries, createRefine)
-    .omit({id: true})
+    .omit({id: true, userId: true})
     .extend({projectId: z.uuid().nullish()});
 
 export const TimeEntryUpdateSchema = createUpdateSchema(timeEntries, updateRefine)

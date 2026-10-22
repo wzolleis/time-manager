@@ -22,11 +22,12 @@ function mockApi() {
             const {pathname} = new URL(raw, "http://localhost");
             if (pathname === "/api/auth/me") return Response.json(USER);
             if (pathname === "/api/users") return Response.json([USER]);
-            if (
-                ["/api/time-entries", "/api/projects", "/api/vacations", "/api/holidays", "/api/sick-leaves"].includes(
-                    pathname,
-                )
-            ) {
+            const user = `/api/users/${USER.id}`;
+            const empty = [
+                "/api/projects",
+                ...["time-entries", "vacations", "holidays", "sick-leaves"].map((a) => `${user}/${a}`),
+            ];
+            if (empty.includes(pathname)) {
                 return Response.json([]);
             }
             return Response.json({error: `Nicht gemockt: ${pathname}`}, {status: 404});

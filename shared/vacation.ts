@@ -8,11 +8,12 @@ const day = z.string().refine(isValidDay, "Ungültiges Datum (JJJJ-MM-TT)");
 
 export const VacationSchema = createSelectSchema(vacations);
 
+// Der User steht im Pfad der API, nicht im Body
 export const VacationCreateSchema = createInsertSchema(vacations, {
     startDate: day,
     endDate: day,
 })
-    .omit({id: true})
+    .omit({id: true, userId: true})
     .superRefine((v, ctx) => {
         const problem = checkRange(v.startDate, v.endDate);
         if (problem) ctx.addIssue({code: "custom", message: problem, path: ["endDate"]});

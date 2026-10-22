@@ -75,7 +75,7 @@ Wer einen neuen Endpoint baut, der nicht für alle User gedacht ist, legt die Ei
 - Ein Eintrag besteht aus Pfad, HTTP-Methode und genau einer Rolle.
 - Methoden: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`.
 - Der Pfad ist das Muster aus der `config.path` der Netlify Function, nicht die konkrete URL,
-  z. B. `/api/vacations/:id` und nicht `/api/vacations/42`.
+  z. B. `/api/users/:userId/vacations/:id` und nicht `/api/users/7/vacations/42`.
 - Pro Kombination aus Pfad und Methode gibt es höchstens einen Eintrag.
 - Gibt es für Pfad und Methode keinen Eintrag, gilt die Rolle "User".
 - Zugriff hat, wer die zugeordnete Rolle besitzt, sowie jeder Administrator.
@@ -85,8 +85,12 @@ Beispiel:
 | Pfad                | Methode  | Rolle                     |
 |---------------------|----------|---------------------------|
 | `/api/holidays`     | `POST`   | Administrator             |
+| `/api/holidays/:id` | `PATCH`  | Administrator             |
 | `/api/holidays/:id` | `DELETE` | Administrator             |
 | `/api/holidays`     | `GET`    | (kein Eintrag, also User) |
+
+So sind die globalen Feiertage gesichert (Migration `0012_holidays_roles.sql`). Die eigenen Feiertage eines
+Users unter `/api/users/:userId/holidays` haben keinen Eintrag, dort prüft `ensureAccess`.
 
 Die Agent-Tokens aller User (`GET /api/admin/api-tokens`, `DELETE /api/admin/api-tokens/:id`) haben einen
 Eintrag mit der Rolle Administrator (Migration `0011_api_tokens_roles.sql`). Die eigenen Tokens unter
@@ -140,6 +144,14 @@ eine Abfrage nicht (`retry` in `src/query-client.ts`).
 # Daten eines Users
 
 Die Rolle entscheidet, ob ein Endpoint aufgerufen werden darf, aber nicht, wessen Daten.
-Buchungen, Urlaube und Krankmeldungen darf jeder User nur für sich selbst lesen und ändern, ein Administrator
-für alle. Das prüft `ensureAccess` aus `netlify/functions/lib/roles.ts` gegen die `userId` der Anfrage
-bzw. des gespeicherten Datensatzes. Sie wirft `ForbiddenError`, die Function antwortet dann mit `403`. Ohne `?userId=` liefert die Liste die eigenen Daten.
+Buchungen, Urlaube, Krankmeldungen und eigene Feiertage darf jeder User nur für sich selbst lesen und ändern,
+ein Administrator für alle. Wem die Daten gehören, steht im Pfad: `/api/users/:userId/time-entries`,
+`…/vacations`, `…/sick-leaves`, `…/holidays`, jeweils mit `/:id` für einen Datensatz. Der Body enthält keine
+`userId`, die Function setzt sie aus dem Pfad.
+
+- Jede dieser Functions ruft zuerst `ensureAccess(session.user.id, userId)` aus `netlify/functions/lib/roles.ts`
+  mit der `userId` aus dem Pfad auf. Sie wirft `ForbiddenError`, die Function antwortet dann mit `403`.
+- Gehört ein Datensatz unter `/api/users/U/…/:id` nicht U, ist er „nicht gefunden“ (`notFound()`, also 410),
+  nicht 403. So verrät die API nicht, dass es ihn gibt.
+- `isRoutePath` aus `lib/id.ts` lässt nur die Pfade aus `config.path` durch, auch in den Wiederholungen von
+  Netlify (`…/vacations.html`), und `pathParams` liest `userId` und `id` daraus.

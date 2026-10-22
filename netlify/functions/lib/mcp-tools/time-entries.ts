@@ -115,7 +115,7 @@ export function registerTimeEntryTools(server: McpServer, user: SessionUser): vo
         },
         ({type, projectId}) =>
             run(async () => {
-                const entry = await createEntry({userId: user.id, type, bookedAt: new Date(), projectId});
+                const entry = await createEntry(user.id, {type, bookedAt: new Date(), projectId});
                 return entryResult(entry, "Gebucht");
             }),
     );
@@ -190,8 +190,7 @@ export function registerTimeEntryTools(server: McpServer, user: SessionUser): vo
         },
         ({type, day, time, projectId}) =>
             run(async () => {
-                const entry = await createEntry({
-                    userId: user.id,
+                const entry = await createEntry(user.id, {
                     type,
                     bookedAt: localTimeToUtc(day, time),
                     projectId,

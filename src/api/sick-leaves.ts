@@ -1,12 +1,15 @@
 import {request} from "./http";
 import type {SickLeave, SickLeaveCreate, SickLeaveUpdate} from "@shared/sick-leave";
 
-export const fetchSickLeaves = (userId: string) => request<SickLeave[]>(`/api/sick-leaves?userId=${userId}`);
+const path = (userId: string) => `/api/users/${userId}/sick-leaves`;
 
-export const createSickLeave = (data: SickLeaveCreate) =>
-    request<SickLeave>("/api/sick-leaves", {method: "POST", body: JSON.stringify(data)});
+export const fetchSickLeaves = (userId: string) => request<SickLeave[]>(path(userId));
 
-export const updateSickLeave = (id: string, data: SickLeaveUpdate) =>
-    request<SickLeave>(`/api/sick-leaves/${id}`, {method: "PATCH", body: JSON.stringify(data)});
+export const createSickLeave = (userId: string, data: SickLeaveCreate) =>
+    request<SickLeave>(path(userId), {method: "POST", body: JSON.stringify(data)});
 
-export const deleteSickLeave = (id: string) => request<void>(`/api/sick-leaves/${id}`, {method: "DELETE"});
+export const updateSickLeave = (userId: string, id: string, data: SickLeaveUpdate) =>
+    request<SickLeave>(`${path(userId)}/${id}`, {method: "PATCH", body: JSON.stringify(data)});
+
+export const deleteSickLeave = (userId: string, id: string) =>
+    request<void>(`${path(userId)}/${id}`, {method: "DELETE"});

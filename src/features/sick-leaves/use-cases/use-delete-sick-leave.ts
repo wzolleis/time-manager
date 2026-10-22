@@ -1,12 +1,13 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {deleteSickLeave} from "@/api/sick-leaves";
+import type {SickLeave} from "@shared/sick-leave";
 
 /** Der User löscht eine Krankmeldung. Die Buchungen an den Tagen zählen danach wieder. */
 export function useDeleteSickLeave() {
     const qc = useQueryClient();
 
     const remove = useMutation({
-        mutationFn: (id: string) => deleteSickLeave(id),
+        mutationFn: ({userId, id}: Pick<SickLeave, "userId" | "id">) => deleteSickLeave(userId, id),
         onSuccess: () => qc.invalidateQueries({queryKey: ["sick-leaves"]}),
     });
 

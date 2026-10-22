@@ -90,21 +90,27 @@ Tabelle `holidays`, im Code `Holiday`. Ein Feiertag ist immer genau ein Tag.
 
 ## Schnittstelle
 
-| Aufruf                                 | Ergebnis                                        |
-|----------------------------------------|-------------------------------------------------|
-| `GET /api/holidays`                    | nur die globalen Feiertage, nach Datum          |
-| `GET /api/holidays?userId=U`           | globale und eigene Feiertage von U, nach Datum  |
-| `POST /api/holidays`                   | `{userId, date, name}`, `userId` ist Pflicht (`null` = global) |
-| `PATCH /api/holidays/:id`              | `{date?, name?}`                                |
-| `DELETE /api/holidays/:id`             | 204                                             |
+| Aufruf                                      | Ergebnis                                          |
+|---------------------------------------------|---------------------------------------------------|
+| `GET /api/holidays`                         | nur die globalen Feiertage, nach Datum            |
+| `POST /api/holidays`                        | `{date, name}`, globaler Feiertag (Administrator) |
+| `PATCH /api/holidays/:id`                   | `{date?, name?}`, globaler Feiertag (Administrator) |
+| `DELETE /api/holidays/:id`                  | 204, globaler Feiertag (Administrator)            |
+| `GET /api/users/U/holidays`                 | globale und eigene Feiertage von U, nach Datum    |
+| `POST /api/users/U/holidays`                | `{date, name}`, eigener Feiertag von U            |
+| `PATCH /api/users/U/holidays/:id`           | `{date?, name?}`, eigener Feiertag von U          |
+| `DELETE /api/users/U/holidays/:id`          | 204, eigener Feiertag von U                       |
 
-Ein Konflikt nach Regel 2 oder 3 ergibt 422 mit der Meldung aus `holidayClashMessage`. Geplante Änderung
-der Pfade: `../changes/api-user-pfade.md`.
+Der Body enthält keine `userId`: Wem der Feiertag gehört, sagt der Pfad. Die Rolle Administrator für die
+globalen Feiertage steht in `endpoint_roles` (Migration `0012_holidays_roles.sql`). Ein eigener Feiertag
+unter `/api/holidays/:id` oder ein globaler unter `/api/users/U/holidays/:id` ist „nicht gefunden“ (410).
+Ein Konflikt nach Regel 2 oder 3 ergibt 422 mit der Meldung aus `holidayClashMessage`. Eingeführt mit dem
+Change `../changes/api-user-pfade.md`.
 
 ## Tests
 
 - `../../shared/holiday-rules.test.ts`: Regeln 1 bis 4
-- `../../shared/holiday.test.ts`: Schema, `userId` beim Anlegen Pflicht, beim Ändern nicht änderbar (Regel 5)
+- `../../shared/holiday.test.ts`: Schema, `userId` kommt nicht aus dem Body und ist nicht änderbar (Regel 5)
 - `../../shared/target-hours.test.ts` und `../../shared/vacation-rules.test.ts`: Regeln 6 und 7
 - `../../src/features/holidays/components/holidays.test.tsx`: User sieht globale und eigene, ändert nur
   eigene; Administrator sieht und ändert nur globale

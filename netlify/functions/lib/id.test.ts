@@ -1,5 +1,5 @@
 import {describe, expect, it} from "vitest";
-import {IdSchema, isApiPath, pathParams, stripRetrySuffix} from "./id";
+import {IdSchema, isApiPath, isRoutePath, pathParams, stripRetrySuffix} from "./id";
 
 const ID = "00000000-0000-4000-8000-000000000001";
 const u = (path: string) => `http://localhost:8888${path}`;
@@ -40,6 +40,32 @@ describe("isApiPath", () => {
     });
 });
 
+describe("isRoutePath", () => {
+    const routes = ["/api/users/:userId/vacations", "/api/users/:userId/vacations/:id"];
+
+    it("akzeptiert die Sammlung und eine Ressource eines Users", () => {
+        expect(isRoutePath(u(`/api/users/${ID}/vacations`), routes)).toBe(true);
+        expect(isRoutePath(u(`/api/users/${ID}/vacations/`), routes)).toBe(true);
+        expect(isRoutePath(u(`/api/users/${ID}/vacations/${ID}?x=1`), routes)).toBe(true);
+    });
+
+    it("akzeptiert die Wiederholungen von Netlify wie das Original", () => {
+        expect(isRoutePath(u(`/api/users/${ID}/vacations.html`), routes)).toBe(true);
+        expect(isRoutePath(u(`/api/users/${ID}/vacations/index.htm`), routes)).toBe(true);
+        expect(isRoutePath(u(`/api/users/${ID}/vacations/${ID}.html`), routes)).toBe(true);
+        expect(isRoutePath(u(`/api/users/${ID}/vacations/${ID}/index.html`), routes)).toBe(true);
+    });
+
+    it("lehnt die alten Pfade, andere Endungen und zusätzliche Segmente ab", () => {
+        expect(isRoutePath(u("/api/vacations"), routes)).toBe(false);
+        expect(isRoutePath(u(`/api/vacations/${ID}`), routes)).toBe(false);
+        expect(isRoutePath(u(`/api/users/${ID}/vacations/${ID}.json`), routes)).toBe(false);
+        expect(isRoutePath(u(`/api/users/${ID}.json/vacations`), routes)).toBe(false);
+        expect(isRoutePath(u(`/api/users/${ID}/vacations/${ID}/extra`), routes)).toBe(false);
+        expect(isRoutePath(u("/api/users//vacations"), routes)).toBe(false);
+    });
+});
+
 describe("stripRetrySuffix", () => {
     it("entfernt die Endungen der Wiederholungen", () => {
         expect(stripRetrySuffix("/api/users.html")).toBe("/api/users");
@@ -77,6 +103,12 @@ describe("pathParams", () => {
         expect(pathParams(u("/api/auth/reset-password/index.html"), "/api/auth/:action")).toEqual({
             action: "reset-password",
         });
+    });
+
+    it("liest den User und die ID aus einem Pfad mit beiden Parametern", () => {
+        const user = ["/api/users/:userId/vacations", "/api/users/:userId/vacations/:id"];
+        expect(pathParams(u(`/api/users/${ID}/vacations`), user)).toEqual({userId: ID});
+        expect(pathParams(u(`/api/users/${ID}/vacations/${ID}.html`), user)).toEqual({userId: ID, id: ID});
     });
 
     it("bildet den internen Function-Pfad ab und mehrere Parameter in einem Pfad", () => {

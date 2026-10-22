@@ -21,12 +21,12 @@ export const IdSchema = z.preprocess((v) => (typeof v === "string" ? stripRetryS
 export const isApiPath = (url: string, name: string): boolean =>
     new RegExp(`^(/api|/\\.netlify/functions)/${name}(/[^/.]+)?/?$`).test(stripRetrySuffix(new URL(url).pathname));
 
-/**
- * Die Parameter der Route (":id", ":action") aus der URL, gegen die Pfade aus config.path.
- * Statt context.params, weil netlify dev in den Wiederholungen einer 403 (…/<id>/index.html) keine
- * params mitgibt; der Handler nähme dann den Zweig für die Sammlung. Ohne passenden Pfad: {}.
- */
-export function pathParams(url: string, patterns: string | string[] | undefined): Record<string, string> {
+// Die Parameter des ersten passenden Musters, ohne passendes Muster null. valid prüft jedes Segment eines Parameters.
+function matchRoute(
+    url: string,
+    patterns: string | string[] | undefined,
+    valid: (segment: string) => boolean,
+): Record<string, string> | null {
     const path = stripRetrySuffix(new URL(url).pathname)
         .replace(/^\/\.netlify\/functions\//, "/api/")
         .replace(/\/+$/, "");
@@ -38,12 +38,28 @@ export function pathParams(url: string, patterns: string | string[] | undefined)
         const matches = want.every((seg, i) => {
             if (!seg.startsWith(":")) return seg === have[i];
             params[seg.slice(1)] = decodeURIComponent(have[i]);
-            return have[i] !== "";
+            return valid(have[i]);
         });
         if (matches) return params;
     }
-    return {};
+    return null;
 }
+
+/**
+ * Die Parameter der Route (":id", ":action") aus der URL, gegen die Pfade aus config.path.
+ * Statt context.params, weil netlify dev in den Wiederholungen einer 403 (…/<id>/index.html) keine
+ * params mitgibt; der Handler nähme dann den Zweig für die Sammlung. Ohne passenden Pfad: {}.
+ */
+export const pathParams = (url: string, patterns: string | string[] | undefined): Record<string, string> =>
+    matchRoute(url, patterns, (seg) => seg !== "") ?? {};
+
+/**
+ * Wie isApiPath, aber gegen die Muster aus config.path, für Pfade mit mehreren Parametern
+ * (/api/users/:userId/vacations/:id). Ein Parameter ist ein Segment ohne Punkt, die Wiederholungen
+ * von Netlify zählen wie das Original. Jeder andere Pfad bekommt eine 410 ohne Datenbankzugriff.
+ */
+export const isRoutePath = (url: string, patterns: string | string[] | undefined): boolean =>
+    matchRoute(url, patterns, (seg) => /^[^/.]+$/.test(seg)) !== null;
 
 /**
  * "Nicht gefunden" bewusst mit 410 statt 404: Netlify wiederholt eine 404-Antwort mit

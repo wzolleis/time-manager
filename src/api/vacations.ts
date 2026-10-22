@@ -1,12 +1,15 @@
 import {request} from "./http";
 import type {Vacation, VacationCreate, VacationUpdate} from "@shared/vacation";
 
-export const fetchVacations = (userId: string) => request<Vacation[]>(`/api/vacations?userId=${userId}`);
+const path = (userId: string) => `/api/users/${userId}/vacations`;
 
-export const createVacation = (data: VacationCreate) =>
-    request<Vacation>("/api/vacations", {method: "POST", body: JSON.stringify(data)});
+export const fetchVacations = (userId: string) => request<Vacation[]>(path(userId));
 
-export const updateVacation = (id: string, data: VacationUpdate) =>
-    request<Vacation>(`/api/vacations/${id}`, {method: "PATCH", body: JSON.stringify(data)});
+export const createVacation = (userId: string, data: VacationCreate) =>
+    request<Vacation>(path(userId), {method: "POST", body: JSON.stringify(data)});
 
-export const deleteVacation = (id: string) => request<void>(`/api/vacations/${id}`, {method: "DELETE"});
+export const updateVacation = (userId: string, id: string, data: VacationUpdate) =>
+    request<Vacation>(`${path(userId)}/${id}`, {method: "PATCH", body: JSON.stringify(data)});
+
+export const deleteVacation = (userId: string, id: string) =>
+    request<void>(`${path(userId)}/${id}`, {method: "DELETE"});

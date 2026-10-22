@@ -293,7 +293,7 @@ Reihenfolge, jeder Schritt ist ein eigener Commit:
      des Test-Users eines früheren Laufs, geht es ohne Meldung weiter, und Schritt 5 scheitert mit
      einem irreführenden `409 Diese E-Mail existiert bereits`.
    - Künftig bricht `purge_user` beim ersten Status außer `204`/`410` mit dem Aufruf und der Antwort ab.
-   - Es löscht vor dem User auch dessen eigene Feiertage (`GET /api/holidays?userId=…`, nur die mit
+   - Es löscht vor dem User auch dessen eigene Feiertage (`GET /api/users/…/holidays`, nur die mit
      `userId`). `holidays.user_id` hat kein `onDelete: cascade` und würde das Löschen sonst blockieren.
 6. **Doku:** Abschnitt „Lokale Umgebung“ in `README.md` mit „Erstes Aufsetzen“. Im Skill `architecture`
    (`testing.md`) der Hinweis, dass der Walkthrough gegen `dev:test` läuft.

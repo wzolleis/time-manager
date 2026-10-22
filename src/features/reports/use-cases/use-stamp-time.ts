@@ -23,8 +23,7 @@ export function useStampTime() {
 
     const save = useMutation({
         mutationFn: ({type, projectId}: Stamp) =>
-            createTimeEntry({
-                userId: userId!,
+            createTimeEntry(userId!, {
                 type,
                 bookedAt: new Date(),
                 projectId: type === "kommen" ? (projectId ?? undefined) : undefined,

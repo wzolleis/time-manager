@@ -8,8 +8,8 @@ import {withTiming} from "./lib/timing";
 import {holidays, users} from "../../db/schema";
 import {findHolidayClash, holidayClashMessage, type HolidayRange} from "../../shared/holiday-rules";
 import {HolidayCreateSchema, HolidayUpdateSchema} from "../../shared/holiday";
-import {IdSchema, isApiPath, notFound, pathParams} from "./lib/id";
-import {ensureAccess, forbidden, ForbiddenError, isAdmin} from "./lib/roles";
+import {IdSchema, isRoutePath, notFound, pathParams} from "./lib/id";
+import {ensureAccess, forbidden, ForbiddenError} from "./lib/roles";
 import {type Session, withSession} from "./lib/session";
 import {RuleError, ruleViolation} from "./lib/rule-error";
 
@@ -19,9 +19,6 @@ type Executor = Pick<typeof db, "select">;
 class NotFoundError extends Error {}
 
 class UnknownUserError extends Error {}
-
-// Ohne userId nur die globalen Feiertage, mit userId zusätzlich die eigenen dieses Users
-const ListQuerySchema = z.object({userId: z.string().uuid().optional()});
 
 const getHoliday = async (ex: Executor, id: string) => {
     const [row] = await ex.select().from(holidays).where(eq(holidays.id, id)).limit(1);
@@ -42,12 +39,6 @@ const checkClash = async (tx: Tx, candidate: HolidayRange) => {
     if (clash) throw new RuleError(holidayClashMessage(clash));
 };
 
-// Globale Feiertage (userId null) pflegt nur ein Administrator, eigene der User selbst
-const authorize = async (session: Session, ownerId: string | null, ex: Executor = db) => {
-    if (ownerId !== null) return ensureAccess(session.user.id, ownerId, ex);
-    if (!(await isAdmin(session.user.id, ex))) throw new ForbiddenError();
-};
-
 const readBody = async (req: Request): Promise<unknown> => {
     try {
         return await req.json();
@@ -58,21 +49,21 @@ const readBody = async (req: Request): Promise<unknown> => {
 
 const handler = async (req: Request, _context: Context, session: Session) => {
     try {
-        if (!isApiPath(req.url, "holidays")) return notFound();
-        const url = new URL(req.url);
-        const rawId = pathParams(req.url, config.path).id;
+        if (!isRoutePath(req.url, config.path)) return notFound();
+        const params = pathParams(req.url, config.path);
+        // Globale Feiertage unter /api/holidays (Schreiben nur Administratoren, über endpoint_roles),
+        // eigene unter /api/users/:userId/holidays (der User selbst oder ein Administrator)
+        const userId = params.userId === undefined ? null : IdSchema.parse(params.userId);
+        if (userId) await ensureAccess(session.user.id, userId);
 
-        // Sammlung: /api/holidays
-        if (rawId === undefined) {
+        // Sammlung: /api/holidays oder /api/users/:userId/holidays
+        if (params.id === undefined) {
             if (req.method === "GET") {
-                const q = ListQuerySchema.parse(Object.fromEntries(url.searchParams));
-                if (q.userId) await ensureAccess(session.user.id, q.userId);
+                // Für einen User die globalen und seine eigenen, damit Berichte mit einer Abfrage auskommen
                 const rows = await db
                     .select()
                     .from(holidays)
-                    .where(
-                        q.userId ? or(isNull(holidays.userId), eq(holidays.userId, q.userId)) : isNull(holidays.userId),
-                    )
+                    .where(userId ? or(isNull(holidays.userId), eq(holidays.userId, userId)) : isNull(holidays.userId))
                     .orderBy(asc(holidays.date));
                 return Response.json(rows);
             }
@@ -81,23 +72,24 @@ const handler = async (req: Request, _context: Context, session: Session) => {
                 const input = HolidayCreateSchema.parse(await readBody(req));
                 const id = randomUUID();
                 await db.transaction(async (tx) => {
-                    await authorize(session, input.userId, tx);
-                    if (input.userId) await lockUser(tx, input.userId);
-                    await checkClash(tx, {id, ...input});
-                    await tx.insert(holidays).values({id, ...input});
+                    if (userId) await lockUser(tx, userId);
+                    await checkClash(tx, {id, userId, ...input});
+                    await tx.insert(holidays).values({id, userId, ...input});
                 });
                 return Response.json(await getHoliday(db, id), {status: 201});
             }
             return new Response(null, {status: 405});
         }
 
-        // Einzelner Feiertag: /api/holidays/:id
-        const id = IdSchema.parse(rawId);
+        // Einzelner Feiertag: /api/holidays/:id (global) oder /api/users/:userId/holidays/:id (eigener).
+        // Unter dem jeweils anderen Pfad ist er "nicht gefunden", ebenso ein Feiertag eines anderen Users.
+        const id = IdSchema.parse(params.id);
+        const belongsHere = <T extends {userId: string | null}>(row: T | null): row is T =>
+            row !== null && row.userId === userId;
 
         if (req.method === "GET") {
             const row = await getHoliday(db, id);
-            if (!row) return notFound();
-            if (row.userId) await ensureAccess(session.user.id, row.userId); // globale darf jeder lesen
+            if (!belongsHere(row)) return notFound();
             return Response.json(row);
         }
 
@@ -109,9 +101,8 @@ const handler = async (req: Request, _context: Context, session: Session) => {
 
             await db.transaction(async (tx) => {
                 const current = await getHoliday(tx, id);
-                if (!current) throw new NotFoundError();
-                await authorize(session, current.userId, tx);
-                if (current.userId) await lockUser(tx, current.userId);
+                if (!belongsHere(current)) throw new NotFoundError();
+                if (userId) await lockUser(tx, userId);
                 await checkClash(tx, {...current, ...patch});
                 await tx.update(holidays).set(patch).where(eq(holidays.id, id));
             });
@@ -120,8 +111,7 @@ const handler = async (req: Request, _context: Context, session: Session) => {
 
         if (req.method === "DELETE") {
             const row = await getHoliday(db, id);
-            if (!row) return notFound();
-            await authorize(session, row.userId);
+            if (!belongsHere(row)) return notFound();
             const [result] = await db.delete(holidays).where(eq(holidays.id, id));
             return result.affectedRows > 0 ? new Response(null, {status: 204}) : notFound();
         }
@@ -142,4 +132,6 @@ const handler = async (req: Request, _context: Context, session: Session) => {
 
 export default withTiming("holidays", withSession(handler));
 
-export const config: Config = {path: ["/api/holidays", "/api/holidays/:id"]};
+export const config: Config = {
+    path: ["/api/holidays", "/api/holidays/:id", "/api/users/:userId/holidays", "/api/users/:userId/holidays/:id"],
+};

@@ -41,7 +41,7 @@ export function HolidayActions({holiday, userName}: {holiday: Holiday; userName?
                             <AlertDialogCancel>Abbrechen</AlertDialogCancel>
                             <AlertDialogAction
                                 className={buttonVariants({variant: "destructive"})}
-                                onClick={() => remove(holiday.id)}
+                                onClick={() => remove(holiday)}
                             >
                                 Löschen
                             </AlertDialogAction>

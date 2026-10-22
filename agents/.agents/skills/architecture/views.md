@@ -63,8 +63,8 @@ Regeln:
   geladen ist. Dann gilt `enabled: !!userId`, und `userId!` in `queryFn` ist sicher.
 - **Erst bei Bedarf laden:** Der Parameter `enabled` erlaubt es der Komponente, das Laden
   aufzuschieben, z. B. bis ein Dialog geöffnet wird: `useUserRoles(user.id, open)`.
-- **Filtern auf dem Server:** Daten eines Users werden mit `?userId=` beim Server angefragt und nicht
-  im Client aus allen Daten herausgesucht.
+- **Filtern auf dem Server:** Daten eines Users werden über seinen Pfad `/api/users/:userId/<aggregat>`
+  beim Server angefragt und nicht im Client aus allen Daten herausgesucht.
 - **Rückgabe unverändert:** Die View gibt das Ergebnis von `useQuery` zurück. Umrechnen und
   Zusammenfassen ist Aufgabe des Use Case mit einem [Service](service.md).
 

@@ -38,7 +38,7 @@ export function useChangeTimeEntry() {
             const newProject = entry.type === "kommen" ? projectId : null;
             if (newProject !== entry.projectId) patch.projectId = newProject;
             if (Object.keys(patch).length === 0) return;
-            await updateTimeEntry(entry.id, patch);
+            await updateTimeEntry(currentUser!.id, entry.id, patch);
         },
         onSuccess: () => qc.invalidateQueries({queryKey: ["time-entries"]}),
     });

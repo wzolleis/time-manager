@@ -27,19 +27,27 @@ der View. Alle Funktionen verwenden `request` aus `src/api/http.ts`. Die Typen k
 | `delete<Aggregat>`   | `DELETE /api/<aggregat>/:id`           | –                                         | 204, `void`            |
 | `update…` für Mengen | `PUT …` (z. B. `/api/users/:id/roles`) | die vollständige neue Menge               | die gespeicherte Menge |
 
+Daten, die einem User gehören (Buchungen, Urlaube, Krankmeldungen, eigene Feiertage), liegen unter
+`/api/users/:userId/<aggregat>`. Die API-Funktionen bekommen dann die User-ID als ersten Parameter, der
+Body enthält keine `userId`. Zum Ändern und Löschen nimmt der Use Case die `userId` des Datensatzes, nicht
+die des angemeldeten Users, damit es auch in der Admin-Ansicht stimmt. Globale Feiertage bleiben unter
+`/api/holidays`, `src/api/holidays.ts` wählt den Pfad mit `userId: null`.
+
 ```ts
 // src/api/vacations.ts
 import {request} from "./http";
 import type {Vacation, VacationCreate, VacationUpdate} from "@shared/vacation";
 
-export const createVacation = (data: VacationCreate) =>
-    request<Vacation>("/api/vacations", {method: "POST", body: JSON.stringify(data)});
+const path = (userId: string) => `/api/users/${userId}/vacations`;
 
-export const updateVacation = (id: string, data: VacationUpdate) =>
-    request<Vacation>(`/api/vacations/${id}`, {method: "PATCH", body: JSON.stringify(data)});
+export const createVacation = (userId: string, data: VacationCreate) =>
+    request<Vacation>(path(userId), {method: "POST", body: JSON.stringify(data)});
 
-export const deleteVacation = (id: string) =>
-    request<void>(`/api/vacations/${id}`, {method: "DELETE"});
+export const updateVacation = (userId: string, id: string, data: VacationUpdate) =>
+    request<Vacation>(`${path(userId)}/${id}`, {method: "PATCH", body: JSON.stringify(data)});
+
+export const deleteVacation = (userId: string, id: string) =>
+    request<void>(`${path(userId)}/${id}`, {method: "DELETE"});
 ```
 
 `request` wirft bei jeder Antwort außer 2xx einen `ApiError` mit `status` und einer lesbaren
@@ -52,7 +60,7 @@ Meldung (`error` oder `errors` aus dem Body des Servers). Die API-Funktion fäng
 export function useDeleteVacation() {
     const qc = useQueryClient();
     return useMutation({
-        mutationFn: (id: string) => deleteVacation(id),
+        mutationFn: ({userId, id}: Pick<Vacation, "userId" | "id">) => deleteVacation(userId, id),
         onSuccess: () => qc.invalidateQueries({queryKey: ["vacations"]}),
     });
 }

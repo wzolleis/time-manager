@@ -25,7 +25,7 @@ export function useChangeVacation() {
             if (startDate !== vacation.startDate) patch.startDate = startDate;
             if (endDate !== vacation.endDate) patch.endDate = endDate;
             if (Object.keys(patch).length === 0) return;
-            await updateVacation(vacation.id, patch);
+            await updateVacation(vacation.userId, vacation.id, patch);
         },
         onSuccess: () => qc.invalidateQueries({queryKey: ["vacations"]}),
     });

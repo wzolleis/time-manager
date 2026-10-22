@@ -5,22 +5,21 @@ import {hasDbCode} from "./lib/db-errors";
 import {TimeEntryCreateSchema, TimeEntryUpdateSchema} from "../../shared/time-entry";
 import {withTiming} from "./lib/timing";
 
-import {IdSchema, isApiPath, notFound, pathParams} from "./lib/id";
+import {IdSchema, isRoutePath, notFound, pathParams} from "./lib/id";
 import {ensureAccess, forbidden, ForbiddenError} from "./lib/roles";
 import {type Session, withSession} from "./lib/session";
 import {RuleError, ruleViolation} from "./lib/rule-error";
 import {
+    type Authorize,
     changeEntry,
     createEntry,
     deleteEntry,
-    type Executor,
     getEntry,
     listEntries,
     NotFoundError,
 } from "./lib/time-entries-store";
 
 const ListQuerySchema = z.object({
-    userId: z.string().uuid().optional(),
     from: z.coerce.date().optional(),
     to: z.coerce.date().optional(),
 });
@@ -36,35 +35,38 @@ const readBody = async (req: Request): Promise<unknown> => {
 // Jeder User sieht und ändert nur seine eigenen Buchungen, ein Administrator die aller User
 const handler = async (req: Request, _context: Context, session: Session) => {
     try {
-        if (!isApiPath(req.url, "time-entries")) return notFound();
+        if (!isRoutePath(req.url, config.path)) return notFound();
         const url = new URL(req.url);
-        const rawId = pathParams(req.url, config.path).id;
-        const authorize = (ownerId: string, ex?: Executor) => ensureAccess(session.user.id, ownerId, ex);
+        const params = pathParams(req.url, config.path);
+        // Der Pfad sagt, wem die Buchungen gehören: der User selbst oder ein Administrator
+        const userId = IdSchema.parse(params.userId);
+        await ensureAccess(session.user.id, userId);
+        // Eine Buchung eines anderen Users ist unter diesem Pfad "nicht gefunden", damit die API nicht
+        // verrät, dass es sie gibt
+        const authorize: Authorize = (ownerId) => {
+            if (ownerId !== userId) throw new NotFoundError();
+        };
 
-        // Sammlung: /api/time-entries
-        if (rawId === undefined) {
+        // Sammlung: /api/users/:userId/time-entries
+        if (params.id === undefined) {
             if (req.method === "GET") {
                 const q = ListQuerySchema.parse(Object.fromEntries(url.searchParams));
-                const userId = q.userId ?? session.user.id; // ohne Angabe die eigenen
-                await authorize(userId);
                 return Response.json(await listEntries(userId, q));
             }
 
             if (req.method === "POST") {
                 const input = TimeEntryCreateSchema.parse(await readBody(req));
-                await authorize(input.userId);
-                return Response.json(await createEntry(input), {status: 201});
+                return Response.json(await createEntry(userId, input), {status: 201});
             }
             return new Response(null, {status: 405});
         }
 
-        // Einzelne Buchung: /api/time-entries/:id
-        const id = IdSchema.parse(rawId);
+        // Einzelne Buchung: /api/users/:userId/time-entries/:id
+        const id = IdSchema.parse(params.id);
 
         if (req.method === "GET") {
             const entry = await getEntry(id);
-            if (!entry) return notFound();
-            await authorize(entry.userId);
+            if (entry?.userId !== userId) return notFound();
             return Response.json(entry);
         }
 
@@ -98,4 +100,4 @@ const handler = async (req: Request, _context: Context, session: Session) => {
 
 export default withTiming("time-entries", withSession(handler));
 
-export const config: Config = {path: ["/api/time-entries", "/api/time-entries/:id"]};
+export const config: Config = {path: ["/api/users/:userId/time-entries", "/api/users/:userId/time-entries/:id"]};

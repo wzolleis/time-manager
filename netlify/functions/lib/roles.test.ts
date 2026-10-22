@@ -52,6 +52,17 @@ describe("requiredRoleId", () => {
         expect(requiredRoleId(entries, `/api/users/${ID}`)).toBe(USER_ROLE_ID);
     });
 
+    it("verlangt den Administrator nur für globale Feiertage, nicht für die eines Users", () => {
+        const holidays = [
+            {path: "/api/holidays", roleId: ADMIN_ROLE_ID},
+            {path: "/api/holidays/:id", roleId: ADMIN_ROLE_ID},
+        ];
+        expect(requiredRoleId(holidays, "/api/holidays")).toBe(ADMIN_ROLE_ID);
+        expect(requiredRoleId(holidays, `/api/holidays/${ID}`)).toBe(ADMIN_ROLE_ID);
+        expect(requiredRoleId(holidays, `/api/users/${ID}/holidays`)).toBe(USER_ROLE_ID);
+        expect(requiredRoleId(holidays, `/api/users/${ID}/holidays/${ID}`)).toBe(USER_ROLE_ID);
+    });
+
     it("nimmt bei mehreren Treffern den genauesten", () => {
         expect(requiredRoleId(entries, "/api/things/special")).toBe(ADMIN_ROLE_ID);
     });

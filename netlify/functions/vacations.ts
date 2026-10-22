@@ -8,7 +8,7 @@ import {withTiming} from "./lib/timing";
 import {holidays, sickLeaves, users, vacations} from "../../db/schema";
 import {checkRange, checkYearLimit, findOverlap, overlapMessage} from "../../shared/vacation-rules";
 import {VacationCreateSchema, VacationUpdateSchema} from "../../shared/vacation";
-import {IdSchema, isApiPath, notFound, pathParams} from "./lib/id";
+import {IdSchema, isRoutePath, notFound, pathParams} from "./lib/id";
 import {ensureAccess, forbidden, ForbiddenError} from "./lib/roles";
 import {type Session, withSession} from "./lib/session";
 import {RuleError, ruleViolation} from "./lib/rule-error";
@@ -19,8 +19,6 @@ type Executor = Pick<typeof db, "select">;
 class NotFoundError extends Error {}
 
 class UnknownUserError extends Error {}
-
-const ListQuerySchema = z.object({userId: z.string().uuid().optional()});
 
 const getVacation = async (ex: Executor, id: string) => {
     const [row] = await ex.select().from(vacations).where(eq(vacations.id, id)).limit(1);
@@ -59,16 +57,15 @@ const readBody = async (req: Request): Promise<unknown> => {
 
 const handler = async (req: Request, _context: Context, session: Session) => {
     try {
-        if (!isApiPath(req.url, "vacations")) return notFound();
-        const url = new URL(req.url);
-        const rawId = pathParams(req.url, config.path).id;
+        if (!isRoutePath(req.url, config.path)) return notFound();
+        const params = pathParams(req.url, config.path);
+        // Der Pfad sagt, wem die Urlaube gehören: der User selbst oder ein Administrator
+        const userId = IdSchema.parse(params.userId);
+        await ensureAccess(session.user.id, userId);
 
-        // Sammlung: /api/vacations
-        if (rawId === undefined) {
+        // Sammlung: /api/users/:userId/vacations
+        if (params.id === undefined) {
             if (req.method === "GET") {
-                const q = ListQuerySchema.parse(Object.fromEntries(url.searchParams));
-                const userId = q.userId ?? session.user.id; // ohne Angabe die eigenen
-                await ensureAccess(session.user.id, userId);
                 const rows = await db
                     .select()
                     .from(vacations)
@@ -79,35 +76,34 @@ const handler = async (req: Request, _context: Context, session: Session) => {
 
             if (req.method === "POST") {
                 const input = VacationCreateSchema.parse(await readBody(req));
-                await ensureAccess(session.user.id, input.userId);
                 const id = randomUUID();
                 await db.transaction(async (tx) => {
-                    await lockUser(tx, input.userId);
-                    const existing = await userVacations(tx, input.userId);
+                    await lockUser(tx, userId);
+                    const existing = await userVacations(tx, userId);
                     const candidate = {id, startDate: input.startDate, endDate: input.endDate};
                     const clash = findOverlap(existing, candidate);
                     if (clash) throw new RuleError(overlapMessage(clash));
                     const overLimit = checkYearLimit(
                         existing,
                         candidate,
-                        await userHolidays(tx, input.userId),
-                        await userSickLeaves(tx, input.userId),
+                        await userHolidays(tx, userId),
+                        await userSickLeaves(tx, userId),
                     );
                     if (overLimit) throw new RuleError(overLimit);
-                    await tx.insert(vacations).values({id, ...input});
+                    await tx.insert(vacations).values({id, userId, ...input});
                 });
                 return Response.json(await getVacation(db, id), {status: 201});
             }
             return new Response(null, {status: 405});
         }
 
-        // Einzelner Urlaub: /api/vacations/:id
-        const id = IdSchema.parse(rawId);
+        // Einzelner Urlaub: /api/users/:userId/vacations/:id. Ein Urlaub eines anderen Users ist hier
+        // "nicht gefunden", damit die API nicht verrät, dass es ihn gibt.
+        const id = IdSchema.parse(params.id);
 
         if (req.method === "GET") {
             const row = await getVacation(db, id);
-            if (!row) return notFound();
-            await ensureAccess(session.user.id, row.userId);
+            if (row?.userId !== userId) return notFound();
             return Response.json(row);
         }
 
@@ -119,9 +115,8 @@ const handler = async (req: Request, _context: Context, session: Session) => {
 
             await db.transaction(async (tx) => {
                 const current = await getVacation(tx, id);
-                if (!current) throw new NotFoundError();
-                await ensureAccess(session.user.id, current.userId, tx);
-                await lockUser(tx, current.userId);
+                if (current?.userId !== userId) throw new NotFoundError();
+                await lockUser(tx, userId);
 
                 // Wurde nur ein Datum gesendet, gilt für das andere der gespeicherte Wert
                 const next = {
@@ -132,14 +127,14 @@ const handler = async (req: Request, _context: Context, session: Session) => {
                 const problem = checkRange(next.startDate, next.endDate);
                 if (problem) throw new RuleError(problem);
 
-                const existing = await userVacations(tx, current.userId);
+                const existing = await userVacations(tx, userId);
                 const clash = findOverlap(existing, next);
                 if (clash) throw new RuleError(overlapMessage(clash));
                 const overLimit = checkYearLimit(
                     existing,
                     next,
-                    await userHolidays(tx, current.userId),
-                    await userSickLeaves(tx, current.userId),
+                    await userHolidays(tx, userId),
+                    await userSickLeaves(tx, userId),
                 );
                 if (overLimit) throw new RuleError(overLimit);
 
@@ -150,8 +145,7 @@ const handler = async (req: Request, _context: Context, session: Session) => {
 
         if (req.method === "DELETE") {
             const row = await getVacation(db, id);
-            if (!row) return notFound();
-            await ensureAccess(session.user.id, row.userId);
+            if (row?.userId !== userId) return notFound();
             const [result] = await db.delete(vacations).where(eq(vacations.id, id));
             return result.affectedRows > 0 ? new Response(null, {status: 204}) : notFound();
         }
@@ -174,4 +168,4 @@ const handler = async (req: Request, _context: Context, session: Session) => {
 
 export default withTiming("vacations", withSession(handler));
 
-export const config: Config = {path: ["/api/vacations", "/api/vacations/:id"]};
+export const config: Config = {path: ["/api/users/:userId/vacations", "/api/users/:userId/vacations/:id"]};

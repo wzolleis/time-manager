@@ -6,25 +6,27 @@ const userId = "275f12fb-e116-4857-9f12-fbe116b857fb";
 
 describe("VacationCreateSchema", () => {
     it("akzeptiert gültige Daten", () => {
-        const r = VacationCreateSchema.safeParse({userId, startDate: "2026-06-08", endDate: "2026-06-12"});
+        const r = VacationCreateSchema.safeParse({startDate: "2026-06-08", endDate: "2026-06-12"});
         expect(r.success).toBe(true);
     });
 
     it("lehnt ein Ende vor dem Beginn ab und nennt das Feld", () => {
-        const r = VacationCreateSchema.safeParse({userId, startDate: "2026-06-12", endDate: "2026-06-08"});
+        const r = VacationCreateSchema.safeParse({startDate: "2026-06-12", endDate: "2026-06-08"});
         expect(r.success).toBe(false);
         if (!r.success) expect(r.error.issues[0].path).toEqual(["endDate"]);
     });
 
     it("lehnt ein ungültiges Datum ab", () => {
-        expect(VacationCreateSchema.safeParse({userId, startDate: "2026-02-30", endDate: "2026-03-02"}).success).toBe(
-            false,
-        );
+        expect(VacationCreateSchema.safeParse({startDate: "2026-02-30", endDate: "2026-03-02"}).success).toBe(false);
     });
 
-    it("verlangt beide Daten und den User", () => {
-        expect(VacationCreateSchema.safeParse({userId, startDate: "2026-06-08"}).success).toBe(false);
-        expect(VacationCreateSchema.safeParse({startDate: "2026-06-08", endDate: "2026-06-09"}).success).toBe(false);
+    it("verlangt beide Daten", () => {
+        expect(VacationCreateSchema.safeParse({startDate: "2026-06-08"}).success).toBe(false);
+    });
+
+    it("übernimmt keine userId aus dem Body, der User steht im Pfad", () => {
+        const r = VacationCreateSchema.parse({userId, startDate: "2026-06-08", endDate: "2026-06-09"});
+        expect("userId" in r).toBe(false);
     });
 });
 

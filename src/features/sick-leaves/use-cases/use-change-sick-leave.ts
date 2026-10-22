@@ -28,7 +28,7 @@ export function useChangeSickLeave() {
             if (endDate !== sickLeave.endDate) patch.endDate = endDate;
             if (note !== sickLeave.note) patch.note = note;
             if (Object.keys(patch).length === 0) return;
-            await updateSickLeave(sickLeave.id, patch);
+            await updateSickLeave(sickLeave.userId, sickLeave.id, patch);
         },
         onSuccess: () => qc.invalidateQueries({queryKey: ["sick-leaves"]}),
     });

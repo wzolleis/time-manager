@@ -8,13 +8,11 @@ const name = z.string().trim().min(1, "Bitte einen Namen angeben").max(100);
 
 export const HolidaySchema = createSelectSchema(holidays);
 
-// userId muss ausdrücklich gesendet werden (null = für alle), damit ein vergessenes Feld
-// nicht versehentlich einen globalen Feiertag anlegt
+// Wem der Feiertag gehört, sagt der Pfad: /api/holidays für alle, /api/users/:userId/holidays für einen User
 export const HolidayCreateSchema = createInsertSchema(holidays, {
-    userId: z.string().uuid().nullable(),
     date: day,
     name,
-}).omit({id: true});
+}).omit({id: true, userId: true});
 
 // Beim Update ersetzt eine Verfeinerung die Definition des Felds samt Optionalität,
 // deshalb hier ausdrücklich .optional()

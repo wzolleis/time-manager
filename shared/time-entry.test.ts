@@ -32,7 +32,7 @@ describe("TimeEntryUpdateSchema", () => {
 });
 
 describe("TimeEntryCreateSchema", () => {
-    const base = {userId: "275f12fb-e116-4857-9f12-fbe116b857fb", type: "kommen"};
+    const base = {type: "kommen"};
 
     it("verlangt eine Zeit", () => {
         expect(TimeEntryCreateSchema.safeParse(base).success).toBe(false);

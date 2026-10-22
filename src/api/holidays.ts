@@ -1,14 +1,17 @@
 import {request} from "./http";
 import type {Holiday, HolidayCreate, HolidayUpdate} from "@shared/holiday";
 
+// userId null: die globalen Feiertage unter /api/holidays, sonst die eines Users unter /api/users/:userId/holidays
+const path = (userId: string | null) => (userId ? `/api/users/${userId}/holidays` : "/api/holidays");
+
 /** Ohne userId nur die globalen Feiertage, mit userId zusätzlich die eigenen dieses Users */
-export const fetchHolidays = (userId?: string) =>
-    request<Holiday[]>(userId ? `/api/holidays?userId=${userId}` : "/api/holidays");
+export const fetchHolidays = (userId?: string) => request<Holiday[]>(path(userId ?? null));
 
-export const createHoliday = (data: HolidayCreate) =>
-    request<Holiday>("/api/holidays", {method: "POST", body: JSON.stringify(data)});
+export const createHoliday = (userId: string | null, data: HolidayCreate) =>
+    request<Holiday>(path(userId), {method: "POST", body: JSON.stringify(data)});
 
-export const updateHoliday = (id: string, data: HolidayUpdate) =>
-    request<Holiday>(`/api/holidays/${id}`, {method: "PATCH", body: JSON.stringify(data)});
+export const updateHoliday = (userId: string | null, id: string, data: HolidayUpdate) =>
+    request<Holiday>(`${path(userId)}/${id}`, {method: "PATCH", body: JSON.stringify(data)});
 
-export const deleteHoliday = (id: string) => request<void>(`/api/holidays/${id}`, {method: "DELETE"});
+export const deleteHoliday = (userId: string | null, id: string) =>
+    request<void>(`${path(userId)}/${id}`, {method: "DELETE"});
