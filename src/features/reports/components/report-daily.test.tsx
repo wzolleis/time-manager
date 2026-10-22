@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
-import {cleanup, fireEvent, render, screen} from "@testing-library/react";
+import {cleanup, fireEvent, render, screen, waitFor} from "@testing-library/react";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {createMemoryHistory, createRouter, RouterProvider} from "@tanstack/react-router";
 import {routeTree} from "@/routeTree.gen";
@@ -35,11 +35,11 @@ function mockApi() {
     );
 }
 
-function renderPage() {
+function renderPage(path = "/user/reports/daily") {
     const router = createRouter({
         routeTree,
         defaultNotFoundComponent: NotFound,
-        history: createMemoryHistory({initialEntries: ["/user/reports/daily"]}),
+        history: createMemoryHistory({initialEntries: [path]}),
     });
     const queryClient = new QueryClient({defaultOptions: {queries: {retry: false}}});
     render(
@@ -49,6 +49,7 @@ function renderPage() {
             </UserProvider>
         </QueryClientProvider>,
     );
+    return router;
 }
 
 beforeEach(() => {
@@ -91,5 +92,26 @@ describe("Heute", () => {
         fireEvent.click(screen.getByRole("button", {name: "Vorheriger Tag"}));
         await screen.findByText("An diesem Tag keine Buchungen.");
         expect(screen.queryByRole("button", {name: "Kommen"})).toBeNull();
+    });
+
+    it("„Nächster Tag“ ändert die Adresse", async () => {
+        const router = renderPage();
+        await screen.findByRole("button", {name: "Kommen"});
+        fireEvent.click(screen.getByRole("button", {name: "Nächster Tag"}));
+        await waitFor(() => expect(router.state.location.pathname).toBe("/user/reports/daily/2026-10-15"));
+        await screen.findByText("An diesem Tag keine Buchungen.");
+    });
+
+    it("zeigt den Tag aus der Adresse", async () => {
+        renderPage("/user/reports/daily/2026-10-21");
+        await screen.findByText("An diesem Tag keine Buchungen.");
+        expect(screen.queryByRole("button", {name: "Kommen"})).toBeNull();
+        expect((screen.getByLabelText("Tag wählen") as HTMLInputElement).value).toBe("2026-10-21");
+    });
+
+    it("meldet einen ungültigen Tag mit Link auf heute", async () => {
+        renderPage("/user/reports/daily/2026-02-30");
+        expect(await screen.findByRole("alert")).toBeTruthy();
+        expect(screen.getByRole("link", {name: "Zum heutigen Tag"})).toBeTruthy();
     });
 });

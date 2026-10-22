@@ -4,7 +4,7 @@ description: Tag, Woche und Monat eines Berichts stehen im Pfad der Seite (/user
 type: change
 changes: today-report, weekly-report, monthly-report, yearly-report
 epics: report
-state: open
+state: resolved
 ---
 
 # Berichte verlinken

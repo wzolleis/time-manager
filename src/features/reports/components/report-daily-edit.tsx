@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useNavigate} from "@tanstack/react-router";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Summary} from "@/components/summary";
@@ -6,7 +6,6 @@ import {DataTable, type DataTableColumnDef} from "@/components/table/data-table"
 import {diffClass} from "@/lib/format";
 import {formatDate, formatDifference, formatDuration, formatTime, dayKindLabel} from "@shared/format";
 import {addDays} from "@shared/day-range";
-import {localDay} from "@shared/time-rules";
 import {EntryActions} from "@features/reports/components/time-entry-actions";
 import {TimeEntryCreateDialog} from "@features/reports/components/time-entry-create-dialog";
 import {StampCard} from "@features/reports/components/stamp-card";
@@ -45,14 +44,18 @@ const columns: DataTableColumnDef<DailyReportRow>[] = [
     },
 ];
 
-export function ReportDailyEdit() {
-    const [day, setDay] = useState(() => localDay(new Date()));
+/** day ist ein gültiger Tag "JJJJ-MM-TT", geprüft in ReportDailyPage */
+export function ReportDailyEdit({day}: {day: string}) {
+    const navigate = useNavigate();
     const report = useShowDailyReport(day);
     const {currentUser, today, totals} = report;
 
     if (!currentUser) {
         return <p className="text-sm text-muted-foreground">Bitte zuerst einen User anlegen und auswählen.</p>;
     }
+
+    // Blättern ändert die Adresse, der Zurück-Button des Browsers springt dann zum vorherigen Tag
+    const setDay = (target: string) => navigate({to: "/user/reports/daily/$day", params: {day: target}});
 
     return (
         <div className="space-y-4">

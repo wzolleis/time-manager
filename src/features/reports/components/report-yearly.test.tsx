@@ -88,6 +88,13 @@ describe("Jahresbericht", () => {
         expect(screen.getAllByRole("row")).toHaveLength(13); // Kopfzeile und zwölf Monate
     });
 
+    it("öffnet mit einem Klick auf den Monat den Monatsbericht", async () => {
+        renderPage("/user/reports/yearly/2026");
+        fireEvent.click(await screen.findByRole("link", {name: "Oktober"}));
+        expect(await screen.findByRole("heading", {level: 1, name: "Monatsbericht"})).toBeTruthy();
+        expect(screen.getByText("Test · Oktober 2026")).toBeTruthy();
+    });
+
     it("blättert über die Adresse und nicht vor das Jahr der ersten Buchung", async () => {
         renderPage("/user/reports/yearly/2026");
         await screen.findByText("Januar");

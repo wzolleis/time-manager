@@ -30,6 +30,9 @@ Geändert wird nach dem Skill `architecture` (`../../agents/.agents/skills/archi
 ## Wo der Bericht erscheint
 
 Nur unter dem Menüeintrag „Heute“, Route `/user/reports/daily` (`ReportDailyPage` zeigt `ReportDailyEdit`).
+Ein bestimmter Tag hat die Adresse `/user/reports/daily/2026-10-21` (Format `JJJJ-MM-TT`), ohne Tag zeigt die
+Seite heute. Ein ungültiger Tag (`2026-02-30`) zeigt eine Fehlermeldung mit dem Link „Zum heutigen Tag“. Der
+Wochenbericht verlinkt jeden Tag hierher (Change `../changes/report-links.md`).
 Die frühere Seite „Zeiterfassung“ (`/user/time-stamp`) gibt es nicht mehr, ihr Inhalt ist hier.
 
 ## Inhalt
@@ -172,8 +175,8 @@ dieser Art lässt `checkSequence` nicht mehr zu.
   - Pfeil „Vorheriger Tag“ (←) und Pfeil „Nächster Tag“ (→), je ein Tag
   - Datumsfeld „Tag wählen“, ein leerer Wert wird ignoriert
   - Button „Heute“, deaktiviert, solange heute angezeigt wird
-  - Der gewählte Tag steht nur im Zustand der Komponente, nicht in der URL. Nach dem Neuladen zeigt der
-    Bericht wieder heute.
+  - Der gewählte Tag steht in der Adresse. Pfeile, Datumsfeld und „Heute“ navigieren auf die Adresse des
+    neuen Tags, der Zurück-Button des Browsers springt zum vorherigen Tag.
 - **Button „Buchung nachtragen“** öffnet `TimeEntryCreateDialog` (Regel 9).
 - **Aktionen je Buchung** (`../../src/features/reports/components/time-entry-actions.tsx`):
   - „Bearbeiten“: Uhrzeit ändern, beim Kommen auch das Projekt. Der Tag bleibt gleich. Die Abfolge wird
@@ -216,7 +219,7 @@ Lesender Use Case: Views und Services, kein Repository. Alle Bausteine sind vorh
 | Komponente | `../../src/features/reports/components/stamp-card.tsx`                                            | `StampCard` mit Use Case `useStampTime` (stempeln, Status, fehlendes Gehen)                                                                                                        |
 | Komponente | `../../src/features/reports/utils/day-kind-label.ts`                                              | Hinweis zum Soll je `DayKind`                                                                                                                                                      |
 | Seite      | `../../src/features/reports/components/report-daily-page.tsx`                                     | `ReportDailyPage`                                                                                                                                                                  |
-| Route      | `../../src/routes/user/reports/daily.tsx`                                                         | `/user/reports/daily`, bindet nur `ReportDailyPage` ein                                                                                                                            |
+| Routen     | `../../src/routes/user/reports/daily/index.tsx`, `daily/$day.tsx`                                 | `/user/reports/daily` und `/user/reports/daily/$day`, binden nur `ReportDailyPage` ein                                                                                             |
 | Menü       | `../../src/application/navigation/nav-items.ts`                                                   | Eintrag `reports-daily`, Label „Heute“                                                                                                                                             |
 
 Hinweise:
@@ -254,4 +257,3 @@ Test muss fehlschlagen).
 Bewusst zurückgestellt, kommt später. Ohne Auftrag des Users nicht ändern:
 
 1. **Meldung zum fehlenden Gehen** steht im Raster der Karten und belegt dort einen Platz wie eine Karte.
-2. **Gewählter Tag nicht in der URL:** Ein Link auf einen bestimmten Tag ist nicht möglich.

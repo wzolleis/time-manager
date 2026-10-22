@@ -16,7 +16,11 @@ const columns: DataTableColumnDef<YearMonthTotals>[] = [
         id: "month",
         header: "Monat",
         enableSorting: false,
-        cell: ({row}) => formatMonthName(row.original.month),
+        cell: ({row}) => (
+            <Link to="/user/reports/monthly/$month" params={{month: row.original.month}} className="underline">
+                {formatMonthName(row.original.month)}
+            </Link>
+        ),
     },
     {
         accessorKey: "targetMs",

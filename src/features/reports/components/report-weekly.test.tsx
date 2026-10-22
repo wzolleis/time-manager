@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
-import {cleanup, render, screen} from "@testing-library/react";
+import {cleanup, fireEvent, render, screen, waitFor} from "@testing-library/react";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {createMemoryHistory, createRouter, RouterProvider} from "@tanstack/react-router";
 import {routeTree} from "@/routeTree.gen";
@@ -39,11 +39,11 @@ function mockApi(data: {holidays?: unknown[]} = {}) {
     );
 }
 
-function renderPage() {
+function renderPage(path = "/user/reports/weekly") {
     const router = createRouter({
         routeTree,
         defaultNotFoundComponent: NotFound,
-        history: createMemoryHistory({initialEntries: ["/user/reports/weekly"]}),
+        history: createMemoryHistory({initialEntries: [path]}),
     });
     const queryClient = new QueryClient({defaultOptions: {queries: {retry: false}}});
     render(
@@ -53,6 +53,7 @@ function renderPage() {
             </UserProvider>
         </QueryClientProvider>,
     );
+    return router;
 }
 
 beforeEach(() => {
@@ -93,5 +94,28 @@ describe("Wochenbericht", () => {
         expect(await screen.findByText("Feiertag: Testfeiertag")).toBeTruthy();
         expect(screen.getAllByText("krank")).toHaveLength(1);
         expect(screen.getByText(/1 Feiertag · 1 Krankheitstag(?!e)/)).toBeTruthy();
+    });
+
+    it("öffnet mit einem Klick auf den Tag den Tagesbericht dieses Tags", async () => {
+        mockApi();
+        const router = renderPage();
+        fireEvent.click(await screen.findByRole("link", {name: /15\.10\./}));
+        await waitFor(() => expect(router.state.location.pathname).toBe("/user/reports/daily/2026-10-15"));
+        expect(await screen.findByRole("heading", {level: 1, name: "Heute"})).toBeTruthy();
+    });
+
+    it("zeigt die Woche aus der Adresse und blättert über die Adresse", async () => {
+        mockApi();
+        const router = renderPage("/user/reports/weekly/2026-W53");
+        expect(await screen.findByText(/KW 53\/2026/)).toBeTruthy();
+        fireEvent.click(screen.getByRole("button", {name: "Nächste Woche"}));
+        await waitFor(() => expect(router.state.location.pathname).toBe("/user/reports/weekly/2027-W01"));
+    });
+
+    it("meldet eine ungültige Woche mit Link auf die aktuelle", async () => {
+        mockApi();
+        renderPage("/user/reports/weekly/2026-W54");
+        expect(await screen.findByRole("alert")).toBeTruthy();
+        expect(screen.getByRole("link", {name: "Zur aktuellen Woche"})).toBeTruthy();
     });
 });

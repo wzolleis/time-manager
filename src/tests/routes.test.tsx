@@ -47,6 +47,15 @@ const makeRouter = (path: string) =>
 // Routen mit Parametern ($id) oder Platzhaltern (*) brauchen konkrete Werte und bleiben außen vor
 const paths = Object.keys(makeRouter("/").routesByPath).filter((p) => !p.includes("$") && !p.includes("*"));
 
+// Routen mit Parametern: je Route eine konkrete Adresse und ihre Überschrift
+const PARAM_HEADINGS: Record<string, [string, string]> = {
+    "/user/reports/daily/$day": ["/user/reports/daily/2026-10-21", "Heute"],
+    "/user/reports/weekly/$week": ["/user/reports/weekly/2026-W43", "Wochenbericht"],
+    "/user/reports/monthly/$month": ["/user/reports/monthly/2026-10", "Monatsbericht"],
+    "/user/reports/yearly/$year": ["/user/reports/yearly/2026", "Jahresbericht"],
+};
+const paramRoutes = Object.keys(makeRouter("/").routesByPath).filter((p) => p.includes("$"));
+
 function mockApi() {
     vi.stubGlobal(
         "fetch",
@@ -100,9 +109,17 @@ describe("Routen", () => {
         expect([...paths].sort()).toEqual(Object.keys(HEADINGS).sort());
     });
 
-    describe.each(paths)("%s", (path) => {
+    it("jede Route mit Parametern hat eine Adresse im Test (und umgekehrt)", () => {
+        expect([...paramRoutes].sort()).toEqual(Object.keys(PARAM_HEADINGS).sort());
+    });
+
+    const addresses = [...paths.map((path) => [path, HEADINGS[path]]), ...Object.values(PARAM_HEADINGS)] as [
+        string,
+        string | undefined,
+    ][];
+
+    describe.each(addresses)("%s", (path, heading) => {
         it("wird angezeigt", async () => {
-            const heading = HEADINGS[path];
             expect(heading, `Für ${path} fehlt die Überschrift in HEADINGS`).toBeDefined();
 
             const router = makeRouter(path);
@@ -117,7 +134,7 @@ describe("Routen", () => {
             );
 
             // Die Seite zeigt ihre Überschrift (wirft, wenn sie nicht erscheint)
-            await screen.findByRole("heading", {level: 1, name: heading});
+            await screen.findByRole("heading", {level: 1, name: heading!});
 
             // Keine Weiterleitung, kein Fehler, keine Not-Found-Seite
             await waitFor(() => expect(router.state.status).toBe("idle"));

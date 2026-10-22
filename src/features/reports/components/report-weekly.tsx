@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {Link, useNavigate} from "@tanstack/react-router";
 import {Button} from "@/components/ui/button";
 import {Summary} from "@/components/summary";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
@@ -6,7 +6,7 @@ import {diffClass} from "@/lib/format";
 import {formatDayMonth, formatDayShort, formatDifference, formatDuration, dayKindLabel} from "@shared/format";
 import {addDays, localDayRange} from "@shared/day-range";
 import type {WeekDayTotals} from "@shared/time-report";
-import {localDay} from "@shared/time-rules";
+import {isoWeekId} from "@shared/week";
 import {ReportError} from "@features/reports/components/report-error";
 import {useShowWeeklyReport} from "@features/reports/use-cases/use-show-weekly-report";
 
@@ -21,7 +21,9 @@ const columns: DataTableColumnDef<DayRow>[] = [
         header: "Tag",
         cell: ({row}) => (
             <span className={row.original.isToday ? "font-semibold" : undefined}>
-                {formatDayShort(localDayRange(row.original.day).start)}
+                <Link to="/user/reports/daily/$day" params={{day: row.original.day}} className="underline">
+                    {formatDayShort(localDayRange(row.original.day).start)}
+                </Link>
                 {row.original.isToday && " · heute"}
                 {(row.original.kind === "vacation" ||
                     row.original.kind === "holiday" ||
@@ -69,14 +71,18 @@ const columns: DataTableColumnDef<DayRow>[] = [
     },
 ];
 
-export function ReportWeekly() {
-    const [anchor, setAnchor] = useState(() => localDay(new Date())); // irgendein Tag der Woche
+/** anchor ist irgendein Tag der Woche "JJJJ-MM-TT", aus der Adresse in ReportWeeklyPage */
+export function ReportWeekly({anchor}: {anchor: string}) {
+    const navigate = useNavigate();
     const report = useShowWeeklyReport(anchor);
     const {currentUser, today, totals, futureWeek, partial} = report;
 
     if (!currentUser) {
         return <p className="text-sm text-muted-foreground">Bitte zuerst einen User anlegen und auswählen.</p>;
     }
+
+    // Blättern ändert die Adresse, der Zurück-Button des Browsers springt dann zur vorherigen Woche
+    const setAnchor = (day: string) => navigate({to: "/user/reports/weekly/$week", params: {week: isoWeekId(day)}});
 
     const rows: DayRow[] = totals.days.map((d) => ({...d, isToday: d.day === today}));
     const first = totals.days[0].day;
