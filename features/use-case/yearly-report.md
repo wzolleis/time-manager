@@ -60,7 +60,7 @@ Beginn der Zeiterfassung), zeigt „–“ als Differenz, wie eine Woche im Mona
 
 ### Kennzahlen oben (Zusammenfassung)
 
-Drei Karten wie im Monatsbericht (Komponente `Summary` aus `../../src/components/summary.tsx`):
+Drei Karten wie im Monatsbericht (Komponente `MetricCard` aus `../../src/components/cards/metric-card.tsx`):
 
 - **Soll:** Soll aller Monate des Jahres. Im laufenden Jahr dazu der Hinweis „bis heute: …“.
 - **Arbeitszeit:** Summe des Jahres. Läuft gerade eine Arbeitszeit, der Hinweis „läuft noch“.

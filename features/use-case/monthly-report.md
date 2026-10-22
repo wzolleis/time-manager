@@ -47,7 +47,7 @@ oder nur ein Sonntag am Monatsende), zeigt „–“ als Differenz, so wie ein f
 
 ### Kennzahlen oben
 
-Drei Karten wie im Wochenbericht (Komponente `Summary` aus `../../src/components/summary.tsx`):
+Drei Karten wie im Wochenbericht (Komponente `MetricCard` aus `../../src/components/cards/metric-card.tsx`):
 
 - **Soll:** Soll aller Tage des Monats. Im laufenden Monat dazu der Hinweis „bis heute: …“.
 - **Arbeitszeit:** Summe des Monats. Läuft gerade eine Arbeitszeit, der Hinweis „läuft noch“.

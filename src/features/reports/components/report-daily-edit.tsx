@@ -1,7 +1,7 @@
 import {useNavigate} from "@tanstack/react-router";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
-import {Summary} from "@/components/summary";
+import {MetricCard} from "@/components/cards/metric-card";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {diffClass} from "@/lib/format";
 import {formatDate, formatDifference, formatDuration, formatTime, dayKindLabel} from "@shared/format";
@@ -100,18 +100,18 @@ export function ReportDailyEdit({day}: {day: string}) {
                         An diesem Tag fehlt das Gehen. Trage es mit „Buchung nachtragen" nach.
                     </p>
                 )}
-                <Summary
+                <MetricCard
                     title="Arbeitszeit"
                     value={formatDuration(totals.workMs)}
                     hint={totals.running ? "läuft noch" : undefined}
                 />
-                <Summary title="Pausen" value={formatDuration(totals.breakMs)} />
-                <Summary
+                <MetricCard title="Pausen" value={formatDuration(totals.breakMs)} />
+                <MetricCard
                     title="Soll"
                     value={formatDuration(report.target)}
                     hint={dayKindLabel(report.kind, report.holidayName)}
                 />
-                <Summary
+                <MetricCard
                     title="Differenz"
                     value={report.diff === null ? "–" : formatDifference(report.diff)}
                     valueClassName={report.diff === null ? undefined : diffClass(report.diff)}

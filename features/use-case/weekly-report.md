@@ -57,7 +57,7 @@ Hinweise in der Spalte „Tag“:
 
 ### Kennzahlen oben
 
-Vier Karten (Komponente `Summary` aus `../../src/components/summary.tsx`):
+Vier Karten (Komponente `MetricCard` aus `../../src/components/cards/metric-card.tsx`):
 
 - **Arbeitszeit:** Summe der Woche. Läuft gerade eine Arbeitszeit, der Hinweis „läuft noch“.
 - **Pausen:** Summe der Woche.

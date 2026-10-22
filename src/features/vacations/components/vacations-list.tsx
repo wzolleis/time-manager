@@ -4,7 +4,7 @@ import {germanDay, VACATION_DAYS_PER_YEAR} from "@shared/vacation-rules";
 import {VacationActions} from "@features/vacations/components/vacation-actions";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {VacationDialog} from "@features/vacations/components/vacation-dialog";
-import {Summary} from "@/components/summary";
+import {MetricCard} from "@/components/cards/metric-card";
 import {useShowVacations, type VacationRow as Row} from "@features/vacations/use-cases/use-show-vacations";
 import {localDay} from "@shared/time-rules";
 
@@ -68,9 +68,9 @@ export function VacationsList() {
 
             {loaded && (
                 <div className="grid gap-4 sm:grid-cols-3">
-                    <Summary title="Genommen" value={dayLabel(balance.taken)} hint="bis einschließlich heute" />
-                    <Summary title="Geplant" value={dayLabel(balance.planned)} hint="ab morgen eingetragen" />
-                    <Summary
+                    <MetricCard title="Genommen" value={dayLabel(balance.taken)} hint="bis einschließlich heute" />
+                    <MetricCard title="Geplant" value={dayLabel(balance.planned)} hint="ab morgen eingetragen" />
+                    <MetricCard
                         title="Ungeplant"
                         value={dayLabel(balance.unplanned)}
                         valueClassName={balance.over > 0 ? "text-destructive" : undefined}

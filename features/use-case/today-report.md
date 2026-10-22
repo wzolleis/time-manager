@@ -56,7 +56,7 @@ der aktuellen Zeit, an einem anderen Tag würde die Buchung nicht in der angezei
 
 ### Kennzahlen
 
-Vier Karten (Komponente `Summary` aus `../../src/components/summary.tsx`):
+Vier Karten (Komponente `MetricCard` aus `../../src/components/cards/metric-card.tsx`):
 
 | Karte       | Wert                                                                          | Hinweis unter dem Wert                                          |
 |-------------|-------------------------------------------------------------------------------|-----------------------------------------------------------------|

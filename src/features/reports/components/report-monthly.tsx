@@ -1,6 +1,6 @@
 import {Link, useNavigate} from "@tanstack/react-router";
 import {Button} from "@/components/ui/button";
-import {Summary} from "@/components/summary";
+import {MetricCard} from "@/components/cards/metric-card";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {diffClass} from "@/lib/format";
 import {formatDayMonth, formatDifference, formatDuration, formatMonth} from "@shared/format";
@@ -102,17 +102,17 @@ export function ReportMonthly({month}: {month: string}) {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-3">
-                <Summary
+                <MetricCard
                     title="Soll"
                     value={formatDuration(totals.targetMonthMs)}
                     hint={partial && !futureMonth ? `bis heute: ${formatDuration(totals.targetToDateMs)}` : undefined}
                 />
-                <Summary
+                <MetricCard
                     title="Arbeitszeit"
                     value={formatDuration(totals.workMs)}
                     hint={totals.running ? "läuft noch" : undefined}
                 />
-                <Summary
+                <MetricCard
                     title="Differenz"
                     value={futureMonth ? dash : formatDifference(totals.diffMs)}
                     valueClassName={futureMonth ? undefined : diffClass(totals.diffMs)}

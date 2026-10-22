@@ -2,7 +2,7 @@ import {Card, CardDescription, CardHeader, CardTitle} from "@/components/ui/card
 import {cn} from "@/lib/utils";
 
 /** Karte mit einer Kennzahl, z. B. Arbeitszeit oder Urlaubstage */
-export function Summary({
+export function MetricCard({
     title,
     value,
     hint,

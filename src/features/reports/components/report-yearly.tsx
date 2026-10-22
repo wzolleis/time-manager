@@ -1,6 +1,6 @@
 import {Link, useNavigate} from "@tanstack/react-router";
 import {Button} from "@/components/ui/button";
-import {Summary} from "@/components/summary";
+import {MetricCard} from "@/components/cards/metric-card";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {diffClass} from "@/lib/format";
 import {formatDifference, formatDuration, formatMonthName} from "@shared/format";
@@ -105,7 +105,7 @@ export function ReportYearly({year}: {year: string}) {
             ) : (
                 <>
                     <div className="grid gap-4 sm:grid-cols-3">
-                        <Summary
+                        <MetricCard
                             title="Soll"
                             value={formatDuration(totals.targetYearMs)}
                             hint={
@@ -114,12 +114,12 @@ export function ReportYearly({year}: {year: string}) {
                                     : undefined
                             }
                         />
-                        <Summary
+                        <MetricCard
                             title="Arbeitszeit"
                             value={formatDuration(totals.workMs)}
                             hint={totals.running ? "läuft noch" : undefined}
                         />
-                        <Summary
+                        <MetricCard
                             title="Differenz"
                             value={futureYear ? dash : formatDifference(totals.diffMs)}
                             valueClassName={futureYear ? undefined : diffClass(totals.diffMs)}

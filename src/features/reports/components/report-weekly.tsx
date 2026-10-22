@@ -1,6 +1,6 @@
 import {Link, useNavigate} from "@tanstack/react-router";
 import {Button} from "@/components/ui/button";
-import {Summary} from "@/components/summary";
+import {MetricCard} from "@/components/cards/metric-card";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {diffClass} from "@/lib/format";
 import {formatDayMonth, formatDayShort, formatDifference, formatDuration, dayKindLabel} from "@shared/format";
@@ -133,14 +133,14 @@ export function ReportWeekly({anchor}: {anchor: string}) {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Summary
+                <MetricCard
                     title="Arbeitszeit"
                     value={formatDuration(totals.workMs)}
                     hint={rows.some((r) => r.running) ? "läuft noch" : undefined}
                 />
-                <Summary title="Pausen" value={formatDuration(totals.breakMs)} />
-                <Summary title="Soll" value={formatDuration(totals.targetWeekMs)} hint={targetHint || undefined} />
-                <Summary
+                <MetricCard title="Pausen" value={formatDuration(totals.breakMs)} />
+                <MetricCard title="Soll" value={formatDuration(totals.targetWeekMs)} hint={targetHint || undefined} />
+                <MetricCard
                     title="Differenz"
                     value={futureWeek ? dash : formatDifference(totals.diffMs)}
                     valueClassName={futureWeek ? undefined : diffClass(totals.diffMs)}

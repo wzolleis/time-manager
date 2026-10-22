@@ -1,7 +1,7 @@
 import {useState} from "react";
 import {Button} from "@/components/ui/button";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
-import {Summary} from "@/components/summary";
+import {MetricCard} from "@/components/cards/metric-card";
 import {localDay} from "@shared/time-rules";
 import {germanDay} from "@shared/vacation-rules";
 import {SickLeaveActions} from "@features/sick-leaves/components/sick-leave-actions";
@@ -73,7 +73,7 @@ export function SickLeavesList() {
 
             {loaded && (
                 <div className="grid gap-4 sm:grid-cols-3">
-                    <Summary title="Krankheitstage" value={dayLabel(total)} hint="ohne Wochenenden und Feiertage" />
+                    <MetricCard title="Krankheitstage" value={dayLabel(total)} hint="ohne Wochenenden und Feiertage" />
                 </div>
             )}
 
