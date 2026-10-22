@@ -33,3 +33,6 @@ deno.lock
 
 # Local Netlify folder
 .netlify
+
+# Generierte Dateien (npm run features:overview)
+/generated

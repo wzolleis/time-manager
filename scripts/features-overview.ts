@@ -1,11 +1,12 @@
 // scripts/features-overview.ts
-// Erzeugt features/overview.md aus dem Frontmatter der Beschreibungen in features/ (name, type, epics, state).
+// Erzeugt generated/overview.md aus dem Frontmatter der Beschreibungen in features/ (name, type, epics, state).
 // Aufruf: node scripts/features-overview.ts
-import {readdirSync, readFileSync, writeFileSync} from "node:fs";
-import {join, relative} from "node:path";
+import {mkdirSync, readdirSync, readFileSync, writeFileSync} from "node:fs";
+import {dirname, join, relative} from "node:path";
 
 const FEATURES = "features";
-const OUTPUT = join(FEATURES, "overview.md");
+// generiert, nicht im Git (.gitignore)
+const OUTPUT = join("generated", "overview.md");
 const NO_EPIC = "(ohne Epic)";
 const STATE_ORDER = ["open", "later", "resolved"];
 
@@ -15,7 +16,7 @@ function markdownFiles(dir: string): string[] {
     return readdirSync(dir, {withFileTypes: true}).flatMap((entry) => {
         const path = join(dir, entry.name);
         if (entry.isDirectory()) return markdownFiles(path);
-        return entry.name.endsWith(".md") && path !== OUTPUT ? [path] : [];
+        return entry.name.endsWith(".md") ? [path] : [];
     });
 }
 
@@ -45,7 +46,7 @@ function describe(path: string): Description {
         type: fields.type || "story",
         epics: epics.length > 0 ? epics : [NO_EPIC],
         state: fields.state,
-        link: relative(FEATURES, path).split("\\").join("/"),
+        link: relative(dirname(OUTPUT), path).split("\\").join("/"),
     };
 }
 
@@ -57,6 +58,13 @@ function stateRank(state: string): number {
 
 function byStateThenName(a: Description, b: Description): number {
     return stateRank(a.state) - stateRank(b.state) || a.state.localeCompare(b.state) || a.name.localeCompare(b.name);
+}
+
+// Ortszeit, z. B. "22.10.2026, 23:15 Uhr"
+function timestamp(now: Date): string {
+    const two = (n: number) => String(n).padStart(2, "0");
+    const day = `${two(now.getDate())}.${two(now.getMonth() + 1)}.${now.getFullYear()}`;
+    return `${day}, ${two(now.getHours())}:${two(now.getMinutes())} Uhr`;
 }
 
 function table(header: string[], rows: string[][]): string {
@@ -74,11 +82,13 @@ const byEpic = descriptions
     .sort((a, b) => a.epic.localeCompare(b.epic) || byStateThenName(a.d, b.d))
     .map(({epic, d}, i, rows) => [i > 0 && rows[i - 1].epic === epic ? "" : epic, nameLink(d), d.type, d.state]);
 
-const content = `# Übersicht: Use Cases und Changes
+const content = `> **Erzeugt am ${timestamp(new Date())}** mit \`npm run features:overview\`.
+>
+> **Nicht von Hand bearbeiten.** Diese Datei wird aus dem Frontmatter der Beschreibungen in \`features/\` erzeugt
+> (\`name\`, \`type\`, \`epics\`, \`state\`) und bei jedem Lauf überschrieben. Änderungen gehören in die jeweilige
+> Beschreibung; danach das Skript erneut ausführen.
 
-> **Nicht manuell bearbeiten.** Diese Datei wird mit \`node scripts/features-overview.ts\` aus dem Frontmatter
-> der Beschreibungen in \`features/\` erzeugt (\`name\`, \`type\`, \`epics\`, \`state\`). Änderungen gehören in die
-> jeweilige Beschreibung; danach das Skript erneut ausführen.
+# Übersicht: Use Cases und Changes
 
 ## Nach Status
 
@@ -94,5 +104,6 @@ dann nach Name. Eine Beschreibung mit mehreren Epics steht bei jedem ihrer Epics
 ${table(["Epic", "Name", "Typ", "Status"], byEpic)}
 `;
 
+mkdirSync(dirname(OUTPUT), {recursive: true});
 writeFileSync(OUTPUT, content);
 console.log(`${OUTPUT}: ${descriptions.length} Beschreibungen`);

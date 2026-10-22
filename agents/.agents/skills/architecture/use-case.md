@@ -53,9 +53,9 @@ Change oder Setup:
 - **resolved**: umgesetzt. Wer eine Story oder einen Change umsetzt, setzt `state` im selben Commit auf
   `resolved`.
 
-Eine Übersicht aller Beschreibungen nach Epic und Status steht in `features/overview.md`. Sie wird mit
-`npm run features:overview` aus dem Frontmatter erzeugt und nicht von Hand bearbeitet (Skill `overview`).
-Ändert sich `name`, `type`, `epics` oder `state` einer Beschreibung, wird auch die Übersicht neu erzeugt.
+Eine Übersicht aller Beschreibungen nach Epic und Status erzeugt `npm run features:overview` aus dem
+Frontmatter in `generated/overview.md` (Skill `overview`). Sie wird nicht von Hand bearbeitet und nicht
+committet. Ändert sich `name`, `type`, `epics` oder `state` einer Beschreibung, wird sie neu erzeugt.
 
 ## Bausteine
 
