@@ -1,7 +1,7 @@
 // components/UserDropdown.tsx
 import React from "react";
 import {Avatar, DropdownMenu} from "@radix-ui/themes";
-import {KeyRound, LogOut, User as UserIcon} from "lucide-react";
+import {Info, KeyRound, LogOut, User as UserIcon, type LucideIcon} from "lucide-react";
 import {findNavigationItem} from "@/application/navigation/nav-utils";
 import type {NavItem} from "@/application/navigation/nav-items";
 import type {User} from "@shared/user";
@@ -11,16 +11,35 @@ interface UserDropdownProps {
     user: User | null;
     onLogout: () => void;
     onChangePassword: () => void;
+    onShowVersion: () => void;
     onItemSelected: (item: NavItem) => void;
 }
 
-export const UserDropdown: React.FC<UserDropdownProps> = ({user, onItemSelected, onLogout, onChangePassword}) => {
+type MenuItemProps = {
+    icon: LucideIcon;
+    label: string;
+    onClick?: () => void;
+    color?: "red";
+};
+
+const MenuItem = ({icon: Icon, label, onClick, color}: MenuItemProps) => (
+    <DropdownMenu.Item color={color} onClick={onClick}>
+        <Icon size={14} style={{marginRight: "6px"}} /> {label}
+    </DropdownMenu.Item>
+);
+
+export const UserDropdown: React.FC<UserDropdownProps> = ({
+    user,
+    onItemSelected,
+    onLogout,
+    onChangePassword,
+    onShowVersion,
+}) => {
     let fallbackInitials = user?.name ?? "J".toUpperCase();
 
     fallbackInitials = fallbackInitials.substring(0, 1);
 
     const settingsNavItem = findNavigationItem("settings")!;
-    const {icon: SettingsIcon} = settingsNavItem;
 
     return (
         <DropdownMenu.Root>
@@ -32,19 +51,16 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({user, onItemSelected,
             </DropdownMenu.Trigger>
 
             <DropdownMenu.Content variant="soft">
-                <DropdownMenu.Item>
-                    <UserIcon size={14} style={{marginRight: "6px"}} /> Mein Profil
-                </DropdownMenu.Item>
-                <DropdownMenu.Item onClick={() => onItemSelected(settingsNavItem)}>
-                    <SettingsIcon size={14} style={{marginRight: "6px"}} /> {settingsNavItem.label}
-                </DropdownMenu.Item>
-                <DropdownMenu.Item onClick={onChangePassword}>
-                    <KeyRound size={14} style={{marginRight: "6px"}} /> Passwort ändern
-                </DropdownMenu.Item>
+                <MenuItem icon={UserIcon} label="Mein Profil" />
+                <MenuItem
+                    icon={settingsNavItem.icon}
+                    label={settingsNavItem.label}
+                    onClick={() => onItemSelected(settingsNavItem)}
+                />
+                <MenuItem icon={KeyRound} label="Passwort ändern" onClick={onChangePassword} />
+                <MenuItem icon={Info} label="Version" onClick={onShowVersion} />
                 <DropdownMenu.Separator />
-                <DropdownMenu.Item color="red" onClick={onLogout}>
-                    <LogOut size={14} style={{marginRight: "6px"}} /> Log out
-                </DropdownMenu.Item>
+                <MenuItem icon={LogOut} label="Log out" color="red" onClick={onLogout} />
             </DropdownMenu.Content>
         </DropdownMenu.Root>
     );

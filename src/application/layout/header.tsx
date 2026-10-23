@@ -13,12 +13,14 @@ import {useQueryClient} from "@tanstack/react-query";
 import {logout, ME_QUERY_KEY} from "@/api/auth";
 import {clearUserData} from "@/query-client";
 import {PasswordChangeDialog} from "@features/auth/components/password-change-dialog";
+import {VersionDialog} from "@features/version/components/version-dialog";
 
 export const Header = () => {
     const navigate = useNavigate();
     const userContext = useCurrentUser();
     const qc = useQueryClient();
     const [passwordOpen, setPasswordOpen] = useState(false);
+    const [versionOpen, setVersionOpen] = useState(false);
 
     const handleLogout = async (): Promise<void> => {
         try {
@@ -66,8 +68,10 @@ export const Header = () => {
                     user={currentUser}
                     onLogout={handleLogout}
                     onChangePassword={() => setPasswordOpen(true)}
+                    onShowVersion={() => setVersionOpen(true)}
                 />
                 <PasswordChangeDialog open={passwordOpen} onOpenChange={setPasswordOpen} />
+                <VersionDialog open={versionOpen} onOpenChange={setVersionOpen} />
             </Flex>
         </Flex>
     );
