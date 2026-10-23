@@ -36,3 +36,6 @@ deno.lock
 
 # Generierte Dateien (npm run features:overview)
 /generated
+
+# Claude Code (persönliche Einstellungen)
+.claude/settings.local.json
