@@ -1,12 +1,12 @@
-import {useState} from "react";
+import {Link, useNavigate} from "@tanstack/react-router";
 import {Button} from "@/components/ui/button";
-import {Summary} from "@/components/summary";
+import {MetricCard} from "@/components/cards/metric-card";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {diffClass} from "@/lib/format";
 import {formatDayMonth, formatDayShort, formatDifference, formatDuration, dayKindLabel} from "@shared/format";
 import {addDays, localDayRange} from "@shared/day-range";
 import type {WeekDayTotals} from "@shared/time-report";
-import {localDay} from "@shared/time-rules";
+import {isoWeekId} from "@shared/week";
 import {ReportError} from "@features/reports/components/report-error";
 import {useShowWeeklyReport} from "@features/reports/use-cases/use-show-weekly-report";
 
@@ -21,7 +21,9 @@ const columns: DataTableColumnDef<DayRow>[] = [
         header: "Tag",
         cell: ({row}) => (
             <span className={row.original.isToday ? "font-semibold" : undefined}>
-                {formatDayShort(localDayRange(row.original.day).start)}
+                <Link to="/user/reports/daily/$day" params={{day: row.original.day}} className="underline">
+                    {formatDayShort(localDayRange(row.original.day).start)}
+                </Link>
                 {row.original.isToday && " · heute"}
                 {(row.original.kind === "vacation" ||
                     row.original.kind === "holiday" ||
@@ -69,14 +71,18 @@ const columns: DataTableColumnDef<DayRow>[] = [
     },
 ];
 
-export function ReportWeekly() {
-    const [anchor, setAnchor] = useState(() => localDay(new Date())); // irgendein Tag der Woche
+/** anchor ist irgendein Tag der Woche "JJJJ-MM-TT", aus der Adresse in ReportWeeklyPage */
+export function ReportWeekly({anchor}: {anchor: string}) {
+    const navigate = useNavigate();
     const report = useShowWeeklyReport(anchor);
     const {currentUser, today, totals, futureWeek, partial} = report;
 
     if (!currentUser) {
         return <p className="text-sm text-muted-foreground">Bitte zuerst einen User anlegen und auswählen.</p>;
     }
+
+    // Blättern ändert die Adresse, der Zurück-Button des Browsers springt dann zur vorherigen Woche
+    const setAnchor = (day: string) => navigate({to: "/user/reports/weekly/$week", params: {week: isoWeekId(day)}});
 
     const rows: DayRow[] = totals.days.map((d) => ({...d, isToday: d.day === today}));
     const first = totals.days[0].day;
@@ -127,14 +133,14 @@ export function ReportWeekly() {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Summary
+                <MetricCard
                     title="Arbeitszeit"
                     value={formatDuration(totals.workMs)}
                     hint={rows.some((r) => r.running) ? "läuft noch" : undefined}
                 />
-                <Summary title="Pausen" value={formatDuration(totals.breakMs)} />
-                <Summary title="Soll" value={formatDuration(totals.targetWeekMs)} hint={targetHint || undefined} />
-                <Summary
+                <MetricCard title="Pausen" value={formatDuration(totals.breakMs)} />
+                <MetricCard title="Soll" value={formatDuration(totals.targetWeekMs)} hint={targetHint || undefined} />
+                <MetricCard
                     title="Differenz"
                     value={futureWeek ? dash : formatDifference(totals.diffMs)}
                     valueClassName={futureWeek ? undefined : diffClass(totals.diffMs)}

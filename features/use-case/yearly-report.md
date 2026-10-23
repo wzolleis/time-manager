@@ -60,7 +60,7 @@ Beginn der Zeiterfassung), zeigt „–“ als Differenz, wie eine Woche im Mona
 
 ### Kennzahlen oben (Zusammenfassung)
 
-Drei Karten wie im Monatsbericht (Komponente `Summary` aus `../../src/components/summary.tsx`):
+Drei Karten wie im Monatsbericht (Komponente `MetricCard` aus `../../src/components/cards/metric-card.tsx`):
 
 - **Soll:** Soll aller Monate des Jahres. Im laufenden Jahr dazu der Hinweis „bis heute: …“.
 - **Arbeitszeit:** Summe des Jahres. Läuft gerade eine Arbeitszeit, der Hinweis „läuft noch“.
@@ -107,8 +107,8 @@ Drei Karten wie im Monatsbericht (Komponente `Summary` aus `../../src/components
   `../../src/features/reports/components/report-error.tsx`).
 - Menü: neuer Eintrag „Jahr“ nach „Monat“ (`reports-yearly`, `/user/reports/yearly`).
 - Ein MCP-Tool `get_yearly_report` folgt als eigener Change.
-- Links von jedem Monat zum Monatsbericht (`/user/reports/monthly/2026-10`) kommen mit dem Change
-  `../changes/report-links.md`, weil der Monatsbericht erst dann eine Adresse mit Monat hat.
+- Der Monat in der Spalte „Monat“ ist ein Link auf den Monatsbericht (`/user/reports/monthly/2026-10`), seit
+  dem Change `../changes/report-links.md`.
 
 ## Fragen zum Use Case
 

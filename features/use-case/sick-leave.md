@@ -131,7 +131,7 @@ Seite „Urlaub“ (`vacations-list.tsx`).
   „Jack · 2026 · 3 Einträge“. Rechts der Button „Krankmeldung eintragen“.
 - **Jahr wählen** wie auf der Seite „Urlaub“: Pfeil „Vorheriges Jahr“ (←), Pfeil „Nächstes Jahr“ (→) und
   Button „Dieses Jahr“, deaktiviert, solange das laufende Jahr angezeigt wird. Beim Öffnen das laufende Jahr.
-- **Kennzahl:** eine Karte (`Summary`) „Krankheitstage“ mit der Gesamtzahl des Jahres nach Regel 4.
+- **Kennzahl:** eine Karte (`MetricCard`) „Krankheitstage“ mit der Gesamtzahl des Jahres nach Regel 4.
 - **Tabelle** (`DataTable`) mit allen Krankmeldungen, die zumindest teilweise im Jahr liegen,
   aufsteigend nach Beginn:
 

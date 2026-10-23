@@ -33,6 +33,22 @@ export function isoWeek(day: string): {year: number; week: number} {
     return {year, week};
 }
 
+/** Die ISO-Woche eines Tages ("JJJJ-MM-TT") als "JJJJ-Www", z. B. "2026-W43". Das Jahr ist das ISO-Wochenjahr. */
+export function isoWeekId(day: string): string {
+    const {year, week} = isoWeek(day);
+    return `${year}-W${String(week).padStart(2, "0")}`;
+}
+
+/** Der Montag einer ISO-Woche "JJJJ-Www", bei ungültiger Angabe (z. B. "2026-W54", "2026-43") null */
+export function parseIsoWeek(id: string): string | null {
+    const match = /^(\d{4})-W(\d{2})$/.exec(id);
+    if (!match) return null;
+    const [, year, week] = match;
+    // Der 4. Januar liegt immer in KW 1, von dessen Montag aus wird gezählt
+    const monday = addDays(startOfWeek(`${year}-01-04`), (Number(week) - 1) * 7);
+    return isoWeekId(monday) === id ? monday : null;
+}
+
 /** Monat eines Tages ("JJJJ-MM-TT") als "JJJJ-MM" */
 export const monthOf = (day: string): string => day.slice(0, 7);
 
@@ -41,6 +57,9 @@ export function addMonths(month: string, delta: number): string {
     const [y, m] = month.split("-").map(Number);
     return new Date(Date.UTC(y, m - 1 + delta, 1)).toISOString().slice(0, 7);
 }
+
+/** Monat als "JJJJ-MM" mit Monat 01 bis 12 */
+export const isValidMonth = (month: string): boolean => /^\d{4}-(0[1-9]|1[0-2])$/.test(month);
 
 /** Jahr als vierstelliger Text "JJJJ", ab 1970 */
 export const isValidYear = (year: string): boolean => /^\d{4}$/.test(year) && Number(year) >= 1970;

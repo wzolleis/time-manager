@@ -47,7 +47,7 @@ oder nur ein Sonntag am Monatsende), zeigt „–“ als Differenz, so wie ein f
 
 ### Kennzahlen oben
 
-Drei Karten wie im Wochenbericht (Komponente `Summary` aus `../../src/components/summary.tsx`):
+Drei Karten wie im Wochenbericht (Komponente `MetricCard` aus `../../src/components/cards/metric-card.tsx`):
 
 - **Soll:** Soll aller Tage des Monats. Im laufenden Monat dazu der Hinweis „bis heute: …“.
 - **Arbeitszeit:** Summe des Monats. Läuft gerade eine Arbeitszeit, der Hinweis „läuft noch“.
@@ -110,7 +110,12 @@ Differenz, KW 42 hat das Soll von Mittwoch bis Freitag. Ein Monat vor dem 14.10.
   - Pfeil „Vorheriger Monat“ (←) und Pfeil „Nächster Monat“ (→)
   - Button „Dieser Monat“, entspricht „Diese Woche“ im Wochenbericht: springt zurück zum laufenden
     Monat und ist deaktiviert, solange der laufende Monat angezeigt wird
-- Beim Öffnen zeigt der Bericht den laufenden Monat.
+- Der Monat steht in der Adresse (Change `../changes/report-links.md`): `/user/reports/monthly/2026-10`, Format
+  `JJJJ-MM`. Ohne Monat zeigt der Bericht den laufenden Monat. Ein ungültiger Monat (`2026-13`) zeigt eine
+  Fehlermeldung mit dem Link „Zum aktuellen Monat“. Blättern und „Dieser Monat“ navigieren auf die Adresse des
+  neuen Monats.
+- Die Woche in der Spalte „Woche“ ist ein Link auf den Wochenbericht dieser Woche
+  (`/user/reports/weekly/JJJJ-Www`).
 - Laden und Fehler wie in `../../agents/.agents/skills/architecture/views.md`: „Lade…“, bei einem Fehler die Meldung mit „Erneut versuchen“
   (`ReportError` aus `../../src/features/reports/components/report-error.tsx`).
 
@@ -138,7 +143,7 @@ Lesender Use Case: Views und ein Service, kein Repository.
 | Use Case   | `../../src/features/reports/use-cases/use-show-monthly-report.ts` | neu: `useShowMonthlyReport(month)`, setzt Views und Service zusammen |
 | Komponente | `../../src/features/reports/components/report-monthly.tsx`        | neu: zeigt nur an                                                    |
 | Seite      | `../../src/features/reports/components/report-monthly-page.tsx`   | neu: `ReportMonthlyPage`                                             |
-| Route      | `../../src/routes/user/reports/monthly.tsx`                       | neu: `/user/reports/monthly`, bindet nur `ReportMonthlyPage` ein     |
+| Routen     | `../../src/routes/user/reports/monthly/index.tsx`, `monthly/$month.tsx` | `/user/reports/monthly` und `/user/reports/monthly/$month`, binden nur `ReportMonthlyPage` ein |
 | Menü       | `../../src/application/navigation/nav-items.ts`                   | neuer Eintrag „Monat“ nach `reports-weekly`, wie „Woche“             |
 
 Hinweise:

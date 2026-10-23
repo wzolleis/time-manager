@@ -20,7 +20,8 @@ Regeln nicht verletzen. Code:
 
 - Komponente `../../src/features/reports/components/report-weekly.tsx`, Seite
   `../../src/features/reports/components/report-weekly-page.tsx`, Route
-  `../../src/routes/user/reports/weekly.tsx` (`/user/reports/weekly`)
+  `../../src/routes/user/reports/weekly/index.tsx` (`/user/reports/weekly`) und `weekly/$week.tsx`
+  (`/user/reports/weekly/2026-W43`)
 - Use Case `../../src/features/reports/use-cases/use-show-weekly-report.ts`
 - Services `weekTotals`, `dayTotals` und `dayDiffMs` in `../../shared/time-report.ts`, `targetMs` und
   `dayKind` in `../../shared/target-hours.ts`, `weekDays` und `isoWeek` in `../../shared/week.ts`,
@@ -56,7 +57,7 @@ Hinweise in der Spalte „Tag“:
 
 ### Kennzahlen oben
 
-Vier Karten (Komponente `Summary` aus `../../src/components/summary.tsx`):
+Vier Karten (Komponente `MetricCard` aus `../../src/components/cards/metric-card.tsx`):
 
 - **Arbeitszeit:** Summe der Woche. Läuft gerade eine Arbeitszeit, der Hinweis „läuft noch“.
 - **Pausen:** Summe der Woche.
@@ -116,8 +117,11 @@ der Mittwoch noch offen ist), Differenz −4 Std („gegen das Soll bis heute“
 - Laden und Fehler wie in `../../agents/.agents/skills/architecture/views.md`: „Lade…“, bei einem Fehler
   die Meldung mit „Erneut versuchen“ (`ReportError` aus
   `../../src/features/reports/components/report-error.tsx`).
-- Geplant: Adresse mit Woche (`/user/reports/weekly/2026-W43`) und Links von jedem Tag zum Tagesbericht,
-  siehe `../changes/report-links.md`.
+- Adresse mit Woche (Change `../changes/report-links.md`): `/user/reports/weekly/2026-W43`, Format
+  `JJJJ-Www` mit dem ISO-Wochenjahr aus `isoWeekId` (der 31.12.2026 liegt in `2026-W53`). Ohne Woche zeigt
+  die Seite die aktuelle. Eine ungültige Woche (`2026-W54`) zeigt eine Fehlermeldung mit dem Link „Zur
+  aktuellen Woche“. Blättern und „Diese Woche“ navigieren auf die Adresse der neuen Woche.
+- Der Tag in der Spalte „Tag“ ist ein Link auf den Tagesbericht dieses Tags (`/user/reports/daily/JJJJ-MM-TT`).
 
 ## Fragen zum Use Case
 

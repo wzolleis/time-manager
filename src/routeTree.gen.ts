@@ -23,9 +23,12 @@ import { Route as UserSickLeavesRouteImport } from './routes/user/sick-leaves'
 import { Route as UserVacationsRouteImport } from './routes/user/vacations'
 import { Route as UserProjectsIndexRouteImport } from './routes/user/projects/index'
 import { Route as UserReportsIndexRouteImport } from './routes/user/reports/index'
-import { Route as UserReportsDailyRouteImport } from './routes/user/reports/daily'
-import { Route as UserReportsMonthlyRouteImport } from './routes/user/reports/monthly'
-import { Route as UserReportsWeeklyRouteImport } from './routes/user/reports/weekly'
+import { Route as UserReportsDailyIndexRouteImport } from './routes/user/reports/daily/index'
+import { Route as UserReportsDailyDayRouteImport } from './routes/user/reports/daily/$day'
+import { Route as UserReportsMonthlyIndexRouteImport } from './routes/user/reports/monthly/index'
+import { Route as UserReportsMonthlyMonthRouteImport } from './routes/user/reports/monthly/$month'
+import { Route as UserReportsWeeklyIndexRouteImport } from './routes/user/reports/weekly/index'
+import { Route as UserReportsWeeklyWeekRouteImport } from './routes/user/reports/weekly/$week'
 import { Route as UserReportsYearlyIndexRouteImport } from './routes/user/reports/yearly/index'
 import { Route as UserReportsYearlyYearRouteImport } from './routes/user/reports/yearly/$year'
 
@@ -99,19 +102,34 @@ const UserReportsIndexRoute = UserReportsIndexRouteImport.update({
   path: '/user/reports/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UserReportsDailyRoute = UserReportsDailyRouteImport.update({
-  id: '/user/reports/daily',
-  path: '/user/reports/daily',
+const UserReportsDailyIndexRoute = UserReportsDailyIndexRouteImport.update({
+  id: '/user/reports/daily/',
+  path: '/user/reports/daily/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UserReportsMonthlyRoute = UserReportsMonthlyRouteImport.update({
-  id: '/user/reports/monthly',
-  path: '/user/reports/monthly',
+const UserReportsDailyDayRoute = UserReportsDailyDayRouteImport.update({
+  id: '/user/reports/daily/$day',
+  path: '/user/reports/daily/$day',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UserReportsWeeklyRoute = UserReportsWeeklyRouteImport.update({
-  id: '/user/reports/weekly',
-  path: '/user/reports/weekly',
+const UserReportsMonthlyIndexRoute = UserReportsMonthlyIndexRouteImport.update({
+  id: '/user/reports/monthly/',
+  path: '/user/reports/monthly/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UserReportsMonthlyMonthRoute = UserReportsMonthlyMonthRouteImport.update({
+  id: '/user/reports/monthly/$month',
+  path: '/user/reports/monthly/$month',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UserReportsWeeklyIndexRoute = UserReportsWeeklyIndexRouteImport.update({
+  id: '/user/reports/weekly/',
+  path: '/user/reports/weekly/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UserReportsWeeklyWeekRoute = UserReportsWeeklyWeekRouteImport.update({
+  id: '/user/reports/weekly/$week',
+  path: '/user/reports/weekly/$week',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UserReportsYearlyIndexRoute = UserReportsYearlyIndexRouteImport.update({
@@ -138,12 +156,15 @@ export interface FileRoutesByFullPath {
   '/user/vacations': typeof UserVacationsRoute
   '/admin/': typeof AdminIndexRoute
   '/user/': typeof UserIndexRoute
-  '/user/reports/daily': typeof UserReportsDailyRoute
-  '/user/reports/monthly': typeof UserReportsMonthlyRoute
-  '/user/reports/weekly': typeof UserReportsWeeklyRoute
   '/user/projects/': typeof UserProjectsIndexRoute
   '/user/reports/': typeof UserReportsIndexRoute
+  '/user/reports/daily/$day': typeof UserReportsDailyDayRoute
+  '/user/reports/monthly/$month': typeof UserReportsMonthlyMonthRoute
+  '/user/reports/weekly/$week': typeof UserReportsWeeklyWeekRoute
   '/user/reports/yearly/$year': typeof UserReportsYearlyYearRoute
+  '/user/reports/daily/': typeof UserReportsDailyIndexRoute
+  '/user/reports/monthly/': typeof UserReportsMonthlyIndexRoute
+  '/user/reports/weekly/': typeof UserReportsWeeklyIndexRoute
   '/user/reports/yearly/': typeof UserReportsYearlyIndexRoute
 }
 export interface FileRoutesByTo {
@@ -159,12 +180,15 @@ export interface FileRoutesByTo {
   '/user/vacations': typeof UserVacationsRoute
   '/admin': typeof AdminIndexRoute
   '/user': typeof UserIndexRoute
-  '/user/reports/daily': typeof UserReportsDailyRoute
-  '/user/reports/monthly': typeof UserReportsMonthlyRoute
-  '/user/reports/weekly': typeof UserReportsWeeklyRoute
   '/user/projects': typeof UserProjectsIndexRoute
   '/user/reports': typeof UserReportsIndexRoute
+  '/user/reports/daily/$day': typeof UserReportsDailyDayRoute
+  '/user/reports/monthly/$month': typeof UserReportsMonthlyMonthRoute
+  '/user/reports/weekly/$week': typeof UserReportsWeeklyWeekRoute
   '/user/reports/yearly/$year': typeof UserReportsYearlyYearRoute
+  '/user/reports/daily': typeof UserReportsDailyIndexRoute
+  '/user/reports/monthly': typeof UserReportsMonthlyIndexRoute
+  '/user/reports/weekly': typeof UserReportsWeeklyIndexRoute
   '/user/reports/yearly': typeof UserReportsYearlyIndexRoute
 }
 export interface FileRoutesById {
@@ -181,12 +205,15 @@ export interface FileRoutesById {
   '/user/vacations': typeof UserVacationsRoute
   '/admin/': typeof AdminIndexRoute
   '/user/': typeof UserIndexRoute
-  '/user/reports/daily': typeof UserReportsDailyRoute
-  '/user/reports/monthly': typeof UserReportsMonthlyRoute
-  '/user/reports/weekly': typeof UserReportsWeeklyRoute
   '/user/projects/': typeof UserProjectsIndexRoute
   '/user/reports/': typeof UserReportsIndexRoute
+  '/user/reports/daily/$day': typeof UserReportsDailyDayRoute
+  '/user/reports/monthly/$month': typeof UserReportsMonthlyMonthRoute
+  '/user/reports/weekly/$week': typeof UserReportsWeeklyWeekRoute
   '/user/reports/yearly/$year': typeof UserReportsYearlyYearRoute
+  '/user/reports/daily/': typeof UserReportsDailyIndexRoute
+  '/user/reports/monthly/': typeof UserReportsMonthlyIndexRoute
+  '/user/reports/weekly/': typeof UserReportsWeeklyIndexRoute
   '/user/reports/yearly/': typeof UserReportsYearlyIndexRoute
 }
 export interface FileRouteTypes {
@@ -204,12 +231,15 @@ export interface FileRouteTypes {
     | '/user/vacations'
     | '/admin/'
     | '/user/'
-    | '/user/reports/daily'
-    | '/user/reports/monthly'
-    | '/user/reports/weekly'
     | '/user/projects/'
     | '/user/reports/'
+    | '/user/reports/daily/$day'
+    | '/user/reports/monthly/$month'
+    | '/user/reports/weekly/$week'
     | '/user/reports/yearly/$year'
+    | '/user/reports/daily/'
+    | '/user/reports/monthly/'
+    | '/user/reports/weekly/'
     | '/user/reports/yearly/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -225,12 +255,15 @@ export interface FileRouteTypes {
     | '/user/vacations'
     | '/admin'
     | '/user'
+    | '/user/projects'
+    | '/user/reports'
+    | '/user/reports/daily/$day'
+    | '/user/reports/monthly/$month'
+    | '/user/reports/weekly/$week'
+    | '/user/reports/yearly/$year'
     | '/user/reports/daily'
     | '/user/reports/monthly'
     | '/user/reports/weekly'
-    | '/user/projects'
-    | '/user/reports'
-    | '/user/reports/yearly/$year'
     | '/user/reports/yearly'
   id:
     | '__root__'
@@ -246,12 +279,15 @@ export interface FileRouteTypes {
     | '/user/vacations'
     | '/admin/'
     | '/user/'
-    | '/user/reports/daily'
-    | '/user/reports/monthly'
-    | '/user/reports/weekly'
     | '/user/projects/'
     | '/user/reports/'
+    | '/user/reports/daily/$day'
+    | '/user/reports/monthly/$month'
+    | '/user/reports/weekly/$week'
     | '/user/reports/yearly/$year'
+    | '/user/reports/daily/'
+    | '/user/reports/monthly/'
+    | '/user/reports/weekly/'
     | '/user/reports/yearly/'
   fileRoutesById: FileRoutesById
 }
@@ -268,12 +304,15 @@ export interface RootRouteChildren {
   UserVacationsRoute: typeof UserVacationsRoute
   AdminIndexRoute: typeof AdminIndexRoute
   UserIndexRoute: typeof UserIndexRoute
-  UserReportsDailyRoute: typeof UserReportsDailyRoute
-  UserReportsMonthlyRoute: typeof UserReportsMonthlyRoute
-  UserReportsWeeklyRoute: typeof UserReportsWeeklyRoute
   UserProjectsIndexRoute: typeof UserProjectsIndexRoute
   UserReportsIndexRoute: typeof UserReportsIndexRoute
+  UserReportsDailyDayRoute: typeof UserReportsDailyDayRoute
+  UserReportsMonthlyMonthRoute: typeof UserReportsMonthlyMonthRoute
+  UserReportsWeeklyWeekRoute: typeof UserReportsWeeklyWeekRoute
   UserReportsYearlyYearRoute: typeof UserReportsYearlyYearRoute
+  UserReportsDailyIndexRoute: typeof UserReportsDailyIndexRoute
+  UserReportsMonthlyIndexRoute: typeof UserReportsMonthlyIndexRoute
+  UserReportsWeeklyIndexRoute: typeof UserReportsWeeklyIndexRoute
   UserReportsYearlyIndexRoute: typeof UserReportsYearlyIndexRoute
 }
 
@@ -377,25 +416,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UserReportsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/user/reports/daily': {
-      id: '/user/reports/daily'
+    '/user/reports/daily/': {
+      id: '/user/reports/daily/'
       path: '/user/reports/daily'
-      fullPath: '/user/reports/daily'
-      preLoaderRoute: typeof UserReportsDailyRouteImport
+      fullPath: '/user/reports/daily/'
+      preLoaderRoute: typeof UserReportsDailyIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/user/reports/monthly': {
-      id: '/user/reports/monthly'
+    '/user/reports/daily/$day': {
+      id: '/user/reports/daily/$day'
+      path: '/user/reports/daily/$day'
+      fullPath: '/user/reports/daily/$day'
+      preLoaderRoute: typeof UserReportsDailyDayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/user/reports/monthly/': {
+      id: '/user/reports/monthly/'
       path: '/user/reports/monthly'
-      fullPath: '/user/reports/monthly'
-      preLoaderRoute: typeof UserReportsMonthlyRouteImport
+      fullPath: '/user/reports/monthly/'
+      preLoaderRoute: typeof UserReportsMonthlyIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/user/reports/weekly': {
-      id: '/user/reports/weekly'
+    '/user/reports/monthly/$month': {
+      id: '/user/reports/monthly/$month'
+      path: '/user/reports/monthly/$month'
+      fullPath: '/user/reports/monthly/$month'
+      preLoaderRoute: typeof UserReportsMonthlyMonthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/user/reports/weekly/': {
+      id: '/user/reports/weekly/'
       path: '/user/reports/weekly'
-      fullPath: '/user/reports/weekly'
-      preLoaderRoute: typeof UserReportsWeeklyRouteImport
+      fullPath: '/user/reports/weekly/'
+      preLoaderRoute: typeof UserReportsWeeklyIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/user/reports/weekly/$week': {
+      id: '/user/reports/weekly/$week'
+      path: '/user/reports/weekly/$week'
+      fullPath: '/user/reports/weekly/$week'
+      preLoaderRoute: typeof UserReportsWeeklyWeekRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/user/reports/yearly/': {
@@ -428,12 +488,15 @@ const rootRouteChildren: RootRouteChildren = {
   UserVacationsRoute: UserVacationsRoute,
   AdminIndexRoute: AdminIndexRoute,
   UserIndexRoute: UserIndexRoute,
-  UserReportsDailyRoute: UserReportsDailyRoute,
-  UserReportsMonthlyRoute: UserReportsMonthlyRoute,
-  UserReportsWeeklyRoute: UserReportsWeeklyRoute,
   UserProjectsIndexRoute: UserProjectsIndexRoute,
   UserReportsIndexRoute: UserReportsIndexRoute,
+  UserReportsDailyDayRoute: UserReportsDailyDayRoute,
+  UserReportsMonthlyMonthRoute: UserReportsMonthlyMonthRoute,
+  UserReportsWeeklyWeekRoute: UserReportsWeeklyWeekRoute,
   UserReportsYearlyYearRoute: UserReportsYearlyYearRoute,
+  UserReportsDailyIndexRoute: UserReportsDailyIndexRoute,
+  UserReportsMonthlyIndexRoute: UserReportsMonthlyIndexRoute,
+  UserReportsWeeklyIndexRoute: UserReportsWeeklyIndexRoute,
   UserReportsYearlyIndexRoute: UserReportsYearlyIndexRoute,
 }
 export const routeTree = rootRouteImport
