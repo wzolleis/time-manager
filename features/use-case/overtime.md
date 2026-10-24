@@ -3,7 +3,7 @@ name: overtime
 description: Die Anzahl der Überstunden wird angezeigt und es kann auch angepasst werden
 type: story
 epics: zeiterfassung, report
-state: open
+state: resolved
 ---
 
 # Überstunden

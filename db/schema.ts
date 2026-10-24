@@ -1,5 +1,5 @@
 // db/schema.ts
-import {char, date, datetime, index, mysqlEnum, mysqlTable, primaryKey, varchar} from "drizzle-orm/mysql-core";
+import {char, date, datetime, index, int, mysqlEnum, mysqlTable, primaryKey, varchar} from "drizzle-orm/mysql-core";
 
 export const vacations = mysqlTable(
     "vacations",
@@ -28,6 +28,16 @@ export const sickLeaves = mysqlTable(
     },
     (t) => [index("idx_sick_leaves_user_start").on(t.userId, t.startDate)],
 );
+
+// Korrektur der Überstunden: höchstens ein Eintrag je User, eine neue Korrektur überschreibt ihn.
+// Der Saldo wird nicht gespeichert, sondern ab dem Tag der Korrektur aus den Buchungen berechnet.
+export const overtime = mysqlTable("overtime", {
+    userId: char("user_id", {length: 36})
+        .primaryKey()
+        .references(() => users.id, {onDelete: "cascade"}), // ohne eigenen Endpoint zum Löschen
+    offset: int("offset").notNull(), // Minuten, negativ: Fehlzeit
+    created: datetime("created", {mode: "date", fsp: 0}).notNull(), // wann die Korrektur eingetragen wurde
+});
 
 // Feiertage: ohne user_id gelten sie für alle, mit user_id nur für diesen User
 export const holidays = mysqlTable(
