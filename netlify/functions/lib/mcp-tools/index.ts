@@ -1,6 +1,7 @@
 // netlify/functions/lib/mcp-tools/index.ts
 import type {McpServer} from "@modelcontextprotocol/sdk/server/mcp.js";
 import type {SessionUser} from "../session";
+import {registerOvertimeTools} from "./overtime";
 import {registerReportTools} from "./reports";
 import {registerTimeEntryTools} from "./time-entries";
 
@@ -8,4 +9,5 @@ import {registerTimeEntryTools} from "./time-entries";
 export function registerTools(server: McpServer, user: SessionUser): void {
     registerTimeEntryTools(server, user);
     registerReportTools(server, user);
+    registerOvertimeTools(server, user);
 }

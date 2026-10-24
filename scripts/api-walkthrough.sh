@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # API-Walkthrough: Anmeldung, Rollen, Users, Projekte, Zeitbuchungen, Projektzuordnung, Urlaub, Krankmeldung,
-# Feiertage, Rechte auf die Daten eines Users, Agent-Tokens, MCP-Server.
+# Überstunden, Feiertage, Rechte auf die Daten eines Users, Agent-Tokens, MCP-Server.
 # Läuft mit einem Wegwerf-User "vitest" und räumt hinterher auf.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -387,6 +387,17 @@ wt_step "'vitest' löscht keine Krankmeldung unter fremdem Pfad" 403 "notwendige
   DELETE "$ADMIN_SICK/$SICK2"
 wt_step "'vitest' löscht die eigene Krankmeldung" 204 "" DELETE "$SICK/$SICK2"
 
+# Überstunden: nur die eigenen, auch der Administrator sieht und korrigiert keine fremden
+OVT="/api/users/$USER_ID/overtime"
+wt_step "'vitest' hat noch keine Korrektur" 200 "null" GET "$OVT"
+wt_step "'vitest' setzt den Korrekturwert" 200 '"offset":210' PUT "$OVT" '{"offset":210}'
+wt_step "'vitest' überschreibt den Korrekturwert" 200 '"offset":-10' PUT "$OVT" '{"offset":-10}'
+wt_step "Mehr als 23:59 wird abgelehnt" 422 "höchstens ±23:59" PUT "$OVT" '{"offset":1440}'
+wt_step "Bruchteile von Minuten werden abgelehnt" 400 "offset" PUT "$OVT" '{"offset":1.5}'
+wt_step "'vitest' sieht keine fremden Überstunden" 403 "notwendigen Rechte" GET "/api/users/$ADMIN_ID/overtime"
+wt_step "'vitest' korrigiert keine fremden Überstunden" 403 "notwendigen Rechte" \
+  PUT "/api/users/$ADMIN_ID/overtime" '{"offset":60}'
+
 wt_step "'vitest' sieht die eigenen Buchungen" 200 "\"id\":\"$KOMMEN1\"" GET "$ENTRY"
 wt_step "'vitest' sieht eine eigene Buchung" 200 "\"id\":\"$KOMMEN1\"" GET "$ENTRY/$KOMMEN1"
 wt_step "'vitest' sieht keine fremden Buchungen" 403 "notwendigen Rechte" GET "$ADMIN_ENTRY"
@@ -414,6 +425,9 @@ wt_step "'vitest' sieht keine fremden Feiertage" 403 "notwendigen Rechte" GET "/
 wt_step "'vitest' löscht den eigenen Feiertag" 204 "" DELETE "$HOL/$OWN_HOL"
 
 WT_COOKIES="$ADMIN_COOKIES"
+wt_step "Der Administrator sieht die Überstunden von 'vitest' nicht" 403 "notwendigen Rechte" GET "$OVT"
+wt_step "Der Administrator korrigiert die Überstunden von 'vitest' nicht" 403 "notwendigen Rechte" \
+  PUT "$OVT" '{"offset":60}'
 wt_step "Der Administrator sieht die Urlaube von 'vitest'" 200 '"startDate":"2026-06-13"' GET "$VAC"
 wt_step "Der Administrator trägt einen Feiertag für 'vitest' ein" 201 "\"userId\":\"$USER_ID\"" POST "$HOL" \
   '{"date":"2026-06-26","name":"vitest vom Admin"}'
@@ -523,6 +537,15 @@ wt_step "GET auf /api/mcp" 405 "" GET $MCP
 wt_step "initialize" 200 '"name":"time-manager"' POST $MCP \
   "$(rpc initialize '{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"walkthrough","version":"1"}}')"
 wt_step "tools/list enthält die Tools" 200 '"name":"delete_time_entry"' POST $MCP "$(rpc tools/list '{}')"
+WT_TOKEN=""
+
+mcp_step "get_overtime zeigt die Korrektur" "$MCP_TOKEN" '"offsetMinutes":-10' get_overtime
+mcp_step "set_overtime_offset setzt +3:30" "$MCP_TOKEN" 'Korrektur gespeichert' set_overtime_offset \
+  '{"sign":"+","hours":3,"minutes":30}'
+mcp_step "get_overtime zeigt den neuen Wert" "$MCP_TOKEN" '"offset":"+3:30 h"' get_overtime
+WT_TOKEN="$MCP_TOKEN"
+wt_step "set_overtime_offset mit 24 Stunden" 200 '"isError":true' POST $MCP \
+  "$(tool set_overtime_offset '{"sign":"+","hours":24,"minutes":0}')"
 WT_TOKEN=""
 
 mcp_step "stamp Kommen" "$MCP_TOKEN" '"type":"kommen"' stamp '{"type":"kommen"}'

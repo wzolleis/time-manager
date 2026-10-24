@@ -23,6 +23,7 @@ const HEADINGS: Record<string, string> = {
     "/user/reports/weekly": "Wochenbericht",
     "/user/reports/monthly": "Monatsbericht",
     "/user/reports/yearly": "Jahresbericht",
+    "/user/reports/overtime": "Überstunden",
     "/user/vacations": "Urlaub",
     "/user/sick-leaves": "Krankmeldungen",
     "/user/projects": "Projekte",
@@ -69,6 +70,7 @@ function mockApi() {
             if (pathname === "/api/projects" || pathname === `${user}/time-entries`) return Response.json([]);
             if (pathname === `${user}/vacations`) return Response.json([]);
             if (pathname === `${user}/sick-leaves`) return Response.json([]);
+            if (pathname === `${user}/overtime`) return Response.json(null);
             if (pathname === "/api/holidays" || pathname === `${user}/holidays`) return Response.json([]);
             if (pathname === "/api/api-tokens" || pathname === "/api/admin/api-tokens") return Response.json([]);
 

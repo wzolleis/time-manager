@@ -9,6 +9,7 @@ import {
     LayoutDashboard,
     type LucideIcon,
     Parasol,
+    RotateCcwClock,
     Settings,
     Target,
     Thermometer,
@@ -26,6 +27,7 @@ export const navItemIds = [
     "reports-weekly",
     "reports-monthly",
     "reports-yearly",
+    "reports-overtime",
     "admin",
     "user",
     "users",
@@ -74,5 +76,6 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     {id: "reports-weekly", label: "Woche", icon: CalendarDays, to: "/user/reports/weekly", children: []},
     {id: "reports-monthly", label: "Monat", icon: CalendarRange, to: "/user/reports/monthly", children: []},
     {id: "reports-yearly", label: "Jahr", icon: CalendarSearch, to: "/user/reports/yearly", children: []},
+    {id: "reports-overtime", label: "Überstunden", icon: RotateCcwClock, to: "/user/reports/overtime", children: []},
     {id: "api-tokens", label: "Agent-Zugang", icon: KeyRound, to: "/user/api-tokens", children: []},
 ] as const;
