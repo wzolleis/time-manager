@@ -17,6 +17,8 @@ import {useChangeOvertime} from "@features/reports/use-cases/use-change-overtime
 const range = (n: number) => Array.from({length: n}, (_, i) => String(i));
 const HOURS = range(MAX_OFFSET_HOURS + 1);
 const MINUTES = range(60);
+// Unter dem Feld aufklappen und scrollen, statt über den Dialog hinaus zu wachsen
+const LIST = "max-h-60";
 
 /** offset: der gespeicherte Korrekturwert in Minuten, null: noch keine Korrektur */
 export function OvertimeDialog({offset}: {offset: number | null}) {
@@ -84,7 +86,7 @@ export function OvertimeDialog({offset}: {offset: number | null}) {
                                 <SelectTrigger id={`${uid}-hours`}>
                                     <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent position="popper" className={LIST}>
                                     {HOURS.map((h) => (
                                         <SelectItem key={h} value={h}>
                                             {h}
@@ -102,7 +104,7 @@ export function OvertimeDialog({offset}: {offset: number | null}) {
                                 <SelectTrigger id={`${uid}-minutes`}>
                                     <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent position="popper" className={LIST}>
                                     {MINUTES.map((m) => (
                                         <SelectItem key={m} value={m}>
                                             {m.padStart(2, "0")}
