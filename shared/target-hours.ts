@@ -2,13 +2,12 @@ import type {DayRange} from "./day-range";
 import {type HolidayDay, isHoliday} from "./holiday-rules";
 import {isSickDay} from "./sick-leave-rules";
 import {isVacationDay} from "./vacation-rules";
+import {type SettingHistory, valueOn} from "./user-setting-rules";
 import {weekdayIndex} from "./week";
 
 const HOUR = 3_600_000;
 
-export const DAILY_TARGET_MS = 8 * HOUR;
 export const WORKDAYS_PER_WEEK = 5; // Montag bis Freitag
-export const WEEKLY_TARGET_MS = DAILY_TARGET_MS * WORKDAYS_PER_WEEK; // 40 Stunden
 
 export type DayKind = "workday" | "weekend" | "untracked" | "holiday" | "sick" | "vacation"; // untracked: vor Beginn der Zeiterfassung
 
@@ -34,8 +33,9 @@ export function dayKind(
 }
 
 /**
- * Sollarbeitszeit eines Tages: an Arbeitstagen 8 Stunden, am Wochenende, an Feiertagen, an Krankheitstagen,
- * im Urlaub und vor Beginn der Zeiterfassung 0
+ * Sollarbeitszeit eines Tages: an Arbeitstagen das Soll aus den Einstellungen, das an diesem Tag gilt
+ * (Default 8 Stunden). Am Wochenende, an Feiertagen, an Krankheitstagen, im Urlaub und vor Beginn der
+ * Zeiterfassung 0.
  */
 export const targetMs = (
     day: string,
@@ -43,4 +43,6 @@ export const targetMs = (
     holidays: HolidayDay[],
     sickLeaves: DayRange[],
     trackingStart: string | null,
-): number => (dayKind(day, vacations, holidays, sickLeaves, trackingStart) === "workday" ? DAILY_TARGET_MS : 0);
+    soll: SettingHistory,
+): number =>
+    dayKind(day, vacations, holidays, sickLeaves, trackingStart) === "workday" ? valueOn(soll, day) * HOUR : 0;

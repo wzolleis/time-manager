@@ -398,6 +398,24 @@ wt_step "'vitest' sieht keine fremden Überstunden" 403 "notwendigen Rechte" GET
 wt_step "'vitest' korrigiert keine fremden Überstunden" 403 "notwendigen Rechte" \
   PUT "/api/users/$ADMIN_ID/overtime" '{"offset":60}'
 
+# Einstellungen: nur die eigenen. Der Walkthrough trägt nur einen Wert in ferner Zukunft ein und löscht ihn
+# wieder, damit er beliebig oft laufen kann (abgelaufene Werte lassen sich nicht löschen).
+SET="/api/users/$USER_ID/settings"
+SOLL_ID="fcf78946-28c3-4152-9abb-35af0c50cb8f"
+wt_step "'vitest' sieht die Einstellungen" 200 '"name":"Soll"' GET "$SET"
+wt_step "'vitest' plant ein neues Soll" 201 '"validFrom":"2099-01-01"' POST "$SET" \
+  "{\"settingId\":\"$SOLL_ID\",\"value\":\"6\",\"validFrom\":\"2099-01-01\"}"
+PLANNED=$(wt_id "$WT_BODY")
+wt_step "Mit eigenem Wert ist rückwirkend nicht erlaubt" 422 "in der Zukunft" POST "$SET" \
+  "{\"settingId\":\"$SOLL_ID\",\"value\":\"6\",\"validFrom\":\"2020-01-01\"}"
+wt_step "Derselbe Tag ein zweites Mal" 422 "schon einen Wert" POST "$SET" \
+  "{\"settingId\":\"$SOLL_ID\",\"value\":\"7\",\"validFrom\":\"2099-01-01\"}"
+wt_step "Soll über 10 Stunden wird abgelehnt" 422 "zwischen 1 und 10" POST "$SET" \
+  "{\"settingId\":\"$SOLL_ID\",\"value\":\"11\",\"validFrom\":\"2099-02-01\"}"
+wt_step "'vitest' ändert den geplanten Wert" 200 '"value":"7"' PATCH "$SET/$PLANNED" '{"value":"7"}'
+wt_step "'vitest' sieht keine fremden Einstellungen" 403 "notwendigen Rechte" GET "/api/users/$ADMIN_ID/settings"
+wt_step "'vitest' löscht den geplanten Wert" 204 "" DELETE "$SET/$PLANNED"
+
 wt_step "'vitest' sieht die eigenen Buchungen" 200 "\"id\":\"$KOMMEN1\"" GET "$ENTRY"
 wt_step "'vitest' sieht eine eigene Buchung" 200 "\"id\":\"$KOMMEN1\"" GET "$ENTRY/$KOMMEN1"
 wt_step "'vitest' sieht keine fremden Buchungen" 403 "notwendigen Rechte" GET "$ADMIN_ENTRY"
@@ -547,6 +565,15 @@ WT_TOKEN="$MCP_TOKEN"
 wt_step "set_overtime_offset mit 24 Stunden" 200 '"isError":true' POST $MCP \
   "$(tool set_overtime_offset '{"sign":"+","hours":24,"minutes":0}')"
 WT_TOKEN=""
+
+mcp_step "list_user_settings zeigt das Soll" "$MCP_TOKEN" '"name":"Soll"' list_user_settings
+mcp_step "set_user_setting plant ein Soll" "$MCP_TOKEN" 'Gespeichert' set_user_setting \
+  '{"name":"Soll","value":6,"validFrom":"2099-03-01"}'
+MCP_PLANNED=$(wt_id "$WT_BODY") # der einzige eigene Wert, list_user_settings hat sonst keine String-IDs
+mcp_error_step "set_user_setting mit unbekannter Einstellung" "$MCP_TOKEN" 'Unbekannte Einstellung' set_user_setting \
+  '{"name":"Gibtsnicht","value":1,"validFrom":"2099-03-01"}'
+mcp_step "delete_user_setting löscht den geplanten Wert" "$MCP_TOKEN" 'Gelöscht' delete_user_setting \
+  "{\"id\":\"$MCP_PLANNED\"}"
 
 mcp_step "stamp Kommen" "$MCP_TOKEN" '"type":"kommen"' stamp '{"type":"kommen"}'
 STAMP_ID=$(wt_id "$WT_BODY")

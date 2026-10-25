@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {Button} from "@/components/ui/button";
-import {germanDay, VACATION_DAYS_PER_YEAR} from "@shared/vacation-rules";
+import {germanDay} from "@shared/vacation-rules";
 import {VacationActions} from "@features/vacations/components/vacation-actions";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {VacationDialog} from "@features/vacations/components/vacation-dialog";
@@ -34,7 +34,7 @@ const dayLabel = (n: number) => (n === 1 ? "1 Tag" : `${n} Tage`);
 
 export function VacationsList() {
     const [year, setYear] = useState(() => Number(localDay(new Date()).slice(0, 4)));
-    const {currentUser, currentYear, rows, balance, isPending, error, retry} = useShowVacations(year);
+    const {currentUser, currentYear, rows, balance, allowed, isPending, error, retry} = useShowVacations(year);
     const loaded = !isPending && !error;
 
     if (!currentUser) {
@@ -48,7 +48,7 @@ export function VacationsList() {
                     <h1 className="text-2xl font-semibold">Urlaub</h1>
                     <p className="text-sm text-muted-foreground">
                         {currentUser.name} · {year} · {rows.length} {rows.length === 1 ? "Eintrag" : "Einträge"} ·{" "}
-                        {VACATION_DAYS_PER_YEAR} Urlaubstage im Jahr
+                        {allowed} Urlaubstage im Jahr
                     </p>
                 </div>
                 <VacationDialog label="Urlaub eintragen" variant="default" size="default" />

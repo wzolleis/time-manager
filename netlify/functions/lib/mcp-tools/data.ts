@@ -4,6 +4,8 @@ import {asc, eq, isNull, or} from "drizzle-orm";
 import {db} from "../db";
 import {holidays, projects, sickLeaves, vacations} from "../../../../db/schema";
 import {listEntries} from "../time-entries-store";
+import {loadSettingHistory} from "../user-settings-store";
+import {SOLL_SETTING_ID} from "../../../../shared/user-setting";
 import type {ReportData} from "./report-view";
 
 export const loadProjects = () => db.select().from(projects).orderBy(asc(projects.name));
@@ -28,5 +30,6 @@ export async function loadReportData(userId: string): Promise<ReportData> {
         .where(or(isNull(holidays.userId), eq(holidays.userId, userId)))
         .orderBy(asc(holidays.date));
     const sickRows = await loadSickLeaves(userId);
-    return {entries, projects: projectRows, vacations: vacationRows, holidays: holidayRows, sickLeaves: sickRows};
+    const soll = await loadSettingHistory(userId, SOLL_SETTING_ID);
+    return {entries, projects: projectRows, vacations: vacationRows, holidays: holidayRows, sickLeaves: sickRows, soll};
 }

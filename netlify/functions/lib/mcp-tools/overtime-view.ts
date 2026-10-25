@@ -31,6 +31,7 @@ export function overtimeReport(data: ReportData, correction: OvertimeRow | null,
         data.vacations,
         data.holidays,
         data.sickLeaves,
+        data.soll,
         localDay(now),
         now,
     );

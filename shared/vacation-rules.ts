@@ -1,5 +1,6 @@
 import {addDays, type DayRange, isInRanges, isValidDay} from "./day-range";
 import {type HolidayDay, isHoliday} from "./holiday-rules";
+import {type SettingHistory, valueOn} from "./user-setting-rules";
 import {weekdayIndex} from "./week";
 
 export type VacationRange = {id: string; startDate: string; endDate: string};
@@ -67,7 +68,9 @@ export function countVacationDays(start: string, end: string, holidays: HolidayD
     return count;
 }
 
-export const VACATION_DAYS_PER_YEAR = 30;
+/** Urlaubstage des Jahres aus den Einstellungen: es gilt der Wert vom 1. Januar (Regel 9) */
+export const vacationDaysOfYear = (vacationDays: SettingHistory, year: number): number =>
+    valueOn(vacationDays, `${year}-01-01`);
 
 /** Der Teil des Zeitraums, der im Jahr liegt (sonst null) */
 export function clipToYear(v: DayRange, year: number): DayRange | null {
@@ -108,6 +111,7 @@ export function vacationBalance(
     today: string,
     holidays: HolidayDay[],
     sickLeaves: DayRange[],
+    vacationDays: SettingHistory,
 ): VacationBalance {
     const count = (start: string, end: string) => countVacationDays(start, end, holidays, sickLeaves);
     let taken = 0;
@@ -128,11 +132,12 @@ export function vacationBalance(
     }
 
     const used = taken + planned;
+    const allowed = vacationDaysOfYear(vacationDays, year);
     return {
         taken,
         planned,
-        unplanned: Math.max(0, VACATION_DAYS_PER_YEAR - used),
-        over: Math.max(0, used - VACATION_DAYS_PER_YEAR),
+        unplanned: Math.max(0, allowed - used),
+        over: Math.max(0, used - allowed),
     };
 }
 
@@ -146,6 +151,7 @@ export function checkYearLimit(
     candidate: VacationRange,
     holidays: HolidayDay[],
     sickLeaves: DayRange[],
+    vacationDays: SettingHistory,
 ): string | null {
     const others = existing.filter((v) => v.id !== candidate.id); // beim Bearbeiten den alten Stand ersetzen
     const firstYear = Number(candidate.startDate.slice(0, 4));
@@ -154,9 +160,10 @@ export function checkYearLimit(
     for (let year = firstYear; year <= lastYear; year++) {
         const before = workdaysInYear(existing, year, holidays, sickLeaves);
         const after = workdaysInYear([...others, candidate], year, holidays, sickLeaves);
-        if (after > VACATION_DAYS_PER_YEAR && after > before) {
-            const free = Math.max(0, VACATION_DAYS_PER_YEAR - workdaysInYear(others, year, holidays, sickLeaves));
-            return `${year} wären es ${after} Urlaubstage, erlaubt sind ${VACATION_DAYS_PER_YEAR} (noch frei: ${free})`;
+        const allowed = vacationDaysOfYear(vacationDays, year);
+        if (after > allowed && after > before) {
+            const free = Math.max(0, allowed - workdaysInYear(others, year, holidays, sickLeaves));
+            return `${year} wären es ${after} Urlaubstage, erlaubt sind ${allowed} (noch frei: ${free})`;
         }
     }
     return null;
@@ -171,10 +178,11 @@ export function checkVacation(
     candidate: VacationRange,
     holidays: HolidayDay[],
     sickLeaves: DayRange[],
+    vacationDays: SettingHistory,
 ): string | null {
     const problem = checkRange(candidate.startDate, candidate.endDate);
     if (problem) return problem;
     const clash = findOverlap(existing, candidate);
     if (clash) return overlapMessage(clash);
-    return checkYearLimit(existing, candidate, holidays, sickLeaves);
+    return checkYearLimit(existing, candidate, holidays, sickLeaves, vacationDays);
 }

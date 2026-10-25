@@ -4,9 +4,12 @@ import {useCurrentUser} from "@/lib/user-context";
 import {useHolidays} from "@/views/holidays";
 import {useSickLeaves} from "@/views/sick-leaves";
 import {useVacations} from "@/views/vacations";
+import {useUserSettings} from "@/views/user-settings";
 import {localDay} from "@shared/time-rules";
+import {VACATION_DAYS_SETTING_ID} from "@shared/user-setting";
+import {historyOf} from "@shared/user-setting-rules";
 import type {Vacation} from "@shared/vacation";
-import {countVacationDays, dayCount, vacationBalance} from "@shared/vacation-rules";
+import {countVacationDays, dayCount, vacationBalance, vacationDaysOfYear} from "@shared/vacation-rules";
 
 export type VacationRow = Vacation & {days: number; workdays: number};
 
@@ -19,6 +22,8 @@ export function useShowVacations(year: number) {
     const vacations = useVacations(userId);
     const holidays = useHolidays(userId);
     const sickLeaves = useSickLeaves(userId); // Krankheitstage im Urlaub verbrauchen keinen Urlaubstag
+    const settings = useUserSettings(userId);
+    const vacationDays = useMemo(() => historyOf(settings.data, VACATION_DAYS_SETTING_ID), [settings.data]);
 
     const today = localDay(new Date(now));
 
@@ -35,8 +40,16 @@ export function useShowVacations(year: number) {
         [vacations.data, holidays.data, sickLeaves.data, year],
     );
     const balance = useMemo(
-        () => vacationBalance(vacations.data ?? [], year, today, holidays.data ?? [], sickLeaves.data ?? []),
-        [vacations.data, holidays.data, sickLeaves.data, year, today],
+        () =>
+            vacationBalance(
+                vacations.data ?? [],
+                year,
+                today,
+                holidays.data ?? [],
+                sickLeaves.data ?? [],
+                vacationDays,
+            ),
+        [vacations.data, holidays.data, sickLeaves.data, vacationDays, year, today],
     );
 
     return {
@@ -44,8 +57,9 @@ export function useShowVacations(year: number) {
         currentYear: Number(today.slice(0, 4)),
         rows,
         balance,
-        isPending: vacations.isPending || holidays.isPending || sickLeaves.isPending,
-        error: vacations.error ?? holidays.error ?? sickLeaves.error,
-        retry: () => Promise.all([vacations.refetch(), holidays.refetch(), sickLeaves.refetch()]),
+        allowed: vacationDaysOfYear(vacationDays, year), // Urlaubstage des Jahres aus den Einstellungen
+        isPending: vacations.isPending || holidays.isPending || sickLeaves.isPending || settings.isPending,
+        error: vacations.error ?? holidays.error ?? sickLeaves.error ?? settings.error,
+        retry: () => Promise.all([vacations.refetch(), holidays.refetch(), sickLeaves.refetch(), settings.refetch()]),
     };
 }

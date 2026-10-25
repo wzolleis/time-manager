@@ -39,6 +39,7 @@ export const navItemIds = [
     "projects-new",
     "api-tokens-admin",
     "api-tokens",
+    "user-settings",
 ] as const;
 export type NavItemId = ValuesOf<typeof navItemIds>;
 
@@ -68,6 +69,7 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     {id: "api-tokens-admin", label: "Agent-Zugänge", icon: KeyRound, to: "/admin/api-tokens", children: []},
     {id: "projects", label: "Projekte", icon: Target, to: "/user/projects", children: []},
     {id: "user", label: "User", icon: User, to: "/user", children: []},
+    {id: "user-settings", label: "Einstellungen", icon: Settings, to: "/user/settings", children: []},
     {id: "holidays", label: "Feiertage", icon: CalendarHeart, to: "/user/holidays", children: []},
     {id: "vacations", label: "Urlaube", icon: Parasol, to: "/user/vacations", children: []},
     {id: "sick-leaves", label: "Krankmeldungen", icon: Thermometer, to: "/user/sick-leaves", children: []},

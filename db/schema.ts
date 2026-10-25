@@ -1,5 +1,16 @@
 // db/schema.ts
-import {char, date, datetime, index, int, mysqlEnum, mysqlTable, primaryKey, varchar} from "drizzle-orm/mysql-core";
+import {
+    char,
+    date,
+    datetime,
+    index,
+    int,
+    mysqlEnum,
+    mysqlTable,
+    primaryKey,
+    uniqueIndex,
+    varchar,
+} from "drizzle-orm/mysql-core";
 
 export const vacations = mysqlTable(
     "vacations",
@@ -38,6 +49,35 @@ export const overtime = mysqlTable("overtime", {
     offset: int("offset").notNull(), // Minuten, negativ: Fehlzeit
     created: datetime("created", {mode: "date", fsp: 0}).notNull(), // wann die Korrektur eingetragen wurde
 });
+
+// Einstellungen, die ein User anpassen kann. Fest vorgegeben (Migration 0014), ihre IDs stehen in
+// shared/user-setting.ts. Der User legt keine neuen Einstellungen an, sondern nur Werte.
+export const userSettings = mysqlTable("user_settings", {
+    id: char("id", {length: 36}).primaryKey(),
+    name: varchar("name", {length: 50}).notNull().unique(),
+    description: varchar("description", {length: 500}).notNull(),
+    type: mysqlEnum("type", ["number", "string"]).notNull(),
+    unit: mysqlEnum("unit", ["hour", "day"]),
+    defaultValue: varchar("default_value", {length: 100}).notNull(), // gilt, solange der User keinen Wert hat
+    validFromUnit: mysqlEnum("valid_from_unit", ["day", "year"]).notNull(), // year: gültig ab einem 1. Januar
+});
+
+// Werte eines Users zu einer Einstellung. Jeder Wert gilt ab valid_from bis zum Tag vor dem nächsten Wert.
+export const userSettingValues = mysqlTable(
+    "user_setting_values",
+    {
+        id: char("id", {length: 36}).primaryKey(),
+        userId: char("user_id", {length: 36})
+            .notNull()
+            .references(() => users.id, {onDelete: "cascade"}),
+        settingId: char("setting_id", {length: 36})
+            .notNull()
+            .references(() => userSettings.id),
+        value: varchar("value", {length: 100}).notNull(), // als String, ausgewertet nach user_settings.type
+        validFrom: date("valid_from", {mode: "string"}).notNull(),
+    },
+    (t) => [uniqueIndex("uq_user_setting_values").on(t.userId, t.settingId, t.validFrom)],
+);
 
 // Feiertage: ohne user_id gelten sie für alle, mit user_id nur für diesen User
 export const holidays = mysqlTable(

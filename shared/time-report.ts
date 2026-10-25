@@ -3,6 +3,7 @@ import {type HolidayRange, holidayOn} from "./holiday-rules";
 import {withoutSickDays} from "./sick-leave-rules";
 import {dayKind, type DayKind, targetMs} from "./target-hours";
 import {type Booking, buildPeriods, firstBookingDay} from "./time-rules";
+import type {SettingHistory} from "./user-setting-rules";
 import {monthWeeks, yearMonths} from "./week";
 
 export type DayTotals = {
@@ -85,6 +86,7 @@ export function weekTotals(
     vacations: DayRange[],
     holidays: Pick<HolidayRange, "date" | "name">[],
     sickLeaves: DayRange[],
+    soll: SettingHistory,
     today: string,
     now: Date,
 ): WeekTotals {
@@ -93,7 +95,7 @@ export function weekTotals(
         const range = localDayRange(day);
         // Alle Buchungen gehen in die Summen ein, damit Nachtschichten am Tageswechsel stimmen
         const totals = dayTotals(entries, range, sickLeaves, now);
-        const target = targetMs(day, vacations, holidays, sickLeaves, trackingStart);
+        const target = targetMs(day, vacations, holidays, sickLeaves, trackingStart, soll);
 
         return {
             ...totals,
@@ -153,11 +155,12 @@ export function monthTotals(
     vacations: DayRange[],
     holidays: Pick<HolidayRange, "date" | "name">[],
     sickLeaves: DayRange[],
+    soll: SettingHistory,
     today: string,
     now: Date,
 ): MonthTotals {
     const parts = monthWeeks(month).map(({year, week, days}) => {
-        const t = weekTotals(entries, days, vacations, holidays, sickLeaves, today, now);
+        const t = weekTotals(entries, days, vacations, holidays, sickLeaves, soll, today, now);
         const row: MonthWeekTotals = {
             year,
             week,
@@ -211,11 +214,12 @@ export function yearTotals(
     vacations: DayRange[],
     holidays: Pick<HolidayRange, "date" | "name">[],
     sickLeaves: DayRange[],
+    soll: SettingHistory,
     today: string,
     now: Date,
 ): YearTotals {
     const parts = yearMonths(year).map((month) => {
-        const t = monthTotals(entries, month, vacations, holidays, sickLeaves, today, now);
+        const t = monthTotals(entries, month, vacations, holidays, sickLeaves, soll, today, now);
         const row: YearMonthTotals = {
             month,
             targetMs: t.targetMonthMs,

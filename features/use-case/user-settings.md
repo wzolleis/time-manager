@@ -3,14 +3,14 @@ name: user-settings
 description: Der User passt das Verhalten der Anwendung mit seinen Einstellungen an (Soll pro Tag, Urlaubstage pro Jahr). Jeder Wert gilt ab einem Tag, ältere Werte gelten für die Vergangenheit weiter.
 type: story
 epics: zeiterfassung, einstellungen
-state: open
+state: resolved
 ---
 
 # Einstellungen des Users
 „Der User kann seine Einstellungen sehen und bearbeiten.“
 
 ## Einstellungen
-Im Menü unter „User“ gibt es den Eintrag „Einstellungen“ (Route `/user/settings`).
+Im Menü unter „User“ gibt es als ersten Eintrag „Einstellungen“ (Route `/user/settings`).
 Ein Klick darauf zeigt die Einstellungsseite.
 Dort steht eine Tabelle mit den Spalten „Name“, „Wert“, „gültig ab“, „Status“ und „Beschreibung“:
 * Name = der Name der Einstellung
@@ -29,8 +29,7 @@ Pro Einstellung gibt es eine Zeile je Wert, also auch für ältere und geplante 
 | Soll        | number | hour    | 8       | ein Tag          | ganze Zahl 1–10   | Die Anzahl der Stunden, die pro Tag gearbeitet wird. Das heißt auch Soll.   |
 | Urlaubstage | number | day     | 30      | 1. Januar        | ganze Zahl ≥ 0    | Die Anzahl der Urlaubstage pro Jahr                                          |
 
-Hat der User keine eigenen Werte eingetragen, wird der Default angezeigt und hinter dem Wert steht
-„Default“. Der Default hat kein „gültig ab“, er gilt ab dem ersten Eintrag in der Zeiterfassung.
+Hat der User keine eigenen Werte eingetragen, wird der Default angezeigt. Der Default hat kein „gültig ab“, er gilt ab dem ersten Eintrag in der Zeiterfassung.
 
 Der User kann einen neuen Wert eintragen, aber keine neuen Einstellungen anlegen. Dazu wählt er den Wert
 und das Datum „gültig ab“. Beim Speichern wird ein neuer Eintrag angelegt und angezeigt. Der alte Wert
@@ -107,7 +106,7 @@ Verstöße gegen eine Regel liefern die Meldung der Regel zurück.
 
 ## Akzeptanzkriterien
 
-- Ohne eigene Werte zeigt die Seite Soll 8 und Urlaubstage 30 mit „Default“, Status „aktuell“.
+- Ohne eigene Werte zeigt die Seite Soll 8 und Urlaubstage 30 mit Status „aktuell“ und ohne „gültig ab“.
 - Ein neues Soll ab morgen erscheint als „geplant“. Ab morgen ist es „aktuell“ und der alte Wert „abgelaufen“.
 - Berichte vor dem neuen „gültig ab“ rechnen weiter mit dem alten Soll.
 - Ohne eigenen Wert lässt sich ein erstes Soll ab einem Tag in der Vergangenheit eintragen. Die Berichte

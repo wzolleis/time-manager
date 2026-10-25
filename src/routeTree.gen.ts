@@ -19,6 +19,7 @@ import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as UserIndexRouteImport } from './routes/user/index'
 import { Route as UserApiTokensRouteImport } from './routes/user/api-tokens'
 import { Route as UserHolidaysRouteImport } from './routes/user/holidays'
+import { Route as UserSettingsRouteImport } from './routes/user/settings'
 import { Route as UserSickLeavesRouteImport } from './routes/user/sick-leaves'
 import { Route as UserVacationsRouteImport } from './routes/user/vacations'
 import { Route as UserProjectsIndexRouteImport } from './routes/user/projects/index'
@@ -81,6 +82,11 @@ const UserApiTokensRoute = UserApiTokensRouteImport.update({
 const UserHolidaysRoute = UserHolidaysRouteImport.update({
   id: '/user/holidays',
   path: '/user/holidays',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UserSettingsRoute = UserSettingsRouteImport.update({
+  id: '/user/settings',
+  path: '/user/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UserSickLeavesRoute = UserSickLeavesRouteImport.update({
@@ -159,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminUsersRoute
   '/user/api-tokens': typeof UserApiTokensRoute
   '/user/holidays': typeof UserHolidaysRoute
+  '/user/settings': typeof UserSettingsRoute
   '/user/sick-leaves': typeof UserSickLeavesRoute
   '/user/vacations': typeof UserVacationsRoute
   '/admin/': typeof AdminIndexRoute
@@ -184,6 +191,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersRoute
   '/user/api-tokens': typeof UserApiTokensRoute
   '/user/holidays': typeof UserHolidaysRoute
+  '/user/settings': typeof UserSettingsRoute
   '/user/sick-leaves': typeof UserSickLeavesRoute
   '/user/vacations': typeof UserVacationsRoute
   '/admin': typeof AdminIndexRoute
@@ -210,6 +218,7 @@ export interface FileRoutesById {
   '/admin/users': typeof AdminUsersRoute
   '/user/api-tokens': typeof UserApiTokensRoute
   '/user/holidays': typeof UserHolidaysRoute
+  '/user/settings': typeof UserSettingsRoute
   '/user/sick-leaves': typeof UserSickLeavesRoute
   '/user/vacations': typeof UserVacationsRoute
   '/admin/': typeof AdminIndexRoute
@@ -237,6 +246,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/user/api-tokens'
     | '/user/holidays'
+    | '/user/settings'
     | '/user/sick-leaves'
     | '/user/vacations'
     | '/admin/'
@@ -262,6 +272,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/user/api-tokens'
     | '/user/holidays'
+    | '/user/settings'
     | '/user/sick-leaves'
     | '/user/vacations'
     | '/admin'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/user/api-tokens'
     | '/user/holidays'
+    | '/user/settings'
     | '/user/sick-leaves'
     | '/user/vacations'
     | '/admin/'
@@ -313,6 +325,7 @@ export interface RootRouteChildren {
   AdminUsersRoute: typeof AdminUsersRoute
   UserApiTokensRoute: typeof UserApiTokensRoute
   UserHolidaysRoute: typeof UserHolidaysRoute
+  UserSettingsRoute: typeof UserSettingsRoute
   UserSickLeavesRoute: typeof UserSickLeavesRoute
   UserVacationsRoute: typeof UserVacationsRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -400,6 +413,13 @@ declare module '@tanstack/react-router' {
       path: '/user/holidays'
       fullPath: '/user/holidays'
       preLoaderRoute: typeof UserHolidaysRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/user/settings': {
+      id: '/user/settings'
+      path: '/user/settings'
+      fullPath: '/user/settings'
+      preLoaderRoute: typeof UserSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/user/sick-leaves': {
@@ -505,6 +525,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminUsersRoute: AdminUsersRoute,
   UserApiTokensRoute: UserApiTokensRoute,
   UserHolidaysRoute: UserHolidaysRoute,
+  UserSettingsRoute: UserSettingsRoute,
   UserSickLeavesRoute: UserSickLeavesRoute,
   UserVacationsRoute: UserVacationsRoute,
   AdminIndexRoute: AdminIndexRoute,

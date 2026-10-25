@@ -9,6 +9,7 @@ import {type Booking, localDay} from "../../../../shared/time-rules";
 import {hasDbCode} from "../db-errors";
 import {RuleError} from "../rule-error";
 import {NotFoundError, type StoredEntry} from "../time-entries-store";
+import {SettingNotFoundError} from "../user-settings-store";
 
 const TZ = "Europe/Berlin";
 
@@ -93,6 +94,8 @@ export const fail = (message: string): CallToolResult => ({content: [{type: "tex
 export function errorResult(err: unknown): CallToolResult {
     if (err instanceof RuleError) return fail(err.message);
     if (err instanceof NotFoundError) return fail(NOT_FOUND); // auch eine fremde Buchung (Regel 3)
+    if (err instanceof SettingNotFoundError) return fail("Wert nicht gefunden"); // auch ein fremder Wert
+    if (hasDbCode(err, "ER_DUP_ENTRY")) return fail("Für diesen Tag gibt es schon einen Wert");
     if (hasDbCode(err, "ER_NO_REFERENCED_ROW_2")) return fail("Projekt existiert nicht");
     console.error(err);
     return fail("Interner Fehler");
