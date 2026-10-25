@@ -34,6 +34,7 @@ function mockApi(data: {holidays?: unknown[]} = {}) {
             if (pathname === `/api/users/${USER.id}/sick-leaves`) return Response.json([SICK]);
             if (pathname === `/api/users/${USER.id}/holidays`) return Response.json(data.holidays ?? []);
             if (["/api/projects", `/api/users/${USER.id}/vacations`].includes(pathname)) return Response.json([]);
+            if (pathname === `/api/users/${USER.id}/settings`) return Response.json({settings: [], values: []}); // nur Defaults
             return Response.json({error: `Nicht gemockt: ${pathname}`}, {status: 404});
         }),
     );

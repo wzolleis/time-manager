@@ -33,6 +33,7 @@ function mockApi() {
             if (["/api/projects", `${user}/vacations`, `${user}/holidays`, `${user}/sick-leaves`].includes(pathname)) {
                 return Response.json([]);
             }
+            if (pathname === `/api/users/${USER.id}/settings`) return Response.json({settings: [], values: []}); // nur Defaults
             return Response.json({error: `Nicht gemockt: ${pathname}`}, {status: 404});
         }),
     );

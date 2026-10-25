@@ -6,12 +6,15 @@ import {useProjects} from "@/views/projects";
 import {useSickLeaves} from "@/views/sick-leaves";
 import {useTimeEntries} from "@/views/time-entries";
 import {useVacations} from "@/views/vacations";
+import {useUserSettings} from "@/views/user-settings";
 import {localDayRange} from "@shared/day-range";
 import {holidayOn} from "@shared/holiday-rules";
 import {isSickDay} from "@shared/sick-leave-rules";
 import {dayKind, targetMs} from "@shared/target-hours";
 import {dayDiffMs, dayTotals} from "@shared/time-report";
 import {firstBookingDay, localDay, nextType} from "@shared/time-rules";
+import {SOLL_SETTING_ID} from "@shared/user-setting";
+import {historyOf} from "@shared/user-setting-rules";
 import type {EntryRow} from "@features/reports/time-entry-row";
 
 export type DailyReportRow = EntryRow & {ignored: boolean}; // ignored: am Krankheitstag, zählt nicht
@@ -27,6 +30,8 @@ export function useShowDailyReport(day: string) {
     const vacations = useVacations(userId);
     const holidays = useHolidays(userId);
     const sickLeaves = useSickLeaves(userId);
+    const settings = useUserSettings(userId);
+    const soll = useMemo(() => historyOf(settings.data, SOLL_SETTING_ID), [settings.data]);
 
     const today = localDay(new Date(now));
     const range = useMemo(() => localDayRange(day), [day]);
@@ -60,7 +65,7 @@ export function useShowDailyReport(day: string) {
     const vacationList = vacations.data ?? [];
     const holidayList = holidays.data ?? [];
     const sickList = sickLeaves.data ?? [];
-    const target = targetMs(day, vacationList, holidayList, sickList, report.trackingStart);
+    const target = targetMs(day, vacationList, holidayList, sickList, report.trackingStart, soll);
 
     return {
         currentUser,
@@ -73,8 +78,20 @@ export function useShowDailyReport(day: string) {
         kind: dayKind(day, vacationList, holidayList, sickList, report.trackingStart),
         holidayName: holidayOn(day, holidayList)?.name,
         diff: dayDiffMs(day, today, report.totals.workMs, target), // null: Zukunft oder freier Tag ohne Arbeit
-        isPending: entries.isPending || vacations.isPending || holidays.isPending || sickLeaves.isPending,
-        error: entries.error ?? vacations.error ?? holidays.error ?? sickLeaves.error,
-        retry: () => Promise.all([entries.refetch(), vacations.refetch(), holidays.refetch(), sickLeaves.refetch()]),
+        isPending:
+            entries.isPending ||
+            vacations.isPending ||
+            holidays.isPending ||
+            sickLeaves.isPending ||
+            settings.isPending,
+        error: entries.error ?? vacations.error ?? holidays.error ?? sickLeaves.error ?? settings.error,
+        retry: () =>
+            Promise.all([
+                entries.refetch(),
+                vacations.refetch(),
+                holidays.refetch(),
+                sickLeaves.refetch(),
+                settings.refetch(),
+            ]),
     };
 }

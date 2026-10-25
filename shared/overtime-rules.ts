@@ -3,6 +3,7 @@ import type {HolidayRange} from "./holiday-rules";
 import {targetMs} from "./target-hours";
 import {dayDiffMs, dayTotals} from "./time-report";
 import {type Booking, firstBookingDay, localDay} from "./time-rules";
+import type {SettingHistory} from "./user-setting-rules";
 
 export const MAX_OFFSET_HOURS = 23;
 export const MAX_OFFSET_MINUTES = MAX_OFFSET_HOURS * 60 + 59; // ±23:59
@@ -51,6 +52,7 @@ export function overtimeBalanceMs(
     vacations: DayRange[],
     holidays: Pick<HolidayRange, "date" | "name">[],
     sickLeaves: DayRange[],
+    soll: SettingHistory,
     today: string,
     now: Date,
 ): number {
@@ -66,7 +68,7 @@ export function overtimeBalanceMs(
     let sum = offsetMs;
     for (let day = start; day <= today; day = addDays(day, 1)) {
         const {workMs} = dayTotals(counted, localDayRange(day), sickLeaves, now);
-        const target = targetMs(day, vacations, holidays, sickLeaves, trackingStart);
+        const target = targetMs(day, vacations, holidays, sickLeaves, trackingStart, soll);
         sum += dayDiffMs(day, today, workMs, target) ?? 0;
     }
     return sum;

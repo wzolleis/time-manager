@@ -27,6 +27,7 @@ src/views/
 ├ vacations.ts       useVacations(userId)
 ├ sick-leaves.ts     useSickLeaves(userId)
 ├ overtime.ts        useOvertime(userId)
+├ user-settings.ts   useUserSettings(userId)
 ├ time-entries.ts    useTimeEntries(userId)
 ├ projects.ts        useProjects()
 ├ holidays.ts        useHolidays(userId), useGlobalHolidays()

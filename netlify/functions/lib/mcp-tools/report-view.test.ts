@@ -8,6 +8,7 @@ import {
     weeklyReport,
     WeeklyReportSchema,
 } from "./report-view";
+import {defaultHistory} from "../../../../shared/user-setting-rules";
 
 const entry = (id: string, type: StoredEntry["type"], iso: string, projectId: string | null = null): StoredEntry => ({
     id,
@@ -36,6 +37,7 @@ const data = (extra: Partial<ReportData> = {}): ReportData => ({
     vacations: [],
     holidays: [],
     sickLeaves: [],
+    soll: defaultHistory(8),
     ...extra,
 });
 

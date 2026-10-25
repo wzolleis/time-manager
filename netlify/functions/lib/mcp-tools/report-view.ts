@@ -16,6 +16,7 @@ import {isSickDay} from "../../../../shared/sick-leave-rules";
 import {dayKind, targetMs} from "../../../../shared/target-hours";
 import {dayDiffMs, dayTotals, monthTotals, type WeekDayTotals, weekTotals} from "../../../../shared/time-report";
 import {firstBookingDay, localDay} from "../../../../shared/time-rules";
+import type {SettingHistory} from "../../../../shared/user-setting-rules";
 import {isoWeek, weekDays} from "../../../../shared/week";
 import type {StoredEntry} from "../time-entries-store";
 import {dayShort, EntrySchema, entryView, mdTable, minutes, typeLabel} from "./view";
@@ -26,6 +27,7 @@ export type ReportData = {
     vacations: DayRange[];
     holidays: {date: string; name: string}[]; // globale und eigene
     sickLeaves: DayRange[];
+    soll: SettingHistory; // Soll aus den Einstellungen des Users
 };
 
 const dash = "–";
@@ -67,7 +69,7 @@ export function dailyReport(data: ReportData, day: string, now: Date) {
     const bookings = toBookings(data.entries);
     const trackingStart = firstBookingDay(bookings); // mit allen Buchungen, auch denen an Krankheitstagen
     const totals = dayTotals(bookings, range, data.sickLeaves, now);
-    const target = targetMs(day, data.vacations, data.holidays, data.sickLeaves, trackingStart);
+    const target = targetMs(day, data.vacations, data.holidays, data.sickLeaves, trackingStart, data.soll);
     const kind = dayKind(day, data.vacations, data.holidays, data.sickLeaves, trackingStart);
     const kindText = dayKindLabel(kind, holidayOn(day, data.holidays)?.name) ?? null;
     const diff = dayDiffMs(day, today, totals.workMs, target);
@@ -198,7 +200,16 @@ export function weeklyReport(data: ReportData, day: string, now: Date) {
     const today = localDay(now);
     const days = weekDays(day);
     const {year, week} = isoWeek(day);
-    const t = weekTotals(toBookings(data.entries), days, data.vacations, data.holidays, data.sickLeaves, today, now);
+    const t = weekTotals(
+        toBookings(data.entries),
+        days,
+        data.vacations,
+        data.holidays,
+        data.sickLeaves,
+        data.soll,
+        today,
+        now,
+    );
     const future = days[0] > today;
 
     const structured: z.infer<typeof WeeklyReportSchema> = {
@@ -267,7 +278,16 @@ export const MonthlyReportSchema = z.object({
 
 export function monthlyReport(data: ReportData, month: string, now: Date) {
     const today = localDay(now);
-    const t = monthTotals(toBookings(data.entries), month, data.vacations, data.holidays, data.sickLeaves, today, now);
+    const t = monthTotals(
+        toBookings(data.entries),
+        month,
+        data.vacations,
+        data.holidays,
+        data.sickLeaves,
+        data.soll,
+        today,
+        now,
+    );
     const future = `${month}-01` > today;
     const dayLabel = (day: string) => formatDayMonth(localDayRange(day).start);
 

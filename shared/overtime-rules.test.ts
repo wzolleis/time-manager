@@ -2,6 +2,9 @@
 import {describe, expect, it} from "vitest";
 import {balanceMinutes, checkOffset, formatOffset, fromOffset, overtimeBalanceMs, toOffset} from "./overtime-rules";
 import type {Booking} from "./time-rules";
+import {defaultHistory} from "./user-setting-rules";
+
+const SOLL = defaultHistory(8); // ohne eigene Werte
 
 const MIN = 60_000;
 
@@ -21,7 +24,7 @@ const firstWeek = [
 ];
 
 const balance = (correction: Parameters<typeof overtimeBalanceMs>[0], entries: Booking[], now: string) =>
-    overtimeBalanceMs(correction, entries, [], [], [], now.slice(0, 10), new Date(now));
+    overtimeBalanceMs(correction, entries, [], [], [], SOLL, now.slice(0, 10), new Date(now));
 
 describe("toOffset und fromOffset", () => {
     it("rechnet die Auswahl im Dialog in Minuten um", () => {
@@ -105,6 +108,7 @@ describe("overtimeBalanceMs", () => {
             vacation,
             [],
             [],
+            SOLL,
             "2026-10-14",
             new Date("2026-10-14T20:00:00Z"),
         );

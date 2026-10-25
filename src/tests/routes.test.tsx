@@ -26,6 +26,7 @@ const HEADINGS: Record<string, string> = {
     "/user/reports/overtime": "Überstunden",
     "/user/vacations": "Urlaub",
     "/user/sick-leaves": "Krankmeldungen",
+    "/user/settings": "Einstellungen",
     "/user/projects": "Projekte",
     "/user/holidays": "Feiertage",
     "/user/api-tokens": "Agent-Zugang",
@@ -75,6 +76,7 @@ function mockApi() {
             if (pathname === "/api/api-tokens" || pathname === "/api/admin/api-tokens") return Response.json([]);
 
             // Nicht gemockte Aufrufe fallen auf, statt still zu scheitern
+            if (pathname === `/api/users/${TEST_USER.id}/settings`) return Response.json({settings: [], values: []}); // nur Defaults
             return Response.json({error: `Nicht gemockt: ${pathname}`}, {status: 404});
         }),
     );

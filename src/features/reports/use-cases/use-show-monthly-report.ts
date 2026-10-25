@@ -6,9 +6,12 @@ import {useHolidays} from "@/views/holidays";
 import {useSickLeaves} from "@/views/sick-leaves";
 import {useTimeEntries} from "@/views/time-entries";
 import {useVacations} from "@/views/vacations";
+import {useUserSettings} from "@/views/user-settings";
 import {monthTotals} from "@shared/time-report";
 import {localDay} from "@shared/time-rules";
 import {monthOf} from "@shared/week";
+import {SOLL_SETTING_ID} from "@shared/user-setting";
+import {historyOf} from "@shared/user-setting-rules";
 
 /** Der User sieht seinen Monatsbericht für einen Monat "JJJJ-MM" */
 export function useShowMonthlyReport(month: string) {
@@ -20,6 +23,8 @@ export function useShowMonthlyReport(month: string) {
     const vacations = useVacations(userId);
     const holidays = useHolidays(userId);
     const sickLeaves = useSickLeaves(userId);
+    const settings = useUserSettings(userId);
+    const soll = useMemo(() => historyOf(settings.data, SOLL_SETTING_ID), [settings.data]);
 
     const today = localDay(new Date(now));
 
@@ -31,10 +36,11 @@ export function useShowMonthlyReport(month: string) {
                 vacations.data ?? [],
                 holidays.data ?? [],
                 sickLeaves.data ?? [],
+                soll,
                 today,
                 new Date(now),
             ),
-        [entries.data, vacations.data, holidays.data, sickLeaves.data, month, today, now],
+        [entries.data, vacations.data, holidays.data, sickLeaves.data, soll, month, today, now],
     );
 
     return {
@@ -43,8 +49,20 @@ export function useShowMonthlyReport(month: string) {
         totals,
         futureMonth: `${month}-01` > today,
         partial: totals.targetToDateMs !== totals.targetMonthMs,
-        isPending: entries.isPending || vacations.isPending || holidays.isPending || sickLeaves.isPending,
-        error: entries.error ?? vacations.error ?? holidays.error ?? sickLeaves.error,
-        retry: () => Promise.all([entries.refetch(), vacations.refetch(), holidays.refetch(), sickLeaves.refetch()]),
+        isPending:
+            entries.isPending ||
+            vacations.isPending ||
+            holidays.isPending ||
+            sickLeaves.isPending ||
+            settings.isPending,
+        error: entries.error ?? vacations.error ?? holidays.error ?? sickLeaves.error ?? settings.error,
+        retry: () =>
+            Promise.all([
+                entries.refetch(),
+                vacations.refetch(),
+                holidays.refetch(),
+                sickLeaves.refetch(),
+                settings.refetch(),
+            ]),
     };
 }

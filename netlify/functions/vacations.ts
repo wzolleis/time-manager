@@ -12,6 +12,8 @@ import {IdSchema, isRoutePath, notFound, pathParams} from "./lib/id";
 import {ensureAccess, forbidden, ForbiddenError} from "./lib/roles";
 import {type Session, withSession} from "./lib/session";
 import {RuleError, ruleViolation} from "./lib/rule-error";
+import {loadSettingHistory} from "./lib/user-settings-store";
+import {VACATION_DAYS_SETTING_ID} from "../../shared/user-setting";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Executor = Pick<typeof db, "select">;
@@ -88,6 +90,7 @@ const handler = async (req: Request, _context: Context, session: Session) => {
                         candidate,
                         await userHolidays(tx, userId),
                         await userSickLeaves(tx, userId),
+                        await loadSettingHistory(userId, VACATION_DAYS_SETTING_ID, tx),
                     );
                     if (overLimit) throw new RuleError(overLimit);
                     await tx.insert(vacations).values({id, userId, ...input});
@@ -135,6 +138,7 @@ const handler = async (req: Request, _context: Context, session: Session) => {
                     next,
                     await userHolidays(tx, userId),
                     await userSickLeaves(tx, userId),
+                    await loadSettingHistory(userId, VACATION_DAYS_SETTING_ID, tx),
                 );
                 if (overLimit) throw new RuleError(overLimit);
 

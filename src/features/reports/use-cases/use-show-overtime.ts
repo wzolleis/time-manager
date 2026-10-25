@@ -7,8 +7,11 @@ import {useOvertime} from "@/views/overtime";
 import {useSickLeaves} from "@/views/sick-leaves";
 import {useTimeEntries} from "@/views/time-entries";
 import {useVacations} from "@/views/vacations";
+import {useUserSettings} from "@/views/user-settings";
 import {overtimeBalanceMs} from "@shared/overtime-rules";
 import {localDay} from "@shared/time-rules";
+import {SOLL_SETTING_ID} from "@shared/user-setting";
+import {historyOf} from "@shared/user-setting-rules";
 
 /** Der User sieht seine Überstunden: den Saldo und die letzte Korrektur */
 export function useShowOvertime() {
@@ -21,6 +24,8 @@ export function useShowOvertime() {
     const vacations = useVacations(userId);
     const holidays = useHolidays(userId);
     const sickLeaves = useSickLeaves(userId);
+    const settings = useUserSettings(userId);
+    const soll = useMemo(() => historyOf(settings.data, SOLL_SETTING_ID), [settings.data]);
 
     const today = localDay(new Date(now));
     const bookings = useMemo(() => (entries.data ?? []).map(toBooking), [entries.data]);
@@ -37,13 +42,14 @@ export function useShowOvertime() {
                 vacations.data ?? [],
                 holidays.data ?? [],
                 sickLeaves.data ?? [],
+                soll,
                 today,
                 new Date(now),
             ),
-        [correction, bookings, vacations.data, holidays.data, sickLeaves.data, today, now],
+        [correction, bookings, vacations.data, holidays.data, sickLeaves.data, soll, today, now],
     );
 
-    const views = [overtime, entries, vacations, holidays, sickLeaves];
+    const views = [overtime, entries, vacations, holidays, sickLeaves, settings];
     return {
         currentUser,
         balanceMs,

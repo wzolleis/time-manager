@@ -4,7 +4,10 @@ import {useCurrentUser} from "@/lib/user-context";
 import {useHolidays} from "@/views/holidays";
 import {useSickLeaves} from "@/views/sick-leaves";
 import {useVacations} from "@/views/vacations";
+import {useUserSettings} from "@/views/user-settings";
 import {checkVacation, countVacationDays} from "@shared/vacation-rules";
+import {VACATION_DAYS_SETTING_ID} from "@shared/user-setting";
+import {historyOf} from "@shared/user-setting-rules";
 
 type Addition = {startDate: string; endDate: string};
 
@@ -16,6 +19,7 @@ export function useAddVacation() {
     const vacations = useVacations(currentUser?.id);
     const holidays = useHolidays(currentUser?.id);
     const sickLeaves = useSickLeaves(currentUser?.id); // Krankheitstage im Urlaub verbrauchen keinen Urlaubstag
+    const settings = useUserSettings(currentUser?.id); // Urlaubstage des Jahres
 
     const save = useMutation({
         mutationFn: (data: Addition) => createVacation(currentUser!.id, data),
@@ -31,6 +35,7 @@ export function useAddVacation() {
                 {id: "neu", startDate, endDate},
                 holidays.data ?? [],
                 sickLeaves.data ?? [],
+                historyOf(settings.data, VACATION_DAYS_SETTING_ID),
             ),
         workdays: ({startDate, endDate}: Addition) =>
             countVacationDays(startDate, endDate, holidays.data ?? [], sickLeaves.data ?? []),

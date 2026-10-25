@@ -87,6 +87,7 @@ Query Keys beginnen immer mit dem Namen des Aggregats. Danach folgen Parameter, 
 | Urlaube            | `["vacations", userId]`                          | `["vacations"]`                 |
 | Krankmeldungen     | `["sick-leaves", userId]`                        | `["sick-leaves"]`               |
 | Überstunden        | `["overtime", userId]`                           | `["overtime"]`                  |
+| Einstellungen      | `["user-settings", userId]`                      | `["user-settings"]`             |
 | Buchungen          | `["time-entries", userId]`                       | `["time-entries"]`              |
 | Projekte           | `["projects"]`                                   | `["projects"]`                  |
 | Feiertage          | `["holidays", userId]`, `["holidays", "global"]` | `["holidays"]`                  |
