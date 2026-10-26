@@ -4,8 +4,8 @@ import {cleanup, fireEvent, render, screen, waitFor, within} from "@testing-libr
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {createMemoryHistory, createRouter, RouterProvider} from "@tanstack/react-router";
 import {routeTree} from "@/routeTree.gen";
-import {UserProvider} from "@/components/user-provider";
-import {NotFound} from "@/components/navigation/not-found";
+import {UserProvider} from "@/components/login/user-provider";
+import {NotFound} from "@/application/layout/not-found";
 import {SOLL_SETTING_ID, VACATION_DAYS_SETTING_ID} from "@shared/user-setting";
 
 const USER = {

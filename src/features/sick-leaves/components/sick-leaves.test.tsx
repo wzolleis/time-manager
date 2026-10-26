@@ -4,8 +4,8 @@ import {cleanup, fireEvent, render, screen} from "@testing-library/react";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {createMemoryHistory, createRouter, RouterProvider} from "@tanstack/react-router";
 import {routeTree} from "@/routeTree.gen";
-import {UserProvider} from "@/components/user-provider";
-import {NotFound} from "@/components/navigation/not-found";
+import {UserProvider} from "@/components/login/user-provider";
+import {NotFound} from "@/application/layout/not-found";
 
 const USER = {
     id: "275f12fb-e116-4857-9f12-fbe116b857fb",

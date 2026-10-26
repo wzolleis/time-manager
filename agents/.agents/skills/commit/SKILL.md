@@ -16,6 +16,8 @@ description: Committet alle gestagten, nicht gestagten und neuen Änderungen als
    ```
    Schlägt einer der Befehle fehl, wird nicht committet. Die Fehler dem User melden. Meldet nur
    `format:check` Abweichungen, mit `npm run format` formatieren und die Prüfungen wiederholen.
+   Neue und verschobene Dateien unter `src/` nach dem Skill `ui-modules` prüfen. Bei einem Verstoß
+   wird nur committet, wenn der User ihn ausdrücklich bestätigt.
 3. Die Änderungen nach ihrem Zweck gruppieren. Bilden sie eine einzige Änderung, gibt es einen Commit;
    voneinander unabhängige Arbeiten kommen in getrennte Commits.
 4. Jede offene Änderung committen, auch Arbeit, die nichts mit dem aktuellen Gespräch zu tun hat.
