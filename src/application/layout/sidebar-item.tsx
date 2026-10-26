@@ -26,7 +26,7 @@ export function SidebarItem({node}: {node: NavNode}) {
                     <button
                         type="button"
                         onClick={() => setOpen((o) => !o)}
-                        className="p-2 rounded-md hover:bg-muted"
+                        className="p-2 pointer-coarse:p-3.5 rounded-md hover:bg-muted"
                         aria-label={open ? "Einklappen" : "Ausklappen"}
                     >
                         <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />

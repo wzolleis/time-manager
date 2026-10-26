@@ -36,6 +36,7 @@ Schlägt er nicht fehl, prüft er nichts.
 | Bedienung: Klick, Eingabe, Anzeige von Fehlern   | Komponente                     | neben der Komponente, `*.test.tsx` |
 | Jede Route lässt sich anzeigen                   | Routing                        | `src/tests/routes.test.tsx` |
 | Endpoint mit Datenbank, Rechte, HTTP-Status      | Netlify Function               | `scripts/api-walkthrough.sh` gegen `npm run dev:test` |
+| Aussehen: Layout, Größen, Touch-Ziele            | Oberfläche                     | keine Testdatei, `shot` von Hand ([unten](#oberfläche-mit-shot)) |
 
 - **Regeln gehören in den Service-Test**, nicht in den Komponenten-Test. Die Komponente prüft nur,
   dass die Meldung des Service angezeigt wird, nicht jeden Fall der Regel.
@@ -88,6 +89,18 @@ function renderDialog() {
   4xx und `{error: "…"}`, der Test erwartet den Text in `role="alert"`.
 - **Gesendete Daten prüfen** über die Aufrufe des fetch-Mocks (Methode, Pfad, Body), nicht über
   interne Zustände der Komponente.
+
+### Oberfläche mit shot
+
+Wie eine Seite aussieht, prüft kein Test, sondern `shot` (Skill `shot`, Config `shot.config.ts`).
+
+- **Nur manuell.** shot läuft nicht in `npm run test:run`, nicht im Build und nicht in der CI. Es
+  braucht ein laufendes `netlify dev` mit Anmeldung und einen Browser.
+- **Nach einer Änderung an der Oberfläche** die betroffenen Seiten vorher und nachher aufnehmen,
+  auf Phone und Desktop, mit `--check`. Die Bilder ansehen, bevor die Änderung als fertig gilt.
+- **Warnungen sind Hinweise, kein roter Build.** Was davon behoben wird, entscheidet die Aufgabe.
+- **Bilder werden nicht committet.** `shot publish` lädt sie als Anhang in die PR-Beschreibung hoch,
+  `.shots/` steht in `.gitignore`.
 
 ### Namen
 
