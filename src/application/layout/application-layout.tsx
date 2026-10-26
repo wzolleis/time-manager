@@ -12,8 +12,10 @@ export default function ApplicationLayout(): React.JSX.Element {
         <Flex direction="column" gap="2">
             <Theme accentColor="indigo" grayColor="slate" radius="large" scaling="95%">
                 <Grid columns={{initial: "1fr", md: "250px 1fr"}} style={{minHeight: "100vh"}}>
-                    {/* 1. Wiederverwendbare Sidebar */}
-                    <Sidebar items={NAVIGATION_ITEMS} />
+                    {/* 1. Wiederverwendbare Sidebar (unterhalb von md im Hamburger-Menü des Headers) */}
+                    <Box display={{initial: "none", md: "block"}}>
+                        <Sidebar items={NAVIGATION_ITEMS} />
+                    </Box>
 
                     {/* CONTAINER FÜR NAVBAR + CONTENT */}
                     <Flex direction="column" style={{background: "var(--gray-2)"}}>
