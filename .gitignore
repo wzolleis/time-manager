@@ -39,3 +39,6 @@ deno.lock
 
 # Claude Code (persönliche Einstellungen)
 .claude/settings.local.json
+
+# Screenshots von shot
+/.shots
