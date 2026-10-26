@@ -2,7 +2,7 @@
 import {afterEach, describe, expect, it, vi} from "vitest";
 import {cleanup, fireEvent, render, screen} from "@testing-library/react";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
-import {UserProvider} from "@/components/user-provider";
+import {UserProvider} from "@/components/login/user-provider";
 import {useCurrentUser} from "@/lib/user-context";
 
 const USER = {

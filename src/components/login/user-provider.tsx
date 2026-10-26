@@ -1,10 +1,10 @@
-// src/components/user-provider.tsx
+// src/components/login/user-provider.tsx
 import {type ReactNode, useMemo} from "react";
 import {useQuery} from "@tanstack/react-query";
 import {fetchMe, ME_QUERY_KEY} from "@/api/auth";
 import {UserContext, type UserContextValue} from "@/lib/user-context";
 import {Button} from "@/components/ui/button";
-import {LoginPage} from "@/features/auth/pages/login-page";
+import {LoginPage} from "@/components/login/login-page";
 
 // Der aktuelle User ist immer der angemeldete. Ohne Session gibt es nur die Login-Seite.
 export function UserProvider({children}: {children: ReactNode}) {

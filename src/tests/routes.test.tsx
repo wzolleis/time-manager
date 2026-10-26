@@ -4,8 +4,8 @@ import {cleanup, render, screen, waitFor} from "@testing-library/react";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {createMemoryHistory, createRouter, RouterProvider} from "@tanstack/react-router";
 import {routeTree} from "@/routeTree.gen";
-import {UserProvider} from "@/components/user-provider";
-import {NotFound} from "@/components/navigation/not-found";
+import {UserProvider} from "@/components/login/user-provider";
+import {NotFound} from "@/application/layout/not-found";
 
 // Pro Route die Überschrift (h1), an der man die Seite erkennt.
 // Neue Route anlegen = hier eintragen, sonst schlägt der Test unten fehl.
