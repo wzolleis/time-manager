@@ -14,6 +14,8 @@ import {logout, ME_QUERY_KEY} from "@/api/auth";
 import {clearUserData} from "@/query-client";
 import {PasswordChangeDialog} from "@features/auth/components/password-change-dialog";
 import {VersionDialog} from "@features/version/components/version-dialog";
+import {Sidebar} from "@/application/layout/sidebar";
+import {Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle} from "@/components/ui/sheet";
 
 export const Header = () => {
     const navigate = useNavigate();
@@ -21,6 +23,7 @@ export const Header = () => {
     const qc = useQueryClient();
     const [passwordOpen, setPasswordOpen] = useState(false);
     const [versionOpen, setVersionOpen] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
 
     const handleLogout = async (): Promise<void> => {
         try {
@@ -49,8 +52,17 @@ export const Header = () => {
             <Flex align="center" gap="3" width={"100%"}>
                 {/* Hamburger */}
                 <Box display={{md: "none"}}>
-                    <MenuButton />
+                    <MenuButton onClick={() => setMenuOpen(true)} />
                 </Box>
+                <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+                    <SheetContent side="left" className="w-72 overflow-y-auto">
+                        <SheetHeader>
+                            <SheetTitle>Menü</SheetTitle>
+                            <SheetDescription className="sr-only">Navigation</SheetDescription>
+                        </SheetHeader>
+                        <Sidebar items={NAVIGATION_ITEMS} onNavigate={() => setMenuOpen(false)} />
+                    </SheetContent>
+                </Sheet>
                 <StartEnd>
                     <Breadcrumb items={NAVIGATION_ITEMS} /> {/* dieselbe flache Liste wie für buildNavTree(navItems) */}
                     <Text color="gray">{`Hallo ${currentUser?.name}`}</Text>

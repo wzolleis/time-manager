@@ -4,7 +4,7 @@ import {ChevronDown} from "lucide-react";
 import {toNavNodeLinkProps} from "@/application/navigation/nav-utils";
 import type {NavNode} from "@/application/navigation/nav-items";
 
-export function SidebarItem({node}: {node: NavNode}) {
+export function SidebarItem({node, onNavigate}: {node: NavNode; onNavigate?: () => void}) {
     const {label, icon: Icon, childItems} = node;
     const hasChildren = childItems.length > 0;
     const [open, setOpen] = useState(true);
@@ -16,6 +16,7 @@ export function SidebarItem({node}: {node: NavNode}) {
             <div className="flex items-center">
                 <Link
                     {...linkProps}
+                    onClick={onNavigate}
                     className="flex items-center gap-2 flex-1 px-3 py-2 rounded-md text-sm font-medium hover:bg-muted"
                     activeProps={{className: "bg-muted text-primary"}}
                 >
@@ -37,7 +38,7 @@ export function SidebarItem({node}: {node: NavNode}) {
             {hasChildren && open && (
                 <div className="ml-6 mt-1 flex flex-col gap-1 border-l pl-3">
                     {childItems.map((child) => (
-                        <SidebarItem key={child.id} node={child} />
+                        <SidebarItem key={child.id} node={child} onNavigate={onNavigate} />
                     ))}
                 </div>
             )}
