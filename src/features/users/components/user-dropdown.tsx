@@ -44,8 +44,8 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
     return (
         <DropdownMenu.Root>
             <DropdownMenu.Trigger>
-                {/* Unset-Button, damit das Styling von Radix/nativem HTML nicht interferiert */}
-                <button style={{all: "unset", cursor: "pointer"}}>
+                {/* Ungestylter Button, damit das Styling von Radix/nativem HTML nicht interferiert; auf Touch 44×44 */}
+                <button className="inline-flex cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 outline-none pointer-coarse:size-11">
                     <Avatar src={user?.avatarUrl ?? ""} fallback={fallbackInitials} size="2" radius="full" />
                 </button>
             </DropdownMenu.Trigger>

@@ -58,7 +58,12 @@ export const Header = () => {
             </Flex>
 
             <Flex align="center" gap="3">
-                <Button variant="ghost" size="2" radius="full">
+                <Button
+                    variant="ghost"
+                    size="2"
+                    radius="full"
+                    className="pointer-coarse:box-border! pointer-coarse:min-h-11! pointer-coarse:min-w-11!"
+                >
                     <Bell size={18} />
                 </Button>
 
