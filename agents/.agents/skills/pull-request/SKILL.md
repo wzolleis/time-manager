@@ -16,7 +16,7 @@ description: Erstellt aus dem Arbeitsstand einen Branch, committet, pusht, öffn
    - **Beschreibung:** Abschnitt `## Zusammenfassung` mit einer kurzen Liste der Änderungen. Ändert der PR
      keinen Code, steht dort zusätzlich „Nur Dokumentation, kein Code.“
 6. Mergen, abhängig davon, ob der PR Code ändert (siehe unten).
-7. Danach lokal aufräumen: `git checkout main && git pull`, dann den Merge-Commit mit
+7. Danach aufräumen (siehe „Branch löschen“ unten), dann den Merge-Commit mit
    `git log --oneline -2` melden, zusammen mit dem Link zum PR.
 
 ## Wann auf die Netlify-Checks gewartet wird
@@ -28,15 +28,26 @@ Netlify-GitHub-App. In der Branch Protection von `main` sind sie nicht Pflicht, 
   mergen, wenn sie grün sind.
   ```sh
   gh pr checks <nr> --watch --interval 15
-  gh pr merge <nr> --squash --delete-branch
+  gh pr merge <nr> --squash
   ```
   Schlägt ein Check fehl, nicht mergen, sondern dem User den Check und den Link melden.
 - **Ohne Code-Änderung**, z. B. nur Markdown unter `features/` oder `agents/`: nicht warten, sofort mergen.
   ```sh
-  gh pr merge <nr> --squash --delete-branch
+  gh pr merge <nr> --squash
   ```
 
 ## Merge
 
-Immer als Squash-Merge (`--squash`), der Branch wird dabei gelöscht (`--delete-branch`). Der Commit auf
-`main` heißt dann wie der PR mit der Nummer, z. B. `docs(overtime): Use Case Überstunden beschreiben (#4)`.
+Immer als Squash-Merge (`--squash`). Der Commit auf `main` heißt dann wie der PR mit der Nummer, z. B.
+`docs(overtime): Use Case Überstunden beschreiben (#4)`.
+
+## Branch löschen
+
+Den Remote-Branch löscht GitHub nach dem Merge selbst („Automatically delete head branches“ ist an). Deshalb
+nicht `--delete-branch` verwenden. Das Aufräumen darf keinen Fehler erzeugen, wenn der Branch schon weg ist:
+
+```sh
+git checkout main && git pull --prune
+git push origin --delete <branch> 2>/dev/null || true
+git branch -D <branch> 2>/dev/null || true
+```
