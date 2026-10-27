@@ -23,7 +23,7 @@ export default function ApplicationLayout(): React.JSX.Element {
                         <Header />
 
                         {/* CONTENT BEREICH */}
-                        <Box p="6" style={{flexGrow: 1, overflowX: "auto", overflowY: "auto"}}>
+                        <Box p={{initial: "3", sm: "6"}} style={{flexGrow: 1, overflowX: "auto", overflowY: "auto"}}>
                             {/* Hier steht der Inhalt der aktuellen route */}
                             <Content />
                         </Box>

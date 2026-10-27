@@ -7,14 +7,31 @@ import {
     useShowUserSettings,
 } from "@features/user-settings/use-cases/use-show-user-settings";
 
+// Auf schmalen Bildschirmen dürfen kurze Spalten umbrechen, damit die Tabelle ohne Scrollen passt
+const wrapOnPhone = {className: "whitespace-normal sm:whitespace-nowrap"};
+
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
 const columns: DataTableColumnDef<Row>[] = [
-    {id: "name", header: "Name", enableSorting: false, cell: ({row}) => row.original.setting.name},
-    {accessorKey: "text", header: "Wert", enableSorting: false},
+    {
+        id: "name",
+        header: "Name",
+        enableSorting: false,
+        cell: ({row}) => (
+            <>
+                {row.original.setting.name}
+                {/* Auf schmalen Bildschirmen steht die Beschreibung unter dem Namen statt in einer eigenen Spalte */}
+                <div className="text-xs break-words whitespace-normal text-muted-foreground sm:hidden">
+                    {row.original.setting.description}
+                </div>
+            </>
+        ),
+    },
+    {accessorKey: "text", header: "Wert", enableSorting: false, meta: wrapOnPhone},
     {
         id: "validFrom",
         header: "gültig ab",
         enableSorting: false,
+        meta: wrapOnPhone,
         cell: ({row}) => (row.original.validFrom ? germanDay(row.original.validFrom) : "–"),
     },
     {accessorKey: "status", header: "Status", enableSorting: false},
@@ -22,7 +39,9 @@ const columns: DataTableColumnDef<Row>[] = [
         id: "description",
         header: "Beschreibung",
         enableSorting: false,
-        cell: ({row}) => row.original.setting.description,
+        meta: {className: "hidden sm:table-cell"},
+        // TableCell ist nowrap, lange Beschreibungen brechen um
+        cell: ({row}) => <div className="break-words whitespace-normal">{row.original.setting.description}</div>,
     },
     {id: "actions", header: "", enableSorting: false, cell: ({row}) => <UserSettingActions row={row.original} />},
 ];

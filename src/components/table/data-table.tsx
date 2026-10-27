@@ -3,6 +3,7 @@ import {
     columnVisibilityFeature,
     createSortedRowModel,
     flexRender,
+    metaHelper,
     type RowData,
     rowSortingFeature,
     sortFn_alphanumeric,
@@ -23,6 +24,8 @@ const features = tableFeatures({
         basic: sortFn_basic, // Zahlen und Sonstiges
         datetime: sortFn_datetime, // Datumswerte (Date)
     },
+    // className gilt für Kopf- und Datenzellen der Spalte, z.B. zum Ausblenden auf kleinen Bildschirmen
+    columnMeta: metaHelper<{className?: string}>(),
 });
 
 // Diesen Typ verwenden die Spaltendefinitionen der einzelnen Tabellen
@@ -57,7 +60,7 @@ export function DataTable<TData extends RowData>({
                                 const canSort = header.column.getCanSort();
                                 const sorted = header.column.getIsSorted();
                                 return (
-                                    <TableHead key={header.id}>
+                                    <TableHead key={header.id} className={header.column.columnDef.meta?.className}>
                                         {header.isPlaceholder ? null : canSort ? (
                                             <button
                                                 type="button"
@@ -83,7 +86,7 @@ export function DataTable<TData extends RowData>({
                         rows.map((row) => (
                             <TableRow key={row.id}>
                                 {row.getVisibleCells().map((cell) => (
-                                    <TableCell key={cell.id}>
+                                    <TableCell key={cell.id} className={cell.column.columnDef.meta?.className}>
                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                     </TableCell>
                                 ))}

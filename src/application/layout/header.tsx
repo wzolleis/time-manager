@@ -1,6 +1,5 @@
-import {Box, Button, Flex, Text} from "@radix-ui/themes";
+import {Box, Flex, Text} from "@radix-ui/themes";
 import {UserDropdown} from "@features/users/components/user-dropdown";
-import {Bell} from "lucide-react";
 import {StartEnd} from "@/components/utils/start-end";
 import {MenuButton} from "@/components/buttons/menu-button";
 import {Breadcrumb} from "@/application/breadcrumb/breadcrumb";
@@ -74,15 +73,6 @@ export const Header = () => {
             </Flex>
 
             <Flex align="center" gap="3" flexShrink="0">
-                <Button
-                    variant="ghost"
-                    size="2"
-                    radius="full"
-                    className="pointer-coarse:box-border! pointer-coarse:min-h-11! pointer-coarse:min-w-11!"
-                >
-                    <Bell size={18} />
-                </Button>
-
                 {/* 2. Wiederverwendbares Dropdown */}
                 <UserDropdown
                     onItemSelected={onItemSelected}

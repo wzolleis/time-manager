@@ -1,11 +1,13 @@
 ---
 name: shot
-description: Prove UI work with the shot CLI (agent-shot): screenshots of app paths and URLs before and after a change, size and state variants, layout and a11y checks, recorded flows, evidence on the PR, and a local review page where the user compares labels, votes and draws on them. Use after changing UI, when asked to show, verify or screenshot a page, to attach visual evidence to a pull request, or to let the user choose between variants you built.
+description: Prove UI work with the shot CLI (agent-shot): screenshots of app paths and URLs before and after a change, size and state variants, layout and a11y checks, recorded flows, and a local review page where the user compares labels, votes and draws on them. Use after changing UI, when asked to show, verify or screenshot a page, or to let the user choose between variants you built.
 ---
 
 # shot
 
 `shot` drives Chromium against the running app and writes PNGs, JSON and videos under `.shots/`. Read every PNG you produce before you claim anything about it.
+
+Never run `shot publish`: screenshots stay local and do not go into pull requests. Describe in the PR text what you checked instead.
 
 ## Prove a UI change
 
@@ -15,7 +17,6 @@ description: Prove UI work with the shot CLI (agent-shot): screenshots of app pa
 4. Read both PNGs of each pair. For layout changes, shoot every size the change affects (`--size phone --size desktop`) and read each size's PNG. Complete when you can name what changed and what did not, at each size.
 5. Run `--check` on the after state. Fix `error` findings your change caused. Complete when none are left, or the ones that remain are already in `before`.
 6. For an interaction, write or reuse a flow (`shots/<name>.flow.ts`) and run `shot flow <name> --label after`.
-7. `shot publish` writes every capture, flow and finding of the session into the PR body. It replaces the previous publish. Complete when it printed the PR's URL.
 
 Shot does not run git: you stash, it shoots. A dev server with hot reload also serves the stashed state. One that builds once needs a restart.
 
@@ -39,7 +40,7 @@ When you built variants (or want the user's eye on a change), shoot each one as 
 5. Act on what comes back. Exit 0: stdout is the feedback: the pick, per sheet the vote and numbered notes with the element under each (`#invite` button "Invite"), and PNGs with the drawings burned in. Read those PNGs. Exit 1 with `closed without feedback`: the user closed it; ask in chat what they want.
 6. For another round, change the code, reshoot the same labels and run `shot review` again. The last round's drawings show faded.
 
-`shot review` is local and separate from `shot publish`: nothing goes to the PR. Rounds live in `.shots/<session>/review/round-<n>/` (`feedback.md`, `feedback.json`, burned PNGs). `--json` prints `feedback.json`.
+`shot review` is local: nothing goes to the PR. Rounds live in `.shots/<session>/review/round-<n>/` (`feedback.md`, `feedback.json`, burned PNGs). `--json` prints `feedback.json`.
 
 ## Examples
 
@@ -105,7 +106,7 @@ App paths need a `shot.config.ts` at the project root. If it is missing, shoot U
 
 ```ts
 import { axe } from '@agent-shot/axe'
-import { defineConfig, github } from 'agent-shot'
+import { defineConfig } from 'agent-shot'
 
 export default defineConfig({
   app: {
@@ -117,7 +118,7 @@ export default defineConfig({
       await page.click('button[type=submit]')
     },
   },
-  plugins: [axe(), github()],
+  plugins: [axe()],
 })
 ```
 
@@ -131,8 +132,5 @@ export default defineConfig({
 | `no section "X"; sections: …`   | pick a listed title, or `--select`                                            |
 | `Invalid value for flag --size` | pick a listed size, or `WxH`                                                  |
 | `redirected to /login…`         | the session was renewed once and still bounced: the user lacks access         |
-| `no publisher configured`       | add `github()` to `plugins` in `shot.config.ts`                               |
-| `gh … cannot attach files`      | update gh to 2.99 or later                                                    |
-| `no pull request for …`         | push and create the PR first                                                  |
 | `unknown label …`               | shoot that label first, or pick a listed one                                  |
 | `no sheet matches …`            | use part of a listed sheet title                                              |
