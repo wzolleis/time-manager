@@ -47,7 +47,11 @@ Den Remote-Branch löscht GitHub nach dem Merge selbst („Automatically delete 
 nicht `--delete-branch` verwenden. Das Aufräumen darf keinen Fehler erzeugen, wenn der Branch schon weg ist:
 
 ```sh
-git checkout main && git pull --prune
+git checkout main && git pull
 git push origin --delete <branch> 2>/dev/null || true
+git fetch --prune
 git branch -D <branch> 2>/dev/null || true
 ```
+
+`git fetch --prune` steht nach dem Löschen, weil GitHub den Branch erst kurz nach dem Merge entfernt. Ein
+früheres Prune würde den lokalen Verweis `origin/<branch>` sonst stehen lassen.
