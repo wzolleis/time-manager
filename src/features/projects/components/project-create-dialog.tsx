@@ -5,16 +5,16 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
 import type {ProjectCreate} from "@shared/project";
 import {createProject} from "@/api/projects";
 import {ErrorText} from "@/components/text/error-text";
+import {FormField} from "@/components/form/form-field";
+import {FormDialogFooter} from "@/components/form/form-dialog-footer";
 
 export function ProjectCreateDialog() {
     const qc = useQueryClient();
@@ -55,8 +55,7 @@ export function ProjectCreateDialog() {
                         <DialogDescription>Name ist Pflicht</DialogDescription>
                     </DialogHeader>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="create-project-name">Name</Label>
+                    <FormField label="Name" htmlFor="create-project-name">
                         <Input
                             id="create-project-name"
                             value={name}
@@ -64,18 +63,15 @@ export function ProjectCreateDialog() {
                             required
                             autoFocus
                         />
-                    </div>
+                    </FormField>
 
                     {create.isError && <ErrorText>{create.error.message}</ErrorText>}
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
-                            Abbrechen
-                        </Button>
-                        <Button type="submit" disabled={create.isPending}>
-                            {create.isPending ? "Speichere…" : "Anlegen"}
-                        </Button>
-                    </DialogFooter>
+                    <FormDialogFooter
+                        onCancel={() => handleOpenChange(false)}
+                        saving={create.isPending}
+                        submitLabel="Anlegen"
+                    />
                 </form>
             </DialogContent>
         </Dialog>

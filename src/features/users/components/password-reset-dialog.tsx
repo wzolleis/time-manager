@@ -5,17 +5,17 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
 import {resetPassword} from "@/api/auth";
 import {PASSWORD_MIN_LENGTH} from "@shared/auth";
 import type {User} from "@shared/user";
 import {ErrorText} from "@/components/text/error-text";
+import {FormField} from "@/components/form/form-field";
+import {FormDialogFooter} from "@/components/form/form-dialog-footer";
 
 // Der Admin setzt ein neues Passwort, ohne das alte zu kennen
 export function PasswordResetDialog({user}: {user: User}) {
@@ -56,8 +56,7 @@ export function PasswordResetDialog({user}: {user: User}) {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="space-y-2 text-left">
-                        <Label htmlFor={fieldId}>Neues Passwort</Label>
+                    <FormField label="Neues Passwort" htmlFor={fieldId}>
                         <Input
                             id={fieldId}
                             type="password"
@@ -68,18 +67,15 @@ export function PasswordResetDialog({user}: {user: User}) {
                             required
                             autoFocus
                         />
-                    </div>
+                    </FormField>
 
                     {reset.isError && <ErrorText>{reset.error.message}</ErrorText>}
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
-                            Abbrechen
-                        </Button>
-                        <Button type="submit" disabled={reset.isPending}>
-                            {reset.isPending ? "Speichere…" : "Zurücksetzen"}
-                        </Button>
-                    </DialogFooter>
+                    <FormDialogFooter
+                        onCancel={() => handleOpenChange(false)}
+                        saving={reset.isPending}
+                        submitLabel="Zurücksetzen"
+                    />
                 </form>
             </DialogContent>
         </Dialog>

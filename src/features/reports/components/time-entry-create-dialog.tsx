@@ -4,13 +4,11 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {formatTime} from "@shared/format";
 import {useProjects} from "@/views/projects";
@@ -18,6 +16,8 @@ import {localDay} from "@shared/time-rules";
 import {useAddTimeEntry} from "@features/reports/use-cases/use-add-time-entry";
 import {Muted} from "@/components/text/muted";
 import {ErrorText} from "@/components/text/error-text";
+import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {FormField} from "@/components/form/form-field";
 
 type EntryType = "kommen" | "gehen";
 
@@ -92,8 +92,7 @@ export function TimeEntryCreateDialog({
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="space-y-2 text-left">
-                        <Label htmlFor={`${uid}-type`}>Buchung</Label>
+                    <FormField label="Buchung" htmlFor={`${uid}-type`}>
                         <Select value={type} onValueChange={(v) => setType(v as EntryType)}>
                             <SelectTrigger id={`${uid}-type`}>
                                 <SelectValue />
@@ -103,11 +102,10 @@ export function TimeEntryCreateDialog({
                                 <SelectItem value="gehen">Gehen</SelectItem>
                             </SelectContent>
                         </Select>
-                    </div>
+                    </FormField>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2 text-left">
-                            <Label htmlFor={`${uid}-day`}>Tag</Label>
+                        <FormField label="Tag" htmlFor={`${uid}-day`}>
                             <Input
                                 id={`${uid}-day`}
                                 type="date"
@@ -116,9 +114,8 @@ export function TimeEntryCreateDialog({
                                 onChange={(e) => e.target.value && setDay(e.target.value)}
                                 required
                             />
-                        </div>
-                        <div className="space-y-2 text-left">
-                            <Label htmlFor={`${uid}-time`}>Uhrzeit</Label>
+                        </FormField>
+                        <FormField label="Uhrzeit" htmlFor={`${uid}-time`}>
                             <Input
                                 id={`${uid}-time`}
                                 type="time"
@@ -126,12 +123,11 @@ export function TimeEntryCreateDialog({
                                 onChange={(e) => setTime(e.target.value)}
                                 required
                             />
-                        </div>
+                        </FormField>
                     </div>
 
                     {type === "kommen" && (
-                        <div className="space-y-2 text-left">
-                            <Label htmlFor={`${uid}-project`}>Projekt</Label>
+                        <FormField label="Projekt" htmlFor={`${uid}-project`}>
                             <Select value={projectChoice} onValueChange={setProjectChoice}>
                                 <SelectTrigger id={`${uid}-project`}>
                                     <SelectValue />
@@ -145,21 +141,18 @@ export function TimeEntryCreateDialog({
                                     ))}
                                 </SelectContent>
                             </Select>
-                        </div>
+                        </FormField>
                     )}
 
                     {sickNotice && <Muted>{sickNotice}</Muted>}
                     {problem && <ErrorText alert={false}>{problem}</ErrorText>}
                     {create.error && <ErrorText>{create.error.message}</ErrorText>}
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                            Abbrechen
-                        </Button>
-                        <Button type="submit" disabled={create.isSaving || problem !== null}>
-                            {create.isSaving ? "Speichere…" : "Speichern"}
-                        </Button>
-                    </DialogFooter>
+                    <FormDialogFooter
+                        onCancel={() => setOpen(false)}
+                        saving={create.isSaving}
+                        disabled={problem !== null}
+                    />
                 </form>
             </DialogContent>
         </Dialog>

@@ -1,21 +1,15 @@
 import {useState} from "react";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {Button} from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
 import {TableCell, TableRow} from "@/components/ui/table";
 import type {Project, ProjectUpdate} from "@shared/project";
 import {updateProject} from "@/api/projects";
 import {DeleteProjectDialog} from "@features/projects/components/delete-project-dialog";
 import {ErrorText} from "@/components/text/error-text";
+import {FormField} from "@/components/form/form-field";
+import {FormDialogFooter} from "@/components/form/form-dialog-footer";
 
 type ProjectRowProps = {
     project: Project;
@@ -79,26 +73,18 @@ export function ProjectRow({project, onDelete, deleting}: ProjectRowProps) {
                                 <DialogDescription>Änderungen gelten nach dem Speichern sofort.</DialogDescription>
                             </DialogHeader>
 
-                            <div className="space-y-2 text-left">
-                                <Label htmlFor={fieldId("name")}>Name</Label>
+                            <FormField label="Name" htmlFor={fieldId("name")}>
                                 <Input
                                     id={fieldId("name")}
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     required
                                 />
-                            </div>
+                            </FormField>
 
                             {update.isError && <ErrorText>{update.error.message}</ErrorText>}
 
-                            <DialogFooter>
-                                <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                                    Abbrechen
-                                </Button>
-                                <Button type="submit" disabled={update.isPending}>
-                                    {update.isPending ? "Speichere…" : "Speichern"}
-                                </Button>
-                            </DialogFooter>
+                            <FormDialogFooter onCancel={() => setOpen(false)} saving={update.isPending} />
                         </form>
                     </DialogContent>
                 </Dialog>

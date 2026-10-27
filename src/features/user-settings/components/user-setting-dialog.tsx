@@ -4,19 +4,19 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
 import {addDays} from "@shared/day-range";
 import {localDay} from "@shared/time-rules";
 import type {UserSetting, UserSettingValue} from "@shared/user-setting";
 import {useAddUserSetting} from "@features/user-settings/use-cases/use-add-user-setting";
 import {useChangeUserSetting} from "@features/user-settings/use-cases/use-change-user-setting";
 import {ErrorText} from "@/components/text/error-text";
+import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {FormField} from "@/components/form/form-field";
 
 type Props = {
     setting: UserSetting;
@@ -91,8 +91,7 @@ export function UserSettingDialog({setting, current, initialValue, label, varian
                     </DialogHeader>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2 text-left">
-                            <Label htmlFor={`${uid}-value`}>Wert</Label>
+                        <FormField label="Wert" htmlFor={`${uid}-value`}>
                             <Input
                                 id={`${uid}-value`}
                                 type="number"
@@ -102,9 +101,8 @@ export function UserSettingDialog({setting, current, initialValue, label, varian
                                 onChange={(e) => setValue(e.target.value)}
                                 required
                             />
-                        </div>
-                        <div className="space-y-2 text-left">
-                            <Label htmlFor={`${uid}-from`}>gültig ab</Label>
+                        </FormField>
+                        <FormField label="gültig ab" htmlFor={`${uid}-from`}>
                             {byYear(setting) ? (
                                 <Input
                                     id={`${uid}-from`}
@@ -124,21 +122,18 @@ export function UserSettingDialog({setting, current, initialValue, label, varian
                                     required
                                 />
                             )}
-                        </div>
+                        </FormField>
                     </div>
 
                     {problem && <ErrorText alert={false}>{problem}</ErrorText>}
 
                     {save.error && <ErrorText>{save.error.message}</ErrorText>}
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                            Abbrechen
-                        </Button>
-                        <Button type="submit" disabled={save.isSaving || problem !== null}>
-                            {save.isSaving ? "Speichere…" : "Speichern"}
-                        </Button>
-                    </DialogFooter>
+                    <FormDialogFooter
+                        onCancel={() => setOpen(false)}
+                        saving={save.isSaving}
+                        disabled={problem !== null}
+                    />
                 </form>
             </DialogContent>
         </Dialog>

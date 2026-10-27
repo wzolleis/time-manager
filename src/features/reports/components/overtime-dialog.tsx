@@ -4,16 +4,16 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import {Label} from "@/components/ui/label";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {fromOffset, MAX_OFFSET_HOURS, type OffsetParts, type OffsetSign} from "@shared/overtime-rules";
 import {useChangeOvertime} from "@features/reports/use-cases/use-change-overtime";
 import {ErrorText} from "@/components/text/error-text";
+import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {FormField} from "@/components/form/form-field";
 
 const range = (n: number) => Array.from({length: n}, (_, i) => String(i));
 const HOURS = range(MAX_OFFSET_HOURS + 1);
@@ -63,8 +63,7 @@ export function OvertimeDialog({offset}: {offset: number | null}) {
                     </DialogHeader>
 
                     <div className="grid grid-cols-3 gap-4">
-                        <div className="space-y-2 text-left">
-                            <Label htmlFor={`${uid}-sign`}>Vorzeichen</Label>
+                        <FormField label="Vorzeichen" htmlFor={`${uid}-sign`}>
                             <Select
                                 value={parts.sign}
                                 onValueChange={(sign) => setParts({...parts, sign: sign as OffsetSign})}
@@ -77,9 +76,8 @@ export function OvertimeDialog({offset}: {offset: number | null}) {
                                     <SelectItem value="-">−</SelectItem>
                                 </SelectContent>
                             </Select>
-                        </div>
-                        <div className="space-y-2 text-left">
-                            <Label htmlFor={`${uid}-hours`}>Stunden</Label>
+                        </FormField>
+                        <FormField label="Stunden" htmlFor={`${uid}-hours`}>
                             <Select
                                 value={String(parts.hours)}
                                 onValueChange={(h) => setParts({...parts, hours: Number(h)})}
@@ -95,9 +93,8 @@ export function OvertimeDialog({offset}: {offset: number | null}) {
                                     ))}
                                 </SelectContent>
                             </Select>
-                        </div>
-                        <div className="space-y-2 text-left">
-                            <Label htmlFor={`${uid}-minutes`}>Minuten</Label>
+                        </FormField>
+                        <FormField label="Minuten" htmlFor={`${uid}-minutes`}>
                             <Select
                                 value={String(parts.minutes)}
                                 onValueChange={(m) => setParts({...parts, minutes: Number(m)})}
@@ -113,20 +110,17 @@ export function OvertimeDialog({offset}: {offset: number | null}) {
                                     ))}
                                 </SelectContent>
                             </Select>
-                        </div>
+                        </FormField>
                     </div>
 
                     {problem && <ErrorText alert={false}>{problem}</ErrorText>}
                     {change.error && <ErrorText>{change.error.message}</ErrorText>}
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                            Abbrechen
-                        </Button>
-                        <Button type="submit" disabled={change.isSaving || problem !== null}>
-                            {change.isSaving ? "Speichere…" : "Speichern"}
-                        </Button>
-                    </DialogFooter>
+                    <FormDialogFooter
+                        onCancel={() => setOpen(false)}
+                        saving={change.isSaving}
+                        disabled={problem !== null}
+                    />
                 </form>
             </DialogContent>
         </Dialog>

@@ -5,17 +5,17 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
 import {createUser} from "@/api/users";
 import type {UserCreate} from "@shared/user";
 import {PASSWORD_MIN_LENGTH} from "@shared/auth";
 import {ErrorText} from "@/components/text/error-text";
+import {FormField} from "@/components/form/form-field";
+import {FormDialogFooter} from "@/components/form/form-dialog-footer";
 
 export function UserCreateDialog() {
     const qc = useQueryClient();
@@ -69,8 +69,7 @@ export function UserCreateDialog() {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="create-user-name">Name</Label>
+                    <FormField label="Name" htmlFor="create-user-name">
                         <Input
                             id="create-user-name"
                             value={name}
@@ -78,10 +77,9 @@ export function UserCreateDialog() {
                             required
                             autoFocus
                         />
-                    </div>
+                    </FormField>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="create-user-email">E-Mail</Label>
+                    <FormField label="E-Mail" htmlFor="create-user-email">
                         <Input
                             id="create-user-email"
                             type="email"
@@ -89,10 +87,9 @@ export function UserCreateDialog() {
                             onChange={(e) => setEmail(e.target.value)}
                             required
                         />
-                    </div>
+                    </FormField>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="create-user-password">Passwort</Label>
+                    <FormField label="Passwort" htmlFor="create-user-password">
                         <Input
                             id="create-user-password"
                             type="password"
@@ -102,28 +99,24 @@ export function UserCreateDialog() {
                             onChange={(e) => setPassword(e.target.value)}
                             required
                         />
-                    </div>
+                    </FormField>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="create-user-avatar">Avatar-URL (optional)</Label>
+                    <FormField label="Avatar-URL (optional)" htmlFor="create-user-avatar">
                         <Input
                             id="create-user-avatar"
                             value={avatarUrl}
                             onChange={(e) => setAvatarUrl(e.target.value)}
                             placeholder="https://…"
                         />
-                    </div>
+                    </FormField>
 
                     {create.isError && <ErrorText>{create.error.message}</ErrorText>}
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
-                            Abbrechen
-                        </Button>
-                        <Button type="submit" disabled={create.isPending}>
-                            {create.isPending ? "Speichere…" : "Anlegen"}
-                        </Button>
-                    </DialogFooter>
+                    <FormDialogFooter
+                        onCancel={() => handleOpenChange(false)}
+                        saving={create.isPending}
+                        submitLabel="Anlegen"
+                    />
                 </form>
             </DialogContent>
         </Dialog>

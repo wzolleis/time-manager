@@ -1,20 +1,13 @@
 // src/features/auth/components/password-change-dialog.tsx
 import {useState} from "react";
 import {useMutation} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
 import {changePassword} from "@/api/auth";
 import {PASSWORD_MIN_LENGTH, type PasswordChange} from "@shared/auth";
 import {ErrorText} from "@/components/text/error-text";
+import {FormField} from "@/components/form/form-field";
+import {FormDialogFooter} from "@/components/form/form-dialog-footer";
 
 type Props = {
     open: boolean;
@@ -60,8 +53,7 @@ export function PasswordChangeDialog({open, onOpenChange}: Props) {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="password-old">Bisheriges Passwort</Label>
+                    <FormField label="Bisheriges Passwort" htmlFor="password-old">
                         <Input
                             id="password-old"
                             type="password"
@@ -71,10 +63,9 @@ export function PasswordChangeDialog({open, onOpenChange}: Props) {
                             required
                             autoFocus
                         />
-                    </div>
+                    </FormField>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="password-new">Neues Passwort</Label>
+                    <FormField label="Neues Passwort" htmlFor="password-new">
                         <Input
                             id="password-new"
                             type="password"
@@ -84,10 +75,9 @@ export function PasswordChangeDialog({open, onOpenChange}: Props) {
                             onChange={(e) => setNewPassword(e.target.value)}
                             required
                         />
-                    </div>
+                    </FormField>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="password-repeat">Neues Passwort wiederholen</Label>
+                    <FormField label="Neues Passwort wiederholen" htmlFor="password-repeat">
                         <Input
                             id="password-repeat"
                             type="password"
@@ -97,19 +87,17 @@ export function PasswordChangeDialog({open, onOpenChange}: Props) {
                             aria-invalid={mismatch}
                             required
                         />
-                    </div>
+                    </FormField>
 
                     {mismatch && <ErrorText>Die Passwörter stimmen nicht überein</ErrorText>}
                     {change.isError && <ErrorText>{change.error.message}</ErrorText>}
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
-                            Abbrechen
-                        </Button>
-                        <Button type="submit" disabled={change.isPending || mismatch}>
-                            {change.isPending ? "Speichere…" : "Passwort ändern"}
-                        </Button>
-                    </DialogFooter>
+                    <FormDialogFooter
+                        onCancel={() => handleOpenChange(false)}
+                        saving={change.isPending}
+                        disabled={mismatch}
+                        submitLabel="Passwort ändern"
+                    />
                 </form>
             </DialogContent>
         </Dialog>

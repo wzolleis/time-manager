@@ -4,15 +4,15 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
 import {useAddPasskey} from "@features/passkeys/use-cases/use-add-passkey";
 import {ErrorText} from "@/components/text/error-text";
+import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {FormField} from "@/components/form/form-field";
 
 export function PasskeyAddDialog() {
     const uid = useId();
@@ -53,8 +53,7 @@ export function PasskeyAddDialog() {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="space-y-2 text-left">
-                        <Label htmlFor={`${uid}-name`}>Name</Label>
+                    <FormField label="Name" htmlFor={`${uid}-name`}>
                         <Input
                             id={`${uid}-name`}
                             value={name}
@@ -64,18 +63,17 @@ export function PasskeyAddDialog() {
                             required
                             autoFocus
                         />
-                    </div>
+                    </FormField>
 
                     {add.error && <ErrorText>{add.error.message}</ErrorText>}
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                            Abbrechen
-                        </Button>
-                        <Button type="submit" disabled={add.isSaving || problem !== null}>
-                            {add.isSaving ? "Lege an…" : "Weiter"}
-                        </Button>
-                    </DialogFooter>
+                    <FormDialogFooter
+                        onCancel={() => setOpen(false)}
+                        saving={add.isSaving}
+                        disabled={problem !== null}
+                        submitLabel="Weiter"
+                        savingLabel="Lege an…"
+                    />
                 </form>
             </DialogContent>
         </Dialog>

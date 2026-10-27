@@ -4,13 +4,11 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
 import type {SickLeave} from "@shared/sick-leave";
 import {bookingsInRangeMessage} from "@shared/sick-leave-rules";
 import {localDay} from "@shared/time-rules";
@@ -18,6 +16,8 @@ import {useAddSickLeave} from "@features/sick-leaves/use-cases/use-add-sick-leav
 import {useChangeSickLeave} from "@features/sick-leaves/use-cases/use-change-sick-leave";
 import {Muted} from "@/components/text/muted";
 import {ErrorText} from "@/components/text/error-text";
+import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {FormField} from "@/components/form/form-field";
 
 type Props = {
     sickLeave?: SickLeave; // mit Krankmeldung: bearbeiten, ohne: neu eintragen
@@ -98,8 +98,7 @@ export function SickLeaveDialog({sickLeave, label, variant = "outline", size = "
                     </DialogHeader>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2 text-left">
-                            <Label htmlFor={`${uid}-start`}>Beginn</Label>
+                        <FormField label="Beginn" htmlFor={`${uid}-start`}>
                             <Input
                                 id={`${uid}-start`}
                                 type="date"
@@ -107,9 +106,8 @@ export function SickLeaveDialog({sickLeave, label, variant = "outline", size = "
                                 onChange={(e) => onStartChange(e.target.value)}
                                 required
                             />
-                        </div>
-                        <div className="space-y-2 text-left">
-                            <Label htmlFor={`${uid}-end`}>Ende</Label>
+                        </FormField>
+                        <FormField label="Ende" htmlFor={`${uid}-end`}>
                             <Input
                                 id={`${uid}-end`}
                                 type="date"
@@ -118,11 +116,10 @@ export function SickLeaveDialog({sickLeave, label, variant = "outline", size = "
                                 onChange={(e) => e.target.value && setEnd(e.target.value)}
                                 required
                             />
-                        </div>
+                        </FormField>
                     </div>
 
-                    <div className="space-y-2 text-left">
-                        <Label htmlFor={`${uid}-note`}>Notiz</Label>
+                    <FormField label="Notiz" htmlFor={`${uid}-note`}>
                         <Input
                             id={`${uid}-note`}
                             value={note}
@@ -130,7 +127,7 @@ export function SickLeaveDialog({sickLeave, label, variant = "outline", size = "
                             placeholder="z. B. Attest liegt vor"
                             onChange={(e) => setNote(e.target.value)}
                         />
-                    </div>
+                    </FormField>
 
                     {problem ? (
                         <ErrorText alert={false}>{problem}</ErrorText>
@@ -141,14 +138,11 @@ export function SickLeaveDialog({sickLeave, label, variant = "outline", size = "
 
                     {save.error && <ErrorText>{save.error.message}</ErrorText>}
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                            Abbrechen
-                        </Button>
-                        <Button type="submit" disabled={save.isSaving || problem !== null}>
-                            {save.isSaving ? "Speichere…" : "Speichern"}
-                        </Button>
-                    </DialogFooter>
+                    <FormDialogFooter
+                        onCancel={() => setOpen(false)}
+                        saving={save.isSaving}
+                        disabled={problem !== null}
+                    />
                 </form>
             </DialogContent>
         </Dialog>
