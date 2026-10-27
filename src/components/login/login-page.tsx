@@ -6,12 +6,12 @@ import {browserSupportsWebAuthn, startAuthentication} from "@simplewebauthn/brow
 import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
 import {fetchPasskeyLoginOptions, login, loginWithPasskey, ME_QUERY_KEY} from "@/api/auth";
 import {passkeyError} from "@/lib/passkey-error";
 import type {Login} from "@shared/auth";
 import type {User} from "@shared/user";
 import {ErrorText} from "@/components/text/error-text";
+import {FormField} from "@/components/form/form-field";
 
 // Ohne Session: die Optionen nennen keinen User, der Browser bietet alle Passkeys dieser Domain an
 async function passkeyLogin(): Promise<User> {
@@ -66,8 +66,7 @@ export function LoginPage() {
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="login-email">E-Mail</Label>
+                        <FormField label="E-Mail" htmlFor="login-email">
                             <Input
                                 id="login-email"
                                 type="email"
@@ -77,10 +76,9 @@ export function LoginPage() {
                                 required
                                 autoFocus
                             />
-                        </div>
+                        </FormField>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="login-password">Passwort</Label>
+                        <FormField label="Passwort" htmlFor="login-password">
                             <Input
                                 id="login-password"
                                 type="password"
@@ -89,7 +87,7 @@ export function LoginPage() {
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                             />
-                        </div>
+                        </FormField>
 
                         {error && <ErrorText>{error.message}</ErrorText>}
 

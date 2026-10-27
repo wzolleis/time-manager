@@ -1,15 +1,7 @@
 import React, {useState} from "react";
 import {Button} from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {formatTime} from "@shared/format";
 import {localDay} from "@shared/time-rules";
@@ -19,6 +11,8 @@ import {useChangeTimeEntry} from "@features/reports/use-cases/use-change-time-en
 import type {EntryRow} from "@features/reports/time-entry-row";
 import {Muted} from "@/components/text/muted";
 import {ErrorText} from "@/components/text/error-text";
+import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {FormField} from "@/components/form/form-field";
 
 const NO_PROJECT = "none"; // Radix Select erlaubt keinen leeren String als Wert
 
@@ -75,8 +69,7 @@ export function EntryActions({entry}: {entry: EntryRow}) {
                             </DialogDescription>
                         </DialogHeader>
 
-                        <div className="space-y-2 text-left">
-                            <Label htmlFor={`time-${entry.id}`}>Uhrzeit</Label>
+                        <FormField label="Uhrzeit" htmlFor={`time-${entry.id}`}>
                             <Input
                                 id={`time-${entry.id}`}
                                 type="time"
@@ -84,11 +77,10 @@ export function EntryActions({entry}: {entry: EntryRow}) {
                                 onChange={(e) => setTime(e.target.value)}
                                 required
                             />
-                        </div>
+                        </FormField>
 
                         {isKommen && (
-                            <div className="space-y-2 text-left">
-                                <Label htmlFor={`project-${entry.id}`}>Projekt</Label>
+                            <FormField label="Projekt" htmlFor={`project-${entry.id}`}>
                                 <Select value={projectChoice} onValueChange={setProjectChoice}>
                                     <SelectTrigger id={`project-${entry.id}`}>
                                         <SelectValue />
@@ -102,21 +94,18 @@ export function EntryActions({entry}: {entry: EntryRow}) {
                                         ))}
                                     </SelectContent>
                                 </Select>
-                            </div>
+                            </FormField>
                         )}
 
                         {sickNotice && <Muted>{sickNotice}</Muted>}
                         {problem && <ErrorText alert={false}>{problem}</ErrorText>}
                         {update.error && <ErrorText>{update.error.message}</ErrorText>}
 
-                        <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                                Abbrechen
-                            </Button>
-                            <Button type="submit" disabled={update.isSaving || problem !== null}>
-                                {update.isSaving ? "Speichere…" : "Speichern"}
-                            </Button>
-                        </DialogFooter>
+                        <FormDialogFooter
+                            onCancel={() => setOpen(false)}
+                            saving={update.isSaving}
+                            disabled={problem !== null}
+                        />
                     </form>
                 </DialogContent>
             </Dialog>

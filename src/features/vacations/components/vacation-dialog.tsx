@@ -5,19 +5,19 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
 import {localDay} from "@shared/time-rules";
 import {dayCount} from "@shared/vacation-rules";
 import type {Vacation} from "@shared/vacation";
 import {useAddVacation} from "@features/vacations/use-cases/use-add-vacation";
 import {useChangeVacation} from "@features/vacations/use-cases/use-change-vacation";
 import {ErrorText} from "@/components/text/error-text";
+import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {FormField} from "@/components/form/form-field";
 
 type Props = {
     vacation?: Vacation; // mit Urlaub: bearbeiten, ohne: neu anlegen
@@ -92,8 +92,7 @@ export function VacationDialog({vacation, label, variant = "outline", size = "sm
                     </DialogHeader>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2 text-left">
-                            <Label htmlFor={`${uid}-start`}>Beginn</Label>
+                        <FormField label="Beginn" htmlFor={`${uid}-start`}>
                             <Input
                                 id={`${uid}-start`}
                                 type="date"
@@ -101,9 +100,8 @@ export function VacationDialog({vacation, label, variant = "outline", size = "sm
                                 onChange={(e) => onStartChange(e.target.value)}
                                 required
                             />
-                        </div>
-                        <div className="space-y-2 text-left">
-                            <Label htmlFor={`${uid}-end`}>Ende</Label>
+                        </FormField>
+                        <FormField label="Ende" htmlFor={`${uid}-end`}>
                             <Input
                                 id={`${uid}-end`}
                                 type="date"
@@ -112,7 +110,7 @@ export function VacationDialog({vacation, label, variant = "outline", size = "sm
                                 onChange={(e) => e.target.value && setEnd(e.target.value)}
                                 required
                             />
-                        </div>
+                        </FormField>
                     </div>
 
                     {problem ? (
@@ -123,14 +121,11 @@ export function VacationDialog({vacation, label, variant = "outline", size = "sm
 
                     {save.error && <ErrorText>{save.error.message}</ErrorText>}
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                            Abbrechen
-                        </Button>
-                        <Button type="submit" disabled={save.isSaving || problem !== null}>
-                            {save.isSaving ? "Speichere…" : "Speichern"}
-                        </Button>
-                    </DialogFooter>
+                    <FormDialogFooter
+                        onCancel={() => setOpen(false)}
+                        saving={save.isSaving}
+                        disabled={problem !== null}
+                    />
                 </form>
             </DialogContent>
         </Dialog>

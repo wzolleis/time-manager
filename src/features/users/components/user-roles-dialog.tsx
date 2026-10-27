@@ -5,7 +5,6 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -14,6 +13,7 @@ import {fetchRoles, fetchUserRoles, updateUserRoles} from "@/api/roles";
 import type {User} from "@shared/user";
 import {ErrorText} from "@/components/text/error-text";
 import {Loading} from "@/components/text/loading";
+import {FormDialogFooter} from "@/components/form/form-dialog-footer";
 
 // Der Admin legt fest, welche Rollen ein User hat
 export function UserRolesDialog({user}: {user: User}) {
@@ -91,14 +91,11 @@ export function UserRolesDialog({user}: {user: User}) {
 
                     {(loadError ?? save.error) && <ErrorText>{(loadError ?? save.error)?.message}</ErrorText>}
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
-                            Abbrechen
-                        </Button>
-                        <Button type="submit" disabled={save.isPending || !userRoles.data}>
-                            {save.isPending ? "Speichere…" : "Speichern"}
-                        </Button>
-                    </DialogFooter>
+                    <FormDialogFooter
+                        onCancel={() => handleOpenChange(false)}
+                        saving={save.isPending}
+                        disabled={!userRoles.data}
+                    />
                 </form>
             </DialogContent>
         </Dialog>

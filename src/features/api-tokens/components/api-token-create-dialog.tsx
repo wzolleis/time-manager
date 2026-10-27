@@ -10,12 +10,13 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {useCreateApiToken} from "@features/api-tokens/use-cases/use-create-api-token";
 import {API_TOKEN_VALIDITIES, type ApiTokenValidity, DEFAULT_API_TOKEN_VALIDITY} from "@shared/api-token";
 import {validityLabel} from "@shared/api-token-rules";
 import {ErrorText} from "@/components/text/error-text";
+import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {FormField} from "@/components/form/form-field";
 
 const NO_EXPIRY = "none"; // Radix Select braucht Texte als Werte
 
@@ -69,15 +70,14 @@ export function ApiTokenCreateDialog() {
                             </DialogDescription>
                         </DialogHeader>
 
-                        <div className="space-y-2 text-left">
-                            <Label htmlFor={`${uid}-token`}>Token</Label>
+                        <FormField label="Token" htmlFor={`${uid}-token`}>
                             <div className="flex gap-2">
                                 <Input id={`${uid}-token`} value={token} readOnly className="font-mono" />
                                 <Button type="button" variant="outline" onClick={() => copy(token)}>
                                     {copied ? "Kopiert" : "Kopieren"}
                                 </Button>
                             </div>
-                        </div>
+                        </FormField>
 
                         <div className="space-y-2 text-left">
                             <p className="text-sm font-medium">Einrichten in Claude Code</p>
@@ -110,8 +110,7 @@ export function ApiTokenCreateDialog() {
                         </DialogHeader>
 
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2 text-left">
-                                <Label htmlFor={`${uid}-name`}>Name</Label>
+                            <FormField label="Name" htmlFor={`${uid}-name`}>
                                 <Input
                                     id={`${uid}-name`}
                                     value={name}
@@ -120,9 +119,8 @@ export function ApiTokenCreateDialog() {
                                     onChange={(e) => setName(e.target.value)}
                                     required
                                 />
-                            </div>
-                            <div className="space-y-2 text-left">
-                                <Label htmlFor={`${uid}-validity`}>Gültigkeit</Label>
+                            </FormField>
+                            <FormField label="Gültigkeit" htmlFor={`${uid}-validity`}>
                                 <Select value={validity} onValueChange={setValidity}>
                                     <SelectTrigger id={`${uid}-validity`}>
                                         <SelectValue />
@@ -135,19 +133,18 @@ export function ApiTokenCreateDialog() {
                                         ))}
                                     </SelectContent>
                                 </Select>
-                            </div>
+                            </FormField>
                         </div>
 
                         {create.error && <ErrorText>{create.error.message}</ErrorText>}
 
-                        <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                                Abbrechen
-                            </Button>
-                            <Button type="submit" disabled={create.isSaving || problem !== null}>
-                                {create.isSaving ? "Erzeuge…" : "Erzeugen"}
-                            </Button>
-                        </DialogFooter>
+                        <FormDialogFooter
+                            onCancel={() => setOpen(false)}
+                            saving={create.isSaving}
+                            disabled={problem !== null}
+                            submitLabel="Erzeugen"
+                            savingLabel="Erzeuge…"
+                        />
                     </form>
                 )}
             </DialogContent>

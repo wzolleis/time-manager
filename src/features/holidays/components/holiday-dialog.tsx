@@ -4,13 +4,11 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
 import {useAddHoliday} from "@features/holidays/use-cases/use-add-holiday";
 import {useChangeHoliday} from "@features/holidays/use-cases/use-change-holiday";
 import {localDay} from "@shared/time-rules";
@@ -18,6 +16,8 @@ import {isWeekend} from "@shared/week";
 import type {Holiday} from "@shared/holiday";
 import {Muted} from "@/components/text/muted";
 import {ErrorText} from "@/components/text/error-text";
+import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {FormField} from "@/components/form/form-field";
 
 type Props = {
     holiday?: Holiday; // mit Feiertag: bearbeiten, ohne: neu anlegen
@@ -84,8 +84,7 @@ export function HolidayDialog({holiday, userId, userName, label, variant = "outl
                     </DialogHeader>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2 text-left">
-                            <Label htmlFor={`${uid}-date`}>Datum</Label>
+                        <FormField label="Datum" htmlFor={`${uid}-date`}>
                             <Input
                                 id={`${uid}-date`}
                                 type="date"
@@ -93,9 +92,8 @@ export function HolidayDialog({holiday, userId, userName, label, variant = "outl
                                 onChange={(e) => e.target.value && setDate(e.target.value)}
                                 required
                             />
-                        </div>
-                        <div className="space-y-2 text-left">
-                            <Label htmlFor={`${uid}-name`}>Name</Label>
+                        </FormField>
+                        <FormField label="Name" htmlFor={`${uid}-name`}>
                             <Input
                                 id={`${uid}-name`}
                                 value={name}
@@ -103,7 +101,7 @@ export function HolidayDialog({holiday, userId, userName, label, variant = "outl
                                 onChange={(e) => setName(e.target.value)}
                                 required
                             />
-                        </div>
+                        </FormField>
                     </div>
 
                     {problem && <ErrorText alert={false}>{problem}</ErrorText>}
@@ -111,14 +109,11 @@ export function HolidayDialog({holiday, userId, userName, label, variant = "outl
 
                     {save.error && <ErrorText>{save.error.message}</ErrorText>}
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                            Abbrechen
-                        </Button>
-                        <Button type="submit" disabled={save.isSaving || problem !== null}>
-                            {save.isSaving ? "Speichere…" : "Speichern"}
-                        </Button>
-                    </DialogFooter>
+                    <FormDialogFooter
+                        onCancel={() => setOpen(false)}
+                        saving={save.isSaving}
+                        disabled={problem !== null}
+                    />
                 </form>
             </DialogContent>
         </Dialog>
