@@ -79,11 +79,13 @@ afterEach(() => {
 });
 
 describe("Monatsbericht", () => {
-    it("öffnet mit einem Klick auf die Woche den Wochenbericht dieser Woche", async () => {
+    // Rendert die ganze App mit Router, bei parallelen Testläufen reicht die Standardwartezeit von 1 s nicht immer
+    it("öffnet mit einem Klick auf die Woche den Wochenbericht dieser Woche", {timeout: 10_000}, async () => {
+        const slow = {timeout: 3000};
         const router = renderPage("/user/reports/monthly/2026-10");
-        fireEvent.click(await screen.findByRole("link", {name: /KW 43\/2026/}));
-        await waitFor(() => expect(router.state.location.pathname).toBe("/user/reports/weekly/2026-W43"));
-        expect(await screen.findByRole("heading", {level: 1, name: "Wochenbericht"})).toBeTruthy();
+        fireEvent.click(await screen.findByRole("link", {name: /KW 43\/2026/}, slow));
+        await waitFor(() => expect(router.state.location.pathname).toBe("/user/reports/weekly/2026-W43"), slow);
+        expect(await screen.findByRole("heading", {level: 1, name: "Wochenbericht"}, slow)).toBeTruthy();
     });
 
     it("blättert über die Adresse", async () => {
