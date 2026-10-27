@@ -5,6 +5,13 @@ import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {UserProvider} from "@/components/login/user-provider";
 import {useCurrentUser} from "@/lib/user-context";
 
+// jsdom kann kein WebAuthn: der Dialog des Browsers ist gemockt, fetch läuft wie sonst
+const browser = vi.hoisted(() => ({startAuthentication: vi.fn()}));
+vi.mock("@simplewebauthn/browser", () => ({
+    browserSupportsWebAuthn: () => true,
+    startAuthentication: browser.startAuthentication,
+}));
+
 const USER = {
     id: "275f12fb-e116-4857-9f12-fbe116b857fb",
     name: "Test",
@@ -12,6 +19,8 @@ const USER = {
     avatarUrl: null,
 };
 const PASSWORD = "richtiges-passwort";
+const OPTIONS = {challenge: "challenge-vom-server", rpId: "localhost"};
+const ASSERTION = {id: "cred-1", rawId: "cred-1", type: "public-key", response: {clientDataJSON: "x"}};
 
 // Ohne Session liefert /me 401, der Login setzt die Session
 function mockApi() {
@@ -29,6 +38,11 @@ function mockApi() {
                 return Response.json(USER);
             }
             return Response.json({error: "E-Mail oder Passwort ist falsch"}, {status: 401});
+        }
+        if (pathname === "/api/auth/passkey-login-options") return Response.json(OPTIONS);
+        if (pathname === "/api/auth/passkey-login") {
+            loggedIn = true;
+            return Response.json(USER);
         }
         return Response.json({error: `Nicht gemockt: ${pathname}`}, {status: 404});
     });
@@ -61,6 +75,7 @@ async function submitLogin(email: string, password: string) {
 afterEach(() => {
     cleanup();
     vi.unstubAllGlobals();
+    browser.startAuthentication.mockReset();
 });
 
 describe("Anmeldung", () => {
@@ -96,5 +111,29 @@ describe("Anmeldung", () => {
         renderApp();
         expect(await screen.findByText("Angemeldet als Test")).toBeTruthy();
         expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith("/api/auth/login"))).toHaveLength(1);
+    });
+
+    it("meldet mit Passkey an und schickt dem Server die Antwort des Browsers", async () => {
+        const fetchMock = mockApi();
+        browser.startAuthentication.mockResolvedValue(ASSERTION);
+        renderApp();
+
+        fireEvent.click(await screen.findByRole("button", {name: "Mit Passkey anmelden"}));
+
+        expect(await screen.findByText("Angemeldet als Test")).toBeTruthy();
+        expect(browser.startAuthentication).toHaveBeenCalledWith({optionsJSON: OPTIONS});
+        const [, init] = fetchMock.mock.calls.find(([url]) => String(url).endsWith("/api/auth/passkey-login"))!;
+        expect(JSON.parse(String(init?.body))).toEqual({response: ASSERTION});
+    });
+
+    it("meldet einen abgebrochenen Dialog des Browsers", async () => {
+        const fetchMock = mockApi();
+        browser.startAuthentication.mockRejectedValue(Object.assign(new Error("denied"), {name: "NotAllowedError"}));
+        renderApp();
+
+        fireEvent.click(await screen.findByRole("button", {name: "Mit Passkey anmelden"}));
+
+        expect((await screen.findByRole("alert")).textContent).toBe("Anmeldung mit Passkey abgebrochen");
+        expect(fetchMock.mock.calls.some(([url]) => String(url).endsWith("/api/auth/passkey-login"))).toBe(false);
     });
 });
