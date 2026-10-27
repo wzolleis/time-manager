@@ -14,6 +14,7 @@ import {Muted} from "@/components/text/muted";
 import {ErrorText} from "@/components/text/error-text";
 import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
+import {PageHeader} from "@/components/page/page-header";
 
 // Buchungen an einem Krankheitstag bleiben sichtbar, aber ausgegraut
 const muted = (row: DailyReportRow, text: string) =>
@@ -61,13 +62,15 @@ export function ReportDailyEdit({day}: {day: string}) {
     const setDay = (target: string) => navigate({to: "/user/reports/daily/$day", params: {day: target}});
 
     return (
-        <div className="space-y-4">
-            <div>
-                <h1 className="text-2xl font-semibold">Heute</h1>
-                <Muted>
-                    {currentUser.name} · {formatDate(report.range.start)}
-                </Muted>
-            </div>
+        <>
+            <PageHeader
+                title="Heute"
+                description={
+                    <>
+                        {currentUser.name} · {formatDate(report.range.start)}
+                    </>
+                }
+            />
 
             {/* Gestempelt wird immer jetzt, deshalb nur am heutigen Tag */}
             {day === today && <StampCard />}
@@ -128,6 +131,6 @@ export function ReportDailyEdit({day}: {day: string}) {
                     emptyText={day === today ? "Heute noch keine Buchungen." : "An diesem Tag keine Buchungen."}
                 />
             )}
-        </div>
+        </>
     );
 }

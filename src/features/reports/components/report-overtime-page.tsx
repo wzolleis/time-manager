@@ -8,6 +8,8 @@ import {useShowOvertime} from "@features/reports/use-cases/use-show-overtime";
 import {Muted} from "@/components/text/muted";
 import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
+import {PageHeader} from "@/components/page/page-header";
+import {Page} from "@/components/page/page";
 
 /** Saldo der Überstunden als Karte, darunter die letzte Korrektur. Seite für /user/reports/overtime */
 export function ReportOvertimePage() {
@@ -19,14 +21,12 @@ export function ReportOvertimePage() {
     }
 
     return (
-        <div className="space-y-4 p-4">
-            <div className="flex flex-wrap items-start justify-between gap-2">
-                <div>
-                    <h1 className="text-2xl font-semibold">Überstunden</h1>
-                    <Muted>{currentUser.name}</Muted>
-                </div>
-                {!report.isPending && !report.error && <OvertimeDialog offset={correction?.offset ?? null} />}
-            </div>
+        <Page>
+            <PageHeader
+                title="Überstunden"
+                description={currentUser.name}
+                actions={!report.isPending && !report.error && <OvertimeDialog offset={correction?.offset ?? null} />}
+            />
 
             {report.isPending && <Loading />}
             {report.error && <LoadError error={report.error} onRetry={report.retry} />}
@@ -44,6 +44,6 @@ export function ReportOvertimePage() {
                     />
                 </div>
             )}
-        </div>
+        </Page>
     );
 }

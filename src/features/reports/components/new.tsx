@@ -1,8 +1,10 @@
+import {PageHeader} from "@/components/page/page-header";
+import {Page} from "@/components/page/page";
 const TimeReportNew = () => {
     return (
-        <div className="space-y-4 p-4">
-            <h1 className="text-2xl font-semibold">Neuer Report</h1>
-        </div>
+        <Page>
+            <PageHeader title="Neuer Report" />
+        </Page>
     );
 };
 export default TimeReportNew;

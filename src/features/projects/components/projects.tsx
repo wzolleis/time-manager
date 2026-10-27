@@ -6,6 +6,8 @@ import type {Project} from "@shared/project";
 import {ErrorText} from "@/components/text/error-text";
 import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
+import {PageHeader} from "@/components/page/page-header";
+import {Page} from "@/components/page/page";
 
 export function Projects() {
     const qc = useQueryClient();
@@ -29,11 +31,8 @@ export function Projects() {
     const handleDelete = (project: Project) => remove.mutate(project.id);
 
     return (
-        <div className="space-y-4 p-4">
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-semibold">Projekte</h1>
-                <ProjectCreateDialog />
-            </div>
+        <Page>
+            <PageHeader title="Projekte" actions={<ProjectCreateDialog />} />
 
             {isPending && <Loading />}
 
@@ -48,6 +47,6 @@ export function Projects() {
             )}
 
             {remove.isError && <ErrorText>{remove.error.message}</ErrorText>}
-        </div>
+        </Page>
     );
 }

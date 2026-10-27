@@ -11,6 +11,7 @@ import {useShowMonthlyReport} from "@features/reports/use-cases/use-show-monthly
 import {Muted} from "@/components/text/muted";
 import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
+import {PageHeader} from "@/components/page/page-header";
 
 const dash = "–";
 
@@ -68,13 +69,15 @@ export function ReportMonthly({month}: {month: string}) {
     const setMonth = (target: string) => navigate({to: "/user/reports/monthly/$month", params: {month: target}});
 
     return (
-        <div className="space-y-4">
-            <div>
-                <h1 className="text-2xl font-semibold">Monatsbericht</h1>
-                <Muted>
-                    {currentUser.name} · {formatMonth(month)}
-                </Muted>
-            </div>
+        <>
+            <PageHeader
+                title="Monatsbericht"
+                description={
+                    <>
+                        {currentUser.name} · {formatMonth(month)}
+                    </>
+                }
+            />
 
             <div className="flex flex-wrap items-center gap-2">
                 <Button
@@ -125,6 +128,6 @@ export function ReportMonthly({month}: {month: string}) {
             {report.isPending && <Loading />}
             {report.error && <LoadError error={report.error} onRetry={report.retry} />}
             {!report.isPending && !report.error && <DataTable columns={columns} data={totals.weeks} />}
-        </div>
+        </>
     );
 }

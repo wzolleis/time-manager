@@ -3,6 +3,8 @@ import {localDay} from "@shared/time-rules";
 import {parseIsoWeek} from "@shared/week";
 import {ReportWeekly} from "@features/reports/components/report-weekly";
 import {ErrorText} from "@/components/text/error-text";
+import {PageHeader} from "@/components/page/page-header";
+import {Page} from "@/components/page/page";
 
 /** Die Woche kommt aus der Adresse (/user/reports/weekly/$week, z. B. 2026-W43), ohne Angabe die aktuelle */
 export const ReportWeeklyPage = () => {
@@ -11,19 +13,19 @@ export const ReportWeeklyPage = () => {
 
     if (week !== undefined && monday === null) {
         return (
-            <div className="space-y-2 p-4">
-                <h1 className="text-2xl font-semibold">Wochenbericht</h1>
+            <Page>
+                <PageHeader title="Wochenbericht" />
                 <ErrorText>„{week}“ ist keine gültige Woche (JJJJ-Www, z. B. 2026-W43).</ErrorText>
                 <Link to="/user/reports/weekly" className="text-sm underline">
                     Zur aktuellen Woche
                 </Link>
-            </div>
+            </Page>
         );
     }
 
     return (
-        <div className="p-4">
+        <Page>
             <ReportWeekly anchor={monday ?? localDay(new Date())} />
-        </div>
+        </Page>
     );
 };

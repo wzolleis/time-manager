@@ -6,6 +6,8 @@ import {UserTable} from "@features/users/components/user-table";
 import {ErrorText} from "@/components/text/error-text";
 import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
+import {PageHeader} from "@/components/page/page-header";
+import {Page} from "@/components/page/page";
 
 export function Users() {
     const qc = useQueryClient();
@@ -29,11 +31,8 @@ export function Users() {
     const handleDelete = (user: User) => remove.mutate(user.id);
 
     return (
-        <div className="space-y-4 p-4">
-            <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-semibold">Benutzerverwaltung</h1>
-                <UserCreateDialog />
-            </div>
+        <Page>
+            <PageHeader title="Benutzerverwaltung" actions={<UserCreateDialog />} />
 
             {isPending && <Loading />}
 
@@ -48,6 +47,6 @@ export function Users() {
             )}
 
             {remove.isError && <ErrorText>{remove.error.message}</ErrorText>}
-        </div>
+        </Page>
     );
 }

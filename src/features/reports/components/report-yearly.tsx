@@ -9,6 +9,7 @@ import {useShowYearlyReport} from "@features/reports/use-cases/use-show-yearly-r
 import {Muted} from "@/components/text/muted";
 import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
+import {PageHeader} from "@/components/page/page-header";
 
 const dash = "–";
 
@@ -61,13 +62,15 @@ export function ReportYearly({year}: {year: string}) {
     const beforeStart = !report.isPending && year < firstYear;
 
     return (
-        <div className="space-y-4">
-            <div>
-                <h1 className="text-2xl font-semibold">Jahresbericht</h1>
-                <Muted>
-                    {currentUser.name} · {year}
-                </Muted>
-            </div>
+        <>
+            <PageHeader
+                title="Jahresbericht"
+                description={
+                    <>
+                        {currentUser.name} · {year}
+                    </>
+                }
+            />
 
             <div className="flex flex-wrap items-center gap-2">
                 <Button
@@ -134,6 +137,6 @@ export function ReportYearly({year}: {year: string}) {
                     {!report.isPending && !report.error && <DataTable columns={columns} data={totals.months} />}
                 </>
             )}
-        </div>
+        </>
     );
 }
