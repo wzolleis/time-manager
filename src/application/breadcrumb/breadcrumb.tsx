@@ -12,7 +12,10 @@ export function Breadcrumb({items}: {items: NavItem[]}) {
     }
 
     return (
-        <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-sm">
+        <nav
+            aria-label="Breadcrumb"
+            className="flex min-w-0 items-center gap-1 overflow-hidden text-sm whitespace-nowrap"
+        >
             {trail.map((item, index) => {
                 const isLast = index === trail.length - 1;
                 const Icon = item.icon;
