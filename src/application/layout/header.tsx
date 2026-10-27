@@ -49,7 +49,8 @@ export const Header = () => {
             py="3"
             style={{background: "var(--color-background)", borderBottom: "1px solid var(--gray-4)"}}
         >
-            <Flex align="center" gap="3" width={"100%"}>
+            {/* minWidth 0: die linke Seite schrumpft, Glocke und Avatar bleiben im Bild */}
+            <Flex align="center" gap="3" width={"100%"} minWidth="0">
                 {/* Hamburger */}
                 <Box display={{md: "none"}}>
                     <MenuButton onClick={() => setMenuOpen(true)} />
@@ -65,11 +66,14 @@ export const Header = () => {
                 </Sheet>
                 <StartEnd>
                     <Breadcrumb items={NAVIGATION_ITEMS} /> {/* dieselbe flache Liste wie für buildNavTree(navItems) */}
-                    <Text color="gray">{`Hallo ${currentUser?.name}`}</Text>
+                    {/* Auf schmalen Bildschirmen braucht die Breadcrumb den Platz */}
+                    <Box display={{initial: "none", sm: "block"}} minWidth="0">
+                        <Text as="div" color="gray" truncate>{`Hallo ${currentUser?.name}`}</Text>
+                    </Box>
                 </StartEnd>
             </Flex>
 
-            <Flex align="center" gap="3">
+            <Flex align="center" gap="3" flexShrink="0">
                 <Button
                     variant="ghost"
                     size="2"
