@@ -8,6 +8,7 @@ import {
 import {Muted} from "@/components/text/muted";
 import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
+import {PageHeader} from "@/components/page/page-header";
 
 // Auf schmalen Bildschirmen dürfen kurze Spalten umbrechen, damit die Tabelle ohne Scrollen passt
 const wrapOnPhone = {className: "whitespace-normal sm:whitespace-nowrap"};
@@ -57,17 +58,20 @@ export function UserSettingsTable() {
     }
 
     return (
-        <div className="space-y-4">
-            <div>
-                <h1 className="text-2xl font-semibold">Einstellungen</h1>
-                <Muted>
-                    {currentUser.name} · Jeder Wert gilt ab einem Tag, ältere Werte gelten für die Vergangenheit weiter.
-                </Muted>
-            </div>
+        <>
+            <PageHeader
+                title="Einstellungen"
+                description={
+                    <>
+                        {currentUser.name} · Jeder Wert gilt ab einem Tag, ältere Werte gelten für die Vergangenheit
+                        weiter.
+                    </>
+                }
+            />
 
             {isPending && <Loading />}
             {error && <LoadError error={error} onRetry={retry} />}
             {loaded && <DataTable columns={columns} data={rows} emptyText="Keine Einstellungen" />}
-        </div>
+        </>
     );
 }

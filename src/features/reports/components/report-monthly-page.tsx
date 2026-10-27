@@ -3,6 +3,8 @@ import {localDay} from "@shared/time-rules";
 import {isValidMonth, monthOf} from "@shared/week";
 import {ReportMonthly} from "@features/reports/components/report-monthly";
 import {ErrorText} from "@/components/text/error-text";
+import {PageHeader} from "@/components/page/page-header";
+import {Page} from "@/components/page/page";
 
 /** Der Monat kommt aus der Adresse (/user/reports/monthly/$month), ohne Angabe der aktuelle */
 export const ReportMonthlyPage = () => {
@@ -10,19 +12,19 @@ export const ReportMonthlyPage = () => {
 
     if (month !== undefined && !isValidMonth(month)) {
         return (
-            <div className="space-y-2 p-4">
-                <h1 className="text-2xl font-semibold">Monatsbericht</h1>
+            <Page>
+                <PageHeader title="Monatsbericht" />
                 <ErrorText>„{month}“ ist kein gültiger Monat (JJJJ-MM).</ErrorText>
                 <Link to="/user/reports/monthly" className="text-sm underline">
                     Zum aktuellen Monat
                 </Link>
-            </div>
+            </Page>
         );
     }
 
     return (
-        <div className="p-4">
+        <Page>
             <ReportMonthly month={month ?? monthOf(localDay(new Date()))} />
-        </div>
+        </Page>
     );
 };

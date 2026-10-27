@@ -12,6 +12,7 @@ import {isWeekend, weekdayIndex} from "@shared/week";
 import {Muted} from "@/components/text/muted";
 import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
+import {PageHeader} from "@/components/page/page-header";
 
 const WEEKDAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
@@ -69,25 +70,25 @@ export function HolidayList({scope}: Props) {
     }
 
     return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-semibold">
-                        {scope === "global" ? "Feiertage für alle" : "Feiertage"}
-                    </h1>
-                    <Muted>
+        <>
+            <PageHeader
+                title={scope === "global" ? "Feiertage für alle" : "Feiertage"}
+                description={
+                    <>
                         {scope === "user" && `${currentUser!.name} · `}
                         {year} · {count} {count === 1 ? "Feiertag" : "Feiertage"}
-                    </Muted>
-                </div>
-                <HolidayDialog
-                    userId={scope === "global" ? null : currentUser!.id}
-                    userName={currentUser?.name}
-                    label={scope === "global" ? "Feiertag eintragen" : "Eigenen Feiertag eintragen"}
-                    variant="default"
-                    size="default"
-                />
-            </div>
+                    </>
+                }
+                actions={
+                    <HolidayDialog
+                        userId={scope === "global" ? null : currentUser!.id}
+                        userName={currentUser?.name}
+                        label={scope === "global" ? "Feiertag eintragen" : "Eigenen Feiertag eintragen"}
+                        variant="default"
+                        size="default"
+                    />
+                }
+            />
 
             <div className="flex flex-wrap items-center gap-2">
                 <Button variant="outline" size="sm" aria-label="Vorheriges Jahr" onClick={() => setYear(year - 1)}>
@@ -110,6 +111,6 @@ export function HolidayList({scope}: Props) {
                     emptyText={`Für ${year} ist kein Feiertag eingetragen.`}
                 />
             )}
-        </div>
+        </>
     );
 }

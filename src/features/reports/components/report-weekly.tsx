@@ -11,6 +11,7 @@ import {useShowWeeklyReport} from "@features/reports/use-cases/use-show-weekly-r
 import {Muted} from "@/components/text/muted";
 import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
+import {PageHeader} from "@/components/page/page-header";
 
 type DayRow = WeekDayTotals & {isToday: boolean};
 
@@ -103,14 +104,16 @@ export function ReportWeekly({anchor}: {anchor: string}) {
         .join(" · ");
 
     return (
-        <div className="space-y-4">
-            <div>
-                <h1 className="text-2xl font-semibold">Wochenbericht</h1>
-                <Muted>
-                    {currentUser.name} · KW {report.week}/{report.year} · {formatDayMonth(localDayRange(first).start)} –{" "}
-                    {formatDayMonth(localDayRange(last).start)}
-                </Muted>
-            </div>
+        <>
+            <PageHeader
+                title="Wochenbericht"
+                description={
+                    <>
+                        {currentUser.name} · KW {report.week}/{report.year} ·{" "}
+                        {formatDayMonth(localDayRange(first).start)} – {formatDayMonth(localDayRange(last).start)}
+                    </>
+                }
+            />
 
             <div className="flex flex-wrap items-center gap-2">
                 <Button
@@ -153,6 +156,6 @@ export function ReportWeekly({anchor}: {anchor: string}) {
             {report.isPending && <Loading />}
             {report.error && <LoadError error={report.error} onRetry={report.retry} />}
             {!report.isPending && !report.error && <DataTable columns={columns} data={rows} />}
-        </div>
+        </>
     );
 }

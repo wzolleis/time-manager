@@ -10,6 +10,7 @@ import {type SickLeaveRow as Row, useShowSickLeaves} from "@features/sick-leaves
 import {Muted} from "@/components/text/muted";
 import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
+import {PageHeader} from "@/components/page/page-header";
 
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
 const columns: DataTableColumnDef<Row>[] = [
@@ -51,16 +52,16 @@ export function SickLeavesList() {
     }
 
     return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-semibold">Krankmeldungen</h1>
-                    <Muted>
+        <>
+            <PageHeader
+                title="Krankmeldungen"
+                description={
+                    <>
                         {currentUser.name} · {year} · {rows.length} {rows.length === 1 ? "Eintrag" : "Einträge"}
-                    </Muted>
-                </div>
-                <SickLeaveDialog label="Krankmeldung eintragen" variant="default" size="default" />
-            </div>
+                    </>
+                }
+                actions={<SickLeaveDialog label="Krankmeldung eintragen" variant="default" size="default" />}
+            />
 
             <div className="flex flex-wrap items-center gap-2">
                 <Button variant="outline" size="sm" aria-label="Vorheriges Jahr" onClick={() => setYear(year - 1)}>
@@ -83,6 +84,6 @@ export function SickLeavesList() {
             {isPending && <Loading />}
             {error && <LoadError error={error} onRetry={retry} />}
             {loaded && <DataTable columns={columns} data={rows} emptyText="Keine Krankheitstage" />}
-        </div>
+        </>
     );
 }

@@ -1,17 +1,18 @@
 import {ApiTokenList} from "@features/api-tokens/components/api-token-list";
 import {useShowAllApiTokens} from "@features/api-tokens/use-cases/use-show-all-api-tokens";
-import {Muted} from "@/components/text/muted";
+import {PageHeader} from "@/components/page/page-header";
+import {Page} from "@/components/page/page";
 
 export function AdminApiTokensPage() {
     const tokens = useShowAllApiTokens();
 
     return (
-        <div className="space-y-4 p-4">
-            <div>
-                <h1 className="text-2xl font-semibold">Agent-Zugänge</h1>
-                <Muted>Die Tokens aller User. Ein widerrufenes Token wird sofort abgelehnt.</Muted>
-            </div>
+        <Page>
+            <PageHeader
+                title="Agent-Zugänge"
+                description="Die Tokens aller User. Ein widerrufenes Token wird sofort abgelehnt."
+            />
             <ApiTokenList scope="all" tokens={tokens} />
-        </div>
+        </Page>
     );
 }

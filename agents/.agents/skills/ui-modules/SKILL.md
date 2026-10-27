@@ -35,7 +35,7 @@ Pfad-Aliase: `@/*` → `src/*`, `@features/*` → `src/features/*`, `@shared/*` 
   In `navigation` liegen nur Definitionen der Navigations-Items, keine Komponenten.
 - **`common/`**: nur Typen, kein ausführbarer Code.
 - **`lib/`**: kennt keine fachlichen Features.
-- **`components/`**: nur die Unterordner `buttons`, `cards`, `dashboard-action`, `login`, `table`, `text`, `ui`, `utils`.
+- **`components/`**: nur die Unterordner `buttons`, `cards`, `dashboard-action`, `login`, `page`, `table`, `text`, `ui`, `utils`.
   Keine Dateien direkt in `components/`.
 - **`components/ui/`**: shadcn-Elemente, **nie von Hand ändern**, nur über shadcn. Anpassungen kommen in eine eigene
   Komponente in einem anderen Unterordner von `components/`.

@@ -10,6 +10,7 @@ import {localDay} from "@shared/time-rules";
 import {Muted} from "@/components/text/muted";
 import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
+import {PageHeader} from "@/components/page/page-header";
 
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
 const columns: DataTableColumnDef<Row>[] = [
@@ -45,17 +46,17 @@ export function VacationsList() {
     }
 
     return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-semibold">Urlaub</h1>
-                    <Muted>
+        <>
+            <PageHeader
+                title="Urlaub"
+                description={
+                    <>
                         {currentUser.name} · {year} · {rows.length} {rows.length === 1 ? "Eintrag" : "Einträge"} ·{" "}
                         {allowed} Urlaubstage im Jahr
-                    </Muted>
-                </div>
-                <VacationDialog label="Urlaub eintragen" variant="default" size="default" />
-            </div>
+                    </>
+                }
+                actions={<VacationDialog label="Urlaub eintragen" variant="default" size="default" />}
+            />
 
             <div className="flex flex-wrap items-center gap-2">
                 <Button variant="outline" size="sm" aria-label="Vorheriges Jahr" onClick={() => setYear(year - 1)}>
@@ -91,6 +92,6 @@ export function VacationsList() {
             {loaded && (
                 <DataTable columns={columns} data={rows} emptyText={`Für ${year} ist kein Urlaub eingetragen.`} />
             )}
-        </div>
+        </>
     );
 }
