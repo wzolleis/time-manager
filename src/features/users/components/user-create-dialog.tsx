@@ -15,6 +15,7 @@ import {Label} from "@/components/ui/label";
 import {createUser} from "@/api/users";
 import type {UserCreate} from "@shared/user";
 import {PASSWORD_MIN_LENGTH} from "@shared/auth";
+import {ErrorText} from "@/components/text/error-text";
 
 export function UserCreateDialog() {
     const qc = useQueryClient();
@@ -113,11 +114,7 @@ export function UserCreateDialog() {
                         />
                     </div>
 
-                    {create.isError && (
-                        <p role="alert" className="text-sm text-destructive">
-                            {create.error.message}
-                        </p>
-                    )}
+                    {create.isError && <ErrorText>{create.error.message}</ErrorText>}
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>

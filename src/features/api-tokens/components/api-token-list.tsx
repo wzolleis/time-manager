@@ -1,8 +1,9 @@
-import {Button} from "@/components/ui/button";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {formatDateTime} from "@shared/format";
 import {type ApiTokenScope, ApiTokenRevoke} from "@features/api-tokens/components/api-token-revoke";
 import type {ApiTokenRow} from "@features/api-tokens/use-cases/use-show-api-tokens";
+import {Loading} from "@/components/text/loading";
+import {LoadError} from "@/components/text/load-error";
 
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
 const userColumn: DataTableColumnDef<ApiTokenRow> = {accessorKey: "userName", header: "User"};
@@ -52,17 +53,8 @@ type Props = {
 export function ApiTokenList({scope, tokens}: Props) {
     return (
         <>
-            {tokens.isPending && <p className="text-sm text-muted-foreground">Lade…</p>}
-            {tokens.error && (
-                <div className="space-y-2">
-                    <p role="alert" className="text-sm text-destructive">
-                        {tokens.error.message}
-                    </p>
-                    <Button variant="outline" onClick={tokens.retry}>
-                        Erneut versuchen
-                    </Button>
-                </div>
-            )}
+            {tokens.isPending && <Loading />}
+            {tokens.error && <LoadError error={tokens.error} onRetry={tokens.retry} />}
             {tokens.rows && (
                 <DataTable
                     columns={scope === "own" ? ownColumns : allColumns}

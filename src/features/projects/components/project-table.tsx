@@ -1,6 +1,7 @@
 import {Table, TableBody, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {ProjectRow} from "@features/projects/components/project-row";
 import type {Project} from "@shared/project";
+import {Muted} from "@/components/text/muted";
 
 type ProjectTableProps = {
     projects: Project[];
@@ -10,7 +11,7 @@ type ProjectTableProps = {
 
 export function ProjectTable({projects, onDelete, deletingId}: ProjectTableProps) {
     if (projects.length === 0) {
-        return <p className="text-sm text-muted-foreground">Keine Projekte vorhanden.</p>;
+        return <Muted>Keine Projekte vorhanden.</Muted>;
     }
 
     return (

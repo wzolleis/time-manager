@@ -7,8 +7,10 @@ import {formatDayMonth, formatDifference, formatDuration, formatMonth} from "@sh
 import {localDayRange} from "@shared/day-range";
 import type {MonthWeekTotals} from "@shared/time-report";
 import {addMonths, isoWeekId} from "@shared/week";
-import {ReportError} from "@features/reports/components/report-error";
 import {useShowMonthlyReport} from "@features/reports/use-cases/use-show-monthly-report";
+import {Muted} from "@/components/text/muted";
+import {Loading} from "@/components/text/loading";
+import {LoadError} from "@/components/text/load-error";
 
 const dash = "–";
 
@@ -59,7 +61,7 @@ export function ReportMonthly({month}: {month: string}) {
     const {currentUser, totals, futureMonth, partial} = report;
 
     if (!currentUser) {
-        return <p className="text-sm text-muted-foreground">Bitte zuerst einen User anlegen und auswählen.</p>;
+        return <Muted>Bitte zuerst einen User anlegen und auswählen.</Muted>;
     }
 
     // Blättern ändert die Adresse, der Zurück-Button des Browsers springt dann zum vorherigen Monat
@@ -69,9 +71,9 @@ export function ReportMonthly({month}: {month: string}) {
         <div className="space-y-4">
             <div>
                 <h1 className="text-2xl font-semibold">Monatsbericht</h1>
-                <p className="text-sm text-muted-foreground">
+                <Muted>
                     {currentUser.name} · {formatMonth(month)}
-                </p>
+                </Muted>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
@@ -120,8 +122,8 @@ export function ReportMonthly({month}: {month: string}) {
                 />
             </div>
 
-            {report.isPending && <p className="text-sm text-muted-foreground">Lade…</p>}
-            {report.error && <ReportError error={report.error} onRetry={report.retry} />}
+            {report.isPending && <Loading />}
+            {report.error && <LoadError error={report.error} onRetry={report.retry} />}
             {!report.isPending && !report.error && <DataTable columns={columns} data={totals.weeks} />}
         </div>
     );

@@ -15,6 +15,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/c
 import {useCreateApiToken} from "@features/api-tokens/use-cases/use-create-api-token";
 import {API_TOKEN_VALIDITIES, type ApiTokenValidity, DEFAULT_API_TOKEN_VALIDITY} from "@shared/api-token";
 import {validityLabel} from "@shared/api-token-rules";
+import {ErrorText} from "@/components/text/error-text";
 
 const NO_EXPIRY = "none"; // Radix Select braucht Texte als Werte
 
@@ -137,11 +138,7 @@ export function ApiTokenCreateDialog() {
                             </div>
                         </div>
 
-                        {create.error && (
-                            <p role="alert" className="text-sm text-destructive">
-                                {create.error.message}
-                            </p>
-                        )}
+                        {create.error && <ErrorText>{create.error.message}</ErrorText>}
 
                         <DialogFooter>
                             <Button type="button" variant="outline" onClick={() => setOpen(false)}>

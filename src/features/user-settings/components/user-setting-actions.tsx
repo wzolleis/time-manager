@@ -14,6 +14,7 @@ import {germanDay} from "@shared/vacation-rules";
 import {UserSettingDialog} from "@features/user-settings/components/user-setting-dialog";
 import type {UserSettingRow} from "@features/user-settings/use-cases/use-show-user-settings";
 import {useDeleteUserSetting} from "@features/user-settings/use-cases/use-delete-user-setting";
+import {ErrorText} from "@/components/text/error-text";
 
 /**
  * Aktionen je Zeile (Regel 7): Zum aktuellen Wert trägt der User einen neuen Wert ein, einen geplanten Wert
@@ -68,11 +69,7 @@ export function UserSettingActions({row}: {row: UserSettingRow}) {
                 </AlertDialog>
             </div>
 
-            {remove.error && (
-                <p role="alert" className="text-right text-sm text-destructive">
-                    {remove.error.message}
-                </p>
-            )}
+            {remove.error && <ErrorText className="text-right">{remove.error.message}</ErrorText>}
         </div>
     );
 }

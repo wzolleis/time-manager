@@ -14,6 +14,7 @@ import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {changePassword} from "@/api/auth";
 import {PASSWORD_MIN_LENGTH, type PasswordChange} from "@shared/auth";
+import {ErrorText} from "@/components/text/error-text";
 
 type Props = {
     open: boolean;
@@ -98,16 +99,8 @@ export function PasswordChangeDialog({open, onOpenChange}: Props) {
                         />
                     </div>
 
-                    {mismatch && (
-                        <p role="alert" className="text-sm text-destructive">
-                            Die Passwörter stimmen nicht überein
-                        </p>
-                    )}
-                    {change.isError && (
-                        <p role="alert" className="text-sm text-destructive">
-                            {change.error.message}
-                        </p>
-                    )}
+                    {mismatch && <ErrorText>Die Passwörter stimmen nicht überein</ErrorText>}
+                    {change.isError && <ErrorText>{change.error.message}</ErrorText>}
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>

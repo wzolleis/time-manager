@@ -9,6 +9,9 @@ import {type HolidayRow, type HolidayScope, useShowHolidays} from "@features/hol
 import {localDay} from "@shared/time-rules";
 import {germanDay} from "@shared/vacation-rules";
 import {isWeekend, weekdayIndex} from "@shared/week";
+import {Muted} from "@/components/text/muted";
+import {Loading} from "@/components/text/loading";
+import {LoadError} from "@/components/text/load-error";
 
 const WEEKDAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
@@ -62,7 +65,7 @@ export function HolidayList({scope}: Props) {
     const count = holidays.rows?.length ?? 0;
 
     if (scope === "user" && !currentUser) {
-        return <p className="text-sm text-muted-foreground">Bitte zuerst einen User anlegen und auswählen.</p>;
+        return <Muted>Bitte zuerst einen User anlegen und auswählen.</Muted>;
     }
 
     return (
@@ -72,10 +75,10 @@ export function HolidayList({scope}: Props) {
                     <h1 className="text-2xl font-semibold">
                         {scope === "global" ? "Feiertage für alle" : "Feiertage"}
                     </h1>
-                    <p className="text-sm text-muted-foreground">
+                    <Muted>
                         {scope === "user" && `${currentUser!.name} · `}
                         {year} · {count} {count === 1 ? "Feiertag" : "Feiertage"}
-                    </p>
+                    </Muted>
                 </div>
                 <HolidayDialog
                     userId={scope === "global" ? null : currentUser!.id}
@@ -98,17 +101,8 @@ export function HolidayList({scope}: Props) {
                 </Button>
             </div>
 
-            {holidays.isPending && <p className="text-sm text-muted-foreground">Lade…</p>}
-            {holidays.error && (
-                <div className="space-y-2">
-                    <p role="alert" className="text-sm text-destructive">
-                        {holidays.error.message}
-                    </p>
-                    <Button variant="outline" onClick={holidays.retry}>
-                        Erneut versuchen
-                    </Button>
-                </div>
-            )}
+            {holidays.isPending && <Loading />}
+            {holidays.error && <LoadError error={holidays.error} onRetry={holidays.retry} />}
             {holidays.rows && (
                 <DataTable
                     columns={scope === "global" ? globalColumns : userColumns}

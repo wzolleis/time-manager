@@ -1,5 +1,6 @@
 import {type ComponentProps, useId, useState} from "react";
 import {Button} from "@/components/ui/button";
+import {Muted} from "@/components/text/muted";
 import {
     Dialog,
     DialogContent,
@@ -16,6 +17,7 @@ import {dayCount} from "@shared/vacation-rules";
 import type {Vacation} from "@shared/vacation";
 import {useAddVacation} from "@features/vacations/use-cases/use-add-vacation";
 import {useChangeVacation} from "@features/vacations/use-cases/use-change-vacation";
+import {ErrorText} from "@/components/text/error-text";
 
 type Props = {
     vacation?: Vacation; // mit Urlaub: bearbeiten, ohne: neu anlegen
@@ -113,15 +115,13 @@ export function VacationDialog({vacation, label, variant = "outline", size = "sm
                         </div>
                     </div>
 
-                    <p className={problem ? "text-sm text-destructive" : "text-sm text-muted-foreground"}>
-                        {problem ?? `${dayCount(start, end)} Kalendertage · ${save.workdays(range)} Urlaubstage`}
-                    </p>
-
-                    {save.error && (
-                        <p role="alert" className="text-sm text-destructive">
-                            {save.error.message}
-                        </p>
+                    {problem ? (
+                        <ErrorText alert={false}>{problem}</ErrorText>
+                    ) : (
+                        <Muted>{`${dayCount(start, end)} Kalendertage · ${save.workdays(range)} Urlaubstage`}</Muted>
                     )}
+
+                    {save.error && <ErrorText>{save.error.message}</ErrorText>}
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => setOpen(false)}>

@@ -12,6 +12,7 @@ import {
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {useAddPasskey} from "@features/passkeys/use-cases/use-add-passkey";
+import {ErrorText} from "@/components/text/error-text";
 
 export function PasskeyAddDialog() {
     const uid = useId();
@@ -65,11 +66,7 @@ export function PasskeyAddDialog() {
                         />
                     </div>
 
-                    {add.error && (
-                        <p role="alert" className="text-sm text-destructive">
-                            {add.error.message}
-                        </p>
-                    )}
+                    {add.error && <ErrorText>{add.error.message}</ErrorText>}
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => setOpen(false)}>

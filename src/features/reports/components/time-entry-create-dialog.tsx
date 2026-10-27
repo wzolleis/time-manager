@@ -16,6 +16,8 @@ import {formatTime} from "@shared/format";
 import {useProjects} from "@/views/projects";
 import {localDay} from "@shared/time-rules";
 import {useAddTimeEntry} from "@features/reports/use-cases/use-add-time-entry";
+import {Muted} from "@/components/text/muted";
+import {ErrorText} from "@/components/text/error-text";
 
 type EntryType = "kommen" | "gehen";
 
@@ -146,13 +148,9 @@ export function TimeEntryCreateDialog({
                         </div>
                     )}
 
-                    {sickNotice && <p className="text-sm text-muted-foreground">{sickNotice}</p>}
-                    {problem && <p className="text-sm text-destructive">{problem}</p>}
-                    {create.error && (
-                        <p role="alert" className="text-sm text-destructive">
-                            {create.error.message}
-                        </p>
-                    )}
+                    {sickNotice && <Muted>{sickNotice}</Muted>}
+                    {problem && <ErrorText alert={false}>{problem}</ErrorText>}
+                    {create.error && <ErrorText>{create.error.message}</ErrorText>}
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => setOpen(false)}>

@@ -17,6 +17,8 @@ import {useProjects} from "@/views/projects";
 import {TimeEntryDelete} from "@features/reports/components/time-entry-delete";
 import {useChangeTimeEntry} from "@features/reports/use-cases/use-change-time-entry";
 import type {EntryRow} from "@features/reports/time-entry-row";
+import {Muted} from "@/components/text/muted";
+import {ErrorText} from "@/components/text/error-text";
 
 const NO_PROJECT = "none"; // Radix Select erlaubt keinen leeren String als Wert
 
@@ -103,13 +105,9 @@ export function EntryActions({entry}: {entry: EntryRow}) {
                             </div>
                         )}
 
-                        {sickNotice && <p className="text-sm text-muted-foreground">{sickNotice}</p>}
-                        {problem && <p className="text-sm text-destructive">{problem}</p>}
-                        {update.error && (
-                            <p role="alert" className="text-sm text-destructive">
-                                {update.error.message}
-                            </p>
-                        )}
+                        {sickNotice && <Muted>{sickNotice}</Muted>}
+                        {problem && <ErrorText alert={false}>{problem}</ErrorText>}
+                        {update.error && <ErrorText>{update.error.message}</ErrorText>}
 
                         <DialogFooter>
                             <Button type="button" variant="outline" onClick={() => setOpen(false)}>

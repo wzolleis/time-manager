@@ -7,6 +7,9 @@ import {germanDay} from "@shared/vacation-rules";
 import {SickLeaveActions} from "@features/sick-leaves/components/sick-leave-actions";
 import {SickLeaveDialog} from "@features/sick-leaves/components/sick-leave-dialog";
 import {type SickLeaveRow as Row, useShowSickLeaves} from "@features/sick-leaves/use-cases/use-show-sick-leaves";
+import {Muted} from "@/components/text/muted";
+import {Loading} from "@/components/text/loading";
+import {LoadError} from "@/components/text/load-error";
 
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
 const columns: DataTableColumnDef<Row>[] = [
@@ -44,7 +47,7 @@ export function SickLeavesList() {
     const loaded = !isPending && !error;
 
     if (!currentUser) {
-        return <p className="text-sm text-muted-foreground">Bitte zuerst einen User anlegen und auswählen.</p>;
+        return <Muted>Bitte zuerst einen User anlegen und auswählen.</Muted>;
     }
 
     return (
@@ -52,9 +55,9 @@ export function SickLeavesList() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-semibold">Krankmeldungen</h1>
-                    <p className="text-sm text-muted-foreground">
+                    <Muted>
                         {currentUser.name} · {year} · {rows.length} {rows.length === 1 ? "Eintrag" : "Einträge"}
-                    </p>
+                    </Muted>
                 </div>
                 <SickLeaveDialog label="Krankmeldung eintragen" variant="default" size="default" />
             </div>
@@ -77,17 +80,8 @@ export function SickLeavesList() {
                 </div>
             )}
 
-            {isPending && <p className="text-sm text-muted-foreground">Lade…</p>}
-            {error && (
-                <div className="space-y-2">
-                    <p role="alert" className="text-sm text-destructive">
-                        {error.message}
-                    </p>
-                    <Button variant="outline" onClick={retry}>
-                        Erneut versuchen
-                    </Button>
-                </div>
-            )}
+            {isPending && <Loading />}
+            {error && <LoadError error={error} onRetry={retry} />}
             {loaded && <DataTable columns={columns} data={rows} emptyText="Keine Krankheitstage" />}
         </div>
     );

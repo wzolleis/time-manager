@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/dialog";
 import {fetchRoles, fetchUserRoles, updateUserRoles} from "@/api/roles";
 import type {User} from "@shared/user";
+import {ErrorText} from "@/components/text/error-text";
+import {Loading} from "@/components/text/loading";
 
 // Der Admin legt fest, welche Rollen ein User hat
 export function UserRolesDialog({user}: {user: User}) {
@@ -69,9 +71,7 @@ export function UserRolesDialog({user}: {user: User}) {
                         </DialogDescription>
                     </DialogHeader>
 
-                    {(roles.isPending || userRoles.isPending) && !loadError && (
-                        <p className="text-sm text-muted-foreground">Lade…</p>
-                    )}
+                    {(roles.isPending || userRoles.isPending) && !loadError && <Loading />}
 
                     {roles.data && userRoles.data && (
                         <fieldset className="space-y-2 text-left">
@@ -89,11 +89,7 @@ export function UserRolesDialog({user}: {user: User}) {
                         </fieldset>
                     )}
 
-                    {(loadError ?? save.error) && (
-                        <p role="alert" className="text-sm text-destructive">
-                            {(loadError ?? save.error)?.message}
-                        </p>
-                    )}
+                    {(loadError ?? save.error) && <ErrorText>{(loadError ?? save.error)?.message}</ErrorText>}
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>

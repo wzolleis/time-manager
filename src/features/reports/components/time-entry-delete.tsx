@@ -13,6 +13,7 @@ import {Button, buttonVariants} from "@/components/ui/button";
 import {formatTime} from "@shared/format";
 import type {EntryRow} from "@features/reports/time-entry-row";
 import {useDeleteTimeEntry} from "@features/reports/use-cases/use-delete-time-entry";
+import {ErrorText} from "@/components/text/error-text";
 
 export const TimeEntryDelete = ({entry}: {entry: EntryRow}) => {
     const remove = useDeleteTimeEntry();
@@ -41,12 +42,10 @@ export const TimeEntryDelete = ({entry}: {entry: EntryRow}) => {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     {singleProblem && (
-                        <p className="text-sm text-destructive">
-                            Nur diese Buchung zu löschen geht nicht: {singleProblem}
-                        </p>
+                        <ErrorText alert={false}>Nur diese Buchung zu löschen geht nicht: {singleProblem}</ErrorText>
                     )}
                     {pairProblem && (
-                        <p className="text-sm text-destructive">Mit Gegenstück zu löschen geht nicht: {pairProblem}</p>
+                        <ErrorText alert={false}>Mit Gegenstück zu löschen geht nicht: {pairProblem}</ErrorText>
                     )}
                     <AlertDialogFooter className="flex-wrap">
                         <AlertDialogCancel>Abbrechen</AlertDialogCancel>
@@ -67,11 +66,7 @@ export const TimeEntryDelete = ({entry}: {entry: EntryRow}) => {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-            {remove.error && (
-                <p role="alert" className="text-right text-sm text-destructive">
-                    {remove.error.message}
-                </p>
-            )}
+            {remove.error && <ErrorText className="text-right">{remove.error.message}</ErrorText>}
         </>
     );
 };

@@ -28,6 +28,7 @@ import type {User, UserUpdate} from "@shared/user";
 import {EditButton} from "@/components/buttons/edit-button";
 import {PasswordResetDialog} from "@features/users/components/password-reset-dialog";
 import {UserRolesDialog} from "@features/users/components/user-roles-dialog";
+import {ErrorText} from "@/components/text/error-text";
 
 type UserRowProps = {
     user: User;
@@ -155,11 +156,7 @@ export function UserRow({user, onDelete, deleting}: UserRowProps) {
                                 />
                             </div>
 
-                            {update.isError && (
-                                <p role="alert" className="text-sm text-destructive">
-                                    {update.error.message}
-                                </p>
-                            )}
+                            {update.isError && <ErrorText>{update.error.message}</ErrorText>}
 
                             <DialogFooter>
                                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>

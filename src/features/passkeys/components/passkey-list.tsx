@@ -1,8 +1,9 @@
-import {Button} from "@/components/ui/button";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {formatDateTime} from "@shared/format";
 import type {Passkey} from "@shared/passkey";
 import {PasskeyDelete} from "@features/passkeys/components/passkey-delete";
+import {Loading} from "@/components/text/loading";
+import {LoadError} from "@/components/text/load-error";
 
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
 const columns: DataTableColumnDef<Passkey>[] = [
@@ -39,17 +40,8 @@ type Props = {
 export function PasskeyList({passkeys}: Props) {
     return (
         <>
-            {passkeys.isPending && <p className="text-sm text-muted-foreground">Lade…</p>}
-            {passkeys.error && (
-                <div className="space-y-2">
-                    <p role="alert" className="text-sm text-destructive">
-                        {passkeys.error.message}
-                    </p>
-                    <Button variant="outline" onClick={passkeys.retry}>
-                        Erneut versuchen
-                    </Button>
-                </div>
-            )}
+            {passkeys.isPending && <Loading />}
+            {passkeys.error && <LoadError error={passkeys.error} onRetry={passkeys.retry} />}
             {passkeys.rows && (
                 <DataTable
                     columns={columns}

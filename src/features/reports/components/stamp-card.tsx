@@ -6,6 +6,8 @@ import {formatDayShort, formatDuration, formatTime} from "@shared/format";
 import {localDay} from "@shared/time-rules";
 import {TimeEntryCreateDialog} from "@features/reports/components/time-entry-create-dialog";
 import {useStampTime} from "@features/reports/use-cases/use-stamp-time";
+import {Muted} from "@/components/text/muted";
+import {ErrorText} from "@/components/text/error-text";
 
 const NO_PROJECT = "none"; // Radix Select erlaubt keinen leeren String als Wert
 
@@ -20,7 +22,7 @@ export function StampCard() {
     const [projectChoice, setProjectChoice] = useState(NO_PROJECT);
 
     if (!currentUser) {
-        return <p className="text-sm text-muted-foreground">Bitte zuerst einen User anlegen und auswählen.</p>;
+        return <Muted>Bitte zuerst einen User anlegen und auswählen.</Muted>;
     }
 
     const stamp = () =>
@@ -50,13 +52,13 @@ export function StampCard() {
             </CardHeader>
 
             <CardContent className="space-y-4">
-                {sickNotice && <p className="text-sm text-muted-foreground">{sickNotice}</p>}
+                {sickNotice && <Muted>{sickNotice}</Muted>}
                 {missing ? (
                     <div className="space-y-3">
-                        <p className="text-sm text-destructive">
+                        <ErrorText alert={false}>
                             Ein Gehen lässt sich nur am Tag des Kommens buchen. Trage es nach, danach kannst du wieder
                             stempeln.
-                        </p>
+                        </ErrorText>
                         <TimeEntryCreateDialog
                             defaultDay={localDay(missing.bookedAt)}
                             defaultType="gehen"
@@ -95,11 +97,7 @@ export function StampCard() {
                     </>
                 )}
 
-                {stamping.error && (
-                    <p role="alert" className="text-sm text-destructive">
-                        {stamping.error.message}
-                    </p>
-                )}
+                {stamping.error && <ErrorText>{stamping.error.message}</ErrorText>}
             </CardContent>
         </Card>
     );

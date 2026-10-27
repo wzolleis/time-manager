@@ -14,6 +14,7 @@ import {SickLeaveDialog} from "@features/sick-leaves/components/sick-leave-dialo
 import {germanDay} from "@shared/vacation-rules";
 import type {SickLeave} from "@shared/sick-leave";
 import {useDeleteSickLeave} from "@features/sick-leaves/use-cases/use-delete-sick-leave";
+import {ErrorText} from "@/components/text/error-text";
 
 export function SickLeaveActions({sickLeave}: {sickLeave: SickLeave}) {
     const remove = useDeleteSickLeave();
@@ -50,11 +51,7 @@ export function SickLeaveActions({sickLeave}: {sickLeave: SickLeave}) {
                 </AlertDialog>
             </div>
 
-            {remove.error && (
-                <p role="alert" className="text-right text-sm text-destructive">
-                    {remove.error.message}
-                </p>
-            )}
+            {remove.error && <ErrorText className="text-right">{remove.error.message}</ErrorText>}
         </div>
     );
 }

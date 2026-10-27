@@ -9,8 +9,11 @@ import {addDays} from "@shared/day-range";
 import {EntryActions} from "@features/reports/components/time-entry-actions";
 import {TimeEntryCreateDialog} from "@features/reports/components/time-entry-create-dialog";
 import {StampCard} from "@features/reports/components/stamp-card";
-import {ReportError} from "@features/reports/components/report-error";
 import {type DailyReportRow, useShowDailyReport} from "@features/reports/use-cases/use-show-daily-report";
+import {Muted} from "@/components/text/muted";
+import {ErrorText} from "@/components/text/error-text";
+import {Loading} from "@/components/text/loading";
+import {LoadError} from "@/components/text/load-error";
 
 // Buchungen an einem Krankheitstag bleiben sichtbar, aber ausgegraut
 const muted = (row: DailyReportRow, text: string) =>
@@ -51,7 +54,7 @@ export function ReportDailyEdit({day}: {day: string}) {
     const {currentUser, today, totals} = report;
 
     if (!currentUser) {
-        return <p className="text-sm text-muted-foreground">Bitte zuerst einen User anlegen und auswählen.</p>;
+        return <Muted>Bitte zuerst einen User anlegen und auswählen.</Muted>;
     }
 
     // Blättern ändert die Adresse, der Zurück-Button des Browsers springt dann zum vorherigen Tag
@@ -61,9 +64,9 @@ export function ReportDailyEdit({day}: {day: string}) {
         <div className="space-y-4">
             <div>
                 <h1 className="text-2xl font-semibold">Heute</h1>
-                <p className="text-sm text-muted-foreground">
+                <Muted>
                     {currentUser.name} · {formatDate(report.range.start)}
-                </p>
+                </Muted>
             </div>
 
             {/* Gestempelt wird immer jetzt, deshalb nur am heutigen Tag */}
@@ -96,9 +99,7 @@ export function ReportDailyEdit({day}: {day: string}) {
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {totals.missingGehen && (
-                    <p role="alert" className="text-sm text-destructive">
-                        An diesem Tag fehlt das Gehen. Trage es mit „Buchung nachtragen" nach.
-                    </p>
+                    <ErrorText>An diesem Tag fehlt das Gehen. Trage es mit „Buchung nachtragen" nach.</ErrorText>
                 )}
                 <MetricCard
                     title="Arbeitszeit"
@@ -118,8 +119,8 @@ export function ReportDailyEdit({day}: {day: string}) {
                 />
             </div>
 
-            {report.isPending && <p className="text-sm text-muted-foreground">Lade…</p>}
-            {report.error && <ReportError error={report.error} onRetry={report.retry} />}
+            {report.isPending && <Loading />}
+            {report.error && <LoadError error={report.error} onRetry={report.retry} />}
             {!report.isPending && !report.error && (
                 <DataTable
                     columns={columns}
