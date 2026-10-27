@@ -38,7 +38,7 @@ export function UserSettingActions({row}: {row: UserSettingRow}) {
 
     return (
         <div className="space-y-1">
-            <div className="flex justify-end gap-2">
+            <div className="flex flex-wrap justify-end gap-2">
                 <UserSettingDialog setting={setting} current={value} initialValue={value.value} label="Bearbeiten" />
 
                 <AlertDialog onOpenChange={(next) => next && remove.reset()}>
