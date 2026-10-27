@@ -1,3 +1,4 @@
+import type {AuthenticationResponseJSON, PublicKeyCredentialRequestOptionsJSON} from "@simplewebauthn/browser";
 import type {Login, PasswordChange, PasswordReset} from "@shared/auth";
 import type {User} from "@shared/user";
 import {ApiError, request} from "@/api/http";
@@ -15,6 +16,13 @@ export async function fetchMe(): Promise<User | null> {
 }
 
 export const login = (data: Login) => request<User>("/api/auth/login", {method: "POST", body: JSON.stringify(data)});
+
+/** Optionen mit einer neuen Challenge für den Dialog des Browsers, ohne Session */
+export const fetchPasskeyLoginOptions = () =>
+    request<PublicKeyCredentialRequestOptionsJSON>("/api/auth/passkey-login-options", {method: "POST"});
+
+export const loginWithPasskey = (response: AuthenticationResponseJSON) =>
+    request<User>("/api/auth/passkey-login", {method: "POST", body: JSON.stringify({response})});
 
 export const logout = () => request<void>("/api/auth/logout", {method: "POST"});
 

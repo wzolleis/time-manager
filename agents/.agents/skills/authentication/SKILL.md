@@ -25,7 +25,8 @@ ein Hash des Passworts gespeichert, nie das Passwort selbst.
 ## Anmeldung
 
 Die Anwendung hat eine eigene Benutzerverwaltung, es gibt keinen externen Anmeldedienst (kein OAuth).
-Der Anwender meldet sich mit E-Mail und Passwort an (die E-Mail ist in `users` eindeutig).
+Der Anwender meldet sich mit E-Mail und Passwort an (die E-Mail ist in `users` eindeutig) oder mit einem
+Passkey (siehe unten).
 Das Backend prüft das Passwort gegen den Hash in `users`.
 Bei unbekannter E-Mail oder falschem Passwort kommt dieselbe Fehlermeldung, und die Antwort
 dauert gleich lang, damit nicht erkennbar ist, welche E-Mails existieren.
@@ -40,6 +41,32 @@ Ein User ohne Passwort-Hash kann sich nicht anmelden, bis der Administrator ein 
 | `POST /api/auth/reset-password` | Admin setzt ein Passwort zurück (`userId`, `password`) |
 
 Umgesetzt in `netlify/functions/auth.ts`.
+
+## Passkeys
+
+Statt mit E-Mail und Passwort kann sich der User mit einem Passkey (WebAuthn) anmelden. Das Passwort bleibt
+bestehen. Beschreibung mit Regeln: `features/use-case/passkeys.md`.
+
+- Bibliotheken `@simplewebauthn/server` (Netlify Functions) und `@simplewebauthn/browser` (Login-Seite, Seite
+  „Passkeys“). Kein externer Anmeldedienst.
+- Tabelle `passkeys` mit dem öffentlichen Schlüssel, nie dem privaten. Die Challenges stehen bis zur Prüfung in
+  `passkey_challenges`, gelten 5 Minuten und nur einmal (`saveChallenge`, `consumeChallenge` in
+  `netlify/functions/lib/passkey.ts`).
+- Domain und Origin aus `PASSKEY_RP_ID` und `PASSKEY_ORIGIN`, ohne Variablen aus der URL der Anfrage
+  (`relyingParty`). **In der Produktion beide setzen**, sonst ist ein Passkey an die Domain gebunden, unter der
+  er eingetragen wurde, z. B. eine Deploy-Preview.
+- User Verification ist Pflicht, Passkeys sind auffindbar (Resident Key): beim Anmelden ist keine E-Mail nötig.
+- Nach der Prüfung legt `passkey-login` dieselbe Session an wie der Login mit Passwort (`createSession`).
+- Passwortänderung lässt die Passkeys bestehen. Der Admin-Reset löscht sie mit den Sessions.
+
+| Endpoint                                  | Zweck                                                   |
+|-------------------------------------------|---------------------------------------------------------|
+| `POST /api/auth/passkey-login-options`    | Optionen mit Challenge, ohne Session                    |
+| `POST /api/auth/passkey-login`            | Antwort des Browsers prüfen, setzt das Session-Cookie   |
+| `POST /api/auth/passkey-register-options` | Optionen mit Challenge für einen neuen Passkey          |
+| `POST /api/auth/passkey-register`         | `{name, response}` prüfen und speichern                 |
+| `GET /api/passkeys`                       | eigene Passkeys ohne Schlüssel                          |
+| `DELETE /api/passkeys/:id`                | eigenen Passkey löschen                                 |
 
 ## Sessions
 
@@ -66,7 +93,7 @@ Arbeitsspeicher.
 
 - `POST /api/auth/logout` löscht die Session aus `sessions` und setzt das Cookie mit `Max-Age=0` zurück.
 - Ändert der Anwender sein Passwort, werden alle seine anderen Sessions gelöscht. Die aktuelle bleibt bestehen.
-- Setzt der Administrator ein Passwort zurück, werden alle Sessions dieses Anwenders gelöscht.
+- Setzt der Administrator ein Passwort zurück, werden alle Sessions und alle Passkeys dieses Anwenders gelöscht.
 
 ## Agent-Tokens
 
@@ -96,7 +123,7 @@ Umgesetzt in `netlify/functions/api-tokens.ts`.
 ## Frontend
 
 - Der `UserProvider` fragt `GET /api/auth/me`. Ohne Session zeigt er die Login-Seite
-  (`src/features/auth/pages/login-page.tsx`) statt der Anwendung.
+  (`src/components/login/login-page.tsx`) statt der Anwendung.
 - `useCurrentUser()` liefert immer den angemeldeten User, eine Auswahl anderer User gibt es nicht.
 - Antwortet ein API-Aufruf mit `401`, setzt `src/query-client.ts` den Anmeldestatus zurück,
   und die Login-Seite erscheint.

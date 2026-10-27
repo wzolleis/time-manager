@@ -1,5 +1,6 @@
 // db/schema.ts
 import {
+    boolean,
     char,
     date,
     datetime,
@@ -8,6 +9,7 @@ import {
     mysqlEnum,
     mysqlTable,
     primaryKey,
+    text,
     uniqueIndex,
     varchar,
 } from "drizzle-orm/mysql-core";
@@ -128,6 +130,40 @@ export const apiTokens = mysqlTable(
         expiresAt: datetime("expires_at", {mode: "date", fsp: 0}), // null: kein Ablauf
     },
     (t) => [index("idx_api_tokens_user").on(t.userId)],
+);
+
+// Passkeys (WebAuthn) zum Anmelden ohne Passwort. Gespeichert wird nur der öffentliche Schlüssel.
+export const passkeys = mysqlTable(
+    "passkeys",
+    {
+        id: char("id", {length: 36}).primaryKey(),
+        userId: char("user_id", {length: 36})
+            .notNull()
+            .references(() => users.id, {onDelete: "cascade"}),
+        name: varchar("name", {length: 100}).notNull(),
+        // base64url, wie das Gerät die ID beim Anmelden schickt
+        credentialId: varchar("credential_id", {length: 700}).notNull().unique(),
+        publicKey: text("public_key").notNull(), // COSE-Schlüssel als base64url
+        counter: int("counter", {unsigned: true}).notNull(),
+        transports: varchar("transports", {length: 255}), // kommagetrennt, z. B. internal,hybrid
+        backedUp: boolean("backed_up").notNull(),
+        createdAt: datetime("created_at", {mode: "date", fsp: 0}).notNull(),
+        lastUsedAt: datetime("last_used_at", {mode: "date", fsp: 0}),
+    },
+    (t) => [index("idx_passkeys_user").on(t.userId)],
+);
+
+// Ausgegebene Challenges zwischen Optionen und Prüfung, jede gilt nur einmal (siehe features/use-case/passkeys.md)
+export const passkeyChallenges = mysqlTable(
+    "passkey_challenges",
+    {
+        challenge: varchar("challenge", {length: 64}).primaryKey(),
+        purpose: mysqlEnum("purpose", ["registration", "authentication"]).notNull(),
+        // beim Eintragen der angemeldete User, beim Anmelden null
+        userId: char("user_id", {length: 36}).references(() => users.id, {onDelete: "cascade"}),
+        expiresAt: datetime("expires_at", {mode: "date", fsp: 0}).notNull(),
+    },
+    (t) => [index("idx_passkey_challenges_expires").on(t.expiresAt)],
 );
 
 // Rollen. "Administrator" und "User" sind fest vorgegeben, ihre IDs stehen in shared/role.ts.

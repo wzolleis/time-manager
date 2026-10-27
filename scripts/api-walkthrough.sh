@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # API-Walkthrough: Anmeldung, Rollen, Users, Projekte, Zeitbuchungen, Projektzuordnung, Urlaub, Krankmeldung,
-# Überstunden, Feiertage, Rechte auf die Daten eines Users, Agent-Tokens, MCP-Server.
+# Überstunden, Feiertage, Rechte auf die Daten eines Users, Agent-Tokens, Passkeys, MCP-Server.
 # Läuft mit einem Wegwerf-User "vitest" und räumt hinterher auf.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -503,6 +503,35 @@ wt_step "Admin widerruft das Token von 'vitest'" 204 "" DELETE "$ADMIN_TOK/$TEST
 wt_step "Widerrufenes Token ist unbekannt" 410 "Nicht gefunden" DELETE "$ADMIN_TOK/$TEST_TOKEN_ID"
 wt_step "Admin widerruft das eigene Token" 204 "" DELETE "$TOK/$ADMIN_TOKEN_ID"
 ADMIN_TOKEN_ID=""
+
+# --- Passkeys --------------------------------------------------------------
+# Eine echte Signatur braucht ein Gerät. Geprüft werden Optionen, Session-Pflicht und abgelehnte Antworten.
+
+PK="/api/passkeys"
+# Antwort des Browsers mit einer Challenge, die der Server nie ausgegeben hat
+CLIENT_DATA=$(printf '{"type":"webauthn.create","challenge":"nie-ausgegeben","origin":"%s"}' "$WT_BASE" \
+  | base64 | tr '+/' '-_' | tr -d '=\n')
+FAKE_RESPONSE="{\"id\":\"ZmFrZQ\",\"rawId\":\"ZmFrZQ\",\"type\":\"public-key\",\"clientExtensionResults\":{},\"response\":{\"clientDataJSON\":\"$CLIENT_DATA\",\"attestationObject\":\"AA\",\"authenticatorData\":\"AA\",\"signature\":\"AA\"}}"
+
+wt_step "Liste der eigenen Passkeys" 200 "" GET $PK
+wt_step "Optionen zum Eintragen verlangen einen auffindbaren Passkey" 200 '"residentKey":"required"' \
+  POST /api/auth/passkey-register-options
+wt_step "Eintragen ohne Namen wird abgelehnt" 400 "Namen" POST /api/auth/passkey-register \
+  "{\"name\":\" \",\"response\":$FAKE_RESPONSE}"
+wt_step "Antwort zu einer unbekannten Challenge wird abgelehnt" 400 "nicht geprüft" POST /api/auth/passkey-register \
+  "{\"name\":\"walkthrough\",\"response\":$FAKE_RESPONSE}"
+wt_step "Unbekannter Passkey lässt sich nicht löschen" 410 "Nicht gefunden" DELETE "$PK/$UNKNOWN_ID"
+
+ADMIN_COOKIES="$WT_COOKIES"
+WT_COOKIES=/dev/null
+wt_step "Optionen zum Anmelden gibt es ohne Session" 200 '"userVerification":"required"' \
+  POST /api/auth/passkey-login-options
+wt_step "Anmelden mit unbekanntem Passkey" 401 "Anmeldung mit Passkey fehlgeschlagen" POST /api/auth/passkey-login \
+  "{\"response\":$FAKE_RESPONSE}"
+wt_step "Ohne Session keine Optionen zum Eintragen" 401 "Anmeldung erforderlich" POST /api/auth/passkey-register-options
+wt_step "Ohne Session keine Liste" 401 "Anmeldung erforderlich" GET $PK
+WT_COOKIES="$ADMIN_COOKIES"
+ADMIN_COOKIES=""
 
 # --- MCP-Server (/api/mcp) -------------------------------------------------
 # Als 'vitest' mit Agent-Token. 'vitest' hat Buchungen am 10.06.2026 und Urlaub am 09.–11.06. und 13.–14.06.

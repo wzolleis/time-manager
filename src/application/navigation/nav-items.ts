@@ -5,6 +5,7 @@ import {
     CalendarHeart,
     CalendarRange,
     CalendarSearch,
+    Fingerprint,
     KeyRound,
     LayoutDashboard,
     type LucideIcon,
@@ -39,6 +40,7 @@ export const navItemIds = [
     "projects-new",
     "api-tokens-admin",
     "api-tokens",
+    "passkeys",
     "user-settings",
 ] as const;
 export type NavItemId = ValuesOf<typeof navItemIds>;
@@ -80,4 +82,5 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     {id: "reports-yearly", label: "Jahr", icon: CalendarSearch, to: "/user/reports/yearly", children: []},
     {id: "reports-overtime", label: "Überstunden", icon: RotateCcwClock, to: "/user/reports/overtime", children: []},
     {id: "api-tokens", label: "Agent-Zugang", icon: KeyRound, to: "/user/api-tokens", children: []},
+    {id: "passkeys", label: "Passkeys", icon: Fingerprint, to: "/user/passkeys", children: []},
 ] as const;

@@ -19,6 +19,7 @@ import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as UserIndexRouteImport } from './routes/user/index'
 import { Route as UserApiTokensRouteImport } from './routes/user/api-tokens'
 import { Route as UserHolidaysRouteImport } from './routes/user/holidays'
+import { Route as UserPasskeysRouteImport } from './routes/user/passkeys'
 import { Route as UserSettingsRouteImport } from './routes/user/settings'
 import { Route as UserSickLeavesRouteImport } from './routes/user/sick-leaves'
 import { Route as UserVacationsRouteImport } from './routes/user/vacations'
@@ -82,6 +83,11 @@ const UserApiTokensRoute = UserApiTokensRouteImport.update({
 const UserHolidaysRoute = UserHolidaysRouteImport.update({
   id: '/user/holidays',
   path: '/user/holidays',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UserPasskeysRoute = UserPasskeysRouteImport.update({
+  id: '/user/passkeys',
+  path: '/user/passkeys',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UserSettingsRoute = UserSettingsRouteImport.update({
@@ -165,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminUsersRoute
   '/user/api-tokens': typeof UserApiTokensRoute
   '/user/holidays': typeof UserHolidaysRoute
+  '/user/passkeys': typeof UserPasskeysRoute
   '/user/settings': typeof UserSettingsRoute
   '/user/sick-leaves': typeof UserSickLeavesRoute
   '/user/vacations': typeof UserVacationsRoute
@@ -191,6 +198,7 @@ export interface FileRoutesByTo {
   '/admin/users': typeof AdminUsersRoute
   '/user/api-tokens': typeof UserApiTokensRoute
   '/user/holidays': typeof UserHolidaysRoute
+  '/user/passkeys': typeof UserPasskeysRoute
   '/user/settings': typeof UserSettingsRoute
   '/user/sick-leaves': typeof UserSickLeavesRoute
   '/user/vacations': typeof UserVacationsRoute
@@ -218,6 +226,7 @@ export interface FileRoutesById {
   '/admin/users': typeof AdminUsersRoute
   '/user/api-tokens': typeof UserApiTokensRoute
   '/user/holidays': typeof UserHolidaysRoute
+  '/user/passkeys': typeof UserPasskeysRoute
   '/user/settings': typeof UserSettingsRoute
   '/user/sick-leaves': typeof UserSickLeavesRoute
   '/user/vacations': typeof UserVacationsRoute
@@ -246,6 +255,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/user/api-tokens'
     | '/user/holidays'
+    | '/user/passkeys'
     | '/user/settings'
     | '/user/sick-leaves'
     | '/user/vacations'
@@ -272,6 +282,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/user/api-tokens'
     | '/user/holidays'
+    | '/user/passkeys'
     | '/user/settings'
     | '/user/sick-leaves'
     | '/user/vacations'
@@ -298,6 +309,7 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/user/api-tokens'
     | '/user/holidays'
+    | '/user/passkeys'
     | '/user/settings'
     | '/user/sick-leaves'
     | '/user/vacations'
@@ -325,6 +337,7 @@ export interface RootRouteChildren {
   AdminUsersRoute: typeof AdminUsersRoute
   UserApiTokensRoute: typeof UserApiTokensRoute
   UserHolidaysRoute: typeof UserHolidaysRoute
+  UserPasskeysRoute: typeof UserPasskeysRoute
   UserSettingsRoute: typeof UserSettingsRoute
   UserSickLeavesRoute: typeof UserSickLeavesRoute
   UserVacationsRoute: typeof UserVacationsRoute
@@ -413,6 +426,13 @@ declare module '@tanstack/react-router' {
       path: '/user/holidays'
       fullPath: '/user/holidays'
       preLoaderRoute: typeof UserHolidaysRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/user/passkeys': {
+      id: '/user/passkeys'
+      path: '/user/passkeys'
+      fullPath: '/user/passkeys'
+      preLoaderRoute: typeof UserPasskeysRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/user/settings': {
@@ -525,6 +545,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminUsersRoute: AdminUsersRoute,
   UserApiTokensRoute: UserApiTokensRoute,
   UserHolidaysRoute: UserHolidaysRoute,
+  UserPasskeysRoute: UserPasskeysRoute,
   UserSettingsRoute: UserSettingsRoute,
   UserSickLeavesRoute: UserSickLeavesRoute,
   UserVacationsRoute: UserVacationsRoute,
