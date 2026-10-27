@@ -15,6 +15,7 @@ import {Label} from "@/components/ui/label";
 import {resetPassword} from "@/api/auth";
 import {PASSWORD_MIN_LENGTH} from "@shared/auth";
 import type {User} from "@shared/user";
+import {ErrorText} from "@/components/text/error-text";
 
 // Der Admin setzt ein neues Passwort, ohne das alte zu kennen
 export function PasswordResetDialog({user}: {user: User}) {
@@ -69,11 +70,7 @@ export function PasswordResetDialog({user}: {user: User}) {
                         />
                     </div>
 
-                    {reset.isError && (
-                        <p role="alert" className="text-sm text-destructive">
-                            {reset.error.message}
-                        </p>
-                    )}
+                    {reset.isError && <ErrorText>{reset.error.message}</ErrorText>}
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>

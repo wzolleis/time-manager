@@ -5,8 +5,10 @@ import {DataTable, type DataTableColumnDef} from "@/components/table/data-table"
 import {diffClass} from "@/lib/format";
 import {formatDifference, formatDuration, formatMonthName} from "@shared/format";
 import type {YearMonthTotals} from "@shared/time-report";
-import {ReportError} from "@features/reports/components/report-error";
 import {useShowYearlyReport} from "@features/reports/use-cases/use-show-yearly-report";
+import {Muted} from "@/components/text/muted";
+import {Loading} from "@/components/text/loading";
+import {LoadError} from "@/components/text/load-error";
 
 const dash = "–";
 
@@ -52,7 +54,7 @@ export function ReportYearly({year}: {year: string}) {
     const {currentUser, totals, futureYear, partial, firstYear} = report;
 
     if (!currentUser) {
-        return <p className="text-sm text-muted-foreground">Bitte zuerst einen User anlegen und auswählen.</p>;
+        return <Muted>Bitte zuerst einen User anlegen und auswählen.</Muted>;
     }
 
     const goTo = (target: string) => navigate({to: "/user/reports/yearly/$year", params: {year: target}});
@@ -62,9 +64,9 @@ export function ReportYearly({year}: {year: string}) {
         <div className="space-y-4">
             <div>
                 <h1 className="text-2xl font-semibold">Jahresbericht</h1>
-                <p className="text-sm text-muted-foreground">
+                <Muted>
                     {currentUser.name} · {year}
-                </p>
+                </Muted>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
@@ -96,12 +98,12 @@ export function ReportYearly({year}: {year: string}) {
             </div>
 
             {beforeStart ? (
-                <p className="text-sm text-muted-foreground">
+                <Muted>
                     Die Zeiterfassung beginnt {firstYear}.{" "}
                     <Link to="/user/reports/yearly/$year" params={{year: firstYear}} className="underline">
                         Jahresbericht {firstYear}
                     </Link>
-                </p>
+                </Muted>
             ) : (
                 <>
                     <div className="grid gap-4 sm:grid-cols-3">
@@ -127,8 +129,8 @@ export function ReportYearly({year}: {year: string}) {
                         />
                     </div>
 
-                    {report.isPending && <p className="text-sm text-muted-foreground">Lade…</p>}
-                    {report.error && <ReportError error={report.error} onRetry={report.retry} />}
+                    {report.isPending && <Loading />}
+                    {report.error && <LoadError error={report.error} onRetry={report.retry} />}
                     {!report.isPending && !report.error && <DataTable columns={columns} data={totals.months} />}
                 </>
             )}

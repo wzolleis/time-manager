@@ -16,6 +16,8 @@ import {useChangeHoliday} from "@features/holidays/use-cases/use-change-holiday"
 import {localDay} from "@shared/time-rules";
 import {isWeekend} from "@shared/week";
 import type {Holiday} from "@shared/holiday";
+import {Muted} from "@/components/text/muted";
+import {ErrorText} from "@/components/text/error-text";
 
 type Props = {
     holiday?: Holiday; // mit Feiertag: bearbeiten, ohne: neu anlegen
@@ -104,18 +106,10 @@ export function HolidayDialog({holiday, userId, userName, label, variant = "outl
                         </div>
                     </div>
 
-                    {problem && <p className="text-sm text-destructive">{problem}</p>}
-                    {weekend && (
-                        <p className="text-sm text-muted-foreground">
-                            Der Tag fällt auf ein Wochenende und ändert das Soll nicht.
-                        </p>
-                    )}
+                    {problem && <ErrorText alert={false}>{problem}</ErrorText>}
+                    {weekend && <Muted>Der Tag fällt auf ein Wochenende und ändert das Soll nicht.</Muted>}
 
-                    {save.error && (
-                        <p role="alert" className="text-sm text-destructive">
-                            {save.error.message}
-                        </p>
-                    )}
+                    {save.error && <ErrorText>{save.error.message}</ErrorText>}
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => setOpen(false)}>

@@ -13,6 +13,7 @@ import {Label} from "@/components/ui/label";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {fromOffset, MAX_OFFSET_HOURS, type OffsetParts, type OffsetSign} from "@shared/overtime-rules";
 import {useChangeOvertime} from "@features/reports/use-cases/use-change-overtime";
+import {ErrorText} from "@/components/text/error-text";
 
 const range = (n: number) => Array.from({length: n}, (_, i) => String(i));
 const HOURS = range(MAX_OFFSET_HOURS + 1);
@@ -115,12 +116,8 @@ export function OvertimeDialog({offset}: {offset: number | null}) {
                         </div>
                     </div>
 
-                    {problem && <p className="text-sm text-destructive">{problem}</p>}
-                    {change.error && (
-                        <p role="alert" className="text-sm text-destructive">
-                            {change.error.message}
-                        </p>
-                    )}
+                    {problem && <ErrorText alert={false}>{problem}</ErrorText>}
+                    {change.error && <ErrorText>{change.error.message}</ErrorText>}
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => setOpen(false)}>

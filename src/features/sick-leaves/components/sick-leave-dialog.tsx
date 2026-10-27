@@ -16,6 +16,8 @@ import {bookingsInRangeMessage} from "@shared/sick-leave-rules";
 import {localDay} from "@shared/time-rules";
 import {useAddSickLeave} from "@features/sick-leaves/use-cases/use-add-sick-leave";
 import {useChangeSickLeave} from "@features/sick-leaves/use-cases/use-change-sick-leave";
+import {Muted} from "@/components/text/muted";
+import {ErrorText} from "@/components/text/error-text";
 
 type Props = {
     sickLeave?: SickLeave; // mit Krankmeldung: bearbeiten, ohne: neu eintragen
@@ -130,16 +132,14 @@ export function SickLeaveDialog({sickLeave, label, variant = "outline", size = "
                         />
                     </div>
 
-                    <p className={problem ? "text-sm text-destructive" : "text-sm text-muted-foreground"}>
-                        {problem ?? dayLabel(save.sickDays(range))}
-                    </p>
-                    {entries > 0 && <p className="text-sm text-muted-foreground">{bookingsInRangeMessage(entries)}</p>}
-
-                    {save.error && (
-                        <p role="alert" className="text-sm text-destructive">
-                            {save.error.message}
-                        </p>
+                    {problem ? (
+                        <ErrorText alert={false}>{problem}</ErrorText>
+                    ) : (
+                        <Muted>{dayLabel(save.sickDays(range))}</Muted>
                     )}
+                    {entries > 0 && <Muted>{bookingsInRangeMessage(entries)}</Muted>}
+
+                    {save.error && <ErrorText>{save.error.message}</ErrorText>}
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => setOpen(false)}>

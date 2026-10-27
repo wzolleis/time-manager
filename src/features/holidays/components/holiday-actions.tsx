@@ -14,6 +14,7 @@ import {HolidayDialog} from "@features/holidays/components/holiday-dialog";
 import {useDeleteHoliday} from "@features/holidays/use-cases/use-delete-holiday";
 import {germanDay} from "@shared/vacation-rules";
 import type {Holiday} from "@shared/holiday";
+import {ErrorText} from "@/components/text/error-text";
 
 export function HolidayActions({holiday, userName}: {holiday: Holiday; userName?: string}) {
     const {remove, isDeleting, error, reset} = useDeleteHoliday();
@@ -50,11 +51,7 @@ export function HolidayActions({holiday, userName}: {holiday: Holiday; userName?
                 </AlertDialog>
             </div>
 
-            {error && (
-                <p role="alert" className="text-right text-sm text-destructive">
-                    {error.message}
-                </p>
-            )}
+            {error && <ErrorText className="text-right">{error.message}</ErrorText>}
         </div>
     );
 }

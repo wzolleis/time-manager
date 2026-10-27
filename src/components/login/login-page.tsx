@@ -11,6 +11,7 @@ import {fetchPasskeyLoginOptions, login, loginWithPasskey, ME_QUERY_KEY} from "@
 import {passkeyError} from "@/lib/passkey-error";
 import type {Login} from "@shared/auth";
 import type {User} from "@shared/user";
+import {ErrorText} from "@/components/text/error-text";
 
 // Ohne Session: die Optionen nennen keinen User, der Browser bietet alle Passkeys dieser Domain an
 async function passkeyLogin(): Promise<User> {
@@ -90,11 +91,7 @@ export function LoginPage() {
                             />
                         </div>
 
-                        {error && (
-                            <p role="alert" className="text-sm text-destructive">
-                                {error.message}
-                            </p>
-                        )}
+                        {error && <ErrorText>{error.message}</ErrorText>}
 
                         <Button type="submit" className="w-full" disabled={isPending}>
                             {submit.isPending ? "Melde an…" : "Anmelden"}

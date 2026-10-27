@@ -14,6 +14,7 @@ import {VacationDialog} from "@features/vacations/components/vacation-dialog";
 import {germanDay} from "@shared/vacation-rules";
 import type {Vacation} from "@shared/vacation";
 import {useDeleteVacation} from "@features/vacations/use-cases/use-delete-vacation";
+import {ErrorText} from "@/components/text/error-text";
 
 export function VacationActions({vacation}: {vacation: Vacation}) {
     const remove = useDeleteVacation();
@@ -50,11 +51,7 @@ export function VacationActions({vacation}: {vacation: Vacation}) {
                 </AlertDialog>
             </div>
 
-            {remove.error && (
-                <p role="alert" className="text-right text-sm text-destructive">
-                    {remove.error.message}
-                </p>
-            )}
+            {remove.error && <ErrorText className="text-right">{remove.error.message}</ErrorText>}
         </div>
     );
 }

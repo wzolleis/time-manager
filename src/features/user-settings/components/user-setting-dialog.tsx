@@ -16,6 +16,7 @@ import {localDay} from "@shared/time-rules";
 import type {UserSetting, UserSettingValue} from "@shared/user-setting";
 import {useAddUserSetting} from "@features/user-settings/use-cases/use-add-user-setting";
 import {useChangeUserSetting} from "@features/user-settings/use-cases/use-change-user-setting";
+import {ErrorText} from "@/components/text/error-text";
 
 type Props = {
     setting: UserSetting;
@@ -126,13 +127,9 @@ export function UserSettingDialog({setting, current, initialValue, label, varian
                         </div>
                     </div>
 
-                    {problem && <p className="text-sm text-destructive">{problem}</p>}
+                    {problem && <ErrorText alert={false}>{problem}</ErrorText>}
 
-                    {save.error && (
-                        <p role="alert" className="text-sm text-destructive">
-                            {save.error.message}
-                        </p>
-                    )}
+                    {save.error && <ErrorText>{save.error.message}</ErrorText>}
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => setOpen(false)}>

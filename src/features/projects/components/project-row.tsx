@@ -15,6 +15,7 @@ import {TableCell, TableRow} from "@/components/ui/table";
 import type {Project, ProjectUpdate} from "@shared/project";
 import {updateProject} from "@/api/projects";
 import {DeleteProjectDialog} from "@features/projects/components/delete-project-dialog";
+import {ErrorText} from "@/components/text/error-text";
 
 type ProjectRowProps = {
     project: Project;
@@ -88,11 +89,7 @@ export function ProjectRow({project, onDelete, deleting}: ProjectRowProps) {
                                 />
                             </div>
 
-                            {update.isError && (
-                                <p role="alert" className="text-sm text-destructive">
-                                    {update.error.message}
-                                </p>
-                            )}
+                            {update.isError && <ErrorText>{update.error.message}</ErrorText>}
 
                             <DialogFooter>
                                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>

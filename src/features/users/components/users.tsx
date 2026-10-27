@@ -1,9 +1,11 @@
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button";
 import {deleteUser, fetchUsers} from "@/api/users";
 import type {User} from "@shared/user";
 import {UserCreateDialog} from "@features/users/components/user-create-dialog";
 import {UserTable} from "@features/users/components/user-table";
+import {ErrorText} from "@/components/text/error-text";
+import {Loading} from "@/components/text/loading";
+import {LoadError} from "@/components/text/load-error";
 
 export function Users() {
     const qc = useQueryClient();
@@ -33,18 +35,9 @@ export function Users() {
                 <UserCreateDialog />
             </div>
 
-            {isPending && <p className="text-sm text-muted-foreground">Lade…</p>}
+            {isPending && <Loading />}
 
-            {isError && (
-                <div className="space-y-2">
-                    <p role="alert" className="text-sm text-destructive">
-                        {error.message}
-                    </p>
-                    <Button variant="outline" onClick={() => refetch()}>
-                        Erneut versuchen
-                    </Button>
-                </div>
-            )}
+            {isError && <LoadError error={error} onRetry={() => refetch()} />}
 
             {users && (
                 <UserTable
@@ -54,11 +47,7 @@ export function Users() {
                 />
             )}
 
-            {remove.isError && (
-                <p role="alert" className="text-sm text-destructive">
-                    {remove.error.message}
-                </p>
-            )}
+            {remove.isError && <ErrorText>{remove.error.message}</ErrorText>}
         </div>
     );
 }

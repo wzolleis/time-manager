@@ -7,8 +7,10 @@ import {formatDayMonth, formatDayShort, formatDifference, formatDuration, dayKin
 import {addDays, localDayRange} from "@shared/day-range";
 import type {WeekDayTotals} from "@shared/time-report";
 import {isoWeekId} from "@shared/week";
-import {ReportError} from "@features/reports/components/report-error";
 import {useShowWeeklyReport} from "@features/reports/use-cases/use-show-weekly-report";
+import {Muted} from "@/components/text/muted";
+import {Loading} from "@/components/text/loading";
+import {LoadError} from "@/components/text/load-error";
 
 type DayRow = WeekDayTotals & {isToday: boolean};
 
@@ -78,7 +80,7 @@ export function ReportWeekly({anchor}: {anchor: string}) {
     const {currentUser, today, totals, futureWeek, partial} = report;
 
     if (!currentUser) {
-        return <p className="text-sm text-muted-foreground">Bitte zuerst einen User anlegen und auswählen.</p>;
+        return <Muted>Bitte zuerst einen User anlegen und auswählen.</Muted>;
     }
 
     // Blättern ändert die Adresse, der Zurück-Button des Browsers springt dann zur vorherigen Woche
@@ -104,10 +106,10 @@ export function ReportWeekly({anchor}: {anchor: string}) {
         <div className="space-y-4">
             <div>
                 <h1 className="text-2xl font-semibold">Wochenbericht</h1>
-                <p className="text-sm text-muted-foreground">
+                <Muted>
                     {currentUser.name} · KW {report.week}/{report.year} · {formatDayMonth(localDayRange(first).start)} –{" "}
                     {formatDayMonth(localDayRange(last).start)}
-                </p>
+                </Muted>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
@@ -148,8 +150,8 @@ export function ReportWeekly({anchor}: {anchor: string}) {
                 />
             </div>
 
-            {report.isPending && <p className="text-sm text-muted-foreground">Lade…</p>}
-            {report.error && <ReportError error={report.error} onRetry={report.retry} />}
+            {report.isPending && <Loading />}
+            {report.error && <LoadError error={report.error} onRetry={report.retry} />}
             {!report.isPending && !report.error && <DataTable columns={columns} data={rows} />}
         </div>
     );

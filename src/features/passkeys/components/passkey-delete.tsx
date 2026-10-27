@@ -12,6 +12,7 @@ import {
 import {Button, buttonVariants} from "@/components/ui/button";
 import type {Passkey} from "@shared/passkey";
 import {useDeletePasskey} from "@features/passkeys/use-cases/use-delete-passkey";
+import {ErrorText} from "@/components/text/error-text";
 
 export function PasskeyDelete({passkey}: {passkey: Passkey}) {
     const {remove, isDeleting, error, reset} = useDeletePasskey();
@@ -46,11 +47,7 @@ export function PasskeyDelete({passkey}: {passkey: Passkey}) {
                 </AlertDialog>
             </div>
 
-            {error && (
-                <p role="alert" className="text-right text-sm text-destructive">
-                    {error.message}
-                </p>
-            )}
+            {error && <ErrorText className="text-right">{error.message}</ErrorText>}
         </div>
     );
 }

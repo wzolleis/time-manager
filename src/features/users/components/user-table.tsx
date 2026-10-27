@@ -1,6 +1,7 @@
 import {Table, TableBody, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {UserRow} from "@features/users/components/user-row";
 import type {User} from "@shared/user";
+import {Muted} from "@/components/text/muted";
 
 type UserTableProps = {
     users: User[];
@@ -10,7 +11,7 @@ type UserTableProps = {
 
 export function UserTable({users, onDelete, deletingId}: UserTableProps) {
     if (users.length === 0) {
-        return <p className="text-sm text-muted-foreground">Keine User vorhanden.</p>;
+        return <Muted>Keine User vorhanden.</Muted>;
     }
 
     return (

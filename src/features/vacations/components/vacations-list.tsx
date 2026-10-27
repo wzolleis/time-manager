@@ -7,6 +7,9 @@ import {VacationDialog} from "@features/vacations/components/vacation-dialog";
 import {MetricCard} from "@/components/cards/metric-card";
 import {useShowVacations, type VacationRow as Row} from "@features/vacations/use-cases/use-show-vacations";
 import {localDay} from "@shared/time-rules";
+import {Muted} from "@/components/text/muted";
+import {Loading} from "@/components/text/loading";
+import {LoadError} from "@/components/text/load-error";
 
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
 const columns: DataTableColumnDef<Row>[] = [
@@ -38,7 +41,7 @@ export function VacationsList() {
     const loaded = !isPending && !error;
 
     if (!currentUser) {
-        return <p className="text-sm text-muted-foreground">Bitte zuerst einen User anlegen und auswählen.</p>;
+        return <Muted>Bitte zuerst einen User anlegen und auswählen.</Muted>;
     }
 
     return (
@@ -46,10 +49,10 @@ export function VacationsList() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-semibold">Urlaub</h1>
-                    <p className="text-sm text-muted-foreground">
+                    <Muted>
                         {currentUser.name} · {year} · {rows.length} {rows.length === 1 ? "Eintrag" : "Einträge"} ·{" "}
                         {allowed} Urlaubstage im Jahr
-                    </p>
+                    </Muted>
                 </div>
                 <VacationDialog label="Urlaub eintragen" variant="default" size="default" />
             </div>
@@ -83,17 +86,8 @@ export function VacationsList() {
                 </div>
             )}
 
-            {isPending && <p className="text-sm text-muted-foreground">Lade…</p>}
-            {error && (
-                <div className="space-y-2">
-                    <p role="alert" className="text-sm text-destructive">
-                        {error.message}
-                    </p>
-                    <Button variant="outline" onClick={retry}>
-                        Erneut versuchen
-                    </Button>
-                </div>
-            )}
+            {isPending && <Loading />}
+            {error && <LoadError error={error} onRetry={retry} />}
             {loaded && (
                 <DataTable columns={columns} data={rows} emptyText={`Für ${year} ist kein Urlaub eingetragen.`} />
             )}

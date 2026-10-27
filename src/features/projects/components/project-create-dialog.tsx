@@ -14,6 +14,7 @@ import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import type {ProjectCreate} from "@shared/project";
 import {createProject} from "@/api/projects";
+import {ErrorText} from "@/components/text/error-text";
 
 export function ProjectCreateDialog() {
     const qc = useQueryClient();
@@ -65,11 +66,7 @@ export function ProjectCreateDialog() {
                         />
                     </div>
 
-                    {create.isError && (
-                        <p role="alert" className="text-sm text-destructive">
-                            {create.error.message}
-                        </p>
-                    )}
+                    {create.isError && <ErrorText>{create.error.message}</ErrorText>}
 
                     <DialogFooter>
                         <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>

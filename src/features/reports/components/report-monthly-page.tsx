@@ -2,6 +2,7 @@ import {Link, useParams} from "@tanstack/react-router";
 import {localDay} from "@shared/time-rules";
 import {isValidMonth, monthOf} from "@shared/week";
 import {ReportMonthly} from "@features/reports/components/report-monthly";
+import {ErrorText} from "@/components/text/error-text";
 
 /** Der Monat kommt aus der Adresse (/user/reports/monthly/$month), ohne Angabe der aktuelle */
 export const ReportMonthlyPage = () => {
@@ -11,9 +12,7 @@ export const ReportMonthlyPage = () => {
         return (
             <div className="space-y-2 p-4">
                 <h1 className="text-2xl font-semibold">Monatsbericht</h1>
-                <p role="alert" className="text-sm text-destructive">
-                    „{month}“ ist kein gültiger Monat (JJJJ-MM).
-                </p>
+                <ErrorText>„{month}“ ist kein gültiger Monat (JJJJ-MM).</ErrorText>
                 <Link to="/user/reports/monthly" className="text-sm underline">
                     Zum aktuellen Monat
                 </Link>

@@ -1,6 +1,7 @@
 import {ApiTokenCreateDialog} from "@features/api-tokens/components/api-token-create-dialog";
 import {ApiTokenList} from "@features/api-tokens/components/api-token-list";
 import {useShowApiTokens} from "@features/api-tokens/use-cases/use-show-api-tokens";
+import {Muted} from "@/components/text/muted";
 
 export function ApiTokensPage() {
     const tokens = useShowApiTokens();
@@ -10,9 +11,7 @@ export function ApiTokensPage() {
             <div className="flex items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-semibold">Agent-Zugang</h1>
-                    <p className="text-sm text-muted-foreground">
-                        Mit einem Token bedient ein Agent wie Claude Code die Zeiterfassung in deinem Namen.
-                    </p>
+                    <Muted>Mit einem Token bedient ein Agent wie Claude Code die Zeiterfassung in deinem Namen.</Muted>
                 </div>
                 <ApiTokenCreateDialog />
             </div>
