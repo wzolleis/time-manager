@@ -1,5 +1,6 @@
 import {useState} from "react";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
+import {actionsColumn} from "@/components/table/actions-column";
 import {useNow} from "@/lib/use-now";
 import {useCurrentUser} from "@/lib/user-context";
 import {HolidayActions} from "@features/holidays/components/holiday-actions";
@@ -38,17 +39,13 @@ const scopeColumn: DataTableColumnDef<HolidayRow> = {
     enableSorting: false,
     cell: ({row}) => (row.original.userId === null ? "alle" : "nur mich"),
 };
-const actionsColumn: DataTableColumnDef<HolidayRow> = {
-    id: "actions",
-    header: "",
-    enableSorting: false,
-    // Globale Feiertage sind im User-Bereich nur zum Lesen da
-    cell: ({row}) =>
-        row.original.editable ? <HolidayActions holiday={row.original} userName={row.original.userName} /> : null,
-};
+// Globale Feiertage sind im User-Bereich nur zum Lesen da
+const holidayActions = actionsColumn<HolidayRow>((row) =>
+    row.editable ? <HolidayActions holiday={row} userName={row.userName} /> : null,
+);
 
-const globalColumns = [dateColumn, nameColumn, actionsColumn];
-const userColumns = [dateColumn, nameColumn, scopeColumn, actionsColumn];
+const globalColumns = [dateColumn, nameColumn, holidayActions];
+const userColumns = [dateColumn, nameColumn, scopeColumn, holidayActions];
 
 type Props = {scope: HolidayScope};
 

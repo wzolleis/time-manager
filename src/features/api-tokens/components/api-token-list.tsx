@@ -1,4 +1,5 @@
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
+import {actionsColumn} from "@/components/table/actions-column";
 import {formatDateTime} from "@shared/format";
 import {type ApiTokenScope, ApiTokenRevoke} from "@features/api-tokens/components/api-token-revoke";
 import type {ApiTokenRow} from "@features/api-tokens/use-cases/use-show-api-tokens";
@@ -34,15 +35,11 @@ const expiresColumn: DataTableColumnDef<ApiTokenRow> = {
         );
     },
 };
-const actionsColumn = (scope: ApiTokenScope): DataTableColumnDef<ApiTokenRow> => ({
-    id: "actions",
-    header: "",
-    enableSorting: false,
-    cell: ({row}) => <ApiTokenRevoke token={row.original} scope={scope} />,
-});
+const revokeColumn = (scope: ApiTokenScope) =>
+    actionsColumn<ApiTokenRow>((row) => <ApiTokenRevoke token={row} scope={scope} />);
 
-const ownColumns = [nameColumn, createdColumn, lastUsedColumn, expiresColumn, actionsColumn("own")];
-const allColumns = [userColumn, nameColumn, createdColumn, lastUsedColumn, expiresColumn, actionsColumn("all")];
+const ownColumns = [nameColumn, createdColumn, lastUsedColumn, expiresColumn, revokeColumn("own")];
+const allColumns = [userColumn, nameColumn, createdColumn, lastUsedColumn, expiresColumn, revokeColumn("all")];
 
 type Props = {
     scope: ApiTokenScope;

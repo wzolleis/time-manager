@@ -1,4 +1,5 @@
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
+import {actionsColumn} from "@/components/table/actions-column";
 import {formatDateTime} from "@shared/format";
 import type {Passkey} from "@shared/passkey";
 import {PasskeyDelete} from "@features/passkeys/components/passkey-delete";
@@ -25,12 +26,7 @@ const columns: DataTableColumnDef<Passkey>[] = [
         enableSorting: false,
         cell: ({row}) => (row.original.lastUsedAt ? formatDateTime(row.original.lastUsedAt) : "nie"),
     },
-    {
-        id: "actions",
-        header: "",
-        enableSorting: false,
-        cell: ({row}) => <PasskeyDelete passkey={row.original} />,
-    },
+    actionsColumn((row) => <PasskeyDelete passkey={row} />),
 ];
 
 type Props = {

@@ -2,6 +2,7 @@ import {useState} from "react";
 import {germanDay} from "@shared/vacation-rules";
 import {VacationActions} from "@features/vacations/components/vacation-actions";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
+import {actionsColumn} from "@/components/table/actions-column";
 import {VacationDialog} from "@features/vacations/components/vacation-dialog";
 import {MetricCard} from "@/components/cards/metric-card";
 import {useShowVacations, type VacationRow as Row} from "@features/vacations/use-cases/use-show-vacations";
@@ -26,12 +27,7 @@ const columns: DataTableColumnDef<Row>[] = [
     },
     {accessorKey: "days", header: "Kalendertage", enableSorting: false},
     {accessorKey: "workdays", header: "Urlaubstage", enableSorting: false}, // ohne Wochenenden, Feiertage und Krankheitstage
-    {
-        id: "actions",
-        header: "",
-        enableSorting: false,
-        cell: ({row}) => <VacationActions vacation={row.original} />,
-    },
+    actionsColumn((row) => <VacationActions vacation={row} />),
 ];
 
 const dayLabel = (n: number) => (n === 1 ? "1 Tag" : `${n} Tage`);

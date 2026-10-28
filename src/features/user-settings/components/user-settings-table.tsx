@@ -1,4 +1,5 @@
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
+import {actionsColumn} from "@/components/table/actions-column";
 import {germanDay} from "@shared/vacation-rules";
 import {UserSettingActions} from "@features/user-settings/components/user-setting-actions";
 import {
@@ -46,7 +47,7 @@ const columns: DataTableColumnDef<Row>[] = [
         // TableCell ist nowrap, lange Beschreibungen brechen um
         cell: ({row}) => <div className="break-words whitespace-normal">{row.original.setting.description}</div>,
     },
-    {id: "actions", header: "", enableSorting: false, cell: ({row}) => <UserSettingActions row={row.original} />},
+    actionsColumn((row) => <UserSettingActions row={row} />),
 ];
 
 export function UserSettingsTable() {

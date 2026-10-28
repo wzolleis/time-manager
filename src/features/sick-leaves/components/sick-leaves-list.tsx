@@ -1,5 +1,6 @@
 import {useState} from "react";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
+import {actionsColumn} from "@/components/table/actions-column";
 import {MetricCard} from "@/components/cards/metric-card";
 import {localDay} from "@shared/time-rules";
 import {germanDay} from "@shared/vacation-rules";
@@ -32,12 +33,7 @@ const columns: DataTableColumnDef<Row>[] = [
         enableSorting: false,
         cell: ({getValue}) => getValue<string | null>() ?? "",
     },
-    {
-        id: "actions",
-        header: "",
-        enableSorting: false,
-        cell: ({row}) => <SickLeaveActions sickLeave={row.original} />,
-    },
+    actionsColumn((row) => <SickLeaveActions sickLeave={row} />),
 ];
 
 const dayLabel = (n: number) => (n === 1 ? "1 Tag" : `${n} Tage`);

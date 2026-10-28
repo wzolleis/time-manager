@@ -1,39 +1,18 @@
-import {Table, TableBody, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {ProjectRow} from "@features/projects/components/project-row";
+import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
+import {actionsColumn} from "@/components/table/actions-column";
+import {ProjectActions} from "@features/projects/components/project-actions";
 import type {Project} from "@shared/project";
-import {Muted} from "@/components/text/muted";
 
-type ProjectTableProps = {
-    projects: Project[];
-    onDelete: (project: Project) => void;
-    deletingId?: string;
-};
+// Außerhalb der Komponente, damit die Spalten stabil bleiben
+const columns: DataTableColumnDef<Project>[] = [
+    {
+        accessorKey: "name",
+        header: "Name",
+        cell: ({getValue}) => <span className="font-medium">{getValue<string>()}</span>,
+    },
+    actionsColumn((project) => <ProjectActions project={project} />),
+];
 
-export function ProjectTable({projects, onDelete, deletingId}: ProjectTableProps) {
-    if (projects.length === 0) {
-        return <Muted>Keine Projekte vorhanden.</Muted>;
-    }
-
-    return (
-        <div className="rounded-md border">
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead className="text-right">Aktionen</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {projects.map((project) => (
-                        <ProjectRow
-                            key={project.id}
-                            project={project}
-                            onDelete={onDelete}
-                            deleting={deletingId === project.id}
-                        />
-                    ))}
-                </TableBody>
-            </Table>
-        </div>
-    );
+export function ProjectTable({projects}: {projects: Project[]}) {
+    return <DataTable columns={columns} data={projects} emptyText="Keine Projekte vorhanden." />;
 }

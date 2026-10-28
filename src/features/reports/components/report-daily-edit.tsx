@@ -2,6 +2,7 @@ import {useNavigate} from "@tanstack/react-router";
 import {Input} from "@/components/ui/input";
 import {MetricCard} from "@/components/cards/metric-card";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
+import {actionsColumn} from "@/components/table/actions-column";
 import {diffClass} from "@/lib/format";
 import {formatDate, formatDifference, formatDuration, formatTime, dayKindLabel} from "@shared/format";
 import {addDays} from "@shared/day-range";
@@ -40,12 +41,7 @@ const columns: DataTableColumnDef<DailyReportRow>[] = [
         header: "Projekt",
         cell: ({getValue, row}) => muted(row.original, getValue<string | null>() ?? "–"),
     },
-    {
-        id: "actions",
-        header: "",
-        enableSorting: false,
-        cell: ({row}) => <EntryActions entry={row.original} />,
-    },
+    actionsColumn((row) => <EntryActions entry={row} />),
 ];
 
 /** day ist ein gültiger Tag "JJJJ-MM-TT", geprüft in ReportDailyPage */
