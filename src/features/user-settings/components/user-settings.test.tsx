@@ -13,6 +13,7 @@ const USER = {
     name: "Test",
     email: "test@example.com",
     avatarUrl: null,
+    roleIds: [],
 };
 
 const SETTINGS = [

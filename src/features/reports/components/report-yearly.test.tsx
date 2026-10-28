@@ -12,6 +12,7 @@ const USER = {
     name: "Test",
     email: "test@example.com",
     avatarUrl: null,
+    roleIds: [],
 };
 
 // Die Zeiterfassung beginnt am Mo 02.03.2026

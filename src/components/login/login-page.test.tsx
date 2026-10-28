@@ -17,6 +17,7 @@ const USER = {
     name: "Test",
     email: "test@example.com",
     avatarUrl: null,
+    roleIds: [],
 };
 const PASSWORD = "richtiges-passwort";
 const OPTIONS = {challenge: "challenge-vom-server", rpId: "localhost"};

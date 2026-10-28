@@ -12,6 +12,7 @@ const USER = {
     name: "Test",
     email: "test@example.com",
     avatarUrl: null,
+    roleIds: [],
 };
 const OVERTIME = `/api/users/${USER.id}/overtime`;
 

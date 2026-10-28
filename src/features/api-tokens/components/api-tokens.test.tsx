@@ -5,7 +5,13 @@ import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {UserContext} from "@/lib/user-context";
 import {ApiTokensPage} from "@features/api-tokens/components/api-tokens-page";
 
-const USER = {id: "275f12fb-e116-4857-9f12-fbe116b857fb", name: "Test", email: "test@example.com", avatarUrl: null};
+const USER = {
+    id: "275f12fb-e116-4857-9f12-fbe116b857fb",
+    name: "Test",
+    email: "test@example.com",
+    avatarUrl: null,
+    roleIds: [],
+};
 
 const LAPTOP = {
     id: "a1",

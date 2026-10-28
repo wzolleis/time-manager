@@ -8,6 +8,8 @@ export const USER_ROLE_ID = "65c4543a-6a98-44c6-b953-6329d1688bd0"; // "User"
 
 export type Role = {id: string; name: string};
 
+export const hasAdminRole = (roleIds: readonly string[]) => roleIds.includes(ADMIN_ROLE_ID);
+
 // PUT /api/users/:id/roles: die vollständige Liste der Rollen eines Users
 export const UserRolesSchema = z.object({roleIds: z.array(z.string().uuid())});
 

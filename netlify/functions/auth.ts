@@ -21,7 +21,7 @@ import {consumeChallenge, RP_NAME, relyingParty, saveChallenge} from "./lib/pass
 import {withTiming} from "./lib/timing";
 import {isApiPath, notFound, pathParams} from "./lib/id";
 import {hashPassword, verifyPassword} from "./lib/password";
-import {forbidden, hasEndpointAccess} from "./lib/roles";
+import {forbidden, hasEndpointAccess, roleIdsOf} from "./lib/roles";
 import {
     clearSessionCookie,
     createSession,
@@ -45,6 +45,9 @@ const getPasswordHash = async (userId: string) => {
     return row?.passwordHash ?? null;
 };
 
+// Der angemeldete User mit seinen Rollen: daran erkennt der Client, ob er das Administrator-Menü zeigt
+const withRoles = async <T extends {id: string}>(user: T) => ({...user, roleIds: await roleIdsOf(user.id)});
+
 // POST /api/auth/login: gleiche Meldung für unbekannte E-Mail und falsches Passwort
 async function login(req: Request): Promise<Response> {
     const {email, password} = LoginSchema.parse(await readBody(req));
@@ -65,7 +68,7 @@ async function login(req: Request): Promise<Response> {
     }
 
     const {passwordHash: _, ...user} = row;
-    return Response.json(user, {headers: {"Set-Cookie": await createSession(req, user.id)}});
+    return Response.json(await withRoles(user), {headers: {"Set-Cookie": await createSession(req, user.id)}});
 }
 
 // POST /api/auth/logout: immer erfolgreich, auch ohne gültige Session
@@ -162,7 +165,9 @@ async function passkeyLogin(req: Request): Promise<Response> {
     }
 
     await db.update(passkeys).set({counter: newCounter, lastUsedAt: new Date()}).where(eq(passkeys.id, row.passkey.id));
-    return Response.json(row.user, {headers: {"Set-Cookie": await createSession(req, row.user.id)}});
+    return Response.json(await withRoles(row.user), {
+        headers: {"Set-Cookie": await createSession(req, row.user.id)},
+    });
 }
 
 // POST /api/auth/passkey-register-options: Optionen für einen neuen Passkey des angemeldeten Users
@@ -263,7 +268,9 @@ const handler = async (req: Request, _context: Context) => {
 
         switch (action) {
             case "me":
-                return req.method === "GET" ? Response.json(session.user) : new Response(null, {status: 405});
+                return req.method === "GET"
+                    ? Response.json(await withRoles(session.user))
+                    : new Response(null, {status: 405});
             case "password":
                 return req.method === "POST" ? await changePassword(req, session) : new Response(null, {status: 405});
             case "reset-password":

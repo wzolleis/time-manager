@@ -12,6 +12,7 @@ const USER = {
     name: "Test",
     email: "test@example.com",
     avatarUrl: null,
+    roleIds: [],
 };
 
 // Die Zeiterfassung beginnt vor der Woche, sonst wären die Tage "vor Beginn der Zeiterfassung"

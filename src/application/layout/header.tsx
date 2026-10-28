@@ -4,9 +4,9 @@ import {StartEnd} from "@/components/utils/start-end";
 import {MenuButton} from "@/components/buttons/menu-button";
 import {Breadcrumb} from "@/application/breadcrumb/breadcrumb";
 import {useNavigate} from "@tanstack/react-router";
-import {NAVIGATION_ITEMS, type NavItem} from "@/application/navigation/nav-items";
-import {useCurrentUser} from "@/lib/user-context";
-import type {User} from "@shared/user";
+import {NAVIGATION_ITEMS, navItemsOf, type NavItem} from "@/application/navigation/nav-items";
+import {useCurrentUser, useIsAdmin} from "@/lib/user-context";
+import type {CurrentUser} from "@shared/user";
 import {useState} from "react";
 import {useQueryClient} from "@tanstack/react-query";
 import {logout, ME_QUERY_KEY} from "@/api/auth";
@@ -14,11 +14,13 @@ import {clearUserData} from "@/query-client";
 import {PasswordChangeDialog} from "@features/auth/components/password-change-dialog";
 import {VersionDialog} from "@features/version/components/version-dialog";
 import {Sidebar} from "@/application/layout/sidebar";
+import {AdminDropdown} from "@/application/layout/admin-dropdown";
 import {Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle} from "@/components/ui/sheet";
 
 export const Header = () => {
     const navigate = useNavigate();
     const userContext = useCurrentUser();
+    const isAdmin = useIsAdmin();
     const qc = useQueryClient();
     const [passwordOpen, setPasswordOpen] = useState(false);
     const [versionOpen, setVersionOpen] = useState(false);
@@ -38,7 +40,7 @@ export const Header = () => {
         navigate({to: item.to});
     };
 
-    const currentUser: User = userContext.currentUser;
+    const currentUser: CurrentUser = userContext.currentUser;
 
     return (
         <Flex
@@ -60,11 +62,12 @@ export const Header = () => {
                             <SheetTitle>Menü</SheetTitle>
                             <SheetDescription className="sr-only">Navigation</SheetDescription>
                         </SheetHeader>
-                        <Sidebar items={NAVIGATION_ITEMS} onNavigate={() => setMenuOpen(false)} />
+                        <Sidebar items={navItemsOf("sidebar")} onNavigate={() => setMenuOpen(false)} />
                     </SheetContent>
                 </Sheet>
                 <StartEnd>
-                    <Breadcrumb items={NAVIGATION_ITEMS} /> {/* dieselbe flache Liste wie für buildNavTree(navItems) */}
+                    <Breadcrumb items={NAVIGATION_ITEMS} />{" "}
+                    {/* alle Einträge, auch die aus Administrator- und Avatar-Menü */}
                     {/* Auf schmalen Bildschirmen braucht die Breadcrumb den Platz */}
                     <Box display={{initial: "none", sm: "block"}} minWidth="0">
                         <Text as="div" color="gray" truncate>{`Hallo ${currentUser?.name}`}</Text>
@@ -73,6 +76,7 @@ export const Header = () => {
             </Flex>
 
             <Flex align="center" gap="3" flexShrink="0">
+                {isAdmin && <AdminDropdown onItemSelected={onItemSelected} />}
                 {/* 2. Wiederverwendbares Dropdown */}
                 <UserDropdown
                     onItemSelected={onItemSelected}

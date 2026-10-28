@@ -7,6 +7,7 @@ import {routeTree} from "@/routeTree.gen";
 import {UserProvider} from "@/components/login/user-provider";
 import {NotFound} from "@/application/layout/not-found";
 import type {User} from "@shared/user";
+import {ADMIN_ROLE_ID} from "@shared/role";
 
 const ADMIN: User = {
     id: "275f12fb-e116-4857-9f12-fbe116b857fb",
@@ -24,7 +25,7 @@ function mockApi({deleteError}: {deleteError?: string} = {}) {
         const raw = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
         const {pathname} = new URL(raw, "http://localhost");
         const method = init?.method ?? "GET";
-        if (pathname === "/api/auth/me") return Response.json(ADMIN);
+        if (pathname === "/api/auth/me") return Response.json({...ADMIN, roleIds: [ADMIN_ROLE_ID]});
         if (pathname === "/api/users" && method === "GET") return Response.json(users);
 
         const id = pathname.match(/^\/api\/users\/([^/]+)$/)?.[1];

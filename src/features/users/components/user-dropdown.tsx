@@ -39,7 +39,7 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
 
     fallbackInitials = fallbackInitials.substring(0, 1);
 
-    const settingsNavItem = findNavigationItem("settings")!;
+    const settingsNavItem = findNavigationItem("user-settings");
 
     return (
         <DropdownMenu.Root>

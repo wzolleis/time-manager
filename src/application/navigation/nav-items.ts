@@ -30,7 +30,6 @@ export const navItemIds = [
     "reports-yearly",
     "reports-overtime",
     "admin",
-    "user",
     "users",
     "holidays-admin",
     "holidays",
@@ -46,12 +45,19 @@ export const navItemIds = [
 export type NavItemId = ValuesOf<typeof navItemIds>;
 
 /**
+ * Wo der Eintrag steht: in der Navigationsleiste links, im Administrator-Menü (Zahnrad oben rechts,
+ * nur mit Rolle Administrator) oder im Avatar-Menü oben rechts
+ */
+export type NavMenu = "sidebar" | "admin" | "avatar";
+
+/**
  * Navigationseintrag für eine flache Liste
  */
 export type NavItem = {
     id: NavItemId;
     label: string;
     icon: LucideIcon;
+    menu: NavMenu;
 } & LinkProps;
 
 /**
@@ -62,25 +68,77 @@ export type NavItem = {
 export type NavNode = NavItem & {
     childItems: NavNode[];
 };
+// Die Reihenfolge innerhalb eines Menüs ist die Reihenfolge der Anzeige
 export const NAVIGATION_ITEMS: NavItem[] = [
-    {id: "dashboard", label: "Dashboard", icon: LayoutDashboard, to: "/dashboard", children: []},
-    {id: "admin", label: "Administration", icon: BaggageClaim, to: "/admin", children: []},
-    {id: "settings", label: "Einstellungen", icon: Settings, to: "/admin/settings", children: []},
-    {id: "users", label: "Benutzer verwalten", icon: User, to: "/admin/users", children: []},
-    {id: "holidays-admin", label: "Feiertage", icon: CalendarHeart, to: "/admin/holidays", children: []},
-    {id: "api-tokens-admin", label: "Agent-Zugänge", icon: KeyRound, to: "/admin/api-tokens", children: []},
-    {id: "projects", label: "Projekte", icon: Target, to: "/user/projects", children: []},
-    {id: "user", label: "User", icon: User, to: "/user", children: []},
-    {id: "user-settings", label: "Einstellungen", icon: Settings, to: "/user/settings", children: []},
-    {id: "holidays", label: "Feiertage", icon: CalendarHeart, to: "/user/holidays", children: []},
-    {id: "vacations", label: "Urlaube", icon: Parasol, to: "/user/vacations", children: []},
-    {id: "sick-leaves", label: "Krankmeldungen", icon: Thermometer, to: "/user/sick-leaves", children: []},
-    {id: "reports", label: "Report", icon: WorkflowIcon, to: "/user/reports", children: []},
-    {id: "reports-daily", label: "Heute", icon: CalendarClock, to: "/user/reports/daily", children: []},
-    {id: "reports-weekly", label: "Woche", icon: CalendarDays, to: "/user/reports/weekly", children: []},
-    {id: "reports-monthly", label: "Monat", icon: CalendarRange, to: "/user/reports/monthly", children: []},
-    {id: "reports-yearly", label: "Jahr", icon: CalendarSearch, to: "/user/reports/yearly", children: []},
-    {id: "reports-overtime", label: "Überstunden", icon: RotateCcwClock, to: "/user/reports/overtime", children: []},
-    {id: "api-tokens", label: "Agent-Zugang", icon: KeyRound, to: "/user/api-tokens", children: []},
-    {id: "passkeys", label: "Passkeys", icon: Fingerprint, to: "/user/passkeys", children: []},
+    {id: "dashboard", label: "Dashboard", icon: LayoutDashboard, to: "/dashboard", menu: "sidebar", children: []},
+    {id: "reports", label: "Report", icon: WorkflowIcon, to: "/user/reports", menu: "sidebar", children: []},
+    {
+        id: "reports-daily",
+        label: "Heute",
+        icon: CalendarClock,
+        to: "/user/reports/daily",
+        menu: "sidebar",
+        children: [],
+    },
+    {
+        id: "reports-weekly",
+        label: "Woche",
+        icon: CalendarDays,
+        to: "/user/reports/weekly",
+        menu: "sidebar",
+        children: [],
+    },
+    {
+        id: "reports-monthly",
+        label: "Monat",
+        icon: CalendarRange,
+        to: "/user/reports/monthly",
+        menu: "sidebar",
+        children: [],
+    },
+    {
+        id: "reports-yearly",
+        label: "Jahr",
+        icon: CalendarSearch,
+        to: "/user/reports/yearly",
+        menu: "sidebar",
+        children: [],
+    },
+    {
+        id: "reports-overtime",
+        label: "Überstunden",
+        icon: RotateCcwClock,
+        to: "/user/reports/overtime",
+        menu: "sidebar",
+        children: [],
+    },
+    {id: "vacations", label: "Urlaube", icon: Parasol, to: "/user/vacations", menu: "sidebar", children: []},
+    {
+        id: "sick-leaves",
+        label: "Krankmeldungen",
+        icon: Thermometer,
+        to: "/user/sick-leaves",
+        menu: "sidebar",
+        children: [],
+    },
+    {id: "holidays", label: "Feiertage", icon: CalendarHeart, to: "/user/holidays", menu: "sidebar", children: []},
+    {id: "projects", label: "Projekte", icon: Target, to: "/user/projects", menu: "sidebar", children: []},
+    {id: "api-tokens", label: "Agent-Zugang", icon: KeyRound, to: "/user/api-tokens", menu: "sidebar", children: []},
+    {id: "passkeys", label: "Passkeys", icon: Fingerprint, to: "/user/passkeys", menu: "sidebar", children: []},
+    {id: "user-settings", label: "Einstellungen", icon: Settings, to: "/user/settings", menu: "avatar", children: []},
+    {id: "admin", label: "Administration", icon: BaggageClaim, to: "/admin", menu: "admin", children: []},
+    {id: "settings", label: "Einstellungen", icon: Settings, to: "/admin/settings", menu: "admin", children: []},
+    {id: "users", label: "Benutzer verwalten", icon: User, to: "/admin/users", menu: "admin", children: []},
+    {id: "holidays-admin", label: "Feiertage", icon: CalendarHeart, to: "/admin/holidays", menu: "admin", children: []},
+    {
+        id: "api-tokens-admin",
+        label: "Agent-Zugänge",
+        icon: KeyRound,
+        to: "/admin/api-tokens",
+        menu: "admin",
+        children: [],
+    },
 ] as const;
+
+/** Die Einträge eines Menüs (Leiste, Administrator-Menü, Avatar-Menü) in der Reihenfolge der Anzeige */
+export const navItemsOf = (menu: NavMenu): NavItem[] => NAVIGATION_ITEMS.filter((item) => item.menu === menu);

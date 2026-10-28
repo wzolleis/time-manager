@@ -12,6 +12,7 @@ const USER = {
     name: "Test",
     email: "test@example.com",
     avatarUrl: null,
+    roleIds: [],
 };
 
 function mockApi(vacations: unknown[], holidays: unknown[] = [], sickLeaves: unknown[] = []) {
