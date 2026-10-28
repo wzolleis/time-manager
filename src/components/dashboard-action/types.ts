@@ -22,6 +22,8 @@ export type ConfirmAction = ActionBase & {
     kind: "confirm";
     confirmTitle: string;
     confirmText: string;
+    // Text des Buttons, der in der Bestätigung die Aktion ausführt
+    confirmLabel: string;
 };
 
 export type DashboardAction = LinkAction | ConfirmAction;

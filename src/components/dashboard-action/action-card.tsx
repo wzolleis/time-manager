@@ -58,7 +58,7 @@ export function ActionCard({action, onConfirm}: {action: DashboardAction; onConf
                                     className={buttonVariants({variant: "destructive"})}
                                     onClick={() => onConfirm(action.id)}
                                 >
-                                    Löschen
+                                    {action.confirmLabel}
                                 </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>

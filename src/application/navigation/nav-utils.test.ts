@@ -32,9 +32,12 @@ describe("Navigationsbaum", () => {
         expect(paths).not.toContain("/user/settings");
     });
 
-    it("führt im Administrator-Menü zu den Seiten unter /admin", () => {
-        expect(navItemsOf("admin").map((item) => item.to)).toEqual([
-            "/admin",
+    it("führt im Administrator-Menü nur zum Administrator Dashboard", () => {
+        expect(navItemsOf("admin").map((item) => item.to)).toEqual(["/admin"]);
+    });
+
+    it("führt zu den übrigen Seiten unter /admin nur über das Administrator Dashboard", () => {
+        expect(navItemsOf("admin-dashboard").map((item) => item.to)).toEqual([
             "/admin/settings",
             "/admin/users",
             "/admin/holidays",
