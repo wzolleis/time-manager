@@ -31,8 +31,8 @@ Regeln nicht verletzen. Code:
 - Services `../../shared/holiday-rules.ts`, Schema `../../shared/holiday.ts`, Function
   `../../netlify/functions/holidays.ts`
 
-Geändert wird nach dem Skill `architecture` (`../../agents/.agents/skills/architecture`), zuerst
-`../../agents/.agents/skills/architecture/use-case.md` lesen.
+Geändert wird nach dem Skill `architecture` (`../../.claude/skills/architecture`), zuerst
+`../../.claude/skills/architecture/use-case.md` lesen.
 
 ## Use Cases
 

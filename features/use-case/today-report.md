@@ -24,8 +24,8 @@ Regeln nicht verletzen. Code:
 - Services `dayTotals` und `dayDiffMs` in `../../shared/time-report.ts`, `targetMs` und `dayKind` in
   `../../shared/target-hours.ts`, `nextType` und `firstBookingDay` in `../../shared/time-rules.ts`
 
-Geändert wird nach dem Skill `architecture` (`../../agents/.agents/skills/architecture`), zuerst
-`../../agents/.agents/skills/architecture/use-case.md` lesen.
+Geändert wird nach dem Skill `architecture` (`../../.claude/skills/architecture`), zuerst
+`../../.claude/skills/architecture/use-case.md` lesen.
 
 ## Wo der Bericht erscheint
 
@@ -185,7 +185,7 @@ dieser Art lässt `checkSequence` nicht mehr zu.
   - „Löschen“ (`time-entry-delete.tsx`): Rückfrage mit „Nur diese“ und „Mit Gegenstück“. Eine Variante,
     die die Abfolge verletzen würde, ist deaktiviert und nennt den Grund.
 - **Ohne User:** „Bitte zuerst einen User anlegen und auswählen.“
-- **Laden und Fehler** wie in `../../agents/.agents/skills/architecture/views.md`: „Lade…“, bei einem Fehler
+- **Laden und Fehler** wie in `../../.claude/skills/architecture/views.md`: „Lade…“, bei einem Fehler
   die Meldung mit „Erneut versuchen“ (`ReportError` aus
   `../../src/features/reports/components/report-error.tsx`). Die Karten stehen schon während des Ladens
   da, mit den Werten aus den bis dahin vorhandenen Daten.
@@ -233,7 +233,7 @@ Hinweise:
 
 ## Tests
 
-Nach `../../agents/.agents/skills/architecture/testing.md`. Vorhanden:
+Nach `../../.claude/skills/architecture/testing.md`. Vorhanden:
 
 - **Service-Tests** ohne Mocks:
   - `../../shared/time-report.test.ts`, `describe("dayTotals")`: vollständiger Tag, laufender Zeitraum,

@@ -18,7 +18,7 @@ Login mit Passwort.
 
 Das Passwort bleibt bestehen. Passkeys sind ein zweiter Weg, sich anzumelden, kein Ersatz.
 
-Technische Grundlage: Skill `authentication` (Sessions) in `../../agents/.agents/skills/`. Code:
+Technische Grundlage: Skill `authentication` (Sessions) in `../../.claude/skills/`. Code:
 
 - Function `../../netlify/functions/auth.ts` (Anmelden, Eintragen), `../../netlify/functions/passkeys.ts`
   (Liste, Löschen), Hilfen `../../netlify/functions/lib/passkey.ts`

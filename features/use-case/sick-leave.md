@@ -21,7 +21,7 @@ Vorbild ist der Urlaub. Eine eigene Beschreibung gibt es dafür nicht, nur den C
 - Use Cases `../../src/features/vacations/use-cases/`
 - Services `../../shared/vacation-rules.ts`, Schema `../../shared/vacation.ts`, Function `../../netlify/functions/vacations.ts`
 
-Umgesetzt wird nach dem Skill `architecture` (`../../agents/.agents/skills/architecture`), zuerst `../../agents/.agents/skills/architecture/use-case.md` lesen.
+Umgesetzt wird nach dem Skill `architecture` (`../../.claude/skills/architecture`), zuerst `../../.claude/skills/architecture/use-case.md` lesen.
 
 ## Use Cases
 
@@ -156,7 +156,7 @@ Seite „Urlaub“ (`vacations-list.tsx`).
   Stempeln, wenn heute ein Krankheitstag ist.
 - **Tagesbericht:** Buchungen an einem Krankheitstag werden weiter angezeigt, aber ausgegraut und mit
   „zählt nicht (krank)“ markiert. Bearbeiten und Löschen bleiben möglich.
-- **Laden und Fehler** wie in `../../agents/.agents/skills/architecture/views.md`: „Lade…“, bei einem Fehler die Meldung mit „Erneut versuchen“.
+- **Laden und Fehler** wie in `../../.claude/skills/architecture/views.md`: „Lade…“, bei einem Fehler die Meldung mit „Erneut versuchen“.
 
 Nicht dabei: halbe Tage, Upload eines Attests, Krankmeldung für andere User, Löschen von Buchungen
 durch die Krankmeldung.
@@ -209,7 +209,7 @@ Hinweise:
 
 ## Tests
 
-Nach `../../agents/.agents/skills/architecture/testing.md`, jede Regel mit Gegenprobe (Regel absichtlich brechen, Test muss fehlschlagen):
+Nach `../../.claude/skills/architecture/testing.md`, jede Regel mit Gegenprobe (Regel absichtlich brechen, Test muss fehlschlagen):
 
 - **Service-Tests** ohne Mocks:
   - `../../shared/sick-leave-rules.test.ts`: Regeln 2 und 3 (auch Ändern ohne Vergleich mit sich selbst),
