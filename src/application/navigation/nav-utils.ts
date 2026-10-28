@@ -2,7 +2,7 @@ import {NAVIGATION_ITEMS, type NavItem, type NavNode} from "@/application/naviga
 import type {LinkProps} from "@tanstack/react-router";
 
 export function toLinkProps(item: NavItem): LinkProps {
-    const {...linkProps} = item;
+    const {menu: _menu, ...linkProps} = item;
     return linkProps;
 }
 
@@ -23,10 +23,6 @@ function getDepth(path: string): number {
     return path.split("/").filter(Boolean).length;
 }
 
-function isTopLevel(item: NavItem): boolean {
-    return getDepth(getPath(item)) <= 1;
-}
-
 function isDirectChildOf(item: NavItem, parent: NavItem): boolean {
     const itemPath = getPath(item);
     const parentPath = getPath(parent);
@@ -45,8 +41,14 @@ function createNavNode(item: NavItem, allItems: NavItem[]): NavNode {
     return {...item, childItems};
 }
 
+function isDescendantOf(item: NavItem, ancestor: NavItem): boolean {
+    return getPath(item).startsWith(`${getPath(ancestor)}/`);
+}
+
+// Oberste Ebene: alle Einträge ohne Vorfahren in der Liste. /user/vacations steht so oben,
+// auch wenn es /user selbst nicht als Eintrag gibt.
 export function buildNavTree(items: NavItem[]): NavNode[] {
-    const roots = items.filter(isTopLevel);
+    const roots = items.filter((item) => !items.some((other) => isDescendantOf(item, other)));
     return roots.map((root) => createNavNode(root, items));
 }
 

@@ -24,3 +24,6 @@ export const UserUpdateSchema = createUpdateSchema(users, refine).omit({id: true
 export type User = z.infer<typeof UserSchema>;
 export type UserCreate = z.infer<typeof UserCreateSchema>;
 export type UserUpdate = z.infer<typeof UserUpdateSchema>;
+
+// Der angemeldete User (/api/auth/me, Login) mit den IDs seiner Rollen
+export type CurrentUser = User & {roleIds: string[]};

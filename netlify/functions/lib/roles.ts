@@ -52,15 +52,19 @@ export function requiredRoleId(entries: {path: string; roleId: string}[], path: 
     return match?.roleId ?? USER_ROLE_ID;
 }
 
+/** Die IDs aller Rollen des Users */
+export async function roleIdsOf(userId: string, ex: Executor = db): Promise<string[]> {
+    const rows = await ex.select({roleId: userRoles.roleId}).from(userRoles).where(eq(userRoles.userId, userId));
+    return rows.map((r) => r.roleId);
+}
+
 /**
  * Darf der User den Pfad mit der Methode aufrufen? Ja, wenn er Administrator ist oder die Rolle hat,
  * die endpoint_roles dafür verlangt.
  */
 export async function hasEndpointAccess(userId: string, path: string, method: string): Promise<boolean> {
     if (!METHODS.includes(method)) return true; // HEAD, OPTIONS: der Handler antwortet ohnehin mit 405
-    const roleIds = (
-        await db.select({roleId: userRoles.roleId}).from(userRoles).where(eq(userRoles.userId, userId))
-    ).map((r) => r.roleId);
+    const roleIds = await roleIdsOf(userId);
     if (roleIds.includes(ADMIN_ROLE_ID)) return true;
 
     const entries = await db

@@ -10,7 +10,7 @@ state: resolved
 „Der User kann seine Einstellungen sehen und bearbeiten.“
 
 ## Einstellungen
-Im Menü unter „User“ gibt es als ersten Eintrag „Einstellungen“ (Route `/user/settings`).
+Im Avatar-Menü oben rechts gibt es den Eintrag „Einstellungen“ (Route `/user/settings`).
 Ein Klick darauf zeigt die Einstellungsseite.
 Dort steht eine Tabelle mit den Spalten „Name“, „Wert“, „gültig ab“, „Status“ und „Beschreibung“:
 * Name = der Name der Einstellung

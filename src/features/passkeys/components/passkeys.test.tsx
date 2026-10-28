@@ -9,7 +9,13 @@ import {PasskeysPage} from "@features/passkeys/components/passkeys-page";
 const browser = vi.hoisted(() => ({startRegistration: vi.fn()}));
 vi.mock("@simplewebauthn/browser", () => ({startRegistration: browser.startRegistration}));
 
-const USER = {id: "275f12fb-e116-4857-9f12-fbe116b857fb", name: "Test", email: "test@example.com", avatarUrl: null};
+const USER = {
+    id: "275f12fb-e116-4857-9f12-fbe116b857fb",
+    name: "Test",
+    email: "test@example.com",
+    avatarUrl: null,
+    roleIds: [],
+};
 
 const MACBOOK = {
     id: "p1",

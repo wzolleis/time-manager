@@ -6,6 +6,7 @@ import {createMemoryHistory, createRouter, RouterProvider} from "@tanstack/react
 import {routeTree} from "@/routeTree.gen";
 import {UserProvider} from "@/components/login/user-provider";
 import {NotFound} from "@/application/layout/not-found";
+import {ADMIN_ROLE_ID} from "@shared/role";
 
 // Pro Route die Überschrift (h1), an der man die Seite erkennt.
 // Neue Route anlegen = hier eintragen, sonst schlägt der Test unten fehl.
@@ -38,6 +39,7 @@ const TEST_USER = {
     name: "Test",
     email: "test@example.com",
     avatarUrl: null,
+    roleIds: [ADMIN_ROLE_ID], // auch das Administrator-Menü wird gerendert
 };
 
 const makeRouter = (path: string) =>

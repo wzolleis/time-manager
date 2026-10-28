@@ -9,12 +9,12 @@ import {Input} from "@/components/ui/input";
 import {fetchPasskeyLoginOptions, login, loginWithPasskey, ME_QUERY_KEY} from "@/api/auth";
 import {passkeyError} from "@/lib/passkey-error";
 import type {Login} from "@shared/auth";
-import type {User} from "@shared/user";
+import type {CurrentUser} from "@shared/user";
 import {ErrorText} from "@/components/text/error-text";
 import {FormField} from "@/components/form/form-field";
 
 // Ohne Session: die Optionen nennen keinen User, der Browser bietet alle Passkeys dieser Domain an
-async function passkeyLogin(): Promise<User> {
+async function passkeyLogin(): Promise<CurrentUser> {
     const optionsJSON = await fetchPasskeyLoginOptions();
     let response;
     try {
@@ -31,7 +31,7 @@ export function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const signIn = (user: User) => {
+    const signIn = (user: CurrentUser) => {
         // Daten eines vorher angemeldeten Users dürfen nicht stehen bleiben
         qc.removeQueries({predicate: (q) => q.queryKey[0] !== ME_QUERY_KEY[0]});
         qc.setQueryData(ME_QUERY_KEY, user);

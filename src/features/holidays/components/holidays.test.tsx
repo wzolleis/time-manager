@@ -12,6 +12,7 @@ const USER = {
     name: "Test",
     email: "test@example.com",
     avatarUrl: null,
+    roleIds: [],
 };
 
 const GLOBAL = {id: "g", userId: null, date: "2026-10-03", name: "Tag der Deutschen Einheit"};

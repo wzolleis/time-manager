@@ -6,7 +6,7 @@ import type {NavItem} from "@/application/navigation/nav-items";
 export function Sidebar({items, onNavigate}: {items: NavItem[]; onNavigate?: () => void}) {
     const tree = buildNavTree(items);
     return (
-        <nav className="flex flex-col gap-1 w-64 p-2">
+        <nav aria-label="Navigation" className="flex flex-col gap-1 w-64 p-2">
             {tree.map((node) => (
                 <SidebarItem key={node.id} node={node} onNavigate={onNavigate} />
             ))}
