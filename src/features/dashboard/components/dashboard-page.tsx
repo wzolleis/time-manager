@@ -1,41 +1,18 @@
-import {BaggageClaim, User} from "lucide-react";
 import {ActionCardDashboard} from "@/components/dashboard-action/action-card-dashboard";
-import type {DashboardAction} from "@/components/dashboard-action/types";
-import {useIsAdmin} from "@/lib/user-context";
+import {useLogout} from "@/components/login/use-logout";
+import {LOGOUT_ACTION_ID, userDashboardActions} from "@features/dashboard/actions/user-dashboard-actions";
 
-// Jeder angemeldete User hat die Rolle User und sieht sein Dashboard
-const userDashboard: DashboardAction = {
-    id: "user-dashboard",
-    kind: "link",
-    title: "User Dashboard",
-    description: "Deine Zeiten, Urlaube und Berichte",
-    label: "Zum User Dashboard",
-    icon: User,
-    to: "/user",
-};
-
-const adminDashboard: DashboardAction = {
-    id: "admin-dashboard",
-    kind: "link",
-    title: "Administrator Dashboard",
-    description: "Benutzer, Feiertage und Einstellungen für alle",
-    label: "Zum Administrator Dashboard",
-    icon: BaggageClaim,
-    to: "/admin",
-};
-
-export const Dashboard = () => {
-    const isAdmin = useIsAdmin();
-    const actions = isAdmin ? [userDashboard, adminDashboard] : [userDashboard];
+// Jeder angemeldete User hat die Rolle User und sieht hier die Aktionen seines User Dashboards
+export const Dashboard = ({title = "Dashboard"}: {title?: string}) => {
+    const logout = useLogout();
 
     const handleConfirm = (id: string) => {
-        // Hier den eigentlichen API-Aufruf einbauen
-        console.log("Bestätigt:", id);
+        if (id === LOGOUT_ACTION_ID) void logout();
     };
 
     return (
         <>
-            <ActionCardDashboard title="Dashboard" onActionConfirm={handleConfirm} actions={actions} />
+            <ActionCardDashboard title={title} onActionConfirm={handleConfirm} actions={userDashboardActions} />
         </>
     );
 };

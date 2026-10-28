@@ -8,9 +8,7 @@ import {NAVIGATION_ITEMS, navItemsOf, type NavItem} from "@/application/navigati
 import {useCurrentUser, useIsAdmin} from "@/lib/user-context";
 import type {CurrentUser} from "@shared/user";
 import {useState} from "react";
-import {useQueryClient} from "@tanstack/react-query";
-import {logout, ME_QUERY_KEY} from "@/api/auth";
-import {clearUserData} from "@/query-client";
+import {useLogout} from "@/components/login/use-logout";
 import {PasswordChangeDialog} from "@features/auth/components/password-change-dialog";
 import {VersionDialog} from "@features/version/components/version-dialog";
 import {Sidebar} from "@/application/layout/sidebar";
@@ -21,20 +19,10 @@ export const Header = () => {
     const navigate = useNavigate();
     const userContext = useCurrentUser();
     const isAdmin = useIsAdmin();
-    const qc = useQueryClient();
+    const handleLogout = useLogout();
     const [passwordOpen, setPasswordOpen] = useState(false);
     const [versionOpen, setVersionOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
-
-    const handleLogout = async (): Promise<void> => {
-        try {
-            await logout();
-        } finally {
-            // Auch wenn der Server nicht erreichbar ist: lokal nichts vom User zurücklassen
-            await clearUserData();
-            qc.setQueryData(ME_QUERY_KEY, null);
-        }
-    };
 
     const onItemSelected = (item: NavItem): void => {
         navigate({to: item.to});

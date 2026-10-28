@@ -46,9 +46,10 @@ export type NavItemId = ValuesOf<typeof navItemIds>;
 
 /**
  * Wo der Eintrag steht: in der Navigationsleiste links, im Administrator-Menü (Zahnrad oben rechts,
- * nur mit Rolle Administrator) oder im Avatar-Menü oben rechts
+ * nur mit Rolle Administrator), im Avatar-Menü oben rechts oder in keinem Menü, nur als Karte auf dem
+ * Administrator Dashboard. Für die Breadcrumb zählen alle Einträge.
  */
-export type NavMenu = "sidebar" | "admin" | "avatar";
+export type NavMenu = "sidebar" | "admin" | "avatar" | "admin-dashboard";
 
 /**
  * Navigationseintrag für eine flache Liste
@@ -127,15 +128,29 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     {id: "passkeys", label: "Passkeys", icon: Fingerprint, to: "/user/passkeys", menu: "sidebar", children: []},
     {id: "user-settings", label: "Einstellungen", icon: Settings, to: "/user/settings", menu: "avatar", children: []},
     {id: "admin", label: "Administration", icon: BaggageClaim, to: "/admin", menu: "admin", children: []},
-    {id: "settings", label: "Einstellungen", icon: Settings, to: "/admin/settings", menu: "admin", children: []},
-    {id: "users", label: "Benutzer verwalten", icon: User, to: "/admin/users", menu: "admin", children: []},
-    {id: "holidays-admin", label: "Feiertage", icon: CalendarHeart, to: "/admin/holidays", menu: "admin", children: []},
+    {
+        id: "settings",
+        label: "Einstellungen",
+        icon: Settings,
+        to: "/admin/settings",
+        menu: "admin-dashboard",
+        children: [],
+    },
+    {id: "users", label: "Benutzer verwalten", icon: User, to: "/admin/users", menu: "admin-dashboard", children: []},
+    {
+        id: "holidays-admin",
+        label: "Feiertage",
+        icon: CalendarHeart,
+        to: "/admin/holidays",
+        menu: "admin-dashboard",
+        children: [],
+    },
     {
         id: "api-tokens-admin",
         label: "Agent-Zugänge",
         icon: KeyRound,
         to: "/admin/api-tokens",
-        menu: "admin",
+        menu: "admin-dashboard",
         children: [],
     },
 ] as const;
