@@ -80,6 +80,7 @@ Die Beschreibung sagt dem Agent, wann er das Tool nimmt und welche Regel greifen
 | `get_daily_report`   | `day?` (Standard heute)                          | Buchungen, Arbeitszeit, Pausen, Soll, Differenz, Art des Tags    | `useShowDailyReport` | readOnly             |
 | `get_weekly_report`  | `day?` (Standard heute, Woche dieses Tags)       | KW, Zeilen pro Tag, Summen, Soll bis heute und Woche             | `useShowWeeklyReport`| readOnly             |
 | `get_monthly_report` | `month?` (`JJJJ-MM`, Standard aktueller Monat)   | Zeilen pro Kalenderwoche, Summen                                 | `useShowMonthlyReport`| readOnly            |
+| `get_yearly_report`  | `year?` (`JJJJ`, Standard aktuelles Jahr)        | Zeilen pro Monat, Summen, Soll bis heute und Jahr                | `useShowYearlyReport` | readOnly             |
 
 Bewusst anders als in der UI:
 
@@ -162,7 +163,7 @@ Pause, Soll, Differenz; Monatsbericht: eine Zeile pro Kalenderwoche wie in der U
    von `time-entries.ts` in Funktionen ausgelagert (siehe Umsetzung), die REST und MCP gemeinsam nutzen.
    Eine zweite Kopie der Logik im MCP-Code gibt es nicht.
 2. **Berichte rechnen mit denselben Services wie die UI:** `dayTotals`, `dayDiffMs`, `weekTotals`,
-   `monthTotals`, `targetMs`, `dayKind`, `firstBookingDay`. Die Daten (Buchungen, Urlaube, Feiertage,
+   `monthTotals`, `yearTotals`, `targetMs`, `dayKind`, `firstBookingDay`. Die Daten (Buchungen, Urlaube, Feiertage,
    Krankmeldungen, Projekte) liest die Function aus der DB, wie die Endpoints sie liefern. Ein Bericht über
    MCP zeigt dieselben Zahlen wie die UI zum selben Zeitpunkt.
 3. **Nur eigene Daten.** Kein Tool hat eine `userId` als Eingabe. Der User kommt immer aus dem Token. Eine

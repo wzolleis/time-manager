@@ -29,7 +29,7 @@ Im Alltag:
 ## Agent verbinden (MCP)
 
 Ein Agent bedient die Zeiterfassung über den MCP-Server unter `/api/mcp`: stempeln, Buchungen nachtragen,
-ändern und löschen, Tages-, Wochen- und Monatsbericht. Beschreibung: `features/boundaries/mcp-enable.md`.
+ändern und löschen, Tages-, Wochen-, Monats- und Jahresbericht. Beschreibung: `features/boundaries/mcp-enable.md`.
 
 1. In der Anwendung unter „Agent-Zugang“ ein Token erzeugen. Es wird nur einmal angezeigt.
 2. Den Agent verbinden, z. B. Claude Code:

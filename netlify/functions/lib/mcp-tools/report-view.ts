@@ -1,5 +1,5 @@
 // netlify/functions/lib/mcp-tools/report-view.ts
-// Tages-, Wochen- und Monatsbericht für den MCP-Server, gerechnet mit denselben Services wie die UI (Regel 2).
+// Tages-, Wochen-, Monats- und Jahresbericht für den MCP-Server, gerechnet mit denselben Services wie die UI (Regel 2).
 // Ohne DB: die Daten kommen als Parameter, damit sich die Berichte testen lassen.
 import {z} from "zod";
 import {
@@ -9,12 +9,20 @@ import {
     formatDifference,
     formatDuration,
     formatMonth,
+    formatMonthName,
 } from "../../../../shared/format";
 import {type DayRange, localDayRange} from "../../../../shared/day-range";
 import {holidayOn} from "../../../../shared/holiday-rules";
 import {isSickDay} from "../../../../shared/sick-leave-rules";
 import {dayKind, targetMs} from "../../../../shared/target-hours";
-import {dayDiffMs, dayTotals, monthTotals, type WeekDayTotals, weekTotals} from "../../../../shared/time-report";
+import {
+    dayDiffMs,
+    dayTotals,
+    monthTotals,
+    type WeekDayTotals,
+    weekTotals,
+    yearTotals,
+} from "../../../../shared/time-report";
 import {firstBookingDay, localDay} from "../../../../shared/time-rules";
 import type {SettingHistory} from "../../../../shared/user-setting-rules";
 import {isoWeek, weekDays} from "../../../../shared/week";
@@ -331,4 +339,80 @@ export function monthlyReport(data: ReportData, month: string, now: Date) {
     );
     const summary = summaryLine({...t, targetMs: t.targetMonthMs}, future, "des Monats");
     return {structured, text: [`## ${structured.monthText}`, "", table, "", summary].join("\n")};
+}
+
+// --- Jahresbericht ---------------------------------------------------------
+
+export const YearlyReportSchema = z.object({
+    year: z.string().describe("JJJJ"),
+    months: z.array(
+        z.object({
+            month: z.string().describe("JJJJ-MM"),
+            monthText: z.string(),
+            workMinutes: z.number(),
+            work: z.string(),
+            targetMinutes: z.number(),
+            target: z.string(),
+            diffMinutes: z.number().nullable().describe("null: Monat in der Zukunft oder ohne Soll und Arbeit"),
+            diff: z.string().nullable(),
+            running: z.boolean(),
+        }),
+    ),
+    workMinutes: z.number(),
+    work: z.string(),
+    targetToDateMinutes: z.number().describe("Soll der Tage bis heute"),
+    targetToDate: z.string(),
+    targetYearMinutes: z.number(),
+    targetYear: z.string(),
+    diffMinutes: z.number().nullable().describe("gegen das Soll bis heute; null bei einem künftigen Jahr"),
+    diff: z.string().nullable(),
+    running: z.boolean(),
+});
+
+export function yearlyReport(data: ReportData, year: string, now: Date) {
+    const today = localDay(now);
+    const bookings = toBookings(data.entries);
+    const t = yearTotals(bookings, year, data.vacations, data.holidays, data.sickLeaves, data.soll, today, now);
+    const future = `${year}-01-01` > today;
+    const firstYear = firstBookingDay(bookings)?.slice(0, 4);
+
+    const months = t.months.map((m) => ({
+        month: m.month,
+        monthText: formatMonthName(m.month),
+        workMinutes: minutes(m.workMs),
+        work: formatDuration(m.workMs),
+        targetMinutes: minutes(m.targetMs),
+        target: formatDuration(m.targetMs),
+        diffMinutes: diffMinutes(m.diffMs),
+        diff: diffText(m.diffMs),
+        running: m.running,
+    }));
+
+    const structured: z.infer<typeof YearlyReportSchema> = {
+        year,
+        months,
+        workMinutes: minutes(t.workMs),
+        work: formatDuration(t.workMs),
+        targetToDateMinutes: minutes(t.targetToDateMs),
+        targetToDate: formatDuration(t.targetToDateMs),
+        targetYearMinutes: minutes(t.targetYearMs),
+        targetYear: formatDuration(t.targetYearMs),
+        diffMinutes: future ? null : minutes(t.diffMs),
+        diff: future ? null : formatDifference(t.diffMs),
+        running: t.running,
+    };
+
+    const table = mdTable(
+        ["Monat", "Arbeit", "Soll", "Differenz"],
+        t.months.map((m, i) => [
+            months[i].monthText,
+            m.running ? `${formatDuration(m.workMs)}, läuft` : durationOrDash(m.workMs),
+            durationOrDash(m.targetMs),
+            m.diffMs === null ? dash : formatDifference(m.diffMs),
+        ]),
+    );
+    const summary = [summaryLine({...t, targetMs: t.targetYearMs}, future, "des Jahres")];
+    // Regel 4: vor der ersten Buchung erklärt der Agent dem User, warum alles leer ist
+    if (firstYear && year < firstYear) summary.push(`Die Zeiterfassung beginnt ${firstYear}.`);
+    return {structured, text: [`## ${year}`, "", table, "", summary.join(" ")].join("\n")};
 }

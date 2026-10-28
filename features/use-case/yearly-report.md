@@ -106,7 +106,8 @@ Drei Karten wie im Monatsbericht (Komponente `MetricCard` aus `../../src/compone
   die Meldung mit „Erneut versuchen“ (`ReportError` aus
   `../../src/features/reports/components/report-error.tsx`).
 - Menü: neuer Eintrag „Jahr“ nach „Monat“ (`reports-yearly`, `/user/reports/yearly`).
-- Ein MCP-Tool `get_yearly_report` folgt als eigener Change.
+- Über MCP liefert das Tool `get_yearly_report` denselben Bericht, seit dem Change
+  `../changes/mcp-yearly-report.md`.
 - Der Monat in der Spalte „Monat“ ist ein Link auf den Monatsbericht (`/user/reports/monthly/2026-10`), seit
   dem Change `../changes/report-links.md`.
 
