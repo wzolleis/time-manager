@@ -1,11 +1,11 @@
-   ---
-   name: mcp-yearly-report
-   description: Der MCP-Server bekommt das Tool get_yearly_report. Es liefert den Jahresbericht wie die Seite /user/reports/yearly/JJJJ, mit einer Zeile pro Monat, Summen, Soll bis heute und Soll des Jahres.
-   type: change
-   changes: mcp-enable, yearly-report
-   epics: mcp, report
-   state: resolved
-   ---
+---
+name: mcp-yearly-report
+description: Der MCP-Server bekommt das Tool get_yearly_report. Es liefert den Jahresbericht wie die Seite /user/reports/yearly/JJJJ, mit einer Zeile pro Monat, Summen, Soll bis heute und Soll des Jahres.
+type: change
+changes: mcp-enable, yearly-report
+epics: mcp, report
+state: resolved
+---
 
 # Jahresbericht über MCP
 
