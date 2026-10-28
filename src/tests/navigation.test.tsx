@@ -93,23 +93,3 @@ describe("Navigation", () => {
         expect(breadcrumb.textContent).toBe("ReportWoche");
     });
 });
-
-describe("Dashboard", () => {
-    it("zeigt dem User nur die Karte zum User Dashboard", async () => {
-        mockApi(USER);
-        renderApp("/dashboard");
-
-        const link = await screen.findByRole("link", {name: "Zum User Dashboard"});
-        expect(link.getAttribute("href")).toBe("/user");
-        expect(screen.queryByRole("link", {name: "Zum Administrator Dashboard"})).toBeNull();
-    });
-
-    it("zeigt dem Administrator zusätzlich die Karte zum Administrator Dashboard", async () => {
-        mockApi(ADMIN);
-        renderApp("/dashboard");
-
-        const link = await screen.findByRole("link", {name: "Zum Administrator Dashboard"});
-        expect(link.getAttribute("href")).toBe("/admin");
-        expect(screen.getByRole("link", {name: "Zum User Dashboard"})).toBeTruthy();
-    });
-});

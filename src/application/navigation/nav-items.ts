@@ -140,4 +140,5 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     },
 ] as const;
 
+/** Die Einträge eines Menüs (Leiste, Administrator-Menü, Avatar-Menü) in der Reihenfolge der Anzeige */
 export const navItemsOf = (menu: NavMenu): NavItem[] => NAVIGATION_ITEMS.filter((item) => item.menu === menu);

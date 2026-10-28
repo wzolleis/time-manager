@@ -1,6 +1,6 @@
 ---
 name: ui-modules
-description: Beschreibt die Verzeichnisse der UI unter src/ und was wohin gehört. Verwenden beim Anlegen oder Verschieben von Dateien unter src/ und vor jedem Commit, um zu prüfen, ob neue Dateien am richtigen Ort liegen.
+description: Beschreibt die Verzeichnisse der UI unter src/ und was wohin gehört. Verwenden beim Umsetzen eines Features oder Changes (features/use-case, features/changes), beim Anlegen oder Verschieben von Dateien unter src/ und vor jedem Commit, um zu prüfen, ob neue Dateien am richtigen Ort liegen.
 ---
 
 # Aufbau der Module in der UI
@@ -24,6 +24,7 @@ Pfad-Aliase: `@/*` → `src/*`, `@features/*` → `src/features/*`, `@shared/*` 
 | ist nur ein Typ, der überall gebraucht wird                   | `common/`                           |
 | legt eine URL fest                                            | `routes/admin/` oder `routes/user/` |
 | ist ein Test                                                  | neben der getesteten Datei          |
+| testet die ganze Anwendung über den Router (Routen, Rahmen)   | `tests/`                            |
 
 # Regeln je Verzeichnis
 
@@ -46,8 +47,9 @@ Pfad-Aliase: `@/*` → `src/*`, `@features/*` → `src/features/*`, `@shared/*` 
 - **`routes/`**: die Verzeichnisstruktur legt die URLs fest (`admin/`, `user/`). Jede Datei legt mit
   `createFileRoute` eine Route an und zeigt die Einstiegskomponente eines Features. Keine Logik, keine eigenen
   Komponenten.
-- **`tests/`**: nur Tests für die Routen. Alle anderen Tests liegen neben der getesteten Datei als
-  `<name>.test.ts(x)`.
+- **`tests/`**: nur Tests, die die ganze Anwendung über den Router rendern (`routeTree`, `UserProvider`), z. B.
+  die Routen, die Navigation oder das Dashboard. Eine Datei pro Thema. Alle anderen Tests liegen neben der
+  getesteten Datei als `<name>.test.ts(x)`.
 
 # Wer darf wen importieren?
 
@@ -56,6 +58,12 @@ Pfad-Aliase: `@/*` → `src/*`, `@features/*` → `src/features/*`, `@shared/*` 
 - `features` → `components`, `lib`, `views`, `api`, `common`, `@shared`. Features importieren nicht aus anderen
   Features.
 - `components`, `lib`, `views`, `api`, `common` importieren nie aus `features`, `application` oder `routes`.
+
+# Beim Umsetzen eines Features oder Changes
+
+Schon beim Planen und Anlegen der Dateien entscheidet dieser Skill, wohin jede neue Datei kommt. Ein angepasstes
+shadcn-Element (z. B. ein Button mit eigenem Stil) wird sofort eine eigene Komponente in `components/<art>/`,
+nicht erst im Review.
 
 # Prüfung vor dem Commit
 
