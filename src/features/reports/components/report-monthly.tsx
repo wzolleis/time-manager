@@ -1,5 +1,4 @@
 import {Link, useNavigate} from "@tanstack/react-router";
-import {Button} from "@/components/ui/button";
 import {MetricCard} from "@/components/cards/metric-card";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {diffClass} from "@/lib/format";
@@ -12,6 +11,7 @@ import {Muted} from "@/components/text/muted";
 import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
 import {PageHeader} from "@/components/page/page-header";
+import {PeriodNav} from "@/components/buttons/period-nav";
 
 const dash = "–";
 
@@ -79,32 +79,13 @@ export function ReportMonthly({month}: {month: string}) {
                 }
             />
 
-            <div className="flex flex-wrap items-center gap-2">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    aria-label="Vorheriger Monat"
-                    onClick={() => setMonth(addMonths(month, -1))}
-                >
-                    ←
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    aria-label="Nächster Monat"
-                    onClick={() => setMonth(addMonths(month, 1))}
-                >
-                    →
-                </Button>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={month === report.currentMonth}
-                    onClick={() => setMonth(report.currentMonth)}
-                >
-                    Dieser Monat
-                </Button>
-            </div>
+            <PeriodNav
+                unit="month"
+                onPrevious={() => setMonth(addMonths(month, -1))}
+                onNext={() => setMonth(addMonths(month, 1))}
+                onCurrent={() => setMonth(report.currentMonth)}
+                currentDisabled={month === report.currentMonth}
+            />
 
             <div className="grid gap-4 sm:grid-cols-3">
                 <MetricCard

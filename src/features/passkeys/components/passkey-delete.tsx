@@ -1,18 +1,7 @@
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {Button, buttonVariants} from "@/components/ui/button";
 import type {Passkey} from "@shared/passkey";
 import {useDeletePasskey} from "@features/passkeys/use-cases/use-delete-passkey";
 import {ErrorText} from "@/components/text/error-text";
+import {ConfirmDeleteButton} from "@/components/buttons/confirm-delete-button";
 
 export function PasskeyDelete({passkey}: {passkey: Passkey}) {
     const {remove, isDeleting, error, reset} = useDeletePasskey();
@@ -20,31 +9,13 @@ export function PasskeyDelete({passkey}: {passkey: Passkey}) {
     return (
         <div className="space-y-1">
             <div className="flex justify-end">
-                <AlertDialog onOpenChange={(next) => next && reset()}>
-                    <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="sm" disabled={isDeleting}>
-                            {isDeleting ? "Lösche…" : "Löschen"}
-                        </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Passkey „{passkey.name}“ löschen?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Mit diesem Passkey ist danach keine Anmeldung mehr möglich. Im Passwortmanager des
-                                Geräts bleibt er stehen, dort kannst du ihn selbst entfernen.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-                            <AlertDialogAction
-                                className={buttonVariants({variant: "destructive"})}
-                                onClick={() => remove(passkey.id)}
-                            >
-                                Löschen
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                <ConfirmDeleteButton
+                    title={<>Passkey „{passkey.name}“ löschen?</>}
+                    description="Mit diesem Passkey ist danach keine Anmeldung mehr möglich. Im Passwortmanager des Geräts bleibt er stehen, dort kannst du ihn selbst entfernen."
+                    onConfirm={() => remove(passkey.id)}
+                    onOpen={() => reset()}
+                    pending={isDeleting}
+                />
             </div>
 
             {error && <ErrorText className="text-right">{error.message}</ErrorText>}
