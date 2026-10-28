@@ -4,7 +4,7 @@ description: Die Navigation soll für den User vereinfacht werden.
 type: change
 changes: user-settings, version, holiday, passkeys, sick-leave, overtime, today-report, weekly-report, monthly-report, yearly-report, mcp-token
 epics: navigation
-state: open
+state: resolved
 ---
 
 # Vereinfachung der Navigation
