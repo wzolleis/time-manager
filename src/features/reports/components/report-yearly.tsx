@@ -1,5 +1,4 @@
 import {Link, useNavigate} from "@tanstack/react-router";
-import {Button} from "@/components/ui/button";
 import {MetricCard} from "@/components/cards/metric-card";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {diffClass} from "@/lib/format";
@@ -10,6 +9,7 @@ import {Muted} from "@/components/text/muted";
 import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
 import {PageHeader} from "@/components/page/page-header";
+import {PeriodNav} from "@/components/buttons/period-nav";
 
 const dash = "–";
 
@@ -72,33 +72,14 @@ export function ReportYearly({year}: {year: string}) {
                 }
             />
 
-            <div className="flex flex-wrap items-center gap-2">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    aria-label="Vorheriges Jahr"
-                    disabled={year <= firstYear}
-                    onClick={() => goTo(String(Number(year) - 1))}
-                >
-                    ←
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    aria-label="Nächstes Jahr"
-                    onClick={() => goTo(String(Number(year) + 1))}
-                >
-                    →
-                </Button>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={year === report.currentYear}
-                    onClick={() => goTo(report.currentYear)}
-                >
-                    Dieses Jahr
-                </Button>
-            </div>
+            <PeriodNav
+                unit="year"
+                onPrevious={() => goTo(String(Number(year) - 1))}
+                onNext={() => goTo(String(Number(year) + 1))}
+                onCurrent={() => goTo(report.currentYear)}
+                previousDisabled={year <= firstYear}
+                currentDisabled={year === report.currentYear}
+            />
 
             {beforeStart ? (
                 <Muted>

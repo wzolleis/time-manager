@@ -1,5 +1,4 @@
 import {Link, useNavigate} from "@tanstack/react-router";
-import {Button} from "@/components/ui/button";
 import {MetricCard} from "@/components/cards/metric-card";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {diffClass} from "@/lib/format";
@@ -12,6 +11,7 @@ import {Muted} from "@/components/text/muted";
 import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
 import {PageHeader} from "@/components/page/page-header";
+import {PeriodNav} from "@/components/buttons/period-nav";
 
 type DayRow = WeekDayTotals & {isToday: boolean};
 
@@ -115,27 +115,13 @@ export function ReportWeekly({anchor}: {anchor: string}) {
                 }
             />
 
-            <div className="flex flex-wrap items-center gap-2">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    aria-label="Vorherige Woche"
-                    onClick={() => setAnchor(addDays(anchor, -7))}
-                >
-                    ←
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    aria-label="Nächste Woche"
-                    onClick={() => setAnchor(addDays(anchor, 7))}
-                >
-                    →
-                </Button>
-                <Button variant="ghost" size="sm" disabled={report.thisWeek} onClick={() => setAnchor(today)}>
-                    Diese Woche
-                </Button>
-            </div>
+            <PeriodNav
+                unit="week"
+                onPrevious={() => setAnchor(addDays(anchor, -7))}
+                onNext={() => setAnchor(addDays(anchor, 7))}
+                onCurrent={() => setAnchor(today)}
+                currentDisabled={report.thisWeek}
+            />
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <MetricCard

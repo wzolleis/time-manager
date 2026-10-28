@@ -1,5 +1,4 @@
 import {useNavigate} from "@tanstack/react-router";
-import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {MetricCard} from "@/components/cards/metric-card";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
@@ -15,6 +14,7 @@ import {ErrorText} from "@/components/text/error-text";
 import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
 import {PageHeader} from "@/components/page/page-header";
+import {PeriodNav} from "@/components/buttons/period-nav";
 
 // Buchungen an einem Krankheitstag bleiben sichtbar, aber ausgegraut
 const muted = (row: DailyReportRow, text: string) =>
@@ -75,30 +75,24 @@ export function ReportDailyEdit({day}: {day: string}) {
             {/* Gestempelt wird immer jetzt, deshalb nur am heutigen Tag */}
             {day === today && <StampCard />}
 
-            <div className="flex flex-wrap items-center gap-2">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    aria-label="Vorheriger Tag"
-                    onClick={() => setDay(addDays(day, -1))}
-                >
-                    ←
-                </Button>
-                <Input
-                    type="date"
-                    className="w-40"
-                    value={day}
-                    onChange={(e) => e.target.value && setDay(e.target.value)}
-                    aria-label="Tag wählen"
-                />
-                <Button variant="outline" size="sm" aria-label="Nächster Tag" onClick={() => setDay(addDays(day, 1))}>
-                    →
-                </Button>
-                <Button variant="ghost" size="sm" disabled={day === today} onClick={() => setDay(today)}>
-                    Heute
-                </Button>
+            <PeriodNav
+                unit="day"
+                onPrevious={() => setDay(addDays(day, -1))}
+                onNext={() => setDay(addDays(day, 1))}
+                onCurrent={() => setDay(today)}
+                currentDisabled={day === today}
+                picker={
+                    <Input
+                        type="date"
+                        className="w-40"
+                        value={day}
+                        onChange={(e) => e.target.value && setDay(e.target.value)}
+                        aria-label="Tag wählen"
+                    />
+                }
+            >
                 <TimeEntryCreateDialog defaultDay={day} defaultType={report.next} label="Buchung nachtragen" />
-            </div>
+            </PeriodNav>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {totals.missingGehen && (

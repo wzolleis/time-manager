@@ -1,20 +1,9 @@
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {Button, buttonVariants} from "@/components/ui/button";
 import {germanDay} from "@shared/vacation-rules";
 import {UserSettingDialog} from "@features/user-settings/components/user-setting-dialog";
 import type {UserSettingRow} from "@features/user-settings/use-cases/use-show-user-settings";
 import {useDeleteUserSetting} from "@features/user-settings/use-cases/use-delete-user-setting";
 import {ErrorText} from "@/components/text/error-text";
+import {ConfirmDeleteButton} from "@/components/buttons/confirm-delete-button";
 
 /**
  * Aktionen je Zeile (Regel 7): Zum aktuellen Wert trägt der User einen neuen Wert ein, einen geplanten Wert
@@ -42,31 +31,18 @@ export function UserSettingActions({row}: {row: UserSettingRow}) {
             <div className="flex flex-wrap justify-end gap-2">
                 <UserSettingDialog setting={setting} current={value} initialValue={value.value} label="Bearbeiten" />
 
-                <AlertDialog onOpenChange={(next) => next && remove.reset()}>
-                    <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="sm" disabled={remove.isDeleting}>
-                            {remove.isDeleting ? "Lösche…" : "Löschen"}
-                        </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Geplanten Wert löschen?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                {setting.name} {row.text} ab dem {germanDay(value.validFrom)} wird entfernt. Danach gilt
-                                weiter der bisherige Wert.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-                            <AlertDialogAction
-                                className={buttonVariants({variant: "destructive"})}
-                                onClick={() => remove.remove(value)}
-                            >
-                                Löschen
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                <ConfirmDeleteButton
+                    title="Geplanten Wert löschen?"
+                    description={
+                        <>
+                            {setting.name} {row.text} ab dem {germanDay(value.validFrom)} wird entfernt. Danach gilt
+                            weiter der bisherige Wert.
+                        </>
+                    }
+                    onConfirm={() => remove.remove(value)}
+                    onOpen={() => remove.reset()}
+                    pending={remove.isDeleting}
+                />
             </div>
 
             {remove.error && <ErrorText className="text-right">{remove.error.message}</ErrorText>}

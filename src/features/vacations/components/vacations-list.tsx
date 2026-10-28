@@ -1,5 +1,4 @@
 import {useState} from "react";
-import {Button} from "@/components/ui/button";
 import {germanDay} from "@shared/vacation-rules";
 import {VacationActions} from "@features/vacations/components/vacation-actions";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
@@ -11,6 +10,7 @@ import {Muted} from "@/components/text/muted";
 import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
 import {PageHeader} from "@/components/page/page-header";
+import {PeriodNav} from "@/components/buttons/period-nav";
 
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
 const columns: DataTableColumnDef<Row>[] = [
@@ -58,17 +58,13 @@ export function VacationsList() {
                 actions={<VacationDialog label="Urlaub eintragen" variant="default" size="default" />}
             />
 
-            <div className="flex flex-wrap items-center gap-2">
-                <Button variant="outline" size="sm" aria-label="Vorheriges Jahr" onClick={() => setYear(year - 1)}>
-                    ←
-                </Button>
-                <Button variant="outline" size="sm" aria-label="Nächstes Jahr" onClick={() => setYear(year + 1)}>
-                    →
-                </Button>
-                <Button variant="ghost" size="sm" disabled={year === currentYear} onClick={() => setYear(currentYear)}>
-                    Dieses Jahr
-                </Button>
-            </div>
+            <PeriodNav
+                unit="year"
+                onPrevious={() => setYear(year - 1)}
+                onNext={() => setYear(year + 1)}
+                onCurrent={() => setYear(currentYear)}
+                currentDisabled={year === currentYear}
+            />
 
             {loaded && (
                 <div className="grid gap-4 sm:grid-cols-3">

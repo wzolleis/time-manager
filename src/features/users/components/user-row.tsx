@@ -1,28 +1,17 @@
 import {useState} from "react";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {Button, buttonVariants} from "@/components/ui/button";
+import {Button} from "@/components/ui/button";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import {TableCell, TableRow} from "@/components/ui/table";
 import {updateUser} from "@/api/users";
 import type {User, UserUpdate} from "@shared/user";
-import {EditButton} from "@/components/buttons/edit-button";
 import {PasswordResetDialog} from "@features/users/components/password-reset-dialog";
 import {UserRolesDialog} from "@features/users/components/user-roles-dialog";
 import {ErrorText} from "@/components/text/error-text";
 import {FormField} from "@/components/form/form-field";
 import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {ConfirmDeleteButton} from "@/components/buttons/confirm-delete-button";
 
 type UserRowProps = {
     user: User;
@@ -81,35 +70,18 @@ export function UserRow({user, onDelete, deleting}: UserRowProps) {
             <TableCell className="font-medium">{user.name}</TableCell>
             <TableCell>{user.email}</TableCell>
             <TableCell className="space-x-2 text-right">
-                <EditButton handleOpenChange={handleOpenChange} />
+                <Button variant="outline" size="sm" onClick={() => handleOpenChange(true)}>
+                    Bearbeiten
+                </Button>
                 <UserRolesDialog user={user} />
                 <PasswordResetDialog user={user} />
 
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="sm" disabled={deleting}>
-                            {deleting ? "Lösche…" : "Löschen"}
-                        </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>{user.name} löschen?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Der User wird dauerhaft aus der Datenbank entfernt. Das lässt sich nicht rückgängig
-                                machen.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-                            <AlertDialogAction
-                                className={buttonVariants({variant: "destructive"})}
-                                onClick={() => onDelete(user)}
-                            >
-                                Löschen
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                <ConfirmDeleteButton
+                    title={<>{user.name} löschen?</>}
+                    description="Der User wird dauerhaft aus der Datenbank entfernt. Das lässt sich nicht rückgängig machen."
+                    onConfirm={() => onDelete(user)}
+                    pending={deleting}
+                />
 
                 <Dialog open={open} onOpenChange={handleOpenChange}>
                     <DialogContent>
