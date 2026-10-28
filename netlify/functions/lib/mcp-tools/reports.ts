@@ -3,7 +3,7 @@
 import type {McpServer} from "@modelcontextprotocol/sdk/server/mcp.js";
 import {z} from "zod";
 import {localDay} from "../../../../shared/time-rules";
-import {monthOf} from "../../../../shared/week";
+import {isValidYear, monthOf} from "../../../../shared/week";
 import type {SessionUser} from "../session";
 import {loadReportData} from "./data";
 import {
@@ -13,11 +13,14 @@ import {
     MonthlyReportSchema,
     weeklyReport,
     WeeklyReportSchema,
+    yearlyReport,
+    YearlyReportSchema,
 } from "./report-view";
 import {DaySchema} from "./time-entries";
 import {ok, run} from "./view";
 
 const MonthSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Monat als JJJJ-MM");
+const YearSchema = z.string().refine(isValidYear, "Jahr als JJJJ, ab 1970");
 
 const SHOW_TABLE = "Zeige dem User die Tabelle aus dem Text so, wie sie ist; rechne nicht selbst nach.";
 
@@ -75,6 +78,25 @@ export function registerReportTools(server: McpServer, user: SessionUser): void 
             run(async () => {
                 const now = new Date();
                 const report = monthlyReport(await loadReportData(user.id), month ?? monthOf(localDay(now)), now);
+                return ok(report.text, report.structured);
+            }),
+    );
+
+    server.registerTool(
+        "get_yearly_report",
+        {
+            title: "Jahresbericht",
+            description:
+                "Jahresbericht mit einer Zeile pro Monat, Summen, Soll bis heute und Soll des Jahres. Die Differenz " +
+                `gilt gegen das Soll bis heute, z. B. für Überstunden. ${SHOW_TABLE}`,
+            inputSchema: {year: YearSchema.optional().describe("Jahr JJJJ, Standard aktuelles Jahr")},
+            outputSchema: YearlyReportSchema,
+            annotations: {readOnlyHint: true},
+        },
+        ({year}) =>
+            run(async () => {
+                const now = new Date();
+                const report = yearlyReport(await loadReportData(user.id), year ?? localDay(now).slice(0, 4), now);
                 return ok(report.text, report.structured);
             }),
     );

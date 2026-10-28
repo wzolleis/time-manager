@@ -7,7 +7,10 @@ import {
     type ReportData,
     weeklyReport,
     WeeklyReportSchema,
+    yearlyReport,
+    YearlyReportSchema,
 } from "./report-view";
+import {yearTotals} from "../../../../shared/time-report";
 import {defaultHistory} from "../../../../shared/user-setting-rules";
 
 const entry = (id: string, type: StoredEntry["type"], iso: string, projectId: string | null = null): StoredEntry => ({
@@ -102,5 +105,52 @@ describe("monthlyReport", () => {
         expect(text).toContain("| KW 40 (01.10.–04.10.) | – | – | – |");
         expect(text).toContain("| KW 43 (19.10.–25.10.) | 19 Std 55 Min, läuft | 40 Std | −4 Std 5 Min |");
         expect(structured.weeks.at(-1)).toMatchObject({week: 44, from: "2026-10-26", to: "2026-10-31"});
+    });
+});
+
+describe("yearlyReport", () => {
+    it("zeigt eine Zeile pro Monat mit Summen wie yearTotals", () => {
+        const d = data();
+        const {structured, text} = yearlyReport(d, "2026", NOW);
+        const t = yearTotals(
+            d.entries.map((e) => ({id: e.id, type: e.type, bookedAt: e.bookedAt})),
+            "2026",
+            d.vacations,
+            d.holidays,
+            d.sickLeaves,
+            d.soll,
+            "2026-10-21",
+            NOW,
+        );
+        expect(YearlyReportSchema.parse(structured)).toBeTruthy();
+        expect(structured.months).toHaveLength(12);
+        expect(structured.months[0]).toMatchObject({month: "2026-01", monthText: "Januar", diffMinutes: null});
+        expect(structured).toMatchObject({
+            year: "2026",
+            workMinutes: t.workMs / 60000,
+            targetToDateMinutes: t.targetToDateMs / 60000,
+            targetYearMinutes: t.targetYearMs / 60000,
+            diffMinutes: t.diffMs / 60000,
+            running: true,
+        });
+        expect(text).toContain("## 2026");
+        expect(text).toContain("| Januar | – | – | – |");
+        expect(text).toContain("| Oktober | 19 Std 55 Min, läuft |");
+        expect(text).toContain("Soll des Jahres");
+    });
+
+    it("hat in einem künftigen Jahr keine Differenz", () => {
+        const {structured, text} = yearlyReport(data(), "2027", NOW);
+        expect(structured.diffMinutes).toBeNull();
+        expect(structured.months.every((m) => m.diffMinutes === null)).toBe(true);
+        expect(text).not.toContain("Bis heute");
+    });
+
+    it("nennt vor der ersten Buchung den Beginn der Zeiterfassung", () => {
+        const {structured, text} = yearlyReport(data(), "2025", NOW);
+        expect(structured.targetYearMinutes).toBe(0);
+        expect(structured.months.every((m) => m.diffMinutes === null)).toBe(true);
+        expect(text).toContain("Die Zeiterfassung beginnt 2026.");
+        expect(yearlyReport(data(), "2026", NOW).text).not.toContain("Die Zeiterfassung beginnt");
     });
 });
