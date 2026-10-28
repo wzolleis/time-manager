@@ -31,7 +31,7 @@ Netlify-GitHub-App. In der Branch Protection von `main` sind sie nicht Pflicht, 
   gh pr merge <nr> --squash
   ```
   Schlägt ein Check fehl, nicht mergen, sondern dem User den Check und den Link melden.
-- **Ohne Code-Änderung**, z. B. nur Markdown unter `features/` oder `agents/`: nicht warten, sofort mergen.
+- **Ohne Code-Änderung**, z. B. nur Markdown unter `features/` oder `.claude/skills/`: nicht warten, sofort mergen.
   ```sh
   gh pr merge <nr> --squash
   ```

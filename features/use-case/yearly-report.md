@@ -24,8 +24,8 @@ Vorbild ist der Monatsbericht, beschrieben in `monthly-report.md`. Code:
 Die Adresse mit Zeitraum aus dem Change `../changes/report-links.md` gilt für den Jahresbericht von
 Anfang an: Das Jahr steht im Pfad, nicht im State der Komponente.
 
-Umgesetzt wird nach dem Skill `architecture` (`../../agents/.agents/skills/architecture`), zuerst
-`../../agents/.agents/skills/architecture/use-case.md` lesen.
+Umgesetzt wird nach dem Skill `architecture` (`../../.claude/skills/architecture`), zuerst
+`../../.claude/skills/architecture/use-case.md` lesen.
 
 ## Adresse
 
@@ -102,7 +102,7 @@ Drei Karten wie im Monatsbericht (Komponente `MetricCard` aus `../../src/compone
   - Pfeil „Vorheriges Jahr“ (←), deaktiviert im Jahr der ersten Buchung, und Pfeil „Nächstes Jahr“ (→)
   - Button „Dieses Jahr“: springt zum laufenden Jahr, deaktiviert, solange es angezeigt wird
 - Ohne ausgewählten User: „Bitte zuerst einen User anlegen und auswählen.“
-- Laden und Fehler wie in `../../agents/.agents/skills/architecture/views.md`: „Lade…“, bei einem Fehler
+- Laden und Fehler wie in `../../.claude/skills/architecture/views.md`: „Lade…“, bei einem Fehler
   die Meldung mit „Erneut versuchen“ (`ReportError` aus
   `../../src/features/reports/components/report-error.tsx`).
 - Menü: neuer Eintrag „Jahr“ nach „Monat“ (`reports-yearly`, `/user/reports/yearly`).
@@ -150,7 +150,7 @@ Hinweise:
 
 ## Tests
 
-Nach `../../agents/.agents/skills/architecture/testing.md`, jede Regel mit Gegenprobe:
+Nach `../../.claude/skills/architecture/testing.md`, jede Regel mit Gegenprobe:
 
 - **Service-Tests** ohne Mocks:
   - `../../shared/time-report.test.ts`, `yearTotals`: Summe der Monate = Summe aller Tage (Regel 2, mit

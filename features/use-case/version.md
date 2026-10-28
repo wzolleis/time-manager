@@ -11,8 +11,8 @@ state: resolved
 Als Anwender und Entwickler möchte ich die Version sehen, damit man erkennt, ob eine Änderung schon
 auf Netlify sichtbar ist.
 
-Umgesetzt wird nach dem Skill `architecture` (`../../agents/.agents/skills/architecture`), zuerst
-`../../agents/.agents/skills/architecture/use-case.md` lesen.
+Umgesetzt wird nach dem Skill `architecture` (`../../.claude/skills/architecture`), zuerst
+`../../.claude/skills/architecture/use-case.md` lesen.
 
 ## Version
 Die Version ist das Datum des Commits, aus dem gebaut wurde, im Format `YYYY-MM-DD` in der Zeitzone

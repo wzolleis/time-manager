@@ -89,8 +89,8 @@ Hinweise:
 - Die Spalten der Tabellen sind außerhalb der Komponente definiert und sollen es bleiben. Der Link
   braucht nur Werte aus der Zeile (`row.original.day` bzw. `year`/`week`), keine Werte aus der Komponente.
 
-Geändert wird nach dem Skill `architecture` (`../../agents/.agents/skills/architecture`), zuerst
-`../../agents/.agents/skills/architecture/use-case.md` lesen. Beschreibungen der betroffenen Use Cases:
+Geändert wird nach dem Skill `architecture` (`../../.claude/skills/architecture`), zuerst
+`../../.claude/skills/architecture/use-case.md` lesen. Beschreibungen der betroffenen Use Cases:
 `../use-case/today-report.md`, `../use-case/weekly-report.md`, `../use-case/monthly-report.md` und
 `../use-case/yearly-report.md`.
 

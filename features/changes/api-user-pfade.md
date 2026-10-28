@@ -72,5 +72,5 @@ Künftig steht der User im Pfad, wie schon bei `/api/users/:id/roles`:
 - `npx tsc --noEmit -p tsconfig.netlify.json`, die App-Typprüfung und `npx vitest run` laufen durch.
 - `scripts/api-walkthrough.sh` läuft lokal durch.
 
-Geändert wird nach dem Skill `architecture` (`../../agents/.agents/skills/architecture`), zuerst
-`../../agents/.agents/skills/architecture/use-case.md` lesen. Für die Rechte gilt der Skill `authorization`.
+Geändert wird nach dem Skill `architecture` (`../../.claude/skills/architecture`), zuerst
+`../../.claude/skills/architecture/use-case.md` lesen. Für die Rechte gilt der Skill `authorization`.
