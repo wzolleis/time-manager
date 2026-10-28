@@ -20,7 +20,7 @@ Vorbild ist der Wochenbericht, beschrieben in `weekly-report.md`. Code:
 - Use Case `../../src/features/reports/use-cases/use-show-weekly-report.ts`
 - Service `weekTotals` in `../../shared/time-report.ts`
 
-Umgesetzt wird nach dem Skill `architecture` (`../../agents/.agents/skills/architecture`), zuerst `../../agents/.agents/skills/architecture/use-case.md` lesen.
+Umgesetzt wird nach dem Skill `architecture` (`../../.claude/skills/architecture`), zuerst `../../.claude/skills/architecture/use-case.md` lesen.
 
 ## Inhalt
 
@@ -116,7 +116,7 @@ Differenz, KW 42 hat das Soll von Mittwoch bis Freitag. Ein Monat vor dem 14.10.
   neuen Monats.
 - Die Woche in der Spalte „Woche“ ist ein Link auf den Wochenbericht dieser Woche
   (`/user/reports/weekly/JJJJ-Www`).
-- Laden und Fehler wie in `../../agents/.agents/skills/architecture/views.md`: „Lade…“, bei einem Fehler die Meldung mit „Erneut versuchen“
+- Laden und Fehler wie in `../../.claude/skills/architecture/views.md`: „Lade…“, bei einem Fehler die Meldung mit „Erneut versuchen“
   (`ReportError` aus `../../src/features/reports/components/report-error.tsx`).
 
 ## Fragen zum Use Case
@@ -151,12 +151,12 @@ Hinweise:
 - `weekTotals(entries, days, …)` rechnet für eine beliebige Liste von Tagen. Übergibt man nur die Tage
   einer Woche, die im Monat liegen, gelten Regel 1 und 3 ohne weitere Logik. `monthTotals` kann darauf
   aufbauen.
-- Der Monat wird als Text `JJJJ-MM` übergeben, wie Tage als `JJJJ-MM-TT` (siehe `../../agents/.agents/skills/architecture/service.md`).
+- Der Monat wird als Text `JJJJ-MM` übergeben, wie Tage als `JJJJ-MM-TT` (siehe `../../.claude/skills/architecture/service.md`).
 - Die aktuelle Zeit kommt als Parameter in den Service (`today`, `now`), nicht über `new Date()`.
 
 ## Tests
 
-Nach `../../agents/.agents/skills/architecture/testing.md`:
+Nach `../../.claude/skills/architecture/testing.md`:
 
 - **Service-Test** in `../../shared/time-report.test.ts` (und `../../shared/week.test.ts` für die Wochen eines
   Monats), ohne Mocks:

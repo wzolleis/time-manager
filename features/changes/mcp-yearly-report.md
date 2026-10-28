@@ -86,8 +86,8 @@ Wie `get_monthly_report`: ein Text mit Markdown-Tabelle für den User und ein st
 | `../../README.md`                                            | „Tages-, Wochen- und Monatsbericht“ → „…, Monats- und Jahresbericht“ |
 | `../use-case/yearly-report.md`                               | Hinweis „folgt als eigener Change“ ersetzen durch den Verweis auf das Tool |
 
-Geändert wird nach dem Skill `architecture` (`../../agents/.agents/skills/architecture`), zuerst
-`../../agents/.agents/skills/architecture/use-case.md` lesen.
+Geändert wird nach dem Skill `architecture` (`../../.claude/skills/architecture`), zuerst
+`../../.claude/skills/architecture/use-case.md` lesen.
 
 ## Fertig, wenn
 

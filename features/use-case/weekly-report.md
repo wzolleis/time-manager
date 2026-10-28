@@ -30,8 +30,8 @@ Regeln nicht verletzen. Code:
 - MCP-Tool `get_weekly_report` in `../../netlify/functions/lib/mcp-tools/reports.ts` liefert denselben
   Bericht für einen Agent (`../boundaries/mcp-enable.md`)
 
-Geändert wird nach dem Skill `architecture` (`../../agents/.agents/skills/architecture`), zuerst
-`../../agents/.agents/skills/architecture/use-case.md` lesen.
+Geändert wird nach dem Skill `architecture` (`../../.claude/skills/architecture`), zuerst
+`../../.claude/skills/architecture/use-case.md` lesen.
 
 ## Inhalt
 
@@ -114,7 +114,7 @@ der Mittwoch noch offen ist), Differenz −4 Std („gegen das Soll bis heute“
   - Button „Diese Woche“: springt zur laufenden Woche, deaktiviert, solange sie angezeigt wird
 - Beim Öffnen zeigt der Bericht die laufende Woche.
 - Ohne ausgewählten User: „Bitte zuerst einen User anlegen und auswählen.“
-- Laden und Fehler wie in `../../agents/.agents/skills/architecture/views.md`: „Lade…“, bei einem Fehler
+- Laden und Fehler wie in `../../.claude/skills/architecture/views.md`: „Lade…“, bei einem Fehler
   die Meldung mit „Erneut versuchen“ (`ReportError` aus
   `../../src/features/reports/components/report-error.tsx`).
 - Adresse mit Woche (Change `../changes/report-links.md`): `/user/reports/weekly/2026-W43`, Format

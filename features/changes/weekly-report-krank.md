@@ -49,8 +49,8 @@ Nur die Komponente `../../src/features/reports/components/report-weekly.tsx`:
 Use Case (`use-show-weekly-report.ts`), Services und Views bleiben unverändert, `kind` steht schon in
 jeder Zeile (`WeekDayTotals` in `../../shared/time-report.ts`).
 
-Geändert wird nach dem Skill `architecture` (`../../agents/.agents/skills/architecture`), zuerst
-`../../agents/.agents/skills/architecture/use-case.md` lesen.
+Geändert wird nach dem Skill `architecture` (`../../.claude/skills/architecture`), zuerst
+`../../.claude/skills/architecture/use-case.md` lesen.
 
 ## Fertig, wenn
 

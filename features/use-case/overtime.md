@@ -59,7 +59,7 @@ Zusätzlich gibt es einen Button „Bearbeiten“. Er öffnet einen Dialog, in d
 absolut setzt (siehe Eingabe). Die Felder sind mit dem bisherigen Korrekturwert vorbelegt. Beim Speichern wird
 der Eintrag in `overtime` angelegt oder überschrieben, `created` ist der Zeitpunkt des Speicherns.
 
-Laden und Fehler wie in `agents/.agents/skills/architecture/views.md`: „Lade…“, bei einem Fehler die Meldung
+Laden und Fehler wie in `.claude/skills/architecture/views.md`: „Lade…“, bei einem Fehler die Meldung
 mit „Erneut versuchen“.
 
 # Eingabe des Korrekturwerts
@@ -115,8 +115,8 @@ Wie die Berichte gibt es die Überstunden auch als MCP-Tools für einen Agent
   `minutes` (0–59), wie im Dialog. Legt den Eintrag in `overtime` an oder überschreibt ihn, `created` ist jetzt.
 
 # Use Cases
-Umgesetzt wird nach dem Skill `architecture` (`../../agents/.agents/skills/architecture`), zuerst
-`../../agents/.agents/skills/architecture/use-case.md` lesen. Vorbild für Bericht und Karte ist der
+Umgesetzt wird nach dem Skill `architecture` (`../../.claude/skills/architecture`), zuerst
+`../../.claude/skills/architecture/use-case.md` lesen. Vorbild für Bericht und Karte ist der
 Jahresbericht (`use-show-yearly-report.ts`, `report-yearly-page.tsx`), für Function, API und View die
 Krankmeldungen (`sick-leaves.ts`).
 

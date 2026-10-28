@@ -25,11 +25,11 @@ fest, wie sich die Tokens verhalten. Code:
   `../../netlify/functions/lib/api-token.ts`
 
 Technische Grundlage: Skills `authentication` (Sessions) und `authorization` (`endpoint_roles`,
-`ensureAccess`) in `../../agents/.agents/skills/`, Vorbild für die Prüfung ist `withSession` in
+`ensureAccess`) in `../../.claude/skills/`, Vorbild für die Prüfung ist `withSession` in
 `../../netlify/functions/lib/session.ts`.
 
-Umgesetzt wird nach dem Skill `architecture` (`../../agents/.agents/skills/architecture`), zuerst
-`../../agents/.agents/skills/architecture/use-case.md` lesen.
+Umgesetzt wird nach dem Skill `architecture` (`../../.claude/skills/architecture`), zuerst
+`../../.claude/skills/architecture/use-case.md` lesen.
 
 ## Use Cases
 
