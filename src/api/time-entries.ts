@@ -1,5 +1,5 @@
 import {request} from "./http";
-import type {TimeEntry, TimeEntryCreate, TimeEntryUpdate} from "@shared/time-entry";
+import type {TimeEntry, TimeEntryCreate, TimeEntryDayCreate, TimeEntryUpdate} from "@shared/time-entry";
 import type {Booking} from "@shared/time-rules";
 
 // Über JSON kommt bookedAt als ISO-String an, nicht als Date
@@ -15,6 +15,13 @@ export const fetchTimeEntries = (userId: string) => request<TimeEntryDto[]>(path
 // JSON.stringify macht aus dem Date automatisch einen ISO-String
 export const createTimeEntry = (userId: string, data: TimeEntryCreate) =>
     request<TimeEntryDto>(path(userId), {
+        method: "POST",
+        body: JSON.stringify(data),
+    });
+
+// Ein ganzer Tag: der Server legt alle Buchungen des Tages an
+export const createTimeEntryDay = (userId: string, data: TimeEntryDayCreate) =>
+    request<TimeEntryDto[]>(path(userId), {
         method: "POST",
         body: JSON.stringify(data),
     });

@@ -1,4 +1,6 @@
 // shared/time-rules.ts
+import {localTimeToUtc} from "./day-range";
+
 export type Booking = {
     id: string;
     type: "kommen" | "gehen";
@@ -98,4 +100,47 @@ export function firstBookingDay(entries: Booking[]): string | null {
 /** null = gültig, sonst eine Fehlermeldung. Ein Projekt gibt es nur beim kommen, es gilt für das ganze Paar. */
 export function checkProject(type: Booking["type"], projectId: string | null | undefined): string | null {
     return type === "gehen" && projectId ? 'Ein Projekt kann nur beim "kommen" gebucht werden' : null;
+}
+
+// Ganzer Tag (features/changes/time-stamp-whole-day.md): Pause nach 6 h Arbeit, höchstens 10 h
+const MINUTE = 60_000;
+const BREAK_AFTER_MINUTES = 6 * 60;
+const MAX_WORK_MINUTES = 10 * 60;
+
+/** Pause in Minuten zur Arbeitszeit: bis 6 h keine, bis 9 h 30 min, darüber 45 min */
+export const breakMinutes = (workMinutes: number): number =>
+    workMinutes <= 6 * 60 ? 0 : workMinutes <= 9 * 60 ? 30 : 45;
+
+/** Die Buchungspaare eines ganzen Tages ("JJJJ-MM-TT") ab Beginn ("HH:mm"), mit Pause nach 6 h Arbeit */
+export function planWorkDay(day: string, start: string, workMinutes: number): Booking[] {
+    const from = localTimeToUtc(day, start).getTime();
+    const at = (minutes: number) => new Date(from + minutes * MINUTE);
+    const pause = breakMinutes(workMinutes);
+    if (pause === 0) {
+        return [
+            {id: "neu-1", type: "kommen", bookedAt: at(0)},
+            {id: "neu-2", type: "gehen", bookedAt: at(workMinutes)},
+        ];
+    }
+    return [
+        {id: "neu-1", type: "kommen", bookedAt: at(0)},
+        {id: "neu-2", type: "gehen", bookedAt: at(BREAK_AFTER_MINUTES)},
+        {id: "neu-3", type: "kommen", bookedAt: at(BREAK_AFTER_MINUTES + pause)},
+        {id: "neu-4", type: "gehen", bookedAt: at(workMinutes + pause)},
+    ];
+}
+
+/** null = der ganze Tag lässt sich zu den vorhandenen Buchungen eintragen, sonst eine Fehlermeldung */
+export function checkWorkDay(existing: Booking[], day: string, start: string, workMinutes: number): string | null {
+    if (workMinutes <= 0) return "Die Arbeitszeit muss größer als 0 sein";
+    if (workMinutes > MAX_WORK_MINUTES) return "Die Arbeitszeit darf höchstens 10 Stunden betragen";
+    if (existing.some((e) => localDay(e.bookedAt) === day)) {
+        return "An diesem Tag gibt es schon Buchungen, bitte einzeln nachtragen";
+    }
+    const planned = planWorkDay(day, start, workMinutes);
+    const end = planned.at(-1)!.bookedAt;
+    if (localDay(end) !== day) {
+        return `Das Gehen (${timeFormat.format(end)}) muss am selben Tag liegen`;
+    }
+    return checkSequence([...existing, ...planned]);
 }

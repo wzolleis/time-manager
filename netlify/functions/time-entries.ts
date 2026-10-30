@@ -2,7 +2,7 @@
 import type {Config, Context} from "@netlify/functions";
 import {z} from "zod";
 import {hasDbCode} from "./lib/db-errors";
-import {TimeEntryCreateSchema, TimeEntryUpdateSchema} from "../../shared/time-entry";
+import {TimeEntryCreateSchema, TimeEntryDayCreateSchema, TimeEntryUpdateSchema} from "../../shared/time-entry";
 import {withTiming} from "./lib/timing";
 
 import {IdSchema, isRoutePath, notFound, pathParams} from "./lib/id";
@@ -12,6 +12,7 @@ import {RuleError, ruleViolation} from "./lib/rule-error";
 import {
     type Authorize,
     changeEntry,
+    createDay,
     createEntry,
     deleteEntry,
     getEntry,
@@ -55,7 +56,13 @@ const handler = async (req: Request, _context: Context, session: Session) => {
             }
 
             if (req.method === "POST") {
-                const input = TimeEntryCreateSchema.parse(await readBody(req));
+                const body = await readBody(req);
+                // Mit workMinutes ein ganzer Tag, sonst eine einzelne Buchung
+                if (typeof body === "object" && body !== null && "workMinutes" in body) {
+                    const day = TimeEntryDayCreateSchema.parse(body);
+                    return Response.json(await createDay(userId, day), {status: 201});
+                }
+                const input = TimeEntryCreateSchema.parse(body);
                 return Response.json(await createEntry(userId, input), {status: 201});
             }
             return new Response(null, {status: 405});
