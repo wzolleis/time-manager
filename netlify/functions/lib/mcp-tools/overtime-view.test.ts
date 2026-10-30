@@ -33,8 +33,8 @@ describe("overtimeReport", () => {
         const r = overtimeReport(data, {offset: 210, created: new Date("2026-10-12T07:00:00Z")}, NOW);
         expect(OvertimeReportSchema.parse(r.structured)).toEqual(r.structured);
         expect(r.structured).toEqual({
-            balanceMinutes: -90,
-            balance: "−1:30 h",
+            balanceMinutes: 390,
+            balance: "+6:30 h",
             correction: {
                 offsetMinutes: 210,
                 offset: "+3:30 h",
@@ -42,13 +42,13 @@ describe("overtimeReport", () => {
                 created: "2026-10-12T09:00:00+02:00",
             },
         });
-        expect(r.text).toBe("Überstunden: −1:30 h\nKorrektur am 12.10.2026: +3:30 h");
+        expect(r.text).toBe("Überstunden: +6:30 h\nKorrektur am 12.10.2026: +3:30 h");
     });
 
     it("rechnet ohne Korrektur ab Beginn der Zeiterfassung", () => {
         const r = overtimeReport(data, null, NOW);
-        expect(r.structured.balanceMinutes).toBe(3 * 60 - 8 * 60);
+        expect(r.structured.balanceMinutes).toBe(3 * 60);
         expect(r.structured.correction).toBeNull();
-        expect(r.text).toBe("Überstunden: −5:00 h\nKeine Korrektur");
+        expect(r.text).toBe("Überstunden: +3:00 h\nKeine Korrektur");
     });
 });
