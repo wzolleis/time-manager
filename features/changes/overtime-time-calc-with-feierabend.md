@@ -5,7 +5,7 @@ description: Im Saldo der Überstunden zählt das Soll des heutigen Tages erst a
 type: change
 changes: overtime
 epics: zeitberechnung
-state: open
+state: resolved
 ---
 
 # Überstunden ab dem ersten Feierabend des Tages
@@ -15,7 +15,7 @@ state: open
 # Was ist das Problem
 Heute zählt der heutige Tag im Saldo der Überstunden schon ab 00:00 mit dem vollen Soll
 (`overtimeBalanceMs` in `../../shared/overtime-rules.ts`, über `dayDiffMs`). Um 00:00 wird also
-automatisch das Soll des neuen Tages abgezogen. Bei 8 h Soll werden so aus 5 Überstunden
+automatisch das Soll des neuen Tages abgezogen. Bei 8h Soll werden so aus 5 Überstunden
 3 Minusstunden (5 h − 8 h = −3 h), obwohl der User noch gar nicht angefangen hat.
 
 # Was soll sich ändern
