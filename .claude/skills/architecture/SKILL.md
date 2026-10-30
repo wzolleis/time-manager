@@ -29,6 +29,14 @@ What is true afterwards?                 → event and its fields             Ab
 Who sees the result?                     → view, visibility rule            AbsenceView, absenceVisibilityFromReader
 ```
 
+### Verweise auf Code in Beschreibungen
+
+Eine Beschreibung in `features/` nennt nur wesentliche Stellen im Code, z. B. den Hook des Use Case, einen
+zentralen Service oder eine Stelle, die ausdrücklich nicht geändert wird. Einzelne Hilfsfunktionen und Dateien,
+die sich leicht ändern, gehören nicht hinein. Ist unklar, wohin eine neue Funktion gehört (View, Repository,
+Service oder Use Case, welches Feature), fragt der Agent zurück, statt zu raten. Wie mit Verweisen in erledigten
+Beschreibungen umgegangen wird, steht in [use-case.md](use-case.md) unter „Erledigte Beschreibungen“.
+
 ### Rechte und Rollen
 
 Es gibt den Administrationsbereich, die Aktionen dort dürfen nur von Usern in der Rolle "Administrator" durchgeführt
