@@ -2,7 +2,7 @@ import {describe, expect, it} from "vitest";
 import {formatDifference} from "../../../../shared/format";
 import {RuleError} from "../rule-error";
 import {NotFoundError} from "../time-entries-store";
-import {errorResult, localIso, mdTable, minutes} from "./view";
+import {type EntryView, errorResult, localIso, mdTable, minutes, workDayText} from "./view";
 
 const MIN = 60_000;
 
@@ -60,5 +60,41 @@ describe("errorResult", () => {
         } finally {
             console.error = log;
         }
+    });
+});
+
+describe("workDayText", () => {
+    // Buchung am 26.10.2026 (Winterzeit, +01:00) zur Uhrzeit HH:mm
+    const at = (type: EntryView["type"], time: string, projectName: string | null = null): EntryView => ({
+        id: time,
+        type,
+        day: "2026-10-26",
+        time,
+        bookedAt: `2026-10-26T${time}:00+01:00`,
+        projectId: projectName ? "p1" : null,
+        projectName: type === "kommen" ? projectName : null,
+    });
+
+    it("nennt ein Paar ohne Pause", () => {
+        expect(workDayText([at("kommen", "08:00"), at("gehen", "12:00")])).toBe(
+            "am Mo., 26.10.: 08:00–12:00 (4 Std Arbeit, ohne Pause)",
+        );
+    });
+
+    it("nennt zwei Paare mit 30 Minuten Pause und das Projekt", () => {
+        const entries = [
+            at("kommen", "08:00", "Alpha"),
+            at("gehen", "14:00"),
+            at("kommen", "14:30", "Alpha"),
+            at("gehen", "16:30"),
+        ];
+        expect(workDayText(entries)).toBe(
+            "am Mo., 26.10.: 08:00–14:00, 14:30–16:30 (8 Std Arbeit, 30 Min Pause, Alpha)",
+        );
+    });
+
+    it("nennt 45 Minuten Pause", () => {
+        const entries = [at("kommen", "08:00"), at("gehen", "14:00"), at("kommen", "14:45"), at("gehen", "18:45")];
+        expect(workDayText(entries)).toBe("am Mo., 26.10.: 08:00–14:00, 14:45–18:45 (10 Std Arbeit, 45 Min Pause)");
     });
 });

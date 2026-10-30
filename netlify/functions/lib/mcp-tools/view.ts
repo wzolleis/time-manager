@@ -3,7 +3,7 @@
 // Zeitpunkte als ISO mit Offset, Texte wie in der UI und Markdown-Tabellen. Ohne DB, damit testbar.
 import type {CallToolResult} from "@modelcontextprotocol/sdk/types.js";
 import {z} from "zod";
-import {formatDayShort, formatTime} from "../../../../shared/format";
+import {formatDayShort, formatDuration, formatTime} from "../../../../shared/format";
 import {localTimeToUtc} from "../../../../shared/day-range";
 import {type Booking, localDay} from "../../../../shared/time-rules";
 import {hasDbCode} from "../db-errors";
@@ -77,6 +77,25 @@ export function entryView(e: StoredEntry, projectNames: Map<string, string>): En
 /** Eine Buchung in einem Satz: "Kommen am Mo., 19.10. um 08:00 (Alpha)" */
 export const entryText = (e: EntryView): string =>
     `${typeLabel(e.type)} am ${dayShort(e.day)} um ${e.time}${e.projectName ? ` (${e.projectName})` : ""}`;
+
+/**
+ * Die Buchungen eines ganzen Tages (nach Zeit sortiert, abwechselnd Kommen und Gehen) in einem Satz:
+ * "am Mo., 26.10.: 08:00–14:00, 14:30–16:30 (8 Std Arbeit, 30 Min Pause, Alpha)"
+ */
+export function workDayText(entries: EntryView[]): string {
+    const pairs: [EntryView, EntryView][] = [];
+    for (let i = 0; i + 1 < entries.length; i += 2) pairs.push([entries[i], entries[i + 1]]);
+    const span = (from: EntryView, to: EntryView) => Date.parse(to.bookedAt) - Date.parse(from.bookedAt);
+    const work = pairs.reduce((sum, [from, to]) => sum + span(from, to), 0);
+    const pause = pairs.slice(1).reduce((sum, [from], i) => sum + span(pairs[i][1], from), 0);
+    const details = [
+        `${formatDuration(work)} Arbeit`,
+        pause > 0 ? `${formatDuration(pause)} Pause` : "ohne Pause",
+        entries[0]?.projectName,
+    ].filter(Boolean);
+    const times = pairs.map(([from, to]) => `${from.time}–${to.time}`).join(", ");
+    return `am ${dayShort(entries[0].day)}: ${times} (${details.join(", ")})`;
+}
 
 export const NOT_FOUND = "Buchung nicht gefunden";
 

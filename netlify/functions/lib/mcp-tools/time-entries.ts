@@ -1,5 +1,5 @@
 // netlify/functions/lib/mcp-tools/time-entries.ts
-// Tools der Zeiterfassung: stempeln, Buchungen auflisten, nachtragen, ändern und löschen. Die Regeln
+// Tools der Zeiterfassung: stempeln, Buchungen auflisten, Buchungen oder ganze Tage nachtragen, ändern und löschen. Die Regeln
 // prüft lib/time-entries-store.ts wie bei der REST-API (Regel 1).
 import type {McpServer} from "@modelcontextprotocol/sdk/server/mcp.js";
 import {z} from "zod";
@@ -7,11 +7,12 @@ import {formatTime} from "../../../../shared/format";
 import {addDays, isValidDay, localTimeToUtc, startOfLocalDay} from "../../../../shared/day-range";
 import {isSickDay, sickDayMessage} from "../../../../shared/sick-leave-rules";
 import type {TimeEntryUpdate} from "../../../../shared/time-entry";
-import {findMissingGehen, localDay} from "../../../../shared/time-rules";
+import {findMissingGehen, localDay, WORK_DAY_MINUTES, WORK_DAY_START} from "../../../../shared/time-rules";
 import type {SessionUser} from "../session";
 import {
     type Authorize,
     changeEntry,
+    createDay,
     createEntry,
     deleteEntry,
     getEntry,
@@ -20,7 +21,19 @@ import {
     type StoredEntry,
 } from "../time-entries-store";
 import {loadProjectNames, loadProjects, loadSickLeaves} from "./data";
-import {dayShort, EntrySchema, entryText, entryView, fail, mdTable, NOT_FOUND, ok, run, typeLabel} from "./view";
+import {
+    dayShort,
+    EntrySchema,
+    entryText,
+    entryView,
+    fail,
+    mdTable,
+    NOT_FOUND,
+    ok,
+    run,
+    typeLabel,
+    workDayText,
+} from "./view";
 
 export const DaySchema = z.string().refine(isValidDay, "Tag als JJJJ-MM-TT");
 const TimeSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Uhrzeit als HH:mm");
@@ -196,6 +209,48 @@ export function registerTimeEntryTools(server: McpServer, user: SessionUser): vo
                     projectId,
                 });
                 return entryResult(entry, "Nachgetragen");
+            }),
+    );
+
+    server.registerTool(
+        "add_time_entry_day",
+        {
+            title: "Ganzen Tag nachtragen",
+            description:
+                "Trägt einen ganzen Tag nach: Aus Beginn und Arbeitszeit entstehen Kommen und Gehen, über 6 h mit " +
+                "einer Pause nach 6 h Arbeit (30 min, über 9 h 45 min). Höchstens 10 h, das Gehen muss am selben " +
+                "Tag liegen, und der Tag darf noch keine Buchungen haben, sonst scheitert der Aufruf und nichts " +
+                "wird gebucht. Dann die Meldung dem User zeigen und einzelne Buchungen mit add_time_entry anbieten. " +
+                "Ohne Angabe beginnt der Tag um 08:00 mit 8 h Arbeitszeit, die Arbeitszeit in Minuten angeben " +
+                "(7,5 h = 450). Auch für Sätze wie 'Buche mir 9 h für gestern' oder 'Buche 9 h auf das Projekt " +
+                "Alpha am 27.10.'. day immer als JJJJ-MM-TT: Angaben wie heute, gestern, vorgestern oder 'am " +
+                "Montag' vorher in das Datum umrechnen. Ein Projekt per Name vorher mit list_projects in die ID " +
+                "auflösen, bei keinem oder mehreren Treffern beim User nachfragen.",
+            inputSchema: {
+                day: DaySchema.describe("Tag JJJJ-MM-TT"),
+                start: TimeSchema.optional().describe(`Beginn HH:mm, Standard ${WORK_DAY_START}`),
+                workMinutes: z
+                    .number()
+                    .int()
+                    .positive()
+                    .optional()
+                    .describe(`Arbeitszeit ohne Pause in Minuten, Standard ${WORK_DAY_MINUTES}`),
+                projectId: z.uuid().optional().describe("ID aus list_projects, gilt für jedes Kommen des Tages"),
+            },
+            outputSchema: {
+                entries: z.array(EntrySchema).describe("die angelegten Buchungen nach Zeit"),
+                sickNotice: z.string().nullable().describe("Hinweis, wenn der Tag ein Krankheitstag ist"),
+            },
+            annotations: {destructiveHint: false},
+        },
+        ({day, start = WORK_DAY_START, workMinutes = WORK_DAY_MINUTES, projectId}) =>
+            run(async () => {
+                const created = await createDay(user.id, {day, start, workMinutes, projectId});
+                const names = await loadProjectNames();
+                const entries = created.map((e) => entryView(e, names));
+                const sickNotice = isSickDay(day, await loadSickLeaves(user.id)) ? sickDayMessage(day) : null;
+                const text = [`Nachgetragen ${workDayText(entries)}.`, sickNotice].filter(Boolean).join("\n");
+                return ok(text, {entries, sickNotice});
             }),
     );
 

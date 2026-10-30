@@ -12,7 +12,7 @@ import {Input} from "@/components/ui/input";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {formatTime} from "@shared/format";
 import {useProjects} from "@/views/projects";
-import {localDay} from "@shared/time-rules";
+import {localDay, WORK_DAY_MINUTES, WORK_DAY_START} from "@shared/time-rules";
 import {useAddTimeEntry} from "@features/reports/use-cases/use-add-time-entry";
 import {useAddTimeEntryDay} from "@features/reports/use-cases/use-add-time-entry-day";
 import {Muted} from "@/components/text/muted";
@@ -33,8 +33,11 @@ type Props = {
 };
 
 const NO_PROJECT = "none"; // Radix Select erlaubt keinen leeren String als Wert
-const DAY_START = "08:00"; // Vorgabe für den Beginn eines ganzen Tages
-const DAY_WORK_TIME = "08:00"; // Vorgabe für die Arbeitszeit eines ganzen Tages: 8 Stunden
+
+/** Minuten als "HH:mm", für das Feld der Arbeitszeit */
+const toHhmm = (minutes: number) =>
+    `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+const DAY_WORK_TIME = toHhmm(WORK_DAY_MINUTES);
 
 /** "HH:mm" als Minuten, leer ergibt 0 */
 const toMinutes = (hhmm: string) => {
@@ -62,7 +65,7 @@ export function TimeEntryCreateDialog({
     const [time, setTime] = useState("");
     const [type, setType] = useState<EntryType>(defaultType);
     const [projectChoice, setProjectChoice] = useState(NO_PROJECT);
-    const [start, setStart] = useState(DAY_START);
+    const [start, setStart] = useState(WORK_DAY_START);
     const [workTime, setWorkTime] = useState(DAY_WORK_TIME); // Arbeitszeit als "HH:mm"
 
     // Beim Öffnen immer mit den Vorgaben starten, keine alten Eingaben oder Fehler
@@ -73,7 +76,7 @@ export function TimeEntryCreateDialog({
             setType(defaultType);
             setTime(defaultTime ?? (defaultDay === localDay(new Date()) ? formatTime(new Date()) : ""));
             setProjectChoice(NO_PROJECT);
-            setStart(DAY_START);
+            setStart(WORK_DAY_START);
             setWorkTime(DAY_WORK_TIME);
             create.reset();
             createDay.reset();

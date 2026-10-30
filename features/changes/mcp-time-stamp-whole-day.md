@@ -5,7 +5,7 @@ description: Der MCP-Server bekommt das Tool add_time_entry_day. Es trägt einen
 type: change
 changes: mcp-enable, time-stamp
 epics: mcp, zeiterfassung
-state: open
+state: resolved
 ---
 
 # Ganzen Tag über MCP nachtragen

@@ -647,6 +647,16 @@ mcp_step "Erstes Paar mit pair löschen, obwohl ein Kommen folgt" "$MCP_TOKEN" \
 mcp_step "Übrig bleibt 13:00 bis 17:00" "$MCP_TOKEN" "Arbeit 4 Std · Pause 0 Min" \
   get_daily_report '{"day":"2026-06-15"}'
 
+mcp_step "Ganzen Tag 16.06. mit Vorgaben nachtragen" "$MCP_TOKEN" "08:00–14:00, 14:30–16:30 (8 Std Arbeit, 30 Min Pause)" \
+  add_time_entry_day '{"day":"2026-06-16"}'
+mcp_step "Der ganze Tag hat vier Buchungen" "$MCP_TOKEN" "Arbeit 8 Std · Pause 30 Min" \
+  get_daily_report '{"day":"2026-06-16"}'
+mcp_error_step "Denselben Tag noch einmal" "$MCP_TOKEN" "schon Buchungen" add_time_entry_day '{"day":"2026-06-16"}'
+mcp_error_step "Ganzer Tag mit mehr als 10 h" "$MCP_TOKEN" "höchstens 10 Stunden" add_time_entry_day \
+  '{"day":"2026-06-17","workMinutes":660}'
+mcp_step "Nichts gebucht am 17.06." "$MCP_TOKEN" "Keine Buchungen" list_time_entries \
+  '{"from":"2026-06-17","to":"2026-06-17"}'
+
 WT_COOKIES="$TEST_COOKIES"
 wt_step "'vitest' widerruft das Token" 204 "" DELETE "$TOK/$MCP_TOKEN_ID"
 WT_COOKIES=/dev/null

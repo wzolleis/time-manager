@@ -62,8 +62,10 @@ das Projekt. Für heute ist die aktuelle Uhrzeit vorbelegt. Die Abfolge wird sch
 geprüft, Speichern ist erst möglich, wenn sie stimmt.
 
 Statt eines Zeitstempels kann der User einen ganzen Tag nachtragen. Er gibt Tag, Beginn (vorbelegt mit 08:00),
-Arbeitszeit (vorbelegt mit 08:00, also 8 Stunden) und optional ein Projekt an, der Dialog zeigt die Buchungen, die daraus entstehen. Der Server berechnet
-sie selbst (`planWorkDay`) und legt sie in einer Transaktion an, alle oder keine (`createDay`):
+Arbeitszeit (vorbelegt mit 08:00, also 8 Stunden) und optional ein Projekt an, der Dialog zeigt die Buchungen, die
+daraus entstehen. Die Vorgaben stehen als `WORK_DAY_START` und `WORK_DAY_MINUTES` in `../../shared/time-rules.ts` und
+gelten auch für das MCP-Tool `add_time_entry_day` (`../boundaries/mcp-enable.md`). Der Server berechnet die Buchungen
+selbst (`planWorkDay`) und legt sie in einer Transaktion an, alle oder keine (`createDay`):
 
 - **Pause** nach 6 h Arbeit: bis 6 h keine, über 6 h bis 9 h 30 min, über 9 h 45 min (`breakMinutes`). Mit Pause
   entstehen zwei Buchungspaare.

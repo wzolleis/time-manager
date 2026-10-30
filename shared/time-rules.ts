@@ -103,6 +103,10 @@ export function checkProject(type: Booking["type"], projectId: string | null | u
 }
 
 // Ganzer Tag (features/changes/time-stamp-whole-day.md): Pause nach 6 h Arbeit, höchstens 10 h
+/** Vorgaben eines ganzen Tages für Dialog und MCP-Tool: Beginn 08:00, 8 h Arbeitszeit */
+export const WORK_DAY_START = "08:00";
+export const WORK_DAY_MINUTES = 8 * 60;
+
 const MINUTE = 60_000;
 const BREAK_AFTER_MINUTES = 6 * 60;
 const MAX_WORK_MINUTES = 10 * 60;
