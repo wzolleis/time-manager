@@ -15,18 +15,26 @@ export const formatDate = (d: Date | number | string) =>
         year: "numeric",
     });
 
-export const formatDuration = (ms: number) => {
+/** Anzeige der Dauern: Stunden und Minuten oder Industriezeit (features/use-case/industriezeit.md) */
+export type TimeFormat = "minutes" | "industrial";
+
+/** Ganze Minuten in Stunden mit zwei Nachkommastellen: 500 → "8,33" (Regel 4 der Industriezeit) */
+export const industrialHours = (minutes: number): string =>
+    (Math.round((minutes * 100) / 60) / 100).toFixed(2).replace(".", ",");
+
+export const formatDuration = (ms: number, format: TimeFormat = "minutes") => {
     const minutes = Math.max(0, Math.floor(ms / 60_000));
+    if (format === "industrial") return `${industrialHours(minutes)} h`;
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
     if (h === 0) return `${m} Min`;
     return m === 0 ? `${h} Std` : `${h} Std ${m} Min`;
 };
 
-/** Mit Vorzeichen: "+1 Std 20 Min", "−2 Std", "±0 Min" (unter einer Minute) */
-export const formatDifference = (ms: number) => {
-    const text = formatDuration(Math.abs(ms));
-    if (Math.abs(ms) < 60_000) return "±0 Min";
+/** Mit Vorzeichen: "+1 Std 20 Min", "−2 Std", "±0 Min" (unter einer Minute), in Industriezeit "+1,33 h" */
+export const formatDifference = (ms: number, format: TimeFormat = "minutes") => {
+    const text = formatDuration(Math.abs(ms), format);
+    if (Math.abs(ms) < 60_000) return format === "industrial" ? "±0,00 h" : "±0 Min";
     return `${ms > 0 ? "+" : "−"}${text}`;
 };
 

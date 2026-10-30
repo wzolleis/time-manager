@@ -2,7 +2,8 @@ import {Link, useNavigate} from "@tanstack/react-router";
 import {MetricCard} from "@/components/cards/metric-card";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {diffClass} from "@/lib/format";
-import {formatDayMonth, formatDifference, formatDuration, formatMonth} from "@shared/format";
+import {useTimeFormat} from "@/lib/use-time-format";
+import {formatDayMonth, formatDifference, formatDuration, formatMonth, type TimeFormat} from "@shared/format";
 import {localDayRange} from "@shared/day-range";
 import type {MonthWeekTotals} from "@shared/time-report";
 import {addMonths, isoWeekId} from "@shared/week";
@@ -17,8 +18,7 @@ const dash = "–";
 
 const dayLabel = (day: string) => formatDayMonth(localDayRange(day).start);
 
-// Außerhalb der Komponente, damit die Spalten stabil bleiben
-const columns: DataTableColumnDef<MonthWeekTotals>[] = [
+const columnsOf = (format: TimeFormat): DataTableColumnDef<MonthWeekTotals>[] => [
     {
         id: "week",
         header: "Woche",
@@ -36,13 +36,13 @@ const columns: DataTableColumnDef<MonthWeekTotals>[] = [
         accessorKey: "targetMs",
         header: "Soll",
         enableSorting: false,
-        cell: ({row}) => (row.original.targetMs > 0 ? formatDuration(row.original.targetMs) : dash),
+        cell: ({row}) => (row.original.targetMs > 0 ? formatDuration(row.original.targetMs, format) : dash),
     },
     {
         accessorKey: "workMs",
         header: "Arbeitszeit",
         enableSorting: false,
-        cell: ({row}) => (row.original.workMs > 0 ? formatDuration(row.original.workMs) : dash),
+        cell: ({row}) => (row.original.workMs > 0 ? formatDuration(row.original.workMs, format) : dash),
     },
     {
         accessorKey: "diffMs",
@@ -50,15 +50,19 @@ const columns: DataTableColumnDef<MonthWeekTotals>[] = [
         enableSorting: false,
         cell: ({row}) => {
             const diff = row.original.diffMs;
-            return diff === null ? dash : <span className={diffClass(diff)}>{formatDifference(diff)}</span>;
+            return diff === null ? dash : <span className={diffClass(diff)}>{formatDifference(diff, format)}</span>;
         },
     },
 ];
+
+// Außerhalb der Komponente, damit die Spalten stabil bleiben
+const columns = {minutes: columnsOf("minutes"), industrial: columnsOf("industrial")};
 
 /** month ist ein gültiger Monat "JJJJ-MM", geprüft in ReportMonthlyPage */
 export function ReportMonthly({month}: {month: string}) {
     const navigate = useNavigate();
     const report = useShowMonthlyReport(month);
+    const timeFormat = useTimeFormat();
     const {currentUser, totals, futureMonth, partial} = report;
 
     if (!currentUser) {
@@ -90,17 +94,21 @@ export function ReportMonthly({month}: {month: string}) {
             <div className="grid gap-4 sm:grid-cols-3">
                 <MetricCard
                     title="Soll"
-                    value={formatDuration(totals.targetMonthMs)}
-                    hint={partial && !futureMonth ? `bis heute: ${formatDuration(totals.targetToDateMs)}` : undefined}
+                    value={formatDuration(totals.targetMonthMs, timeFormat)}
+                    hint={
+                        partial && !futureMonth
+                            ? `bis heute: ${formatDuration(totals.targetToDateMs, timeFormat)}`
+                            : undefined
+                    }
                 />
                 <MetricCard
                     title="Arbeitszeit"
-                    value={formatDuration(totals.workMs)}
+                    value={formatDuration(totals.workMs, timeFormat)}
                     hint={totals.running ? "läuft noch" : undefined}
                 />
                 <MetricCard
                     title="Differenz"
-                    value={futureMonth ? dash : formatDifference(totals.diffMs)}
+                    value={futureMonth ? dash : formatDifference(totals.diffMs, timeFormat)}
                     valueClassName={futureMonth ? undefined : diffClass(totals.diffMs)}
                     hint={partial && !futureMonth ? "gegen das Soll bis heute" : undefined}
                 />
@@ -108,7 +116,7 @@ export function ReportMonthly({month}: {month: string}) {
 
             {report.isPending && <Loading />}
             {report.error && <LoadError error={report.error} onRetry={report.retry} />}
-            {!report.isPending && !report.error && <DataTable columns={columns} data={totals.weeks} />}
+            {!report.isPending && !report.error && <DataTable columns={columns[timeFormat]} data={totals.weeks} />}
         </>
     );
 }

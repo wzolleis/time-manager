@@ -4,6 +4,7 @@ import {MetricCard} from "@/components/cards/metric-card";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {actionsColumn} from "@/components/table/actions-column";
 import {diffClass} from "@/lib/format";
+import {useTimeFormat} from "@/lib/use-time-format";
 import {formatDate, formatDifference, formatDuration, formatTime, dayKindLabel} from "@shared/format";
 import {addDays} from "@shared/day-range";
 import {EntryActions} from "@features/reports/components/time-entry-actions";
@@ -48,6 +49,7 @@ const columns: DataTableColumnDef<DailyReportRow>[] = [
 export function ReportDailyEdit({day}: {day: string}) {
     const navigate = useNavigate();
     const report = useShowDailyReport(day);
+    const timeFormat = useTimeFormat();
     const {currentUser, today, totals} = report;
 
     if (!currentUser) {
@@ -96,18 +98,18 @@ export function ReportDailyEdit({day}: {day: string}) {
                 )}
                 <MetricCard
                     title="Arbeitszeit"
-                    value={formatDuration(totals.workMs)}
+                    value={formatDuration(totals.workMs, timeFormat)}
                     hint={totals.running ? "läuft noch" : undefined}
                 />
-                <MetricCard title="Pausen" value={formatDuration(totals.breakMs)} />
+                <MetricCard title="Pausen" value={formatDuration(totals.breakMs, timeFormat)} />
                 <MetricCard
                     title="Soll"
-                    value={formatDuration(report.target)}
+                    value={formatDuration(report.target, timeFormat)}
                     hint={dayKindLabel(report.kind, report.holidayName)}
                 />
                 <MetricCard
                     title="Differenz"
-                    value={report.diff === null ? "–" : formatDifference(report.diff)}
+                    value={report.diff === null ? "–" : formatDifference(report.diff, timeFormat)}
                     valueClassName={report.diff === null ? undefined : diffClass(report.diff)}
                 />
             </div>

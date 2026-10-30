@@ -2,7 +2,8 @@ import {Link, useNavigate} from "@tanstack/react-router";
 import {MetricCard} from "@/components/cards/metric-card";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {diffClass} from "@/lib/format";
-import {formatDifference, formatDuration, formatMonthName} from "@shared/format";
+import {useTimeFormat} from "@/lib/use-time-format";
+import {formatDifference, formatDuration, formatMonthName, type TimeFormat} from "@shared/format";
 import type {YearMonthTotals} from "@shared/time-report";
 import {useShowYearlyReport} from "@features/reports/use-cases/use-show-yearly-report";
 import {Muted} from "@/components/text/muted";
@@ -13,8 +14,7 @@ import {PeriodNav} from "@/components/buttons/period-nav";
 
 const dash = "–";
 
-// Außerhalb der Komponente, damit die Spalten stabil bleiben
-const columns: DataTableColumnDef<YearMonthTotals>[] = [
+const columnsOf = (format: TimeFormat): DataTableColumnDef<YearMonthTotals>[] => [
     {
         id: "month",
         header: "Monat",
@@ -29,13 +29,13 @@ const columns: DataTableColumnDef<YearMonthTotals>[] = [
         accessorKey: "targetMs",
         header: "Soll",
         enableSorting: false,
-        cell: ({row}) => (row.original.targetMs > 0 ? formatDuration(row.original.targetMs) : dash),
+        cell: ({row}) => (row.original.targetMs > 0 ? formatDuration(row.original.targetMs, format) : dash),
     },
     {
         accessorKey: "workMs",
         header: "Arbeitszeit",
         enableSorting: false,
-        cell: ({row}) => (row.original.workMs > 0 ? formatDuration(row.original.workMs) : dash),
+        cell: ({row}) => (row.original.workMs > 0 ? formatDuration(row.original.workMs, format) : dash),
     },
     {
         accessorKey: "diffMs",
@@ -43,15 +43,19 @@ const columns: DataTableColumnDef<YearMonthTotals>[] = [
         enableSorting: false,
         cell: ({row}) => {
             const diff = row.original.diffMs;
-            return diff === null ? dash : <span className={diffClass(diff)}>{formatDifference(diff)}</span>;
+            return diff === null ? dash : <span className={diffClass(diff)}>{formatDifference(diff, format)}</span>;
         },
     },
 ];
+
+// Außerhalb der Komponente, damit die Spalten stabil bleiben
+const columns = {minutes: columnsOf("minutes"), industrial: columnsOf("industrial")};
 
 /** year ist ein gültiges Jahr "JJJJ", geprüft in ReportYearlyPage */
 export function ReportYearly({year}: {year: string}) {
     const navigate = useNavigate();
     const report = useShowYearlyReport(year);
+    const timeFormat = useTimeFormat();
     const {currentUser, totals, futureYear, partial, firstYear} = report;
 
     if (!currentUser) {
@@ -93,21 +97,21 @@ export function ReportYearly({year}: {year: string}) {
                     <div className="grid gap-4 sm:grid-cols-3">
                         <MetricCard
                             title="Soll"
-                            value={formatDuration(totals.targetYearMs)}
+                            value={formatDuration(totals.targetYearMs, timeFormat)}
                             hint={
                                 partial && !futureYear
-                                    ? `bis heute: ${formatDuration(totals.targetToDateMs)}`
+                                    ? `bis heute: ${formatDuration(totals.targetToDateMs, timeFormat)}`
                                     : undefined
                             }
                         />
                         <MetricCard
                             title="Arbeitszeit"
-                            value={formatDuration(totals.workMs)}
+                            value={formatDuration(totals.workMs, timeFormat)}
                             hint={totals.running ? "läuft noch" : undefined}
                         />
                         <MetricCard
                             title="Differenz"
-                            value={futureYear ? dash : formatDifference(totals.diffMs)}
+                            value={futureYear ? dash : formatDifference(totals.diffMs, timeFormat)}
                             valueClassName={futureYear ? undefined : diffClass(totals.diffMs)}
                             hint={partial && !futureYear ? "gegen das Soll bis heute" : undefined}
                         />
@@ -115,7 +119,9 @@ export function ReportYearly({year}: {year: string}) {
 
                     {report.isPending && <Loading />}
                     {report.error && <LoadError error={report.error} onRetry={report.retry} />}
-                    {!report.isPending && !report.error && <DataTable columns={columns} data={totals.months} />}
+                    {!report.isPending && !report.error && (
+                        <DataTable columns={columns[timeFormat]} data={totals.months} />
+                    )}
                 </>
             )}
         </>

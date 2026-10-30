@@ -64,6 +64,11 @@ describe("formatOffset", () => {
         expect(formatOffset(0)).toBe("+0:00");
         expect(formatOffset(870)).toBe("+14:30");
     });
+    it("zeigt in Industriezeit Stunden mit zwei Nachkommastellen", () => {
+        expect(formatOffset(210, "industrial")).toBe("+3,50");
+        expect(formatOffset(-10, "industrial")).toBe("−0,17");
+        expect(formatOffset(0, "industrial")).toBe("+0,00");
+    });
 });
 
 describe("balanceMinutes", () => {

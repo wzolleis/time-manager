@@ -3,6 +3,7 @@ import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {formatDayShort, formatDuration, formatTime} from "@shared/format";
+import {useTimeFormat} from "@/lib/use-time-format";
 import {localDay} from "@shared/time-rules";
 import {TimeEntryCreateDialog} from "@features/reports/components/time-entry-create-dialog";
 import {useStampTime} from "@features/reports/use-cases/use-stamp-time";
@@ -20,6 +21,7 @@ const formatSince = (iso: string) => {
 export function StampCard() {
     const {currentUser, now, last, isIn, missing, projectName, projects, sickNotice, ...stamping} = useStampTime();
     const [projectChoice, setProjectChoice] = useState(NO_PROJECT);
+    const timeFormat = useTimeFormat();
 
     if (!currentUser) {
         return <Muted>Bitte zuerst einen User anlegen und auswählen.</Muted>;
@@ -43,7 +45,7 @@ export function StampCard() {
                     {last && isIn && !missing && (
                         <>
                             Eingestempelt seit {formatSince(last.bookedAt)} (
-                            {formatDuration(now - new Date(last.bookedAt).getTime())})
+                            {formatDuration(now - new Date(last.bookedAt).getTime(), timeFormat)})
                             {projectName && <> · {projectName}</>}
                         </>
                     )}
