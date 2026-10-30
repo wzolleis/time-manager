@@ -53,11 +53,15 @@ Change oder Setup:
 - **resolved**: umgesetzt. Wer eine Story oder einen Change umsetzt, setzt `state` im selben Commit auf
   `resolved`.
 
-**Erledigte Changes.** Ein erledigter Change beschreibt den Stand zur Zeit der Umsetzung. Was heute gilt,
-steht im Use Case, den er ändert (Feld `changes`), und im Code. Verweise auf Code aus einem erledigten
-Change werden nicht ungeprüft übernommen, denn Dateien und Funktionen können inzwischen umbenannt oder
-verschoben sein. Deshalb wird beim Umsetzen eines Changes im selben Commit auch der geänderte Use Case
-angepasst: Regeln, Beispiele und Abschnitte zur Umsetzung beschreiben danach den neuen Stand.
+**Erledigte Beschreibungen.** Ein erledigter Change beschreibt den Stand zur Zeit der Umsetzung und bleibt
+eingefroren: Sein Text und seine Verweise auf Code werden nicht angepasst, auch nicht, wenn sie veraltet sind. Nur
+das Frontmatter, z. B. `state`, darf sich ändern. Was heute gilt, steht im Use Case, den er ändert (Feld
+`changes`), und im Code. Verweise auf Code aus einem erledigten Change werden deshalb nicht ungeprüft übernommen,
+denn Dateien und Funktionen können inzwischen umbenannt oder verschoben sein.
+
+Ein Use Case dagegen ist die Stelle, an der der aktuelle Stand steht. Er wird auch im Status `resolved`
+angepasst, samt seiner Verweise auf Code: Beim Umsetzen eines Changes wird im selben Commit der geänderte Use Case
+aktualisiert, sodass Regeln, Beispiele und Abschnitte zur Umsetzung danach den neuen Stand beschreiben.
 
 Eine Übersicht aller Beschreibungen nach Epic und Status erzeugt `npm run features:overview` aus dem
 Frontmatter in `generated/overview.md` (Skill `overview`). Sie wird nicht von Hand bearbeitet und nicht
