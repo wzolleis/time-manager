@@ -1,4 +1,5 @@
 import {addDays, type DayRange, localDayRange, startOfLocalDay} from "./day-range";
+import {industrialHours, type TimeFormat} from "./format";
 import type {HolidayRange} from "./holiday-rules";
 import {targetMs} from "./target-hours";
 import {dayDiffMs, dayTotals} from "./time-report";
@@ -30,10 +31,15 @@ export function checkOffset(offset: number): string | null {
     return null;
 }
 
-/** Minuten als "+3:30" oder "−0:10" (mit echtem Minuszeichen wie formatDifference), 0 als "+0:00" */
-export const formatOffset = (minutes: number): string => {
+/**
+ * Minuten als "+3:30" oder "−0:10" (mit echtem Minuszeichen wie formatDifference), 0 als "+0:00".
+ * In Industriezeit "+3,50", "−0,17" und "+0,00".
+ */
+export const formatOffset = (minutes: number, format: TimeFormat = "minutes"): string => {
     const abs = Math.abs(minutes);
-    return `${minutes < 0 ? "−" : "+"}${Math.floor(abs / 60)}:${String(abs % 60).padStart(2, "0")}`;
+    const sign = minutes < 0 ? "−" : "+";
+    if (format === "industrial") return `${sign}${industrialHours(abs)}`;
+    return `${sign}${Math.floor(abs / 60)}:${String(abs % 60).padStart(2, "0")}`;
 };
 
 /** Ganze Minuten eines Saldos, der Betrag wird abgerundet wie in formatDifference */

@@ -31,6 +31,30 @@ describe("formatDifference", () => {
     });
 });
 
+// Beispiele aus features/use-case/industriezeit.md
+describe("Industriezeit", () => {
+    const I = "industrial";
+    it("zeigt Dauern als Stunden mit zwei Nachkommastellen", () => {
+        expect(formatDuration(510 * MIN, I)).toBe("8,50 h");
+        expect(formatDuration(480 * MIN, I)).toBe("8,00 h");
+        expect(formatDuration(45 * MIN, I)).toBe("0,75 h");
+        expect(formatDuration(0, I)).toBe("0,00 h");
+        expect(formatDuration(140 * MIN, I)).toBe("2,33 h");
+    });
+    it("rundet erst auf ganze Minuten ab, dann auf zwei Stellen (Regel 4)", () => {
+        expect(formatDuration(500 * MIN, I)).toBe("8,33 h");
+        expect(formatDuration(1 * MIN, I)).toBe("0,02 h");
+        expect(formatDuration(59 * MIN, I)).toBe("0,98 h");
+        expect(formatDuration(59.9 * MIN, I)).toBe("0,98 h");
+    });
+    it("setzt bei der Differenz ein Vorzeichen (Regel 3)", () => {
+        expect(formatDifference(30 * MIN, I)).toBe("+0,50 h");
+        expect(formatDifference(-75 * MIN, I)).toBe("−1,25 h");
+        expect(formatDifference(0, I)).toBe("±0,00 h");
+        expect(formatDifference(-30_000, I)).toBe("±0,00 h");
+    });
+});
+
 describe("formatMonthName", () => {
     it("nennt nur den Monat", () => {
         expect(formatMonthName("2026-10")).toBe("Oktober");

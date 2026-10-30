@@ -1,5 +1,6 @@
 import {MetricCard} from "@/components/cards/metric-card";
 import {diffClass} from "@/lib/format";
+import {useTimeFormat} from "@/lib/use-time-format";
 import {balanceMinutes, formatOffset} from "@shared/overtime-rules";
 import {localDay} from "@shared/time-rules";
 import {germanDay} from "@shared/vacation-rules";
@@ -14,6 +15,7 @@ import {Page} from "@/components/page/page";
 /** Saldo der Überstunden als Karte, darunter die letzte Korrektur. Seite für /user/reports/overtime */
 export function ReportOvertimePage() {
     const report = useShowOvertime();
+    const timeFormat = useTimeFormat();
     const {currentUser, correction} = report;
 
     if (!currentUser) {
@@ -34,11 +36,11 @@ export function ReportOvertimePage() {
                 <div className="grid gap-4 sm:grid-cols-3">
                     <MetricCard
                         title="Überstunden"
-                        value={`${formatOffset(balanceMinutes(report.balanceMs))} h`}
+                        value={`${formatOffset(balanceMinutes(report.balanceMs), timeFormat)} h`}
                         valueClassName={diffClass(report.balanceMs)}
                         hint={
                             correction
-                                ? `Korrektur am ${germanDay(localDay(correction.created))}: ${formatOffset(correction.offset)} h`
+                                ? `Korrektur am ${germanDay(localDay(correction.created))}: ${formatOffset(correction.offset, timeFormat)} h`
                                 : "Keine Korrektur"
                         }
                     />
