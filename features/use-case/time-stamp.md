@@ -1,6 +1,6 @@
 ---
 name: time-stamp
-description: Beschreibt die Use Cases zur Zeiterfassung. Der User stempelt Kommen und Gehen, ordnet beim Kommen ein Projekt zu, trägt vergessene Buchungen nach, ändert und löscht sie. Enthält die Regeln für die Abfolge von Kommen und Gehen (Buchungspaar am selben Tag, keine zwei gleichen Buchungen hintereinander).
+description: Beschreibt die Use Cases zur Zeiterfassung. Der User stempelt Kommen und Gehen, ordnet beim Kommen ein Projekt zu, trägt vergessene Buchungen oder einen ganzen Tag nach, ändert und löscht sie. Enthält die Regeln für die Abfolge von Kommen und Gehen (Buchungspaar am selben Tag, keine zwei gleichen Buchungen hintereinander).
 type: story
 epics: zeiterfassung
 state: resolved
@@ -22,7 +22,7 @@ Regeln nicht verletzen. Wo gestempelt wird und wie die Buchungen angezeigt werde
   `time-entry-actions.tsx`, `time-entry-delete.tsx`)
 - Use Cases `../../src/features/reports/use-cases/`
 - Services `../../shared/time-rules.ts`, Schema `../../shared/time-entry.ts`, Function
-  `../../netlify/functions/time-entries.ts`
+  `../../netlify/functions/time-entries.ts`, Store `../../netlify/functions/lib/time-entries-store.ts`
 
 Geändert wird nach dem Skill `architecture` (`../../.claude/skills/architecture`), zuerst
 `../../.claude/skills/architecture/use-case.md` lesen.
@@ -44,6 +44,7 @@ Geändert wird nach dem Skill `architecture` (`../../.claude/skills/architecture
 |--------------------------------------------|----------------------|-----------------------------|
 | Der User stempelt Kommen oder Gehen.       | `useStampTime`       | `StampCard`                 |
 | Der User trägt eine Buchung nach.          | `useAddTimeEntry`    | `TimeEntryCreateDialog`     |
+| Der User trägt einen ganzen Tag nach.      | `useAddTimeEntryDay` | `TimeEntryCreateDialog`     |
 | Der User ändert eine Buchung.              | `useChangeTimeEntry` | `EntryActions`              |
 | Der User löscht eine Buchung.              | `useDeleteTimeEntry` | `TimeEntryDelete`           |
 
@@ -59,6 +60,16 @@ die Stempelkarte bietet stattdessen „Gehen nachtragen“ für diesen Tag an (R
 Der User trägt eine Buchung für einen beliebigen Tag nach und wählt Typ, Tag und Uhrzeit, beim Kommen auch
 das Projekt. Für heute ist die aktuelle Uhrzeit vorbelegt. Die Abfolge wird schon während der Eingabe
 geprüft, Speichern ist erst möglich, wenn sie stimmt.
+
+Statt eines Zeitstempels kann der User einen ganzen Tag nachtragen. Er gibt Tag, Beginn (vorbelegt mit 08:00),
+Arbeitszeit (vorbelegt mit 08:00, also 8 Stunden) und optional ein Projekt an, der Dialog zeigt die Buchungen, die daraus entstehen. Der Server berechnet
+sie selbst (`planWorkDay`) und legt sie in einer Transaktion an, alle oder keine (`createDay`):
+
+- **Pause** nach 6 h Arbeit: bis 6 h keine, über 6 h bis 9 h 30 min, über 9 h 45 min (`breakMinutes`). Mit Pause
+  entstehen zwei Buchungspaare.
+- **Höchstens 10 h** Arbeitszeit, das letzte Gehen liegt am selben Tag (Regel 3).
+- **Nur ein leerer Tag.** Hat der Tag schon Buchungen, trägt der User einzelne Zeitstempel nach.
+- Das Projekt gilt für jedes Kommen des Tages (Regel 6). Geprüft wird mit `checkWorkDay`.
 
 ### Ändern
 
@@ -120,3 +131,9 @@ Projekt für das ganze Buchungspaar.
 | Kommen 08:00, Gehen 08:00                                   | Fehler: zwei Buchungen zur selben Zeit (Regel 5) |
 | Aus 08–12, 13–17 nur Gehen 12:00 löschen                    | Fehler: Kommen 08:00 und Kommen 13:00 folgen aufeinander |
 | Aus 08–12, 13–17 Gehen 12:00 mit Gegenstück löschen         | gültig, übrig bleibt 13–17                       |
+| Ganzer Tag ab 08:00, 6:00 h                                 | Kommen 08:00, Gehen 14:00                        |
+| Ganzer Tag ab 08:00, 8:00 h                                 | 08:00–14:00, 14:30–16:30                         |
+| Ganzer Tag ab 08:00, 10:00 h                                | 08:00–14:00, 14:45–18:45                         |
+| Ganzer Tag ab 08:00, 10:30 h                                | Fehler: mehr als 10 h                            |
+| Ganzer Tag ab 15:00, 10:00 h                                | Fehler: Gehen 01:45 am nächsten Tag (Regel 3)    |
+| Ganzer Tag an einem Tag mit Kommen 08:00                    | Fehler: Tag hat schon Buchungen                  |

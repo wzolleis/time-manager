@@ -6,8 +6,15 @@ import {randomUUID} from "node:crypto";
 import {and, asc, eq, gte, inArray, lt} from "drizzle-orm";
 import {db} from "./db";
 import {timeEntries, timeEntryProjects} from "../../../db/schema";
-import type {TimeEntryCreate, TimeEntryUpdate} from "../../../shared/time-entry";
-import {type Booking, checkProject, checkSequence, findPartner} from "../../../shared/time-rules";
+import type {TimeEntryCreate, TimeEntryDayCreate, TimeEntryUpdate} from "../../../shared/time-entry";
+import {
+    type Booking,
+    checkProject,
+    checkSequence,
+    checkWorkDay,
+    findPartner,
+    planWorkDay,
+} from "../../../shared/time-rules";
 import {RuleError} from "./rule-error";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -95,6 +102,29 @@ export async function createEntry(userId: string, input: TimeEntryCreate): Promi
         if (input.projectId) await setProject(tx, id, input.projectId);
     });
     return (await getEntry(id))!;
+}
+
+/** Legt alle Buchungen eines ganzen Tages an, oder keine, wenn eine Regel verletzt ist (RuleError) */
+export async function createDay(userId: string, input: TimeEntryDayCreate): Promise<StoredEntry[]> {
+    const planned = planWorkDay(input.day, input.start, input.workMinutes).map((b) => ({...b, id: randomUUID()}));
+    await db.transaction(async (tx) => {
+        const existing = await lockBookings(tx, userId);
+        const problem = checkWorkDay(existing, input.day, input.start, input.workMinutes);
+        if (problem) throw new RuleError(problem);
+        await tx.insert(timeEntries).values(planned.map((b) => ({...b, userId})));
+        // Das Projekt gilt für jedes kommen des Tages
+        for (const b of planned) {
+            if (b.type === "kommen" && input.projectId) await setProject(tx, b.id, input.projectId);
+        }
+    });
+    return selectEntries(db)
+        .where(
+            inArray(
+                timeEntries.id,
+                planned.map((b) => b.id),
+            ),
+        )
+        .orderBy(asc(timeEntries.bookedAt));
 }
 
 /** Ändert Zeit und/oder Projekt einer Buchung, der Typ bleibt */

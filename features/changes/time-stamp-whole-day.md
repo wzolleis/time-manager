@@ -5,7 +5,7 @@ description: Beim Nachtragen wählt der User zwischen einem einzelnen Zeitstempe
 type: change
 changes: time-stamp
 epics: zeiterfassung
-state: open
+state: resolved
 ---
 
 # Einen ganzen Tag nachtragen
