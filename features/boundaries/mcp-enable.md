@@ -75,7 +75,7 @@ Die Beschreibung sagt dem Agent, wann er das Tool nimmt und welche Regel greifen
 | `list_projects`      | –                                                | Projekte mit `id` und `name`                                     | `useProjects`        | readOnly             |
 | `list_time_entries`  | `from`, `to` (Tage)                              | Buchungen im Zeitraum mit Projektname                            | `useTimeEntries`     | readOnly             |
 | `add_time_entry`     | `type`, `day`, `time`, `projectId?`              | die angelegte Buchung                                            | `useAddTimeEntry`    |                      |
-| `add_time_entry_day` | `day`, `start?` (08:00), `workMinutes?` (480), `projectId?` | die angelegten Buchungen des Tages                    | `useAddTimeEntryDay` |                      |
+| `add_time_entry_day` | `day`, `start?`, `workMinutes?` (480 nur am leeren Tag), `projectId?` | die angelegten Buchungen und die eingeplante Pause | `useAddTimeEntryDay` |                      |
 | `change_time_entry`  | `id`, `time?`, `projectId?`                      | die geänderte Buchung                                            | `useChangeTimeEntry` |                      |
 | `delete_time_entry`  | `id`, `pair?`                                    | die IDs der gelöschten Buchungen                                 | `useDeleteTimeEntry` | destructive          |
 | `get_daily_report`   | `day?` (Standard heute)                          | Buchungen, Arbeitszeit, Pausen, Soll, Differenz, Art des Tags    | `useShowDailyReport` | readOnly             |
@@ -230,6 +230,7 @@ Nach dem Skill `architecture` (`testing.md`): Functions haben keine Unit-Tests, 
 | „Ich gehe jetzt.“                                | `get_stamp_status` → `stamp {type: "gehen"}`                                        |
 | „Gestern habe ich vergessen auszustempeln, war 17:30.“ | `get_stamp_status` (fehlendes Gehen gestern) → `add_time_entry {type: "gehen", day: <gestern>, time: "17:30"}` |
 | „Buche mir 9 h für gestern.“                     | `add_time_entry_day {day: <gestern>, workMinutes: 540}` → 08:00–14:00, 14:30–17:30 |
+| „Buche mir heute noch 2 h.“ (heute 08:00–12:00)  | `add_time_entry_day {day: <heute>, workMinutes: 120}` → 12:01–14:01 |
 | „Buche 9 h auf das Projekt Alpha am 27.10.“      | `list_projects` → `add_time_entry_day {day: "2026-10-27", workMinutes: 540, projectId: <Alpha>}` |
 | „Wie viel habe ich diese Woche gearbeitet?“      | `get_weekly_report`                                                                 |
 | „Lösch das Kommen um 13:00, das war ein Versehen.“ (Kommen 08:00, Gehen 12:00, Kommen 13:00) | `get_daily_report` → `delete_time_entry {id: <Kommen 13:00>}`, gültig, übrig bleibt 08:00–12:00 |

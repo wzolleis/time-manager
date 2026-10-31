@@ -76,7 +76,7 @@ describe("workDayText", () => {
     });
 
     it("nennt ein Paar ohne Pause", () => {
-        expect(workDayText([at("kommen", "08:00"), at("gehen", "12:00")])).toBe(
+        expect(workDayText([at("kommen", "08:00"), at("gehen", "12:00")], 0)).toBe(
             "am Mo., 26.10.: 08:00–12:00 (4 Std Arbeit, ohne Pause)",
         );
     });
@@ -88,13 +88,19 @@ describe("workDayText", () => {
             at("kommen", "14:30", "Alpha"),
             at("gehen", "16:30"),
         ];
-        expect(workDayText(entries)).toBe(
+        expect(workDayText(entries, 30)).toBe(
             "am Mo., 26.10.: 08:00–14:00, 14:30–16:30 (8 Std Arbeit, 30 Min Pause, Alpha)",
         );
     });
 
     it("nennt 45 Minuten Pause", () => {
         const entries = [at("kommen", "08:00"), at("gehen", "14:00"), at("kommen", "14:45"), at("gehen", "18:45")];
-        expect(workDayText(entries)).toBe("am Mo., 26.10.: 08:00–14:00, 14:45–18:45 (10 Std Arbeit, 45 Min Pause)");
+        expect(workDayText(entries, 45)).toBe("am Mo., 26.10.: 08:00–14:00, 14:45–18:45 (10 Std Arbeit, 45 Min Pause)");
+    });
+
+    it("nennt ein Paar nach vorhandenen Buchungen mit der Pause davor", () => {
+        expect(workDayText([at("kommen", "12:30"), at("gehen", "15:30")], 30)).toBe(
+            "am Mo., 26.10.: 12:30–15:30 (3 Std Arbeit, 30 Min Pause)",
+        );
     });
 });

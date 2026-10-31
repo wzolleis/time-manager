@@ -6,7 +6,7 @@ import {z} from "zod";
 import {formatTime} from "../../../../shared/format";
 import {addDays, isValidDay, localTimeToUtc, startOfLocalDay} from "../../../../shared/day-range";
 import {isSickDay, sickDayMessage} from "../../../../shared/sick-leave-rules";
-import type {TimeEntryUpdate} from "../../../../shared/time-entry";
+import {TimeOfDaySchema, type TimeEntryUpdate} from "../../../../shared/time-entry";
 import {findMissingGehen, localDay, WORK_DAY_MINUTES, WORK_DAY_START} from "../../../../shared/time-rules";
 import type {SessionUser} from "../session";
 import {
@@ -36,7 +36,6 @@ import {
 } from "./view";
 
 export const DaySchema = z.string().refine(isValidDay, "Tag als JJJJ-MM-TT");
-const TimeSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Uhrzeit als HH:mm");
 const TypeSchema = z.enum(["kommen", "gehen"]);
 const ProjectIdSchema = z.uuid().describe("ID aus list_projects, nur beim Kommen");
 
@@ -195,7 +194,7 @@ export function registerTimeEntryTools(server: McpServer, user: SessionUser): vo
             inputSchema: {
                 type: TypeSchema,
                 day: DaySchema.describe("Tag JJJJ-MM-TT"),
-                time: TimeSchema.describe("Uhrzeit HH:mm"),
+                time: TimeOfDaySchema.describe("Uhrzeit HH:mm"),
                 projectId: ProjectIdSchema.optional(),
             },
             outputSchema: EntryResultSchema,
@@ -215,42 +214,65 @@ export function registerTimeEntryTools(server: McpServer, user: SessionUser): vo
     server.registerTool(
         "add_time_entry_day",
         {
-            title: "Ganzen Tag nachtragen",
+            title: "Zeitraum nachtragen",
             description:
-                "Trägt einen ganzen Tag nach: Aus Beginn und Arbeitszeit entstehen Kommen und Gehen, über 6 h mit " +
-                "einer Pause nach 6 h Arbeit (30 min, über 9 h 45 min). Höchstens 10 h, das Gehen muss am selben " +
-                "Tag liegen, und der Tag darf noch keine Buchungen haben, sonst scheitert der Aufruf und nichts " +
-                "wird gebucht. Dann die Meldung dem User zeigen und einzelne Buchungen mit add_time_entry anbieten. " +
-                "Ohne Angabe beginnt der Tag um 08:00 mit 8 h Arbeitszeit, die Arbeitszeit in Minuten angeben " +
-                "(7,5 h = 450). Auch für Sätze wie 'Buche mir 9 h für gestern' oder 'Buche 9 h auf das Projekt " +
+                "Trägt eine Arbeitszeit an einem Tag nach. Am leeren Tag entstehen Kommen und Gehen ab Beginn, über " +
+                "6 h mit einer Pause nach 6 h Arbeit (30 min, über 9 h 45 min). Hat der Tag schon Buchungen, entsteht " +
+                "ein neues Paar nach dem letzten Gehen, mit der fehlenden Pause davor; die Pflichtpause gilt für die " +
+                "Arbeitszeit des ganzen Tages, vorhandene Pausen zählen. Dann workMinutes immer angeben. Ein offenes " +
+                "Kommen am Tag muss vorher mit stamp oder add_time_entry geschlossen werden. Höchstens 10 h am Tag, " +
+                "das Gehen muss am selben Tag liegen, sonst scheitert der Aufruf und nichts wird gebucht; dann die " +
+                "Meldung dem User zeigen. Ohne Angabe beginnt ein leerer Tag um 08:00 mit 8 h Arbeitszeit, die " +
+                "Arbeitszeit in Minuten angeben (7,5 h = 450). Auch für Sätze wie 'Buche mir 9 h für gestern', " +
+                "'Buche mir heute noch 2 h' oder 'Buche 9 h auf das Projekt " +
                 "Alpha am 27.10.'. day immer als JJJJ-MM-TT: Angaben wie heute, gestern, vorgestern oder 'am " +
                 "Montag' vorher in das Datum umrechnen. Ein Projekt per Name vorher mit list_projects in die ID " +
                 "auflösen, bei keinem oder mehreren Treffern beim User nachfragen.",
             inputSchema: {
                 day: DaySchema.describe("Tag JJJJ-MM-TT"),
-                start: TimeSchema.optional().describe(`Beginn HH:mm, Standard ${WORK_DAY_START}`),
+                start: TimeOfDaySchema.optional().describe(
+                    `Beginn HH:mm, Standard ${WORK_DAY_START} am leeren Tag, sonst so früh wie möglich`,
+                ),
                 workMinutes: z
                     .number()
                     .int()
                     .positive()
                     .optional()
-                    .describe(`Arbeitszeit ohne Pause in Minuten, Standard ${WORK_DAY_MINUTES}`),
-                projectId: z.uuid().optional().describe("ID aus list_projects, gilt für jedes Kommen des Tages"),
+                    .describe(
+                        `Arbeitszeit ohne Pause in Minuten, Standard ${WORK_DAY_MINUTES} am leeren Tag, sonst Pflicht`,
+                    ),
+                projectId: z.uuid().optional().describe("ID aus list_projects, gilt für jedes neue Kommen"),
             },
             outputSchema: {
                 entries: z.array(EntrySchema).describe("die angelegten Buchungen nach Zeit"),
+                pauseMinutes: z.number().describe("die dafür eingeplante Pause in Minuten"),
                 sickNotice: z.string().nullable().describe("Hinweis, wenn der Tag ein Krankheitstag ist"),
             },
             annotations: {destructiveHint: false},
         },
-        ({day, start = WORK_DAY_START, workMinutes = WORK_DAY_MINUTES, projectId}) =>
+        ({day, start, workMinutes, projectId}) =>
             run(async () => {
-                const created = await createDay(user.id, {day, start, workMinutes, projectId});
+                if (workMinutes === undefined) {
+                    const onDay = await listEntries(user.id, {
+                        from: startOfLocalDay(day),
+                        to: startOfLocalDay(addDays(day, 1)),
+                    });
+                    if (onDay.length > 0) return fail("Bitte workMinutes angeben, der Tag hat schon Buchungen");
+                }
+                const created = await createDay(user.id, {
+                    day,
+                    start,
+                    workMinutes: workMinutes ?? WORK_DAY_MINUTES,
+                    projectId,
+                });
                 const names = await loadProjectNames();
-                const entries = created.map((e) => entryView(e, names));
+                const entries = created.entries.map((e) => entryView(e, names));
+                const {pauseMinutes} = created;
                 const sickNotice = isSickDay(day, await loadSickLeaves(user.id)) ? sickDayMessage(day) : null;
-                const text = [`Nachgetragen ${workDayText(entries)}.`, sickNotice].filter(Boolean).join("\n");
-                return ok(text, {entries, sickNotice});
+                const text = [`Nachgetragen ${workDayText(entries, pauseMinutes)}.`, sickNotice]
+                    .filter(Boolean)
+                    .join("\n");
+                return ok(text, {entries, pauseMinutes, sickNotice});
             }),
     );
 
@@ -263,7 +285,7 @@ export function registerTimeEntryTools(server: McpServer, user: SessionUser): vo
                 "projectId null entfernt das Projekt. Die Abfolge muss danach stimmen, sonst scheitert der Aufruf.",
             inputSchema: {
                 id: z.uuid().describe("ID der Buchung"),
-                time: TimeSchema.optional().describe("neue Uhrzeit HH:mm"),
+                time: TimeOfDaySchema.optional().describe("neue Uhrzeit HH:mm"),
                 projectId: ProjectIdSchema.nullable().optional(),
             },
             outputSchema: EntryResultSchema,

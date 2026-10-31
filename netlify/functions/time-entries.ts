@@ -57,10 +57,10 @@ const handler = async (req: Request, _context: Context, session: Session) => {
 
             if (req.method === "POST") {
                 const body = await readBody(req);
-                // Mit workMinutes ein ganzer Tag, sonst eine einzelne Buchung
+                // Mit workMinutes ein Zeitraum, sonst eine einzelne Buchung
                 if (typeof body === "object" && body !== null && "workMinutes" in body) {
                     const day = TimeEntryDayCreateSchema.parse(body);
-                    return Response.json(await createDay(userId, day), {status: 201});
+                    return Response.json((await createDay(userId, day)).entries, {status: 201});
                 }
                 const input = TimeEntryCreateSchema.parse(body);
                 return Response.json(await createEntry(userId, input), {status: 201});

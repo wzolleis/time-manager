@@ -18,6 +18,8 @@ const timeFormat = new Intl.DateTimeFormat("de-DE", {
 });
 
 export const localDay = (d: Date) => dayFormat.format(d);
+const clockFormat = new Intl.DateTimeFormat("de-DE", {timeZone: TZ, hour: "2-digit", minute: "2-digit"});
+const formatClock = (d: Date) => clockFormat.format(d); // "HH:mm" in Berliner Zeit
 
 const sorted = (entries: Booking[]) => [...entries].sort((a, b) => a.bookedAt.getTime() - b.bookedAt.getTime());
 
@@ -102,25 +104,33 @@ export function checkProject(type: Booking["type"], projectId: string | null | u
     return type === "gehen" && projectId ? 'Ein Projekt kann nur beim "kommen" gebucht werden' : null;
 }
 
-// Ganzer Tag (features/changes/time-stamp-whole-day.md): Pause nach 6 h Arbeit, höchstens 10 h
-/** Vorgaben eines ganzen Tages für Dialog und MCP-Tool: Beginn 08:00, 8 h Arbeitszeit */
+// Zeitraum (features/changes/time-stamp-whole-day.md, time-stamp-period.md): am leeren Tag ab Beginn, sonst nach
+// dem letzten Gehen. Pflichtpause für die Arbeitszeit des ganzen Tages, höchstens 6 h am Stück, höchstens 10 h am Tag.
+/** Vorgaben eines leeren Tages für Dialog und MCP-Tool: Beginn 08:00, 8 h Arbeitszeit */
 export const WORK_DAY_START = "08:00";
 export const WORK_DAY_MINUTES = 8 * 60;
 
 const MINUTE = 60_000;
 const BREAK_AFTER_MINUTES = 6 * 60;
 const MAX_WORK_MINUTES = 10 * 60;
+const MIN_SPLIT_BREAK_MINUTES = 15; // kürzester Pausenabschnitt, wenn ein neuer Block nach 6 h geteilt wird
 
-/** Pause in Minuten zur Arbeitszeit: bis 6 h keine, bis 9 h 30 min, darüber 45 min */
+/** Pause in Minuten zur Arbeitszeit eines Tages: bis 6 h keine, bis 9 h 30 min, darüber 45 min */
 export const breakMinutes = (workMinutes: number): number =>
     workMinutes <= 6 * 60 ? 0 : workMinutes <= 9 * 60 ? 30 : 45;
 
-/** Die Buchungspaare eines ganzen Tages ("JJJJ-MM-TT") ab Beginn ("HH:mm"), mit Pause nach 6 h Arbeit */
-export function planWorkDay(day: string, start: string, workMinutes: number): Booking[] {
-    const from = localTimeToUtc(day, start).getTime();
+/** Die neuen Buchungen und die Pause, die dafür eingeplant ist (Abstand zum letzten Gehen und Teilung nach 6 h) */
+export type WorkDayPlan = {bookings: Booking[]; pauseMinutes: number};
+
+type Planned = {plan: WorkDayPlan; earliest: Date | null; problem: string | null};
+
+const minutesOf = (periods: Period[]) =>
+    periods.reduce((sum, p) => sum + ((p.to?.getTime() ?? p.from.getTime()) - p.from.getTime()) / MINUTE, 0);
+
+// Ein Block ab from, nach 6 h geteilt, wenn splitPause > 0 und er länger als 6 h ist
+function block(from: number, workMinutes: number, splitPause: number): Booking[] {
     const at = (minutes: number) => new Date(from + minutes * MINUTE);
-    const pause = breakMinutes(workMinutes);
-    if (pause === 0) {
+    if (workMinutes <= BREAK_AFTER_MINUTES || splitPause === 0) {
         return [
             {id: "neu-1", type: "kommen", bookedAt: at(0)},
             {id: "neu-2", type: "gehen", bookedAt: at(workMinutes)},
@@ -129,22 +139,72 @@ export function planWorkDay(day: string, start: string, workMinutes: number): Bo
     return [
         {id: "neu-1", type: "kommen", bookedAt: at(0)},
         {id: "neu-2", type: "gehen", bookedAt: at(BREAK_AFTER_MINUTES)},
-        {id: "neu-3", type: "kommen", bookedAt: at(BREAK_AFTER_MINUTES + pause)},
-        {id: "neu-4", type: "gehen", bookedAt: at(workMinutes + pause)},
+        {id: "neu-3", type: "kommen", bookedAt: at(BREAK_AFTER_MINUTES + splitPause)},
+        {id: "neu-4", type: "gehen", bookedAt: at(workMinutes + splitPause)},
     ];
 }
 
-/** null = der ganze Tag lässt sich zu den vorhandenen Buchungen eintragen, sonst eine Fehlermeldung */
-export function checkWorkDay(existing: Booking[], day: string, start: string, workMinutes: number): string | null {
+function planPeriod(existing: Booking[], day: string, workMinutes: number, start?: string): Planned {
+    const none = (problem: string, earliest: Date | null = null): Planned => ({
+        plan: {bookings: [], pauseMinutes: 0},
+        earliest,
+        problem,
+    });
+    // Das letzte neue Gehen liegt am selben Tag (Regel 4), sonst gibt es keinen Plan
+    const planned = (bookings: Booking[], pauseMinutes: number, earliest: Date | null): Planned => {
+        const end = bookings[bookings.length - 1].bookedAt;
+        if (localDay(end) !== day) {
+            return none(`Das Gehen (${timeFormat.format(end)}) muss am selben Tag liegen`, earliest);
+        }
+        return {plan: {bookings, pauseMinutes}, earliest, problem: null};
+    };
+    const dayEntries = sorted(existing).filter((e) => localDay(e.bookedAt) === day);
+
+    // Leerer Tag: ab Beginn, Pause nach 6 h
+    if (dayEntries.length === 0) {
+        if (workMinutes > MAX_WORK_MINUTES) return none("Die Arbeitszeit darf höchstens 10 Stunden betragen");
+        const pause = breakMinutes(workMinutes);
+        const from = localTimeToUtc(day, start ?? WORK_DAY_START).getTime();
+        return planned(block(from, workMinutes, pause), pause, null);
+    }
+
+    const last = dayEntries.at(-1)!;
+    if (last.type === "kommen") return none(`Erst das Gehen zum Kommen um ${formatClock(last.bookedAt)} buchen`);
+
+    const {work, breaks} = buildPeriods(dayEntries);
+    const total = minutesOf(work) + workMinutes;
+    if (total > MAX_WORK_MINUTES) return none("Die Arbeitszeit des Tages darf höchstens 10 Stunden betragen");
+    const missing = Math.max(0, breakMinutes(total) - minutesOf(breaks));
+    const lastEnd = last.bookedAt.getTime();
+
+    // Über 6 h wird der neue Block geteilt, der fehlende Rest liegt dort (Regel 7), sonst vor dem Kommen (Regel 6)
+    const split = workMinutes > BREAK_AFTER_MINUTES;
+    const earliest = new Date(lastEnd + (split ? 1 : Math.max(missing, 1)) * MINUTE);
+    const from = start ? localTimeToUtc(day, start) : earliest;
+    if (from < earliest) return none(`Beginn frühestens um ${formatClock(earliest)}`, earliest);
+
+    const gap = (from.getTime() - lastEnd) / MINUTE;
+    // Teilung nach 6 h (Regel 7): dort liegt der fehlende Rest, mindestens 15 min.
+    // Ein späterer Beginn zählt als Pause, die 1 min Abstand nicht.
+    let splitPause = 0;
+    if (split) {
+        const countedGap = gap > 1 ? gap : 0;
+        splitPause = Math.max(missing - countedGap, MIN_SPLIT_BREAK_MINUTES);
+    }
+    return planned(block(from.getTime(), workMinutes, splitPause), gap + splitPause, earliest);
+}
+
+/** Die neuen Buchungen eines Zeitraums am Tag ("JJJJ-MM-TT"), leer, wenn eine Regel verletzt ist */
+export const planWorkDay = (existing: Booking[], day: string, workMinutes: number, start?: string): WorkDayPlan =>
+    planPeriod(existing, day, workMinutes, start).plan;
+
+/** Frühester Beginn eines Zeitraums an einem Tag mit Buchungen (null: leerer Tag oder offenes Kommen) */
+export const earliestStart = (existing: Booking[], day: string, workMinutes: number): Date | null =>
+    planPeriod(existing, day, workMinutes).earliest;
+
+/** null = der Zeitraum lässt sich zu den vorhandenen Buchungen eintragen, sonst eine Fehlermeldung */
+export function checkWorkDay(existing: Booking[], day: string, workMinutes: number, start?: string): string | null {
     if (workMinutes <= 0) return "Die Arbeitszeit muss größer als 0 sein";
-    if (workMinutes > MAX_WORK_MINUTES) return "Die Arbeitszeit darf höchstens 10 Stunden betragen";
-    if (existing.some((e) => localDay(e.bookedAt) === day)) {
-        return "An diesem Tag gibt es schon Buchungen, bitte einzeln nachtragen";
-    }
-    const planned = planWorkDay(day, start, workMinutes);
-    const end = planned.at(-1)!.bookedAt;
-    if (localDay(end) !== day) {
-        return `Das Gehen (${timeFormat.format(end)}) muss am selben Tag liegen`;
-    }
-    return checkSequence([...existing, ...planned]);
+    const {plan, problem} = planPeriod(existing, day, workMinutes, start);
+    return problem ?? checkSequence([...existing, ...plan.bookings]);
 }
