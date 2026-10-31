@@ -651,7 +651,18 @@ mcp_step "Ganzen Tag 16.06. mit Vorgaben nachtragen" "$MCP_TOKEN" "08:00–14:00
   add_time_entry_day '{"day":"2026-06-16"}'
 mcp_step "Der ganze Tag hat vier Buchungen" "$MCP_TOKEN" "Arbeit 8 Std · Pause 30 Min" \
   get_daily_report '{"day":"2026-06-16"}'
-mcp_error_step "Denselben Tag noch einmal" "$MCP_TOKEN" "schon Buchungen" add_time_entry_day '{"day":"2026-06-16"}'
+mcp_error_step "Ohne workMinutes an einem Tag mit Buchungen" "$MCP_TOKEN" "Bitte workMinutes angeben" \
+  add_time_entry_day '{"day":"2026-06-16"}'
+mcp_step "1 h nach dem ganzen Tag, Pause reicht schon" "$MCP_TOKEN" "16:31–17:31 (1 Std Arbeit, 1 Min Pause)" \
+  add_time_entry_day '{"day":"2026-06-16","workMinutes":60}'
+mcp_error_step "2 h mehr am selben Tag" "$MCP_TOKEN" "höchstens 10 Stunden" add_time_entry_day \
+  '{"day":"2026-06-16","workMinutes":120}'
+mcp_step "Offenes Kommen 18.06. 08:00" "$MCP_TOKEN" '"type":"kommen"' add_time_entry \
+  '{"type":"kommen","day":"2026-06-18","time":"08:00"}'
+MCP_OPEN=$(wt_id "$WT_BODY")
+mcp_error_step "Zeitraum bei offenem Kommen" "$MCP_TOKEN" "Erst das Gehen zum Kommen um 08:00 buchen" \
+  add_time_entry_day '{"day":"2026-06-18","workMinutes":60}'
+mcp_step "Offenes Kommen löschen" "$MCP_TOKEN" "\"deletedIds\":[\"$MCP_OPEN\"]" delete_time_entry "{\"id\":\"$MCP_OPEN\"}"
 mcp_error_step "Ganzer Tag mit mehr als 10 h" "$MCP_TOKEN" "höchstens 10 Stunden" add_time_entry_day \
   '{"day":"2026-06-17","workMinutes":660}'
 mcp_step "Nichts gebucht am 17.06." "$MCP_TOKEN" "Keine Buchungen" list_time_entries \

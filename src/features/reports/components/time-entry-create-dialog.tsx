@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {formatTime} from "@shared/format";
+import {formatDuration, formatTime} from "@shared/format";
 import {useProjects} from "@/views/projects";
 import {localDay, WORK_DAY_MINUTES, WORK_DAY_START} from "@shared/time-rules";
 import {useAddTimeEntry} from "@features/reports/use-cases/use-add-time-entry";
@@ -21,7 +21,7 @@ import {FormDialogFooter} from "@/components/form/form-dialog-footer";
 import {FormField} from "@/components/form/form-field";
 
 type EntryType = "kommen" | "gehen";
-type Mode = "stamp" | "day"; // ein Zeitstempel oder ein ganzer Tag
+type Mode = "stamp" | "day"; // ein Zeitstempel oder ein Zeitraum (ganzer Tag oder Arbeitszeit nach den Buchungen)
 
 type Props = {
     defaultDay: string; // "JJJJ-MM-TT"
@@ -84,9 +84,26 @@ export function TimeEntryCreateDialog({
         setOpen(next);
     };
 
-    const workDay = {day, start, workMinutes: toMinutes(workTime)};
+    // Vorgaben für einen Zeitraum: am leeren Tag 08:00 und 8 h, an einem Tag mit Buchungen keine
+    const applyDayDefaults = (d: string) => {
+        const busy = createDay.hasBookings(d);
+        setStart(busy ? "" : WORK_DAY_START);
+        setWorkTime(busy ? "" : DAY_WORK_TIME);
+    };
+    const changeMode = (next: Mode) => {
+        if (next === "day") applyDayDefaults(day);
+        setMode(next);
+    };
+    const changeDay = (next: string) => {
+        if (mode === "day") applyDayDefaults(next);
+        setDay(next);
+    };
+
+    const workDay = {day, start: start || undefined, workMinutes: toMinutes(workTime)};
     const problem = mode === "stamp" ? create.problem({type, day, time}) : createDay.problem(workDay);
-    const preview = mode === "day" && !problem ? createDay.preview(workDay) : [];
+    const {bookings: preview, pauseMinutes} =
+        mode === "day" && !problem ? createDay.preview(workDay) : {bookings: [], pauseMinutes: 0};
+    const earliest = mode === "day" && !start ? createDay.earliestStart(day, workDay.workMinutes) : null;
     const sickNotice = create.sickNotice(day);
     const saving = mode === "stamp" ? create.isSaving : createDay.isSaving;
     const error = mode === "stamp" ? create.error : createDay.error;
@@ -125,7 +142,7 @@ export function TimeEntryCreateDialog({
                 type="date"
                 value={day}
                 max={localDay(new Date())}
-                onChange={(e) => e.target.value && setDay(e.target.value)}
+                onChange={(e) => e.target.value && changeDay(e.target.value)}
                 required
             />
         </FormField>
@@ -144,18 +161,18 @@ export function TimeEntryCreateDialog({
                         <DialogTitle>Buchung nachtragen</DialogTitle>
                         <DialogDescription>
                             Für {currentUser?.name}. Kommen und Gehen müssen am selben Tag liegen, die Abfolge wird beim
-                            Speichern geprüft. Bei einem ganzen Tag liegt die Pause nach 6 Stunden Arbeit.
+                            Speichern geprüft. Bei einem Zeitraum wird die nötige Pause eingeplant.
                         </DialogDescription>
                     </DialogHeader>
 
                     <FormField label="Nachtragen" htmlFor={`${uid}-mode`}>
-                        <Select value={mode} onValueChange={(v) => setMode(v as Mode)}>
+                        <Select value={mode} onValueChange={(v) => changeMode(v as Mode)}>
                             <SelectTrigger id={`${uid}-mode`}>
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="stamp">Zeitstempel</SelectItem>
-                                <SelectItem value="day">Ganzer Tag</SelectItem>
+                                <SelectItem value="day">Zeitraum</SelectItem>
                             </SelectContent>
                         </Select>
                     </FormField>
@@ -199,7 +216,6 @@ export function TimeEntryCreateDialog({
                                         type="time"
                                         value={start}
                                         onChange={(e) => setStart(e.target.value)}
-                                        required
                                     />
                                 </FormField>
                                 <FormField label="Arbeitszeit" htmlFor={`${uid}-work`}>
@@ -213,6 +229,8 @@ export function TimeEntryCreateDialog({
                                 </FormField>
                             </div>
 
+                            {earliest && <Muted>Ohne Beginn so früh wie möglich, ab {formatTime(earliest)}.</Muted>}
+
                             {projectField}
 
                             {preview.length > 0 && (
@@ -221,6 +239,7 @@ export function TimeEntryCreateDialog({
                                     {pairs(preview)
                                         .map(([from, to]) => `${formatTime(from)}–${formatTime(to)}`)
                                         .join(", ")}
+                                    {pauseMinutes > 0 && `, Pause ${formatDuration(pauseMinutes * 60_000)}`}
                                 </Muted>
                             )}
                         </>

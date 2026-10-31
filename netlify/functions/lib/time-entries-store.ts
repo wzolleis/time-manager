@@ -104,27 +104,31 @@ export async function createEntry(userId: string, input: TimeEntryCreate): Promi
     return (await getEntry(id))!;
 }
 
-/** Legt alle Buchungen eines ganzen Tages an, oder keine, wenn eine Regel verletzt ist (RuleError) */
-export async function createDay(userId: string, input: TimeEntryDayCreate): Promise<StoredEntry[]> {
-    const planned = planWorkDay(input.day, input.start, input.workMinutes).map((b) => ({...b, id: randomUUID()}));
-    await db.transaction(async (tx) => {
+/**
+ * Legt die Buchungen eines Zeitraums an, alle oder keine (RuleError). Der Platz am Tag wird in der Transaktion aus
+ * den gesperrten Buchungen berechnet. pauseMinutes: die dafür eingeplante Pause.
+ */
+export async function createDay(
+    userId: string,
+    input: TimeEntryDayCreate,
+): Promise<{entries: StoredEntry[]; pauseMinutes: number}> {
+    const ids: string[] = [];
+    const pauseMinutes = await db.transaction(async (tx) => {
         const existing = await lockBookings(tx, userId);
-        const problem = checkWorkDay(existing, input.day, input.start, input.workMinutes);
+        const problem = checkWorkDay(existing, input.day, input.workMinutes, input.start);
         if (problem) throw new RuleError(problem);
+        const plan = planWorkDay(existing, input.day, input.workMinutes, input.start);
+        const planned = plan.bookings.map((b) => ({...b, id: randomUUID()}));
+        ids.push(...planned.map((b) => b.id));
         await tx.insert(timeEntries).values(planned.map((b) => ({...b, userId})));
-        // Das Projekt gilt für jedes kommen des Tages
+        // Das Projekt gilt für jedes neue kommen
         for (const b of planned) {
             if (b.type === "kommen" && input.projectId) await setProject(tx, b.id, input.projectId);
         }
+        return plan.pauseMinutes;
     });
-    return selectEntries(db)
-        .where(
-            inArray(
-                timeEntries.id,
-                planned.map((b) => b.id),
-            ),
-        )
-        .orderBy(asc(timeEntries.bookedAt));
+    const entries = await selectEntries(db).where(inArray(timeEntries.id, ids)).orderBy(asc(timeEntries.bookedAt));
+    return {entries, pauseMinutes};
 }
 
 /** Ändert Zeit und/oder Projekt einer Buchung, der Typ bleibt */

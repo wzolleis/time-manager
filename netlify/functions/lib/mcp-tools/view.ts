@@ -79,18 +79,16 @@ export const entryText = (e: EntryView): string =>
     `${typeLabel(e.type)} am ${dayShort(e.day)} um ${e.time}${e.projectName ? ` (${e.projectName})` : ""}`;
 
 /**
- * Die Buchungen eines ganzen Tages (nach Zeit sortiert, abwechselnd Kommen und Gehen) in einem Satz:
- * "am Mo., 26.10.: 08:00–14:00, 14:30–16:30 (8 Std Arbeit, 30 Min Pause, Alpha)"
+ * Die neuen Buchungen eines Zeitraums (nach Zeit sortiert, abwechselnd Kommen und Gehen) in einem Satz, mit der
+ * dafür eingeplanten Pause: "am Mo., 26.10.: 08:00–14:00, 14:30–16:30 (8 Std Arbeit, 30 Min Pause, Alpha)"
  */
-export function workDayText(entries: EntryView[]): string {
+export function workDayText(entries: EntryView[], pauseMinutes: number): string {
     const pairs: [EntryView, EntryView][] = [];
     for (let i = 0; i + 1 < entries.length; i += 2) pairs.push([entries[i], entries[i + 1]]);
-    const span = (from: EntryView, to: EntryView) => Date.parse(to.bookedAt) - Date.parse(from.bookedAt);
-    const work = pairs.reduce((sum, [from, to]) => sum + span(from, to), 0);
-    const pause = pairs.slice(1).reduce((sum, [from], i) => sum + span(pairs[i][1], from), 0);
+    const work = pairs.reduce((sum, [from, to]) => sum + Date.parse(to.bookedAt) - Date.parse(from.bookedAt), 0);
     const details = [
         `${formatDuration(work)} Arbeit`,
-        pause > 0 ? `${formatDuration(pause)} Pause` : "ohne Pause",
+        pauseMinutes > 0 ? `${formatDuration(pauseMinutes * 60_000)} Pause` : "ohne Pause",
         entries[0]?.projectName,
     ].filter(Boolean);
     const times = pairs.map(([from, to]) => `${from.time}–${to.time}`).join(", ");

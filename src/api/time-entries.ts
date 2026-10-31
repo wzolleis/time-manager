@@ -19,7 +19,7 @@ export const createTimeEntry = (userId: string, data: TimeEntryCreate) =>
         body: JSON.stringify(data),
     });
 
-// Ein ganzer Tag: der Server legt alle Buchungen des Tages an
+// Ein Zeitraum: der Server legt die Buchungen nach den vorhandenen des Tages an
 export const createTimeEntryDay = (userId: string, data: TimeEntryDayCreate) =>
     request<TimeEntryDto[]>(path(userId), {
         method: "POST",

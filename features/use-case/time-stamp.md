@@ -1,6 +1,6 @@
 ---
 name: time-stamp
-description: Beschreibt die Use Cases zur Zeiterfassung. Der User stempelt Kommen und Gehen, ordnet beim Kommen ein Projekt zu, trägt vergessene Buchungen oder einen ganzen Tag nach, ändert und löscht sie. Enthält die Regeln für die Abfolge von Kommen und Gehen (Buchungspaar am selben Tag, keine zwei gleichen Buchungen hintereinander).
+description: Beschreibt die Use Cases zur Zeiterfassung. Der User stempelt Kommen und Gehen, ordnet beim Kommen ein Projekt zu, trägt vergessene Buchungen oder einen Zeitraum nach, ändert und löscht sie. Enthält die Regeln für die Abfolge von Kommen und Gehen (Buchungspaar am selben Tag, keine zwei gleichen Buchungen hintereinander).
 type: story
 epics: zeiterfassung
 state: resolved
@@ -44,7 +44,7 @@ Geändert wird nach dem Skill `architecture` (`../../.claude/skills/architecture
 |--------------------------------------------|----------------------|-----------------------------|
 | Der User stempelt Kommen oder Gehen.       | `useStampTime`       | `StampCard`                 |
 | Der User trägt eine Buchung nach.          | `useAddTimeEntry`    | `TimeEntryCreateDialog`     |
-| Der User trägt einen ganzen Tag nach.      | `useAddTimeEntryDay` | `TimeEntryCreateDialog`     |
+| Der User trägt einen Zeitraum nach.       | `useAddTimeEntryDay` | `TimeEntryCreateDialog`     |
 | Der User ändert eine Buchung.              | `useChangeTimeEntry` | `EntryActions`              |
 | Der User löscht eine Buchung.              | `useDeleteTimeEntry` | `TimeEntryDelete`           |
 
@@ -61,17 +61,33 @@ Der User trägt eine Buchung für einen beliebigen Tag nach und wählt Typ, Tag 
 das Projekt. Für heute ist die aktuelle Uhrzeit vorbelegt. Die Abfolge wird schon während der Eingabe
 geprüft, Speichern ist erst möglich, wenn sie stimmt.
 
-Statt eines Zeitstempels kann der User einen ganzen Tag nachtragen. Er gibt Tag, Beginn (vorbelegt mit 08:00),
-Arbeitszeit (vorbelegt mit 08:00, also 8 Stunden) und optional ein Projekt an, der Dialog zeigt die Buchungen, die
-daraus entstehen. Die Vorgaben stehen als `WORK_DAY_START` und `WORK_DAY_MINUTES` in `../../shared/time-rules.ts` und
-gelten auch für das MCP-Tool `add_time_entry_day` (`../boundaries/mcp-enable.md`). Der Server berechnet die Buchungen
-selbst (`planWorkDay`) und legt sie in einer Transaktion an, alle oder keine (`createDay`):
+### Zeitraum nachtragen
 
-- **Pause** nach 6 h Arbeit: bis 6 h keine, über 6 h bis 9 h 30 min, über 9 h 45 min (`breakMinutes`). Mit Pause
-  entstehen zwei Buchungspaare.
-- **Höchstens 10 h** Arbeitszeit, das letzte Gehen liegt am selben Tag (Regel 3).
-- **Nur ein leerer Tag.** Hat der Tag schon Buchungen, trägt der User einzelne Zeitstempel nach.
-- Das Projekt gilt für jedes Kommen des Tages (Regel 6). Geprüft wird mit `checkWorkDay`.
+Statt eines Zeitstempels kann der User einen Zeitraum nachtragen (Modus „Zeitraum“). Er gibt Tag, Arbeitszeit und
+optional Beginn und Projekt an, der Dialog zeigt die Buchungen und die eingeplante Pause, die daraus entstehen. Der
+Server berechnet die Buchungen selbst (`planWorkDay`) und legt sie in einer Transaktion an, alle oder keine
+(`createDay`). Dasselbe kann ein Agent mit dem MCP-Tool `add_time_entry_day` (`../boundaries/mcp-enable.md`).
+
+**Leerer Tag:** Beginn und Arbeitszeit sind mit 08:00 und 8 h vorbelegt (`WORK_DAY_START`, `WORK_DAY_MINUTES` in
+`../../shared/time-rules.ts`). Über 6 h liegt die Pause nach 6 h Arbeit, mit Pause entstehen zwei Buchungspaare.
+
+**Tag mit Buchungen:** Das neue Buchungspaar liegt nach dem letzten Gehen des Tages. Beginn und Arbeitszeit haben
+keine Vorgabe. Ohne Beginn so früh wie möglich, der Dialog nennt den frühesten Beginn (`earliestStart`).
+
+- **Kein offenes Kommen.** Ist die letzte Buchung des Tages ein Kommen, wird nichts gebucht.
+- **Pflichtpause für den ganzen Tag:** Die Arbeitszeit des Tages mit der neuen bestimmt die Pause, bis 6 h keine,
+  über 6 h bis 9 h 30 min, über 9 h 45 min (`breakMinutes`). Vorhandene Pausen und der Abstand zum letzten Gehen
+  zählen, nur der fehlende Rest liegt vor dem neuen Kommen. Fehlt nichts, liegt es 1 min nach dem letzten Gehen
+  (Regel 5).
+- **Höchstens 6 h am Stück.** Eine neue Arbeitszeit über 6 h wird nach 6 h geteilt, die Pause dort ist der fehlende
+  Rest, mindestens 15 min. Das neue Kommen liegt dann 1 min nach dem letzten Gehen, diese 1 min zählt hier nicht.
+- Ein Beginn vor dem frühesten wird abgelehnt.
+
+Für jeden Tag gilt:
+
+- **Höchstens 10 h** Arbeitszeit am Tag, das letzte Gehen liegt am selben Tag (Regel 3).
+- Das Projekt gilt für jedes neue Kommen (Regel 6). Geprüft wird mit `checkWorkDay`.
+- Ein Zeitraum wird nur nach dem letzten Gehen gebucht, nicht in eine Lücke und nicht vor das erste Kommen.
 
 ### Ändern
 
@@ -133,9 +149,15 @@ Projekt für das ganze Buchungspaar.
 | Kommen 08:00, Gehen 08:00                                   | Fehler: zwei Buchungen zur selben Zeit (Regel 5) |
 | Aus 08–12, 13–17 nur Gehen 12:00 löschen                    | Fehler: Kommen 08:00 und Kommen 13:00 folgen aufeinander |
 | Aus 08–12, 13–17 Gehen 12:00 mit Gegenstück löschen         | gültig, übrig bleibt 13–17                       |
-| Ganzer Tag ab 08:00, 6:00 h                                 | Kommen 08:00, Gehen 14:00                        |
-| Ganzer Tag ab 08:00, 8:00 h                                 | 08:00–14:00, 14:30–16:30                         |
-| Ganzer Tag ab 08:00, 10:00 h                                | 08:00–14:00, 14:45–18:45                         |
-| Ganzer Tag ab 08:00, 10:30 h                                | Fehler: mehr als 10 h                            |
-| Ganzer Tag ab 15:00, 10:00 h                                | Fehler: Gehen 01:45 am nächsten Tag (Regel 3)    |
-| Ganzer Tag an einem Tag mit Kommen 08:00                    | Fehler: Tag hat schon Buchungen                  |
+| Zeitraum am leeren Tag ab 08:00, 6:00 h                     | Kommen 08:00, Gehen 14:00                        |
+| Zeitraum am leeren Tag ab 08:00, 8:00 h                     | 08:00–14:00, 14:30–16:30                         |
+| Zeitraum am leeren Tag ab 08:00, 10:00 h                    | 08:00–14:00, 14:45–18:45                         |
+| Zeitraum am leeren Tag ab 08:00, 10:30 h                    | Fehler: mehr als 10 h                            |
+| Zeitraum am leeren Tag ab 15:00, 10:00 h                    | Fehler: Gehen 01:45 am nächsten Tag (Regel 3)    |
+| Aus 08–12, Zeitraum 1:00 h                                  | 12:01–13:01, keine Pause nötig                   |
+| Aus 08–12, Zeitraum 3:00 h                                  | 12:30–15:30, 30 min Pause eingeplant             |
+| Aus 08–12, Zeitraum 3:00 h ab 12:15                         | Fehler: Beginn frühestens um 12:30               |
+| Aus 08–14, 14:30–16:30, Zeitraum 1:30 h                     | 16:45–18:15, 15 min der 45 min fehlen            |
+| Aus 08–14, 14:30–16:30, Zeitraum 2:30 h                     | Fehler: mehr als 10 h am Tag                     |
+| Aus 08–09, Zeitraum 8:00 h                                  | 09:01–15:01, 15:31–17:31                         |
+| Kommen 08:00 offen, Zeitraum 2:00 h                         | Fehler: erst das Gehen buchen                    |

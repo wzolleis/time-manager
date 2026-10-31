@@ -21,10 +21,13 @@ export const TimeEntryUpdateSchema = createUpdateSchema(timeEntries, updateRefin
     .omit({id: true, userId: true, type: true})
     .extend({projectId: z.uuid().nullish()});
 
-// Ein ganzer Tag: die Buchungen berechnet der Server aus Beginn und Arbeitszeit (planWorkDay)
+// Uhrzeit "HH:mm": Stunde 00–23, Minute 00–59, immer zweistellig (kein "8:00", kein "24:00")
+export const TimeOfDaySchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Uhrzeit als HH:mm");
+
+// Ein Zeitraum: die Buchungen berechnet der Server aus Arbeitszeit, Beginn und den Buchungen des Tages (planWorkDay)
 export const TimeEntryDayCreateSchema = z.object({
     day: z.string().refine(isValidDay, "Tag als JJJJ-MM-TT"),
-    start: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Uhrzeit als HH:mm"),
+    start: TimeOfDaySchema.optional(), // ohne: 08:00 am leeren Tag, sonst so früh wie möglich
     workMinutes: z.number().int().positive(),
     projectId: z.uuid().nullish(),
 });
