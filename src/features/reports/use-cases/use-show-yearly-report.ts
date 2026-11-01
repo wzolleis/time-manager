@@ -1,50 +1,21 @@
 import {useMemo} from "react";
 import type {Year} from "@shared/date-schemas";
-import {toBooking} from "@/api/time-entries";
-import {useNow} from "@/lib/use-now";
-import {useCurrentUser} from "@/lib/user-context";
-import {useHolidays} from "@/views/holidays";
-import {useSickLeaves} from "@/views/sick-leaves";
-import {useTimeEntries} from "@/views/time-entries";
-import {useVacations} from "@/views/vacations";
-import {useUserSettings} from "@/views/user-settings";
 import {yearTotals} from "@shared/time-report";
-import {firstBookingDay, localDay} from "@shared/time-rules";
-import {SOLL_SETTING_ID} from "@shared/user-setting";
-import {historyOf} from "@shared/user-setting-rules";
+import {firstBookingDay} from "@shared/time-rules";
 import {yearOf} from "@shared/week";
+import {useReportData} from "@features/reports/use-report-data";
 
 /** Der User sieht seinen Jahresbericht für ein Jahr "JJJJ" */
 export function useShowYearlyReport(year: Year) {
-    const {currentUser} = useCurrentUser();
-    const now = useNow();
-    const userId = currentUser?.id;
+    const {currentUser, now, today, bookings, vacations, holidays, sickLeaves, soll, isPending, error, retry} =
+        useReportData();
 
-    const entries = useTimeEntries(userId);
-    const vacations = useVacations(userId);
-    const holidays = useHolidays(userId);
-    const sickLeaves = useSickLeaves(userId);
-    const settings = useUserSettings(userId);
-    const soll = useMemo(() => historyOf(settings.data, SOLL_SETTING_ID), [settings.data]);
-
-    const today = localDay(new Date(now));
     const currentYear = yearOf(today);
-    const bookings = useMemo(() => (entries.data ?? []).map(toBooking), [entries.data]);
     const firstDay = firstBookingDay(bookings);
 
     const totals = useMemo(
-        () =>
-            yearTotals(
-                bookings,
-                year,
-                vacations.data ?? [],
-                holidays.data ?? [],
-                sickLeaves.data ?? [],
-                soll,
-                today,
-                new Date(now),
-            ),
-        [bookings, vacations.data, holidays.data, sickLeaves.data, soll, year, today, now],
+        () => yearTotals(bookings, year, vacations, holidays, sickLeaves, soll, today, new Date(now)),
+        [bookings, vacations, holidays, sickLeaves, soll, year, today, now],
     );
 
     return {
@@ -55,20 +26,8 @@ export function useShowYearlyReport(year: Year) {
         totals,
         futureYear: `${year}-01-01` > today,
         partial: totals.targetToDateMs !== totals.targetYearMs,
-        isPending:
-            entries.isPending ||
-            vacations.isPending ||
-            holidays.isPending ||
-            sickLeaves.isPending ||
-            settings.isPending,
-        error: entries.error ?? vacations.error ?? holidays.error ?? sickLeaves.error ?? settings.error,
-        retry: () =>
-            Promise.all([
-                entries.refetch(),
-                vacations.refetch(),
-                holidays.refetch(),
-                sickLeaves.refetch(),
-                settings.refetch(),
-            ]),
+        isPending,
+        error,
+        retry,
     };
 }

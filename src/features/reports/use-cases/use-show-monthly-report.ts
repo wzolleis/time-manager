@@ -1,47 +1,17 @@
 import {useMemo} from "react";
 import type {Month} from "@shared/date-schemas";
-import {toBooking} from "@/api/time-entries";
-import {useNow} from "@/lib/use-now";
-import {useCurrentUser} from "@/lib/user-context";
-import {useHolidays} from "@/views/holidays";
-import {useSickLeaves} from "@/views/sick-leaves";
-import {useTimeEntries} from "@/views/time-entries";
-import {useVacations} from "@/views/vacations";
-import {useUserSettings} from "@/views/user-settings";
 import {monthTotals} from "@shared/time-report";
-import {localDay} from "@shared/time-rules";
 import {monthOf} from "@shared/week";
-import {SOLL_SETTING_ID} from "@shared/user-setting";
-import {historyOf} from "@shared/user-setting-rules";
+import {useReportData} from "@features/reports/use-report-data";
 
 /** Der User sieht seinen Monatsbericht für einen Monat "JJJJ-MM" */
 export function useShowMonthlyReport(month: Month) {
-    const {currentUser} = useCurrentUser();
-    const now = useNow();
-    const userId = currentUser?.id;
-
-    const entries = useTimeEntries(userId);
-    const vacations = useVacations(userId);
-    const holidays = useHolidays(userId);
-    const sickLeaves = useSickLeaves(userId);
-    const settings = useUserSettings(userId);
-    const soll = useMemo(() => historyOf(settings.data, SOLL_SETTING_ID), [settings.data]);
-
-    const today = localDay(new Date(now));
+    const {currentUser, now, today, bookings, vacations, holidays, sickLeaves, soll, isPending, error, retry} =
+        useReportData();
 
     const totals = useMemo(
-        () =>
-            monthTotals(
-                (entries.data ?? []).map(toBooking),
-                month,
-                vacations.data ?? [],
-                holidays.data ?? [],
-                sickLeaves.data ?? [],
-                soll,
-                today,
-                new Date(now),
-            ),
-        [entries.data, vacations.data, holidays.data, sickLeaves.data, soll, month, today, now],
+        () => monthTotals(bookings, month, vacations, holidays, sickLeaves, soll, today, new Date(now)),
+        [bookings, vacations, holidays, sickLeaves, soll, month, today, now],
     );
 
     return {
@@ -50,20 +20,8 @@ export function useShowMonthlyReport(month: Month) {
         totals,
         futureMonth: `${month}-01` > today,
         partial: totals.targetToDateMs !== totals.targetMonthMs,
-        isPending:
-            entries.isPending ||
-            vacations.isPending ||
-            holidays.isPending ||
-            sickLeaves.isPending ||
-            settings.isPending,
-        error: entries.error ?? vacations.error ?? holidays.error ?? sickLeaves.error ?? settings.error,
-        retry: () =>
-            Promise.all([
-                entries.refetch(),
-                vacations.refetch(),
-                holidays.refetch(),
-                sickLeaves.refetch(),
-                settings.refetch(),
-            ]),
+        isPending,
+        error,
+        retry,
     };
 }
