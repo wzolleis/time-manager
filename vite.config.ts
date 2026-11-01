@@ -23,7 +23,9 @@ export default defineConfig({
     plugins: [
         tanstackRouter({
             target: "react",
-            autoCodeSplitting: true,
+            // In Vitest ohne Code-Splitting: die Routen werden mit der Testdatei geladen und nicht erst beim
+            // ersten Rendern im Test, das unter Last sonst länger dauert als findBy wartet
+            autoCodeSplitting: !process.env.VITEST,
         }),
         react(),
         tailwindcss(),
