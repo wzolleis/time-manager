@@ -1,6 +1,7 @@
 // shared/format.test.ts
 import {describe, expect, it} from "vitest";
-import {formatDifference, formatDuration, formatMonth, formatMonthName} from "./format";
+import {day, month} from "./test-dates";
+import {formatDay, formatDifference, formatDuration, formatMonth, formatMonthName} from "./format";
 
 const MIN = 60_000;
 
@@ -57,15 +58,21 @@ describe("Industriezeit", () => {
 
 describe("formatMonthName", () => {
     it("nennt nur den Monat", () => {
-        expect(formatMonthName("2026-10")).toBe("Oktober");
-        expect(formatMonthName("2027-01")).toBe("Januar");
+        expect(formatMonthName(month("2026-10"))).toBe("Oktober");
+        expect(formatMonthName(month("2027-01"))).toBe("Januar");
     });
 });
 
 describe("formatMonth", () => {
     it("schreibt den Monat aus, auch am Jahresanfang und -ende", () => {
-        expect(formatMonth("2026-10")).toBe("Oktober 2026");
-        expect(formatMonth("2027-01")).toBe("Januar 2027");
-        expect(formatMonth("2026-12")).toBe("Dezember 2026");
+        expect(formatMonth(month("2026-10"))).toBe("Oktober 2026");
+        expect(formatMonth(month("2027-01"))).toBe("Januar 2027");
+        expect(formatMonth(month("2026-12"))).toBe("Dezember 2026");
+    });
+});
+
+describe("formatDay", () => {
+    it("schreibt den Tag deutsch", () => {
+        expect(formatDay(day("2026-06-08"))).toBe("08.06.2026");
     });
 });

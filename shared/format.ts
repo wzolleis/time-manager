@@ -1,7 +1,7 @@
 // Texte für Zeiten, Tage und Dauern, wie UI und MCP-Server sie zeigen
+import type {Day, Month} from "./date-schemas";
+import {TZ} from "./day-range";
 import type {DayKind} from "./target-hours";
-
-export const TZ = "Europe/Berlin";
 
 export const formatTime = (d: Date | string) =>
     new Date(d).toLocaleTimeString("de-DE", {timeZone: TZ, hour: "2-digit", minute: "2-digit"});
@@ -14,6 +14,9 @@ export const formatDate = (d: Date | number | string) =>
         month: "2-digit",
         year: "numeric",
     });
+
+/** Tag als Text ("JJJJ-MM-TT") deutsch geschrieben: "2026-06-08" wird zu "08.06.2026" */
+export const formatDay = (day: Day): string => day.split("-").reverse().join(".");
 
 /** Anzeige der Dauern: Stunden und Minuten oder Industriezeit (features/use-case/industriezeit.md) */
 export type TimeFormat = "minutes" | "industrial";
@@ -45,7 +48,7 @@ export const formatDayMonth = (d: Date) =>
     d.toLocaleDateString("de-DE", {timeZone: TZ, day: "2-digit", month: "2-digit"});
 
 /** Monat ("JJJJ-MM") ausgeschrieben: "Oktober 2026" */
-export const formatMonth = (month: string) => {
+export const formatMonth = (month: Month) => {
     const [y, m] = month.split("-").map(Number);
     return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString("de-DE", {
         timeZone: "UTC",
@@ -55,7 +58,7 @@ export const formatMonth = (month: string) => {
 };
 
 /** Nur der Name des Monats ("JJJJ-MM"): "Oktober" */
-export const formatMonthName = (month: string) => {
+export const formatMonthName = (month: Month) => {
     const [y, m] = month.split("-").map(Number);
     return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString("de-DE", {timeZone: "UTC", month: "long"});
 };

@@ -1,4 +1,5 @@
 import {Link, useNavigate} from "@tanstack/react-router";
+import type {Year} from "@shared/date-schemas";
 import {MetricCard} from "@/components/cards/metric-card";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {diffClass} from "@/lib/format";
@@ -52,7 +53,7 @@ const columnsOf = (format: TimeFormat): DataTableColumnDef<YearMonthTotals>[] =>
 const columns = {minutes: columnsOf("minutes"), industrial: columnsOf("industrial")};
 
 /** year ist ein gültiges Jahr "JJJJ", geprüft in ReportYearlyPage */
-export function ReportYearly({year}: {year: string}) {
+export function ReportYearly({year}: {year: Year}) {
     const navigate = useNavigate();
     const report = useShowYearlyReport(year);
     const timeFormat = useTimeFormat();

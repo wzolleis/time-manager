@@ -1,5 +1,5 @@
+import {formatDay} from "@shared/format";
 import {VacationDialog} from "@features/vacations/components/vacation-dialog";
-import {germanDay} from "@shared/vacation-rules";
 import type {Vacation} from "@shared/vacation";
 import {useDeleteVacation} from "@features/vacations/use-cases/use-delete-vacation";
 import {ErrorText} from "@/components/text/error-text";
@@ -17,7 +17,7 @@ export function VacationActions({vacation}: {vacation: Vacation}) {
                     title="Urlaub löschen?"
                     description={
                         <>
-                            Der Urlaub vom {germanDay(vacation.startDate)} bis {germanDay(vacation.endDate)} wird
+                            Der Urlaub vom {formatDay(vacation.startDate)} bis {formatDay(vacation.endDate)} wird
                             dauerhaft entfernt.
                         </>
                     }

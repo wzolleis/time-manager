@@ -1,5 +1,6 @@
 // shared/user-setting-rules.test.ts
 import {describe, expect, it} from "vitest";
+import {day} from "./test-dates";
 import {targetMs} from "./target-hours";
 import {SOLL_SETTING_ID, type UserSetting, VACATION_DAYS_SETTING_ID} from "./user-setting";
 import {
@@ -13,7 +14,7 @@ import {
 } from "./user-setting-rules";
 import {checkYearLimit, vacationBalance} from "./vacation-rules";
 
-const TODAY = "2026-10-26"; // Montag
+const TODAY = day("2026-10-26"); // Montag
 const HOUR = 3_600_000;
 
 const SOLL: UserSetting = {
@@ -34,7 +35,7 @@ const VACATION_DAYS: UserSetting = {
     validFromUnit: "year",
 };
 
-const p = (id: string, validFrom: string, value: number) => ({id, validFrom, value});
+const p = (id: string, validFrom: string, value: number) => ({id, validFrom: day(validFrom), value});
 const history = (...values: ReturnType<typeof p>[]): SettingHistory => ({defaultValue: 8, values});
 
 describe("valueOn (Regel 1)", () => {
@@ -42,17 +43,17 @@ describe("valueOn (Regel 1)", () => {
 
     it("ohne eigenen Wert gilt der Default", () => {
         expect(valueOn(history(), TODAY)).toBe(8);
-        expect(valueOn(h, "2026-02-28")).toBe(8); // vor dem ersten eigenen Wert
+        expect(valueOn(h, day("2026-02-28"))).toBe(8); // vor dem ersten eigenen Wert
     });
 
     it("es gilt der Wert mit dem größten gültig ab bis zu diesem Tag", () => {
-        expect(valueOn(h, "2026-03-01")).toBe(6);
-        expect(valueOn(h, "2026-10-31")).toBe(6);
-        expect(valueOn(h, "2026-11-01")).toBe(7);
+        expect(valueOn(h, day("2026-03-01"))).toBe(6);
+        expect(valueOn(h, day("2026-10-31"))).toBe(6);
+        expect(valueOn(h, day("2026-11-01"))).toBe(7);
     });
 
     it("die Reihenfolge der Werte spielt keine Rolle", () => {
-        expect(valueOn(history(p("b", "2026-11-01", 7), p("a", "2026-03-01", 6)), "2026-12-01")).toBe(7);
+        expect(valueOn(history(p("b", "2026-11-01", 7), p("a", "2026-03-01", 6)), day("2026-12-01"))).toBe(7);
     });
 });
 
@@ -63,14 +64,14 @@ describe("settingStatus (Regel 2)", () => {
 
     it("ein Wert ab morgen ist geplant, der Default bleibt aktuell", () => {
         const h = history(p("a", "2026-10-27", 6));
-        expect(settingStatus(h, "2026-10-27", TODAY)).toBe("geplant");
+        expect(settingStatus(h, day("2026-10-27"), TODAY)).toBe("geplant");
         expect(settingStatus(h, null, TODAY)).toBe("aktuell");
     });
 
     it("ab dem gültig ab ist der Wert aktuell, der vorherige abgelaufen", () => {
         const h = history(p("a", "2026-03-01", 6), p("b", "2026-10-26", 7));
-        expect(settingStatus(h, "2026-10-26", TODAY)).toBe("aktuell");
-        expect(settingStatus(h, "2026-03-01", TODAY)).toBe("abgelaufen");
+        expect(settingStatus(h, day("2026-10-26"), TODAY)).toBe("aktuell");
+        expect(settingStatus(h, day("2026-03-01"), TODAY)).toBe("abgelaufen");
         expect(settingStatus(h, null, TODAY)).toBe("abgelaufen");
     });
 });
@@ -128,12 +129,12 @@ describe("checkChange und checkDelete (Regel 7)", () => {
     const h = history(p("a", "2026-03-01", 6), p("b", "2026-10-26", 7), p("c", "2026-12-01", 8));
 
     it("geplante Werte lassen sich ändern und löschen", () => {
-        expect(checkChange(h, "2026-12-01", TODAY)).toBeNull();
-        expect(checkDelete(h, "2026-12-01", TODAY)).toBeNull();
+        expect(checkChange(h, day("2026-12-01"), TODAY)).toBeNull();
+        expect(checkDelete(h, day("2026-12-01"), TODAY)).toBeNull();
     });
 
     it("aktuelle und abgelaufene Werte nicht", () => {
-        for (const validFrom of ["2026-03-01", "2026-10-26"]) {
+        for (const validFrom of ["2026-03-01", "2026-10-26"].map(day)) {
             expect(checkChange(h, validFrom, TODAY)).not.toBeNull();
             expect(checkDelete(h, validFrom, TODAY)).not.toBeNull();
         }
@@ -147,7 +148,7 @@ describe("historyOf", () => {
             userId: "u1",
             settingId,
             value: v,
-            validFrom,
+            validFrom: day(validFrom),
         });
         const data = {
             settings: [{...SOLL, defaultValue: "7"}, VACATION_DAYS],
@@ -168,9 +169,9 @@ describe("historyOf", () => {
 describe("Wertwechsel in den Berechnungen (Regeln 8 und 9)", () => {
     it("das Soll eines Tages kommt aus dem Wert, der an dem Tag gilt", () => {
         const soll = history(p("a", "2026-10-28", 6)); // ab Mittwoch 6 Stunden
-        expect(targetMs("2026-10-27", [], [], [], "2026-01-01", soll)).toBe(8 * HOUR);
-        expect(targetMs("2026-10-28", [], [], [], "2026-01-01", soll)).toBe(6 * HOUR);
-        expect(targetMs("2026-10-31", [], [], [], "2026-01-01", soll)).toBe(0); // Samstag
+        expect(targetMs(day("2026-10-27"), [], [], [], day("2026-01-01"), soll)).toBe(8 * HOUR);
+        expect(targetMs(day("2026-10-28"), [], [], [], day("2026-01-01"), soll)).toBe(6 * HOUR);
+        expect(targetMs(day("2026-10-31"), [], [], [], day("2026-01-01"), soll)).toBe(0); // Samstag
     });
 
     it("das Urlaubskonto rechnet je Jahr mit dem Wert vom 1. Januar", () => {
@@ -178,9 +179,9 @@ describe("Wertwechsel in den Berechnungen (Regeln 8 und 9)", () => {
         expect(vacationBalance([], 2026, TODAY, [], [], days).unplanned).toBe(30);
         expect(vacationBalance([], 2027, TODAY, [], [], days).unplanned).toBe(25);
 
-        const vacation = {id: "new", startDate: "2027-01-04", endDate: "2027-02-05"}; // 25 Arbeitstage
+        const vacation = {id: "new", startDate: day("2027-01-04"), endDate: day("2027-02-05")}; // 25 Arbeitstage
         expect(checkYearLimit([], vacation, [], [], days)).toBeNull();
-        const longer = {...vacation, endDate: "2027-02-08"}; // 26 Arbeitstage
+        const longer = {...vacation, endDate: day("2027-02-08")}; // 26 Arbeitstage
         expect(checkYearLimit([], longer, [], [], days)).toMatch(/erlaubt sind 25/);
     });
 });

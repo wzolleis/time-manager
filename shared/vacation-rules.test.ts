@@ -1,5 +1,6 @@
 // shared/vacation-rules.test.ts
 import {describe, expect, it} from "vitest";
+import {day} from "./test-dates";
 import {
     checkRange,
     checkVacation,
@@ -8,7 +9,6 @@ import {
     countWorkdays,
     dayCount,
     findOverlap,
-    germanDay,
     isVacationDay,
     overlapMessage,
     vacationBalance,
@@ -19,24 +19,18 @@ import {defaultHistory} from "./user-setting-rules";
 const VACATION_DAYS_PER_YEAR = 30;
 const DAYS = defaultHistory(VACATION_DAYS_PER_YEAR); // ohne eigene Werte
 
-const v = (id: string, startDate: string, endDate: string) => ({id, startDate, endDate});
+const v = (id: string, startDate: string, endDate: string) => ({id, startDate: day(startDate), endDate: day(endDate)});
 
 describe("dayCount", () => {
     it("zählt Beginn und Ende mit", () => {
-        expect(dayCount("2026-06-08", "2026-06-08")).toBe(1);
-        expect(dayCount("2026-06-08", "2026-06-12")).toBe(5);
-        expect(dayCount("2026-06-01", "2026-06-30")).toBe(30);
+        expect(dayCount(day("2026-06-08"), day("2026-06-08"))).toBe(1);
+        expect(dayCount(day("2026-06-08"), day("2026-06-12"))).toBe(5);
+        expect(dayCount(day("2026-06-01"), day("2026-06-30"))).toBe(30);
     });
 
     it("ist unabhängig von der Zeitumstellung", () => {
-        expect(dayCount("2026-03-28", "2026-03-30")).toBe(3);
-        expect(dayCount("2026-10-24", "2026-10-26")).toBe(3);
-    });
-});
-
-describe("germanDay", () => {
-    it("dreht das Datum um", () => {
-        expect(germanDay("2026-06-08")).toBe("08.06.2026");
+        expect(dayCount(day("2026-03-28"), day("2026-03-30"))).toBe(3);
+        expect(dayCount(day("2026-10-24"), day("2026-10-26"))).toBe(3);
     });
 });
 
@@ -89,39 +83,39 @@ describe("findOverlap", () => {
 
 describe("countWorkdays", () => {
     it("zählt Montag bis Freitag", () => {
-        expect(countWorkdays("2026-06-08", "2026-06-14", [])).toBe(5); // Mo bis So
-        expect(countWorkdays("2026-06-10", "2026-06-10", [])).toBe(1); // ein Mittwoch
+        expect(countWorkdays(day("2026-06-08"), day("2026-06-14"), [])).toBe(5); // Mo bis So
+        expect(countWorkdays(day("2026-06-10"), day("2026-06-10"), [])).toBe(1); // ein Mittwoch
     });
 
     it("zählt am Wochenende nichts", () => {
-        expect(countWorkdays("2026-06-13", "2026-06-14", [])).toBe(0);
+        expect(countWorkdays(day("2026-06-13"), day("2026-06-14"), [])).toBe(0);
     });
 
     it("zählt über das Wochenende hinweg", () => {
-        expect(countWorkdays("2026-06-12", "2026-06-15", [])).toBe(2); // Fr und Mo
+        expect(countWorkdays(day("2026-06-12"), day("2026-06-15"), [])).toBe(2); // Fr und Mo
     });
 });
 describe("isVacationDay", () => {
     const vacations = [v("a", "2026-06-09", "2026-06-10"), v("b", "2026-07-01", "2026-07-01")];
 
     it("Beginn, Ende und Tage dazwischen gehören dazu", () => {
-        expect(isVacationDay("2026-06-09", vacations)).toBe(true);
-        expect(isVacationDay("2026-06-10", vacations)).toBe(true);
-        expect(isVacationDay("2026-07-01", vacations)).toBe(true);
+        expect(isVacationDay(day("2026-06-09"), vacations)).toBe(true);
+        expect(isVacationDay(day("2026-06-10"), vacations)).toBe(true);
+        expect(isVacationDay(day("2026-07-01"), vacations)).toBe(true);
     });
 
     it("Tage davor und danach nicht", () => {
-        expect(isVacationDay("2026-06-08", vacations)).toBe(false);
-        expect(isVacationDay("2026-06-11", vacations)).toBe(false);
+        expect(isVacationDay(day("2026-06-08"), vacations)).toBe(false);
+        expect(isVacationDay(day("2026-06-11"), vacations)).toBe(false);
     });
 
     it("ohne Urlaube nie", () => {
-        expect(isVacationDay("2026-06-09", [])).toBe(false);
+        expect(isVacationDay(day("2026-06-09"), [])).toBe(false);
     });
 });
 
 describe("vacationBalance", () => {
-    const today = "2026-06-10"; // Mittwoch
+    const today = day("2026-06-10"); // Mittwoch
 
     it("ohne Urlaub ist das ganze Kontingent ungeplant", () => {
         expect(vacationBalance([], 2026, today, [], [], DAYS)).toEqual({
@@ -230,11 +224,11 @@ describe("checkYearLimit", () => {
 });
 
 describe("Feiertage im Urlaub", () => {
-    const today = "2026-06-10";
-    const holidays = [{date: "2026-10-02"}]; // Freitag
+    const today = day("2026-06-10");
+    const holidays = [{date: day("2026-10-02")}]; // Freitag
 
     it("zählen nicht als Arbeitstage", () => {
-        expect(countWorkdays("2026-09-28", "2026-10-04", holidays)).toBe(4);
+        expect(countWorkdays(day("2026-09-28"), day("2026-10-04"), holidays)).toBe(4);
     });
 
     it("verbrauchen keinen Urlaubstag", () => {
@@ -254,12 +248,12 @@ describe("Feiertage im Urlaub", () => {
 });
 
 describe("Krankheit im Urlaub", () => {
-    const today = "2026-06-10";
+    const today = day("2026-06-10");
     const vacations = [v("a", "2026-10-12", "2026-10-23")]; // 10 Urlaubstage
-    const sick = [{startDate: "2026-10-14", endDate: "2026-10-16"}]; // 3 Krankheitstage
+    const sick = [{startDate: day("2026-10-14"), endDate: day("2026-10-16")}]; // 3 Krankheitstage
 
     it("verbraucht keinen Urlaubstag", () => {
-        expect(countVacationDays("2026-10-12", "2026-10-23", [], sick)).toBe(7);
+        expect(countVacationDays(day("2026-10-12"), day("2026-10-23"), [], sick)).toBe(7);
         expect(workdaysInYear(vacations, 2026, [], sick)).toBe(7);
         expect(vacationBalance(vacations, 2026, today, [], sick, DAYS)).toMatchObject({planned: 7, unplanned: 23});
     });

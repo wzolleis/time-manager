@@ -1,14 +1,16 @@
 // Bewusst ohne Abhängigkeit zur DB, damit Client und Server dieselben Regeln nutzen
+import type {Day} from "./date-schemas";
+import {formatDay} from "./format";
 import {isValidDay} from "./day-range";
 
-export type HolidayDay = {date: string}; // "JJJJ-MM-TT"
-export type HolidayRange = {id: string; userId: string | null; date: string; name: string};
+export type HolidayDay = {date: Day}; // "JJJJ-MM-TT"
+export type HolidayRange = {id: string; userId: string | null; date: Day; name: string};
 
 /** Der Feiertag an diesem Tag (sonst undefined) */
-export const holidayOn = <H extends HolidayDay>(day: string, holidays: H[]): H | undefined =>
+export const holidayOn = <H extends HolidayDay>(day: Day, holidays: H[]): H | undefined =>
     holidays.find((h) => h.date === day);
 
-export const isHoliday = (day: string, holidays: HolidayDay[]): boolean => holidays.some((h) => h.date === day);
+export const isHoliday = (day: Day, holidays: HolidayDay[]): boolean => holidays.some((h) => h.date === day);
 
 /**
  * Ein vorhandener Feiertag, mit dem der neue kollidiert (sonst null).
@@ -28,7 +30,7 @@ export function findHolidayClash(existing: HolidayRange[], candidate: HolidayRan
 }
 
 export const holidayClashMessage = (h: HolidayRange): string => {
-    const day = h.date.split("-").reverse().join(".");
+    const day = formatDay(h.date);
     return h.userId === null
         ? `Am ${day} ist bereits der Feiertag „${h.name}“ für alle eingetragen`
         : `Am ${day} ist bereits der Feiertag „${h.name}“ eingetragen`;

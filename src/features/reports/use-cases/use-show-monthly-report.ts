@@ -1,4 +1,5 @@
 import {useMemo} from "react";
+import type {Month} from "@shared/date-schemas";
 import {toBooking} from "@/api/time-entries";
 import {useNow} from "@/lib/use-now";
 import {useCurrentUser} from "@/lib/user-context";
@@ -14,7 +15,7 @@ import {SOLL_SETTING_ID} from "@shared/user-setting";
 import {historyOf} from "@shared/user-setting-rules";
 
 /** Der User sieht seinen Monatsbericht für einen Monat "JJJJ-MM" */
-export function useShowMonthlyReport(month: string) {
+export function useShowMonthlyReport(month: Month) {
     const {currentUser} = useCurrentUser();
     const now = useNow();
     const userId = currentUser?.id;

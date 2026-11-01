@@ -1,9 +1,9 @@
+import {formatDay} from "@shared/format";
 import {MetricCard} from "@/components/cards/metric-card";
 import {diffClass} from "@/lib/format";
 import {useTimeFormat} from "@/lib/use-time-format";
 import {balanceMinutes, formatOffset} from "@shared/overtime-rules";
 import {localDay} from "@shared/time-rules";
-import {germanDay} from "@shared/vacation-rules";
 import {OvertimeDialog} from "@features/reports/components/overtime-dialog";
 import {useShowOvertime} from "@features/reports/use-cases/use-show-overtime";
 import {Muted} from "@/components/text/muted";
@@ -40,7 +40,7 @@ export function ReportOvertimePage() {
                         valueClassName={diffClass(report.balanceMs)}
                         hint={
                             correction
-                                ? `Korrektur am ${germanDay(localDay(correction.created))}: ${formatOffset(correction.offset, timeFormat)} h`
+                                ? `Korrektur am ${formatDay(localDay(correction.created))}: ${formatOffset(correction.offset, timeFormat)} h`
                                 : "Keine Korrektur"
                         }
                     />

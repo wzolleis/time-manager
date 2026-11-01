@@ -1,5 +1,6 @@
 // shared/overtime-rules.test.ts
 import {describe, expect, it} from "vitest";
+import {day, time} from "./test-dates";
 import {localTimeToUtc} from "./day-range";
 import {balanceMinutes, checkOffset, formatOffset, fromOffset, overtimeBalanceMs, toOffset} from "./overtime-rules";
 import type {Booking} from "./time-rules";
@@ -10,9 +11,9 @@ const SOLL = defaultHistory(8); // ohne eigene Werte
 const MIN = 60_000;
 
 // Ein Tag mit Arbeit von 08:00 bis zur angegebenen Stunde, Berliner Sommerzeit (UTC+2)
-const worked = (day: string, untilHour: number): Booking[] => [
-    {id: `${day}-k`, type: "kommen", bookedAt: new Date(`${day}T06:00:00Z`)},
-    {id: `${day}-g`, type: "gehen", bookedAt: new Date(`${day}T${String(untilHour - 2).padStart(2, "0")}:00:00Z`)},
+const worked = (d: string, untilHour: number): Booking[] => [
+    {id: `${d}-k`, type: "kommen", bookedAt: new Date(`${d}T06:00:00Z`)},
+    {id: `${d}-g`, type: "gehen", bookedAt: new Date(`${d}T${String(untilHour - 2).padStart(2, "0")}:00:00Z`)},
 ];
 
 // Mo 05.10. bis Fr 09.10.2026: 42 Stunden bei 40 Stunden Soll
@@ -25,7 +26,7 @@ const firstWeek = [
 ];
 
 const balance = (correction: Parameters<typeof overtimeBalanceMs>[0], entries: Booking[], now: string) =>
-    overtimeBalanceMs(correction, entries, [], [], [], SOLL, now.slice(0, 10), new Date(now));
+    overtimeBalanceMs(correction, entries, [], [], [], SOLL, day(now.slice(0, 10)), new Date(now));
 
 describe("toOffset und fromOffset", () => {
     it("rechnet die Auswahl im Dialog in Minuten um", () => {
@@ -107,7 +108,7 @@ describe("overtimeBalanceMs", () => {
 
     it("zählt Urlaubstage nach dem Tag der Korrektur ohne Soll", () => {
         const entries = [...firstWeek, ...worked("2026-10-12", 17), ...worked("2026-10-14", 17)];
-        const vacation = [{startDate: "2026-10-13", endDate: "2026-10-13"}];
+        const vacation = [{startDate: day("2026-10-13"), endDate: day("2026-10-13")}];
         const ms = overtimeBalanceMs(
             correction,
             entries,
@@ -115,7 +116,7 @@ describe("overtimeBalanceMs", () => {
             [],
             [],
             SOLL,
-            "2026-10-14",
+            day("2026-10-14"),
             new Date("2026-10-14T20:00:00Z"),
         );
         expect(ms).toBe((210 + 60 + 60) * MIN);
@@ -124,12 +125,12 @@ describe("overtimeBalanceMs", () => {
 
 describe("overtimeBalanceMs heute erst ab dem ersten Gehen", () => {
     // Winterzeit ab So 25.10.2026, die Uhrzeiten sind lokal (Europe/Berlin)
-    const booking = (day: string, time: string, type: Booking["type"]): Booking => ({
-        id: `${day}-${time}`,
+    const booking = (d: string, t: string, type: Booking["type"]): Booking => ({
+        id: `${d}-${t}`,
         type,
-        bookedAt: localTimeToUtc(day, time),
+        bookedAt: localTimeToUtc(day(d), time(t)),
     });
-    const at = (day: string, time: string) => localTimeToUtc(day, time).toISOString();
+    const at = (d: string, t: string) => localTimeToUtc(day(d), time(t)).toISOString();
     const hours = (h: number) => h * 60 * MIN;
 
     // Mo 26.10. 10 h und Di 27.10. 11 h bei 8 h Soll: Di abends +5:00 h
@@ -158,27 +159,31 @@ describe("overtimeBalanceMs heute erst ab dem ersten Gehen", () => {
         ["2026-10-29", "00:00", 4], // Soll von Do zählt noch nicht
         ["2026-10-29", "18:00", 4], // ohne Gehen zählt das Soll von Do noch nicht
         ["2026-10-30", "00:00", -4], // Do ist vergangen: 4 h − 8 h Soll
-    ])("am %s um %s beträgt der Saldo %i h", (day, time, expected) => {
-        const now = at(day, time);
-        expect(overtimeBalanceMs(null, bookedUntil(now), [], [], [], SOLL, day, new Date(now))).toBe(hours(expected));
+    ])("am %s um %s beträgt der Saldo %i h", (d, t, expected) => {
+        const now = at(d, t);
+        expect(overtimeBalanceMs(null, bookedUntil(now), [], [], [], SOLL, day(d), new Date(now))).toBe(
+            hours(expected),
+        );
     });
 
     it("zählt einen vergangenen Tag ohne Gehen mit vollem Soll", () => {
         // Mi vergessenes Ausstempeln: 5 h − 8 h
         const entries = [...monTue, booking("2026-10-28", "08:00", "kommen")];
         const now = at("2026-10-29", "07:00");
-        expect(overtimeBalanceMs(null, entries, [], [], [], SOLL, "2026-10-29", new Date(now))).toBe(hours(-3));
+        expect(overtimeBalanceMs(null, entries, [], [], [], SOLL, day("2026-10-29"), new Date(now))).toBe(hours(-3));
     });
 
     it("zählt an einem Urlaubstag heute auch nach dem Gehen kein Soll", () => {
         const entries = [...monTue, booking("2026-10-28", "08:00", "kommen"), booking("2026-10-28", "10:00", "gehen")];
-        const vacation = [{startDate: "2026-10-28", endDate: "2026-10-28"}];
+        const vacation = [{startDate: day("2026-10-28"), endDate: day("2026-10-28")}];
         const now = at("2026-10-28", "11:00");
-        expect(overtimeBalanceMs(null, entries, vacation, [], [], SOLL, "2026-10-28", new Date(now))).toBe(hours(7));
+        expect(overtimeBalanceMs(null, entries, vacation, [], [], SOLL, day("2026-10-28"), new Date(now))).toBe(
+            hours(7),
+        );
     });
 
     it("wendet am Tag der Korrektur dieselbe Regel an", () => {
-        const correction = {offset: 210, created: localTimeToUtc("2026-10-28", "07:00")};
+        const correction = {offset: 210, created: localTimeToUtc(day("2026-10-28"), time("07:00"))};
         const entries = [...monTue, booking("2026-10-28", "08:00", "kommen"), booking("2026-10-28", "12:00", "gehen")];
         const before = at("2026-10-28", "10:00");
         const after = at("2026-10-28", "12:00");
@@ -191,11 +196,13 @@ describe("overtimeBalanceMs heute erst ab dem ersten Gehen", () => {
                 [],
                 [],
                 SOLL,
-                "2026-10-28",
+                day("2026-10-28"),
                 new Date(before),
             ),
         ).toBe(330 * MIN);
         // 3:30 + 4 h − 8 h Soll
-        expect(overtimeBalanceMs(correction, entries, [], [], [], SOLL, "2026-10-28", new Date(after))).toBe(-30 * MIN);
+        expect(overtimeBalanceMs(correction, entries, [], [], [], SOLL, day("2026-10-28"), new Date(after))).toBe(
+            -30 * MIN,
+        );
     });
 });

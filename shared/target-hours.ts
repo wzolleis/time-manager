@@ -1,3 +1,4 @@
+import type {Day} from "./date-schemas";
 import type {DayRange} from "./day-range";
 import {type HolidayDay, isHoliday} from "./holiday-rules";
 import {isSickDay} from "./sick-leave-rules";
@@ -18,11 +19,11 @@ export type DayKind = "workday" | "weekend" | "untracked" | "holiday" | "sick" |
  * trackingStart ist der Tag der ersten Buchung (firstBookingDay), null: noch keine Buchung.
  */
 export function dayKind(
-    day: string,
+    day: Day,
     vacations: DayRange[],
     holidays: HolidayDay[],
     sickLeaves: DayRange[],
-    trackingStart: string | null,
+    trackingStart: Day | null,
 ): DayKind {
     if (weekdayIndex(day) >= WORKDAYS_PER_WEEK) return "weekend";
     if (trackingStart === null || day < trackingStart) return "untracked";
@@ -38,11 +39,11 @@ export function dayKind(
  * Zeiterfassung 0.
  */
 export const targetMs = (
-    day: string,
+    day: Day,
     vacations: DayRange[],
     holidays: HolidayDay[],
     sickLeaves: DayRange[],
-    trackingStart: string | null,
+    trackingStart: Day | null,
     soll: SettingHistory,
 ): number =>
     dayKind(day, vacations, holidays, sickLeaves, trackingStart) === "workday" ? valueOn(soll, day) * HOUR : 0;

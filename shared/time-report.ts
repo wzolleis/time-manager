@@ -1,3 +1,4 @@
+import type {Day, Month, Year} from "./date-schemas";
 import {type DayRange, localDayRange} from "./day-range";
 import {type HolidayRange, holidayOn} from "./holiday-rules";
 import {withoutSickDays} from "./sick-leave-rules";
@@ -58,11 +59,11 @@ export function dayTotals(
  * Differenz eines Tages ("JJJJ-MM-TT") gegen das Soll. null: der Tag liegt nach heute, oder er hat weder
  * Soll noch Arbeitszeit (freier Tag ohne Arbeit). today ist der heutige Tag "JJJJ-MM-TT".
  */
-export const dayDiffMs = (day: string, today: string, workMs: number, target: number): number | null =>
+export const dayDiffMs = (day: Day, today: Day, workMs: number, target: number): number | null =>
     day > today || (target === 0 && workMs === 0) ? null : workMs - target; // ISO-Daten lassen sich als Text vergleichen
 
 export type WeekDayTotals = DayTotals & {
-    day: string; // "JJJJ-MM-TT"
+    day: Day; // "JJJJ-MM-TT"
     count: number; // Buchungen an diesem Tag, auch die an Krankheitstagen
     targetMs: number;
     kind: DayKind;
@@ -82,12 +83,12 @@ export type WeekTotals = {
 /** Summen je Tag und für die ganze Woche. today ist der heutige Tag "JJJJ-MM-TT" */
 export function weekTotals(
     entries: Booking[],
-    days: string[],
+    days: Day[],
     vacations: DayRange[],
     holidays: Pick<HolidayRange, "date" | "name">[],
     sickLeaves: DayRange[],
     soll: SettingHistory,
-    today: string,
+    today: Day,
     now: Date,
 ): WeekTotals {
     const trackingStart = firstBookingDay(entries); // mit allen Buchungen, auch denen an Krankheitstagen
@@ -129,7 +130,7 @@ export function weekTotals(
 export type MonthWeekTotals = {
     year: number; // Jahr der ISO-Kalenderwoche
     week: number;
-    days: string[]; // nur die Tage dieser Woche im Monat
+    days: Day[]; // nur die Tage dieser Woche im Monat
     targetMs: number;
     workMs: number;
     running: boolean;
@@ -151,12 +152,12 @@ export type MonthTotals = {
  */
 export function monthTotals(
     entries: Booking[],
-    month: string,
+    month: Month,
     vacations: DayRange[],
     holidays: Pick<HolidayRange, "date" | "name">[],
     sickLeaves: DayRange[],
     soll: SettingHistory,
-    today: string,
+    today: Day,
     now: Date,
 ): MonthTotals {
     const parts = monthWeeks(month).map(({year, week, days}) => {
@@ -188,7 +189,7 @@ export function monthTotals(
 }
 
 export type YearMonthTotals = {
-    month: string; // "JJJJ-MM"
+    month: Month; // "JJJJ-MM"
     targetMs: number;
     workMs: number;
     running: boolean;
@@ -210,12 +211,12 @@ export type YearTotals = {
  */
 export function yearTotals(
     entries: Booking[],
-    year: string,
+    year: Year,
     vacations: DayRange[],
     holidays: Pick<HolidayRange, "date" | "name">[],
     sickLeaves: DayRange[],
     soll: SettingHistory,
-    today: string,
+    today: Day,
     now: Date,
 ): YearTotals {
     const parts = yearMonths(year).map((month) => {

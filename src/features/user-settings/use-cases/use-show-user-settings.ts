@@ -1,4 +1,5 @@
 import {useMemo} from "react";
+import type {Day} from "@shared/date-schemas";
 import {useNow} from "@/lib/use-now";
 import {useCurrentUser} from "@/lib/user-context";
 import {useUserSettings} from "@/views/user-settings";
@@ -11,7 +12,7 @@ export type UserSettingRow = {
     setting: UserSetting;
     value: UserSettingValue | null; // null: der Default
     text: string; // Wert mit Einheit, z. B. "8 Stunden"
-    validFrom: string | null; // null: der Default, gilt ab Beginn der Zeiterfassung
+    validFrom: Day | null; // null: der Default, gilt ab Beginn der Zeiterfassung
     status: SettingStatus;
 };
 

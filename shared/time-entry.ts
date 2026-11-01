@@ -2,7 +2,7 @@
 import {z} from "zod";
 import {createInsertSchema, createSelectSchema, createUpdateSchema} from "drizzle-zod";
 import {timeEntries} from "../db/schema";
-import {isValidDay} from "./day-range";
+import {DaySchema, TimeOfDaySchema} from "./date-schemas";
 
 const createRefine = {bookedAt: z.coerce.date()};
 const updateRefine = {bookedAt: z.coerce.date().optional()};
@@ -21,12 +21,9 @@ export const TimeEntryUpdateSchema = createUpdateSchema(timeEntries, updateRefin
     .omit({id: true, userId: true, type: true})
     .extend({projectId: z.uuid().nullish()});
 
-// Uhrzeit "HH:mm": Stunde 00–23, Minute 00–59, immer zweistellig (kein "8:00", kein "24:00")
-export const TimeOfDaySchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Uhrzeit als HH:mm");
-
 // Ein Zeitraum: die Buchungen berechnet der Server aus Arbeitszeit, Beginn und den Buchungen des Tages (planWorkDay)
 export const TimeEntryDayCreateSchema = z.object({
-    day: z.string().refine(isValidDay, "Tag als JJJJ-MM-TT"),
+    day: DaySchema,
     start: TimeOfDaySchema.optional(), // ohne: 08:00 am leeren Tag, sonst so früh wie möglich
     workMinutes: z.number().int().positive(),
     projectId: z.uuid().nullish(),

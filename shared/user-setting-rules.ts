@@ -1,5 +1,7 @@
 // shared/user-setting-rules.ts
 // Regeln der Einstellungen (features/use-case/user-settings.md, Regeln 1 bis 7)
+import type {Day} from "./date-schemas";
+import {formatDay} from "./format";
 import {isValidDay} from "./day-range";
 import {
     DEFAULT_SOLL_HOURS,
@@ -10,10 +12,7 @@ import {
     VACATION_DAYS_SETTING_ID,
 } from "./user-setting";
 
-// Wie germanDay aus vacation-rules.ts, ohne Import: vacation-rules.ts verwendet valueOn
-const germanDay = (day: string): string => day.split("-").reverse().join(".");
-
-export type SettingPoint = {id: string; validFrom: string; value: number};
+export type SettingPoint = {id: string; validFrom: Day; value: number};
 
 /** Default und eigene Werte einer Einstellung, für die Berechnungen */
 export type SettingHistory = {defaultValue: number; values: SettingPoint[]};
@@ -44,7 +43,7 @@ export function historyOf(data: UserSettingsData | undefined, settingId: string)
 export const defaultHistory = (defaultValue: number): SettingHistory => ({defaultValue, values: []});
 
 /** Der eigene Wert, der an day gilt (Regel 1), null: es gilt der Default */
-export function pointOn(history: SettingHistory, day: string): SettingPoint | null {
+export function pointOn(history: SettingHistory, day: Day): SettingPoint | null {
     let best: SettingPoint | null = null;
     // ISO-Daten lassen sich als Text vergleichen
     for (const p of history.values) if (p.validFrom <= day && (!best || p.validFrom > best.validFrom)) best = p;
@@ -52,11 +51,11 @@ export function pointOn(history: SettingHistory, day: string): SettingPoint | nu
 }
 
 /** Der Wert, der an day "JJJJ-MM-TT" gilt (Regel 1) */
-export const valueOn = (history: SettingHistory, day: string): number =>
+export const valueOn = (history: SettingHistory, day: Day): number =>
     pointOn(history, day)?.value ?? history.defaultValue;
 
 /** Status eines eigenen Werts (validFrom) oder des Defaults (null) am Tag today (Regel 2) */
-export function settingStatus(history: SettingHistory, validFrom: string | null, today: string): SettingStatus {
+export function settingStatus(history: SettingHistory, validFrom: Day | null, today: Day): SettingStatus {
     if (validFrom !== null && validFrom > today) return "geplant";
     const current = pointOn(history, today);
     if (validFrom === null) return current ? "abgelaufen" : "aktuell";
@@ -71,7 +70,7 @@ export function checkSettingValue(
     setting: Pick<UserSetting, "id" | "name" | "type" | "validFromUnit">,
     others: SettingPoint[],
     candidate: {value: string; validFrom: string},
-    today: string,
+    today: Day,
 ): string | null {
     const {value, validFrom} = candidate;
     if (!isValidDay(validFrom)) return "Ungültiges Datum";
@@ -97,19 +96,19 @@ export function checkSettingValue(
     }
 
     if (others.some((p) => p.validFrom === validFrom)) {
-        return `Für ${setting.name} gibt es ab dem ${germanDay(validFrom)} schon einen Wert`;
+        return `Für ${setting.name} gibt es ab dem ${formatDay(validFrom)} schon einen Wert`;
     }
     return null;
 }
 
 /** null = erlaubt. Ändern lassen sich nur geplante Werte (Regel 7). */
-export const checkChange = (history: SettingHistory, validFrom: string, today: string): string | null =>
+export const checkChange = (history: SettingHistory, validFrom: Day, today: Day): string | null =>
     settingStatus(history, validFrom, today) === "geplant"
         ? null
         : "Nur geplante Werte lassen sich ändern. Für einen neuen Wert bitte einen neuen Eintrag anlegen.";
 
 /** null = erlaubt. Löschen lassen sich nur geplante Werte (Regel 7). */
-export const checkDelete = (history: SettingHistory, validFrom: string, today: string): string | null =>
+export const checkDelete = (history: SettingHistory, validFrom: Day, today: Day): string | null =>
     settingStatus(history, validFrom, today) === "geplant"
         ? null
         : "Nur geplante Werte lassen sich löschen, abgelaufene gelten für die Vergangenheit weiter";

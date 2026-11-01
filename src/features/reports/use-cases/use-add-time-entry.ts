@@ -1,4 +1,5 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
+import {type Day, parseTimeOfDay, toTimeOfDay} from "@shared/date-schemas";
 import {createTimeEntry, toBooking} from "@/api/time-entries";
 import {useCurrentUser} from "@/lib/user-context";
 import {useSickLeaves} from "@/views/sick-leaves";
@@ -9,8 +10,8 @@ import {checkSequence} from "@shared/time-rules";
 
 type Addition = {
     type: "kommen" | "gehen";
-    day: string; // "JJJJ-MM-TT"
-    time: string; // "HH:mm"
+    day: Day; // "JJJJ-MM-TT"
+    time: string; // "HH:mm" aus dem Formular, noch ungeprüft
     projectId: string | null;
 };
 
@@ -25,16 +26,17 @@ export function useAddTimeEntry() {
         mutationFn: ({type, day, time, projectId}: Addition) =>
             createTimeEntry(currentUser!.id, {
                 type,
-                bookedAt: localTimeToUtc(day, time),
+                bookedAt: localTimeToUtc(day, parseTimeOfDay(time)),
                 projectId: type === "kommen" ? (projectId ?? undefined) : undefined,
             }),
         onSuccess: () => qc.invalidateQueries({queryKey: ["time-entries"]}),
     });
 
-    /** Service, null = alles in Ordnung. Ohne Uhrzeit gibt es noch nichts zu prüfen. */
+    /** Service, null = alles in Ordnung. Ohne gültige Uhrzeit gibt es noch nichts zu prüfen. */
     const problem = ({type, day, time}: Pick<Addition, "type" | "day" | "time">) => {
-        if (!time) return null;
-        const added = {id: "neu", type, bookedAt: localTimeToUtc(day, time)};
+        const valid = toTimeOfDay(time);
+        if (!valid) return null;
+        const added = {id: "neu", type, bookedAt: localTimeToUtc(day, valid)};
         return checkSequence([...(entries.data ?? []).map(toBooking), added]);
     };
 
@@ -42,7 +44,7 @@ export function useAddTimeEntry() {
         currentUser,
         problem,
         // Hinweis, wenn der Tag ("JJJJ-MM-TT") ein Krankheitstag ist. Speichern bleibt möglich.
-        sickNotice: (day: string) => (isSickDay(day, sickLeaves.data ?? []) ? sickDayMessage(day) : null),
+        sickNotice: (day: Day) => (isSickDay(day, sickLeaves.data ?? []) ? sickDayMessage(day) : null),
         add: save.mutate,
         isSaving: save.isPending,
         error: save.error,

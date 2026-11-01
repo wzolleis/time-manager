@@ -1,4 +1,5 @@
 import {useState} from "react";
+import {formatDay} from "@shared/format";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {actionsColumn} from "@/components/table/actions-column";
 import {useNow} from "@/lib/use-now";
@@ -7,7 +8,6 @@ import {HolidayActions} from "@features/holidays/components/holiday-actions";
 import {HolidayDialog} from "@features/holidays/components/holiday-dialog";
 import {type HolidayRow, type HolidayScope, useShowHolidays} from "@features/holidays/use-cases/use-show-holidays";
 import {localDay} from "@shared/time-rules";
-import {germanDay} from "@shared/vacation-rules";
 import {isWeekend, weekdayIndex} from "@shared/week";
 import {Muted} from "@/components/text/muted";
 import {Loading} from "@/components/text/loading";
@@ -26,7 +26,7 @@ const dateColumn: DataTableColumnDef<HolidayRow> = {
         const weekend = isWeekend(date);
         return (
             <span>
-                {WEEKDAYS[weekdayIndex(date)]}, {germanDay(date)}
+                {WEEKDAYS[weekdayIndex(date)]}, {formatDay(date)}
                 {weekend && <span className="ml-2 text-muted-foreground">Wochenende</span>}
             </span>
         );

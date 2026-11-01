@@ -1,4 +1,5 @@
 import type {Config, Context} from "@netlify/functions";
+import type {Day} from "../../shared/date-schemas";
 import {randomUUID} from "node:crypto";
 import {asc, eq, isNull, or} from "drizzle-orm";
 import {z} from "zod";
@@ -32,7 +33,7 @@ const lockUser = async (tx: Tx, userId: string) => {
 };
 
 // FOR UPDATE sperrt auch die Lücke im Index auf date: ein paralleles Anlegen am selben Tag wartet
-const holidaysOn = (tx: Tx, date: string) => tx.select().from(holidays).where(eq(holidays.date, date)).for("update");
+const holidaysOn = (tx: Tx, date: Day) => tx.select().from(holidays).where(eq(holidays.date, date)).for("update");
 
 const checkClash = async (tx: Tx, candidate: HolidayRange) => {
     const clash = findHolidayClash(await holidaysOn(tx, candidate.date), candidate);

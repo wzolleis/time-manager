@@ -1,4 +1,5 @@
 import {describe, expect, it} from "vitest";
+import {day} from "../../../../shared/test-dates";
 import {formatDifference} from "../../../../shared/format";
 import {RuleError} from "../rule-error";
 import {NotFoundError} from "../time-entries-store";
@@ -68,7 +69,7 @@ describe("workDayText", () => {
     const at = (type: EntryView["type"], time: string, projectName: string | null = null): EntryView => ({
         id: time,
         type,
-        day: "2026-10-26",
+        day: day("2026-10-26"),
         time,
         bookedAt: `2026-10-26T${time}:00+01:00`,
         projectId: projectName ? "p1" : null,

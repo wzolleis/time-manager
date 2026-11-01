@@ -1,4 +1,5 @@
 import {Link, useNavigate} from "@tanstack/react-router";
+import type {Day} from "@shared/date-schemas";
 import {MetricCard} from "@/components/cards/metric-card";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {diffClass} from "@/lib/format";
@@ -85,7 +86,7 @@ const columnsOf = (format: TimeFormat): DataTableColumnDef<DayRow>[] => [
 const columns = {minutes: columnsOf("minutes"), industrial: columnsOf("industrial")};
 
 /** anchor ist irgendein Tag der Woche "JJJJ-MM-TT", aus der Adresse in ReportWeeklyPage */
-export function ReportWeekly({anchor}: {anchor: string}) {
+export function ReportWeekly({anchor}: {anchor: Day}) {
     const navigate = useNavigate();
     const report = useShowWeeklyReport(anchor);
     const timeFormat = useTimeFormat();
@@ -96,7 +97,7 @@ export function ReportWeekly({anchor}: {anchor: string}) {
     }
 
     // Blättern ändert die Adresse, der Zurück-Button des Browsers springt dann zur vorherigen Woche
-    const setAnchor = (day: string) => navigate({to: "/user/reports/weekly/$week", params: {week: isoWeekId(day)}});
+    const setAnchor = (day: Day) => navigate({to: "/user/reports/weekly/$week", params: {week: isoWeekId(day)}});
 
     const rows: DayRow[] = totals.days.map((d) => ({...d, isToday: d.day === today}));
     const first = totals.days[0].day;

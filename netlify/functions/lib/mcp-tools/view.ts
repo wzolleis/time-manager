@@ -2,16 +2,15 @@
 // Formate der Tool-Ergebnisse (features/boundaries/mcp-enable.md, „Formate“): Minuten statt Millisekunden,
 // Zeitpunkte als ISO mit Offset, Texte wie in der UI und Markdown-Tabellen. Ohne DB, damit testbar.
 import type {CallToolResult} from "@modelcontextprotocol/sdk/types.js";
+import {type Day, type TimeOfDay, DaySchema} from "../../../../shared/date-schemas";
 import {z} from "zod";
 import {formatDayShort, formatDuration, formatTime} from "../../../../shared/format";
-import {localTimeToUtc} from "../../../../shared/day-range";
+import {localTimeToUtc, TZ} from "../../../../shared/day-range";
 import {type Booking, localDay} from "../../../../shared/time-rules";
 import {hasDbCode} from "../db-errors";
 import {RuleError} from "../rule-error";
 import {NotFoundError, type StoredEntry} from "../time-entries-store";
 import {SettingNotFoundError} from "../user-settings-store";
-
-const TZ = "Europe/Berlin";
 
 /** Ganze Minuten wie in formatDuration und formatDifference: der Betrag wird abgerundet, das Vorzeichen bleibt */
 export const minutes = (ms: number): number => {
@@ -40,7 +39,7 @@ export function localIso(d: Date): string {
 }
 
 /** Tag ("JJJJ-MM-TT") kurz wie in der UI: "Mo., 19.10." */
-export const dayShort = (day: string): string => formatDayShort(localTimeToUtc(day, "12:00"));
+export const dayShort = (day: Day): string => formatDayShort(localTimeToUtc(day, "12:00" as TimeOfDay));
 
 export const typeLabel = (type: Booking["type"]): string => (type === "kommen" ? "Kommen" : "Gehen");
 
@@ -53,7 +52,7 @@ export function mdTable(head: string[], rows: string[][]): string {
 export const EntrySchema = z.object({
     id: z.string(),
     type: z.enum(["kommen", "gehen"]),
-    day: z.string().describe("Tag JJJJ-MM-TT, Berliner Zeit"),
+    day: DaySchema.describe("Tag JJJJ-MM-TT, Berliner Zeit"),
     time: z.string().describe("Uhrzeit HH:mm, Berliner Zeit"),
     bookedAt: z.string().describe("Zeitpunkt ISO-8601 mit Offset"),
     projectId: z.string().nullable(),

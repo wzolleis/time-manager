@@ -8,6 +8,8 @@ import {useUserSettings} from "@/views/user-settings";
 import {checkVacation, countVacationDays} from "@shared/vacation-rules";
 import {VACATION_DAYS_SETTING_ID} from "@shared/user-setting";
 import {historyOf} from "@shared/user-setting-rules";
+import {toDayRange} from "@shared/day-range";
+import {parseDay} from "@shared/date-schemas";
 
 type Addition = {startDate: string; endDate: string};
 
@@ -22,7 +24,8 @@ export function useAddVacation() {
     const settings = useUserSettings(currentUser?.id); // Urlaubstage des Jahres
 
     const save = useMutation({
-        mutationFn: (data: Addition) => createVacation(currentUser!.id, data),
+        mutationFn: (data: Addition) =>
+            createVacation(currentUser!.id, {startDate: parseDay(data.startDate), endDate: parseDay(data.endDate)}),
         onSuccess: () => qc.invalidateQueries({queryKey: ["vacations"]}),
     });
 
@@ -37,8 +40,12 @@ export function useAddVacation() {
                 sickLeaves.data ?? [],
                 historyOf(settings.data, VACATION_DAYS_SETTING_ID),
             ),
-        workdays: ({startDate, endDate}: Addition) =>
-            countVacationDays(startDate, endDate, holidays.data ?? [], sickLeaves.data ?? []),
+        workdays: (input: Addition) => {
+            const range = toDayRange(input);
+            return range
+                ? countVacationDays(range.startDate, range.endDate, holidays.data ?? [], sickLeaves.data ?? [])
+                : 0;
+        },
         add: save.mutate,
         isSaving: save.isPending,
         error: save.error,

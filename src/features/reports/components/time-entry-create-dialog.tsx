@@ -1,4 +1,5 @@
 import {type ComponentProps, useId, useState} from "react";
+import {type Day, toDay} from "@shared/date-schemas";
 import {Button} from "@/components/ui/button";
 import {
     Dialog,
@@ -24,7 +25,7 @@ type EntryType = "kommen" | "gehen";
 type Mode = "stamp" | "day"; // ein Zeitstempel oder ein Zeitraum (ganzer Tag oder Arbeitszeit nach den Buchungen)
 
 type Props = {
-    defaultDay: string; // "JJJJ-MM-TT"
+    defaultDay: Day; // "JJJJ-MM-TT"
     defaultType: EntryType;
     defaultTime?: string; // "HH:mm"; ohne Angabe: jetzt für heute, sonst leer
     label: string;
@@ -62,10 +63,10 @@ export function TimeEntryCreateDialog({
     const [open, setOpen] = useState(false);
     const [mode, setMode] = useState<Mode>("stamp");
     const [day, setDay] = useState(defaultDay);
-    const [time, setTime] = useState("");
+    const [time, setTime] = useState<string>(""); // Eingaben als Text, geprüft wird im Use Case
     const [type, setType] = useState<EntryType>(defaultType);
     const [projectChoice, setProjectChoice] = useState(NO_PROJECT);
-    const [start, setStart] = useState(WORK_DAY_START);
+    const [start, setStart] = useState<string>(WORK_DAY_START);
     const [workTime, setWorkTime] = useState(DAY_WORK_TIME); // Arbeitszeit als "HH:mm"
 
     // Beim Öffnen immer mit den Vorgaben starten, keine alten Eingaben oder Fehler
@@ -85,7 +86,7 @@ export function TimeEntryCreateDialog({
     };
 
     // Vorgaben für einen Zeitraum: am leeren Tag 08:00 und 8 h, an einem Tag mit Buchungen keine
-    const applyDayDefaults = (d: string) => {
+    const applyDayDefaults = (d: Day) => {
         const busy = createDay.hasBookings(d);
         setStart(busy ? "" : WORK_DAY_START);
         setWorkTime(busy ? "" : DAY_WORK_TIME);
@@ -94,7 +95,7 @@ export function TimeEntryCreateDialog({
         if (next === "day") applyDayDefaults(day);
         setMode(next);
     };
-    const changeDay = (next: string) => {
+    const changeDay = (next: Day) => {
         if (mode === "day") applyDayDefaults(next);
         setDay(next);
     };
@@ -142,7 +143,10 @@ export function TimeEntryCreateDialog({
                 type="date"
                 value={day}
                 max={localDay(new Date())}
-                onChange={(e) => e.target.value && changeDay(e.target.value)}
+                onChange={(e) => {
+                    const next = toDay(e.target.value); // leer oder ungültig: der alte Tag bleibt
+                    if (next) changeDay(next);
+                }}
                 required
             />
         </FormField>

@@ -1,9 +1,10 @@
 // netlify/functions/lib/mcp-tools/overtime-view.ts
 // Überstunden für den MCP-Server, gerechnet mit denselben Services wie die UI (Regel 2). Ohne DB, damit testbar.
 import {z} from "zod";
+import {DaySchema} from "../../../../shared/date-schemas";
+import {formatDay} from "../../../../shared/format";
 import {balanceMinutes, formatOffset, overtimeBalanceMs} from "../../../../shared/overtime-rules";
 import {localDay} from "../../../../shared/time-rules";
-import {germanDay} from "../../../../shared/vacation-rules";
 import type {ReportData} from "./report-view";
 import {localIso} from "./view";
 
@@ -14,7 +15,7 @@ export const OvertimeReportSchema = z.object({
         .object({
             offsetMinutes: z.number(),
             offset: z.string(),
-            day: z.string().describe("Tag der Korrektur JJJJ-MM-TT, ab dem weitergerechnet wird"),
+            day: DaySchema.describe("Tag der Korrektur JJJJ-MM-TT, ab dem weitergerechnet wird"),
             created: z.string().describe("Zeitpunkt ISO-8601 mit Offset"),
         })
         .nullable()
@@ -51,7 +52,7 @@ export function overtimeReport(data: ReportData, correction: OvertimeRow | null,
     const lines = [`Überstunden: ${structured.balance}`];
     lines.push(
         structured.correction
-            ? `Korrektur am ${germanDay(structured.correction.day)}: ${structured.correction.offset}`
+            ? `Korrektur am ${formatDay(structured.correction.day)}: ${structured.correction.offset}`
             : "Keine Korrektur",
     );
     return {structured, text: lines.join("\n")};

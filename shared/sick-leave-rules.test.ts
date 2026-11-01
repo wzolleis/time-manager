@@ -1,5 +1,7 @@
 // shared/sick-leave-rules.test.ts
 import {describe, expect, it} from "vitest";
+import type {HolidayDay} from "./holiday-rules";
+import {day} from "./test-dates";
 import {
     bookingsInRangeMessage,
     checkSickLeave,
@@ -12,7 +14,7 @@ import {
 import type {Booking} from "./time-rules";
 import {countWorkdays, dayCount} from "./vacation-rules";
 
-const s = (id: string, startDate: string, endDate: string) => ({id, startDate, endDate});
+const s = (id: string, startDate: string, endDate: string) => ({id, startDate: day(startDate), endDate: day(endDate)});
 const b = (id: string, type: Booking["type"], iso: string): Booking => ({id, type, bookedAt: new Date(iso)});
 
 describe("checkSickLeave", () => {
@@ -25,7 +27,9 @@ describe("checkSickLeave", () => {
 
     it("lehnt einen ungültigen Zeitraum ab", () => {
         expect(checkSickLeave([], s("neu", "2026-10-16", "2026-10-15"))).toBe("Das Ende liegt vor dem Beginn");
-        expect(checkSickLeave([], s("neu", "2026-02-30", "2026-03-02"))).toBe("Ungültiges Datum");
+        expect(checkSickLeave([], {id: "neu", startDate: "2026-02-30", endDate: "2026-03-02"})).toBe(
+            "Ungültiges Datum",
+        );
         expect(checkSickLeave([], s("neu", "2026-01-01", "2027-01-02"))).toBe(
             "Eine Krankmeldung darf höchstens 366 Tage lang sein",
         );
@@ -43,7 +47,7 @@ describe("checkSickLeave", () => {
 });
 
 describe("Krankheitstage", () => {
-    const none: {date: string}[] = []; // ohne Feiertage, auch ohne Neujahr
+    const none: HolidayDay[] = []; // ohne Feiertage, auch ohne Neujahr
 
     it.each([
         ["2026-10-14", "2026-10-14", 1, 1], // Mi
@@ -51,8 +55,8 @@ describe("Krankheitstage", () => {
         ["2026-10-17", "2026-10-18", 2, 0], // nur Wochenende
         ["2026-12-28", "2027-01-08", 12, 10],
     ])("%s bis %s: %i Kalendertage, %i Krankheitstage", (start, end, days, sickDays) => {
-        expect(dayCount(start, end)).toBe(days);
-        expect(countWorkdays(start, end, none)).toBe(sickDays);
+        expect(dayCount(day(start), day(end))).toBe(days);
+        expect(countWorkdays(day(start), day(end), none)).toBe(sickDays);
     });
 
     it("zählen im Jahr nur mit dem Teil, der im Jahr liegt", () => {
@@ -63,15 +67,15 @@ describe("Krankheitstage", () => {
     });
 
     it("Feiertage zählen nicht als Krankheitstage", () => {
-        expect(sickDaysInYear([s("a", "2026-09-28", "2026-10-02")], 2026, [{date: "2026-10-02"}])).toBe(4);
+        expect(sickDaysInYear([s("a", "2026-09-28", "2026-10-02")], 2026, [{date: day("2026-10-02")}])).toBe(4);
     });
 
     it("Beginn und Ende sind Krankheitstage", () => {
         const sickLeaves = [s("a", "2026-10-14", "2026-10-16")];
-        expect(isSickDay("2026-10-13", sickLeaves)).toBe(false);
-        expect(isSickDay("2026-10-14", sickLeaves)).toBe(true);
-        expect(isSickDay("2026-10-16", sickLeaves)).toBe(true);
-        expect(isSickDay("2026-10-17", sickLeaves)).toBe(false);
+        expect(isSickDay(day("2026-10-13"), sickLeaves)).toBe(false);
+        expect(isSickDay(day("2026-10-14"), sickLeaves)).toBe(true);
+        expect(isSickDay(day("2026-10-16"), sickLeaves)).toBe(true);
+        expect(isSickDay(day("2026-10-17"), sickLeaves)).toBe(false);
     });
 });
 
@@ -103,13 +107,13 @@ describe("withoutSickDays", () => {
 describe("Hinweise", () => {
     it("zählt die Buchungen im Zeitraum", () => {
         const entries = [b("1", "kommen", "2026-10-14T06:00:00Z"), b("2", "gehen", "2026-10-14T10:00:00Z")];
-        expect(countBookingsInRange(entries, {startDate: "2026-10-14", endDate: "2026-10-14"})).toBe(2);
-        expect(countBookingsInRange(entries, {startDate: "2026-10-15", endDate: "2026-10-20"})).toBe(0);
+        expect(countBookingsInRange(entries, {startDate: day("2026-10-14"), endDate: day("2026-10-14")})).toBe(2);
+        expect(countBookingsInRange(entries, {startDate: day("2026-10-15"), endDate: day("2026-10-20")})).toBe(0);
     });
 
     it("nennt die Zahl der Buchungen und den Tag", () => {
         expect(bookingsInRangeMessage(2)).toBe("Im Zeitraum gibt es 2 Buchungen. Sie zählen nicht zur Arbeitszeit.");
-        expect(sickDayMessage("2026-10-14")).toBe(
+        expect(sickDayMessage(day("2026-10-14"))).toBe(
             "Der 14.10.2026 ist als Krankheitstag eingetragen. Die Buchung zählt nicht zur Arbeitszeit.",
         );
     });

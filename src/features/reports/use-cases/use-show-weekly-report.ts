@@ -1,4 +1,5 @@
 import {useMemo} from "react";
+import type {Day} from "@shared/date-schemas";
 import {useNow} from "@/lib/use-now";
 import {useCurrentUser} from "@/lib/user-context";
 import {useHolidays} from "@/views/holidays";
@@ -13,7 +14,7 @@ import {SOLL_SETTING_ID} from "@shared/user-setting";
 import {historyOf} from "@shared/user-setting-rules";
 
 /** Der User sieht seinen Wochenbericht für die Woche, in der anchor "JJJJ-MM-TT" liegt */
-export function useShowWeeklyReport(anchor: string) {
+export function useShowWeeklyReport(anchor: Day) {
     const {currentUser} = useCurrentUser();
     const now = useNow();
     const userId = currentUser?.id;

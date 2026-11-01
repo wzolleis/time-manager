@@ -1,3 +1,4 @@
+import type {Day} from "./date-schemas";
 import {addDays, type DayRange, localDayRange, startOfLocalDay} from "./day-range";
 import {industrialHours, type TimeFormat} from "./format";
 import type {HolidayRange} from "./holiday-rules";
@@ -63,7 +64,7 @@ export function overtimeBalanceMs(
     holidays: Pick<HolidayRange, "date" | "name">[],
     sickLeaves: DayRange[],
     soll: SettingHistory,
-    today: string,
+    today: Day,
     now: Date,
 ): number {
     const offsetMs = (correction?.offset ?? 0) * 60_000;
