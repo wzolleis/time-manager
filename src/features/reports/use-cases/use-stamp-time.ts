@@ -1,5 +1,5 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {createTimeEntry} from "@/api/time-entries";
+import {createTimeEntry, toBooking} from "@/api/time-entries";
 import {useNow} from "@/lib/use-now";
 import {useCurrentUser} from "@/lib/user-context";
 import {useProjects} from "@/views/projects";
@@ -34,12 +34,7 @@ export function useStampTime() {
     // Die API liefert die Buchungen nach Zeit sortiert, die letzte bestimmt den Status
     const last = entries.data?.at(-1);
     const isIn = last?.type === "kommen";
-    const missing = entries.data
-        ? findMissingGehen(
-              entries.data.map((e) => ({id: e.id, type: e.type, bookedAt: new Date(e.bookedAt)})),
-              new Date(now),
-          )
-        : null;
+    const missing = entries.data ? findMissingGehen(entries.data.map(toBooking), new Date(now)) : null;
     const today = localDay(new Date(now));
 
     return {
