@@ -1,12 +1,13 @@
+import {formatDay} from "./format";
 import {type DayRange, isInRanges} from "./day-range";
 import type {HolidayDay} from "./holiday-rules";
 import {type Booking, localDay} from "./time-rules";
-import {checkRange, clipToYear, countWorkdays, findOverlap, germanDay, type VacationRange} from "./vacation-rules";
+import {checkRange, clipToYear, countWorkdays, findOverlap, type VacationRange} from "./vacation-rules";
 
 export type SickLeaveRange = VacationRange;
 
 export const sickLeaveOverlapMessage = (s: SickLeaveRange): string =>
-    `Überschneidet sich mit der Krankmeldung vom ${germanDay(s.startDate)} bis ${germanDay(s.endDate)}`;
+    `Überschneidet sich mit der Krankmeldung vom ${formatDay(s.startDate)} bis ${formatDay(s.endDate)}`;
 
 /**
  * null = gültig, sonst eine verständliche Fehlermeldung. Prüft den Zeitraum und die Überschneidung mit
@@ -42,7 +43,7 @@ export const countBookingsInRange = (entries: Booking[], range: DayRange): numbe
 
 /** Hinweis zu einer Buchung an einem Krankheitstag */
 export const sickDayMessage = (day: string): string =>
-    `Der ${germanDay(day)} ist als Krankheitstag eingetragen. Die Buchung zählt nicht zur Arbeitszeit.`;
+    `Der ${formatDay(day)} ist als Krankheitstag eingetragen. Die Buchung zählt nicht zur Arbeitszeit.`;
 
 /** Hinweis zu Buchungen im Zeitraum einer Krankmeldung */
 export const bookingsInRangeMessage = (count: number): string =>

@@ -1,4 +1,5 @@
 // Bewusst ohne Abhängigkeit zur DB, damit Client und Server dieselben Regeln nutzen
+import {formatDay} from "./format";
 import {isValidDay} from "./day-range";
 
 export type HolidayDay = {date: string}; // "JJJJ-MM-TT"
@@ -28,7 +29,7 @@ export function findHolidayClash(existing: HolidayRange[], candidate: HolidayRan
 }
 
 export const holidayClashMessage = (h: HolidayRange): string => {
-    const day = h.date.split("-").reverse().join(".");
+    const day = formatDay(h.date);
     return h.userId === null
         ? `Am ${day} ist bereits der Feiertag „${h.name}“ für alle eingetragen`
         : `Am ${day} ist bereits der Feiertag „${h.name}“ eingetragen`;

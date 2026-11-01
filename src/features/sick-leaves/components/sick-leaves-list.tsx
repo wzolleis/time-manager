@@ -1,9 +1,9 @@
 import {useState} from "react";
+import {formatDay} from "@shared/format";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {actionsColumn} from "@/components/table/actions-column";
 import {MetricCard} from "@/components/cards/metric-card";
 import {localDay} from "@shared/time-rules";
-import {germanDay} from "@shared/vacation-rules";
 import {SickLeaveActions} from "@features/sick-leaves/components/sick-leave-actions";
 import {SickLeaveDialog} from "@features/sick-leaves/components/sick-leave-dialog";
 import {type SickLeaveRow as Row, useShowSickLeaves} from "@features/sick-leaves/use-cases/use-show-sick-leaves";
@@ -18,12 +18,12 @@ const columns: DataTableColumnDef<Row>[] = [
     {
         accessorKey: "startDate",
         header: "Beginn",
-        cell: ({getValue}) => germanDay(getValue<string>()),
+        cell: ({getValue}) => formatDay(getValue<string>()),
     },
     {
         accessorKey: "endDate",
         header: "Ende",
-        cell: ({getValue}) => germanDay(getValue<string>()),
+        cell: ({getValue}) => formatDay(getValue<string>()),
     },
     {accessorKey: "days", header: "Kalendertage", enableSorting: false},
     {accessorKey: "sickDays", header: "Krankheitstage", enableSorting: false}, // ohne Wochenenden und Feiertage

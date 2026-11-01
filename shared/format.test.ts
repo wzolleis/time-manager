@@ -1,6 +1,6 @@
 // shared/format.test.ts
 import {describe, expect, it} from "vitest";
-import {formatDifference, formatDuration, formatMonth, formatMonthName} from "./format";
+import {formatDay, formatDifference, formatDuration, formatMonth, formatMonthName} from "./format";
 
 const MIN = 60_000;
 
@@ -67,5 +67,11 @@ describe("formatMonth", () => {
         expect(formatMonth("2026-10")).toBe("Oktober 2026");
         expect(formatMonth("2027-01")).toBe("Januar 2027");
         expect(formatMonth("2026-12")).toBe("Dezember 2026");
+    });
+});
+
+describe("formatDay", () => {
+    it("schreibt den Tag deutsch", () => {
+        expect(formatDay("2026-06-08")).toBe("08.06.2026");
     });
 });

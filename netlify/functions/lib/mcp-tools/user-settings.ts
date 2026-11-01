@@ -7,7 +7,7 @@ import {localDay} from "../../../../shared/time-rules";
 import {RuleError} from "../rule-error";
 import type {SessionUser} from "../session";
 import {addSettingValue, changeSettingValue, deleteSettingValue, listUserSettings} from "../user-settings-store";
-import {DaySchema} from "./time-entries";
+import {DaySchema} from "../../../../shared/date-schemas";
 import {userSettingsReport, UserSettingsReportSchema} from "./user-settings-view";
 import {ok, run} from "./view";
 

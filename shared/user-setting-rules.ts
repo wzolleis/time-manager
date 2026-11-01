@@ -1,5 +1,6 @@
 // shared/user-setting-rules.ts
 // Regeln der Einstellungen (features/use-case/user-settings.md, Regeln 1 bis 7)
+import {formatDay} from "./format";
 import {isValidDay} from "./day-range";
 import {
     DEFAULT_SOLL_HOURS,
@@ -9,9 +10,6 @@ import {
     type UserSettingsData,
     VACATION_DAYS_SETTING_ID,
 } from "./user-setting";
-
-// Wie germanDay aus vacation-rules.ts, ohne Import: vacation-rules.ts verwendet valueOn
-const germanDay = (day: string): string => day.split("-").reverse().join(".");
 
 export type SettingPoint = {id: string; validFrom: string; value: number};
 
@@ -97,7 +95,7 @@ export function checkSettingValue(
     }
 
     if (others.some((p) => p.validFrom === validFrom)) {
-        return `Für ${setting.name} gibt es ab dem ${germanDay(validFrom)} schon einen Wert`;
+        return `Für ${setting.name} gibt es ab dem ${formatDay(validFrom)} schon einen Wert`;
     }
     return null;
 }

@@ -1,5 +1,5 @@
 // shared/time-rules.ts
-import {localTimeToUtc} from "./day-range";
+import {localTimeToUtc, TZ} from "./day-range";
 
 export type Booking = {
     id: string;
@@ -9,7 +9,6 @@ export type Booking = {
 
 export type Period = {from: Date; to: Date | null}; // to = null: läuft noch
 
-const TZ = "Europe/Berlin";
 const dayFormat = new Intl.DateTimeFormat("sv-SE", {timeZone: TZ}); // ergibt JJJJ-MM-TT
 const timeFormat = new Intl.DateTimeFormat("de-DE", {
     timeZone: TZ,

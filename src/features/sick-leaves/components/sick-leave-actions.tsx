@@ -1,5 +1,5 @@
+import {formatDay} from "@shared/format";
 import {SickLeaveDialog} from "@features/sick-leaves/components/sick-leave-dialog";
-import {germanDay} from "@shared/vacation-rules";
 import type {SickLeave} from "@shared/sick-leave";
 import {useDeleteSickLeave} from "@features/sick-leaves/use-cases/use-delete-sick-leave";
 import {ErrorText} from "@/components/text/error-text";
@@ -17,7 +17,7 @@ export function SickLeaveActions({sickLeave}: {sickLeave: SickLeave}) {
                     title="Krankmeldung löschen?"
                     description={
                         <>
-                            Die Krankmeldung vom {germanDay(sickLeave.startDate)} bis {germanDay(sickLeave.endDate)}{" "}
+                            Die Krankmeldung vom {formatDay(sickLeave.startDate)} bis {formatDay(sickLeave.endDate)}{" "}
                             wird dauerhaft entfernt. Buchungen an diesen Tagen zählen danach wieder zur Arbeitszeit.
                         </>
                     }

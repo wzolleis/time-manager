@@ -8,7 +8,6 @@ import {
     countWorkdays,
     dayCount,
     findOverlap,
-    germanDay,
     isVacationDay,
     overlapMessage,
     vacationBalance,
@@ -31,12 +30,6 @@ describe("dayCount", () => {
     it("ist unabhängig von der Zeitumstellung", () => {
         expect(dayCount("2026-03-28", "2026-03-30")).toBe(3);
         expect(dayCount("2026-10-24", "2026-10-26")).toBe(3);
-    });
-});
-
-describe("germanDay", () => {
-    it("dreht das Datum um", () => {
-        expect(germanDay("2026-06-08")).toBe("08.06.2026");
     });
 });
 

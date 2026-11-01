@@ -1,4 +1,5 @@
 import {addDays} from "./day-range";
+import {MonthSchema, YearSchema} from "./date-schemas";
 
 /** Wochentag eines Tages ("JJJJ-MM-TT"): 0 = Montag ... 6 = Sonntag */
 export function weekdayIndex(day: string): number {
@@ -59,10 +60,10 @@ export function addMonths(month: string, delta: number): string {
 }
 
 /** Monat als "JJJJ-MM" mit Monat 01 bis 12 */
-export const isValidMonth = (month: string): boolean => /^\d{4}-(0[1-9]|1[0-2])$/.test(month);
+export const isValidMonth = (month: string): boolean => MonthSchema.safeParse(month).success;
 
 /** Jahr als vierstelliger Text "JJJJ", ab 1970 */
-export const isValidYear = (year: string): boolean => /^\d{4}$/.test(year) && Number(year) >= 1970;
+export const isValidYear = (year: string): boolean => YearSchema.safeParse(year).success;
 
 /** Die Monate eines Jahres ("JJJJ") als "JJJJ-MM", Januar bis Dezember */
 export const yearMonths = (year: string): string[] =>

@@ -1,9 +1,9 @@
 // netlify/functions/lib/mcp-tools/reports.ts
 // Tools der Berichte. Gerechnet wird in report-view.ts mit den Services der UI (Regel 2).
 import type {McpServer} from "@modelcontextprotocol/sdk/server/mcp.js";
-import {z} from "zod";
 import {localDay} from "../../../../shared/time-rules";
-import {isValidYear, monthOf} from "../../../../shared/week";
+import {monthOf} from "../../../../shared/week";
+import {DaySchema, MonthSchema, YearSchema} from "../../../../shared/date-schemas";
 import type {SessionUser} from "../session";
 import {loadReportData} from "./data";
 import {
@@ -16,11 +16,7 @@ import {
     yearlyReport,
     YearlyReportSchema,
 } from "./report-view";
-import {DaySchema} from "./time-entries";
 import {ok, run} from "./view";
-
-const MonthSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Monat als JJJJ-MM");
-const YearSchema = z.string().refine(isValidYear, "Jahr als JJJJ, ab 1970");
 
 const SHOW_TABLE = "Zeige dem User die Tabelle aus dem Text so, wie sie ist; rechne nicht selbst nach.";
 

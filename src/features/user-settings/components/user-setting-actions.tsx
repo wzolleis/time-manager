@@ -1,4 +1,4 @@
-import {germanDay} from "@shared/vacation-rules";
+import {formatDay} from "@shared/format";
 import {UserSettingDialog} from "@features/user-settings/components/user-setting-dialog";
 import type {UserSettingRow} from "@features/user-settings/use-cases/use-show-user-settings";
 import {useDeleteUserSetting} from "@features/user-settings/use-cases/use-delete-user-setting";
@@ -35,7 +35,7 @@ export function UserSettingActions({row}: {row: UserSettingRow}) {
                     title="Geplanten Wert löschen?"
                     description={
                         <>
-                            {setting.name} {row.text} ab dem {germanDay(value.validFrom)} wird entfernt. Danach gilt
+                            {setting.name} {row.text} ab dem {formatDay(value.validFrom)} wird entfernt. Danach gilt
                             weiter der bisherige Wert.
                         </>
                     }

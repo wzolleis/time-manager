@@ -1,6 +1,6 @@
+import {formatDay} from "@shared/format";
 import {HolidayDialog} from "@features/holidays/components/holiday-dialog";
 import {useDeleteHoliday} from "@features/holidays/use-cases/use-delete-holiday";
-import {germanDay} from "@shared/vacation-rules";
 import type {Holiday} from "@shared/holiday";
 import {ErrorText} from "@/components/text/error-text";
 import {ConfirmDeleteButton} from "@/components/buttons/confirm-delete-button";
@@ -17,7 +17,7 @@ export function HolidayActions({holiday, userName}: {holiday: Holiday; userName?
                     title="Feiertag löschen?"
                     description={
                         <>
-                            Der Feiertag „{holiday.name}“ am {germanDay(holiday.date)} wird dauerhaft entfernt.
+                            Der Feiertag „{holiday.name}“ am {formatDay(holiday.date)} wird dauerhaft entfernt.
                             {holiday.userId === null && " Er fehlt danach bei allen Usern."}
                         </>
                     }

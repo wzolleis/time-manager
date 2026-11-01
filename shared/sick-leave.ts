@@ -1,10 +1,9 @@
 import {z} from "zod";
 import {createInsertSchema, createSelectSchema, createUpdateSchema} from "drizzle-zod";
 import {sickLeaves} from "../db/schema";
-import {isValidDay} from "./day-range";
+import {DaySchema} from "./date-schemas";
 import {checkRange} from "./vacation-rules";
 
-const day = z.string().refine(isValidDay, "Ungültiges Datum (JJJJ-MM-TT)");
 const note = z.string().max(500, "Die Notiz darf höchstens 500 Zeichen lang sein").nullable();
 const RANGE_LABEL = "Eine Krankmeldung";
 
@@ -12,8 +11,8 @@ export const SickLeaveSchema = createSelectSchema(sickLeaves);
 
 // Der User steht im Pfad der API, nicht im Body
 export const SickLeaveCreateSchema = createInsertSchema(sickLeaves, {
-    startDate: day,
-    endDate: day,
+    startDate: DaySchema,
+    endDate: DaySchema,
     note: note.optional(),
 })
     .omit({id: true, userId: true})
@@ -25,8 +24,8 @@ export const SickLeaveCreateSchema = createInsertSchema(sickLeaves, {
 // Beim Update ersetzt eine Verfeinerung die Definition des Felds samt Optionalität,
 // deshalb hier ausdrücklich .optional()
 export const SickLeaveUpdateSchema = createUpdateSchema(sickLeaves, {
-    startDate: day.optional(),
-    endDate: day.optional(),
+    startDate: DaySchema.optional(),
+    endDate: DaySchema.optional(),
     note: note.optional(),
 })
     .omit({id: true, userId: true}) // eine Krankmeldung wandert nicht zu einem anderen User

@@ -1,6 +1,6 @@
+import {formatDay} from "@shared/format";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {actionsColumn} from "@/components/table/actions-column";
-import {germanDay} from "@shared/vacation-rules";
 import {UserSettingActions} from "@features/user-settings/components/user-setting-actions";
 import {
     type UserSettingRow as Row,
@@ -36,7 +36,7 @@ const columns: DataTableColumnDef<Row>[] = [
         header: "gültig ab",
         enableSorting: false,
         meta: wrapOnPhone,
-        cell: ({row}) => (row.original.validFrom ? germanDay(row.original.validFrom) : "–"),
+        cell: ({row}) => (row.original.validFrom ? formatDay(row.original.validFrom) : "–"),
     },
     {accessorKey: "status", header: "Status", enableSorting: false},
     {

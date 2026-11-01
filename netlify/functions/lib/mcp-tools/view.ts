@@ -4,14 +4,12 @@
 import type {CallToolResult} from "@modelcontextprotocol/sdk/types.js";
 import {z} from "zod";
 import {formatDayShort, formatDuration, formatTime} from "../../../../shared/format";
-import {localTimeToUtc} from "../../../../shared/day-range";
+import {localTimeToUtc, TZ} from "../../../../shared/day-range";
 import {type Booking, localDay} from "../../../../shared/time-rules";
 import {hasDbCode} from "../db-errors";
 import {RuleError} from "../rule-error";
 import {NotFoundError, type StoredEntry} from "../time-entries-store";
 import {SettingNotFoundError} from "../user-settings-store";
-
-const TZ = "Europe/Berlin";
 
 /** Ganze Minuten wie in formatDuration und formatDifference: der Betrag wird abgerundet, das Vorzeichen bleibt */
 export const minutes = (ms: number): number => {

@@ -1,9 +1,9 @@
 // netlify/functions/lib/mcp-tools/user-settings-view.ts
 // Einstellungen für den MCP-Server, mit denselben Regeln wie die Seite „Einstellungen“. Ohne DB, damit testbar.
 import {z} from "zod";
+import {formatDay} from "../../../../shared/format";
 import type {UserSettingsData} from "../../../../shared/user-setting";
 import {historyOf, settingStatus, valueOn} from "../../../../shared/user-setting-rules";
-import {germanDay} from "../../../../shared/vacation-rules";
 import {mdTable} from "./view";
 
 const StatusSchema = z.enum(["aktuell", "geplant", "abgelaufen"]);
@@ -58,7 +58,7 @@ export function userSettingsReport(data: UserSettingsData, today: string) {
         const unit = s.unit ? ` ${UNIT_TEXT[s.unit]}` : "";
         return [
             [s.name, `${s.defaultValue}${unit}`, "–", s.defaultStatus, ""],
-            ...s.values.map((v) => [s.name, `${v.value}${unit}`, germanDay(v.validFrom), v.status, v.id]),
+            ...s.values.map((v) => [s.name, `${v.value}${unit}`, formatDay(v.validFrom), v.status, v.id]),
         ];
     });
     const text = mdTable(["Name", "Wert", "gültig ab", "Status", "ID"], rows);

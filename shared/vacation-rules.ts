@@ -1,3 +1,4 @@
+import {formatDay} from "./format";
 import {addDays, type DayRange, isInRanges, isValidDay} from "./day-range";
 import {type HolidayDay, isHoliday} from "./holiday-rules";
 import {type SettingHistory, valueOn} from "./user-setting-rules";
@@ -15,9 +16,6 @@ const utc = (day: string): number => {
 
 /** Kalendertage inklusive Beginn und Ende */
 export const dayCount = (start: string, end: string): number => Math.round((utc(end) - utc(start)) / DAY_MS) + 1;
-
-/** Deutsches Datum: "2026-06-08" wird zu "08.06.2026" */
-export const germanDay = (day: string): string => day.split("-").reverse().join(".");
 
 /** null = gültig, sonst eine verständliche Fehlermeldung. what nennt den Zeitraum in der Meldung zur Länge. */
 export function checkRange(start: string, end: string, what = "Ein Urlaub"): string | null {
@@ -42,7 +40,7 @@ export function findOverlap(existing: VacationRange[], candidate: VacationRange)
 }
 
 export const overlapMessage = (v: VacationRange): string =>
-    `Überschneidet sich mit dem Urlaub vom ${germanDay(v.startDate)} bis ${germanDay(v.endDate)}`;
+    `Überschneidet sich mit dem Urlaub vom ${formatDay(v.startDate)} bis ${formatDay(v.endDate)}`;
 
 /** Arbeitstage (Montag bis Freitag) im Zeitraum, Feiertage zählen nicht mit */
 export function countWorkdays(start: string, end: string, holidays: HolidayDay[]): number {

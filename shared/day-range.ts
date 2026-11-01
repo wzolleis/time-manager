@@ -1,4 +1,7 @@
-const TZ = "Europe/Berlin";
+import {DaySchema} from "./date-schemas";
+
+/** Alle lokalen Tage und Uhrzeiten gelten in dieser Zeitzone */
+export const TZ = "Europe/Berlin";
 
 const formatter = new Intl.DateTimeFormat("en-US", {
     timeZone: TZ,
@@ -44,13 +47,8 @@ export function localDayRange(day: string): {start: Date; end: Date} {
     return {start: startOfLocalDay(day), end: startOfLocalDay(addDays(day, 1))};
 }
 
-/** "JJJJ-MM-TT" und ein echtes Kalenderdatum (2026-02-30 ist ungültig) */
-export function isValidDay(day: string): boolean {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return false;
-    const [y, m, d] = day.split("-").map(Number);
-    const date = new Date(Date.UTC(y, m - 1, d));
-    return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
-}
+/** "JJJJ-MM-TT", ein echtes Kalenderdatum ab 1970 (2026-02-30 ist ungültig), geprüft mit DaySchema */
+export const isValidDay = (day: string): boolean => DaySchema.safeParse(day).success;
 
 /** Ein Zeitraum ganzer Tage ("JJJJ-MM-TT"), das Ende ist eingeschlossen */
 export type DayRange = {startDate: string; endDate: string};

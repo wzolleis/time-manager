@@ -1,17 +1,15 @@
 import {z} from "zod";
 import {createInsertSchema, createSelectSchema, createUpdateSchema} from "drizzle-zod";
 import {vacations} from "../db/schema";
-import {isValidDay} from "./day-range";
+import {DaySchema} from "./date-schemas";
 import {checkRange} from "./vacation-rules";
-
-const day = z.string().refine(isValidDay, "Ungültiges Datum (JJJJ-MM-TT)");
 
 export const VacationSchema = createSelectSchema(vacations);
 
 // Der User steht im Pfad der API, nicht im Body
 export const VacationCreateSchema = createInsertSchema(vacations, {
-    startDate: day,
-    endDate: day,
+    startDate: DaySchema,
+    endDate: DaySchema,
 })
     .omit({id: true, userId: true})
     .superRefine((v, ctx) => {
@@ -22,8 +20,8 @@ export const VacationCreateSchema = createInsertSchema(vacations, {
 // Beim Update ersetzt eine Verfeinerung die Definition des Felds samt Optionalität,
 // deshalb hier ausdrücklich .optional()
 export const VacationUpdateSchema = createUpdateSchema(vacations, {
-    startDate: day.optional(),
-    endDate: day.optional(),
+    startDate: DaySchema.optional(),
+    endDate: DaySchema.optional(),
 })
     .omit({id: true, userId: true}) // ein Urlaub wandert nicht zu einem anderen User
     .superRefine((v, ctx) => {

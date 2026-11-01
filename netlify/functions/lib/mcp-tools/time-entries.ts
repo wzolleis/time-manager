@@ -4,9 +4,10 @@
 import type {McpServer} from "@modelcontextprotocol/sdk/server/mcp.js";
 import {z} from "zod";
 import {formatTime} from "../../../../shared/format";
-import {addDays, isValidDay, localTimeToUtc, startOfLocalDay} from "../../../../shared/day-range";
+import {addDays, localTimeToUtc, startOfLocalDay} from "../../../../shared/day-range";
+import {DaySchema, TimeOfDaySchema} from "../../../../shared/date-schemas";
 import {isSickDay, sickDayMessage} from "../../../../shared/sick-leave-rules";
-import {TimeOfDaySchema, type TimeEntryUpdate} from "../../../../shared/time-entry";
+import type {TimeEntryUpdate} from "../../../../shared/time-entry";
 import {findMissingGehen, localDay, WORK_DAY_MINUTES, WORK_DAY_START} from "../../../../shared/time-rules";
 import type {SessionUser} from "../session";
 import {
@@ -35,7 +36,6 @@ import {
     workDayText,
 } from "./view";
 
-export const DaySchema = z.string().refine(isValidDay, "Tag als JJJJ-MM-TT");
 const TypeSchema = z.enum(["kommen", "gehen"]);
 const ProjectIdSchema = z.uuid().describe("ID aus list_projects, nur beim Kommen");
 
