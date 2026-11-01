@@ -78,7 +78,9 @@ Schema in `shared/api-token.ts`, Migration mit `npm run db:generate`.
 2. **Nur einmal sichtbar:** Das Token steht nur in der Antwort auf das Erzeugen, danach nie wieder. Keine
    Antwort enthält den Hash.
 3. **Gültigkeit:** Der User wählt beim Erzeugen 30 Tage, 90 Tage, 1 Jahr oder kein Ablauf, vorausgewählt
-   sind 90 Tage. Gespeichert wird der Zeitpunkt `expiresAt`, bei „kein Ablauf“ `null`. Die Gültigkeit
+   sind 90 Tage. Gezählt werden Kalendertage in Europe/Berlin: das Token läuft zur selben lokalen Uhrzeit ab,
+   zu der es erzeugt wurde, auch über eine Zeitumstellung (`tokenExpiry` in `shared/api-token-rules.ts`).
+   Gespeichert wird der Zeitpunkt `expiresAt`, bei „kein Ablauf“ `null`. Die Gültigkeit
    lässt sich danach nicht ändern, der User erzeugt dann ein neues Token.
 4. **Widerrufen** löscht die Zeile. Es gibt keinen Status „widerrufen“, ein gelöschtes Token ist unbekannt.
 5. **Nur für `/api/mcp`:** Die übrigen Endpoints akzeptieren weiterhin nur das Session-Cookie, und
