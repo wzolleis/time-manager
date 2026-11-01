@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
 import {endpointPath, matchesPattern, requiredRoleId} from "./roles";
-import {ADMIN_ROLE_ID, USER_ROLE_ID} from "../../../shared/role";
+import {ADMIN_ROLE_ID, USER_ROLE_ID} from "@shared/role";
 
 const ID = "275f12fb-e116-4857-9f12-fbe116b857fb";
 const OTHER_ROLE_ID = "11111111-1111-4111-8111-111111111111";

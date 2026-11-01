@@ -2,11 +2,11 @@
 // Formate der Tool-Ergebnisse (features/boundaries/mcp-enable.md, „Formate“): Minuten statt Millisekunden,
 // Zeitpunkte als ISO mit Offset, Texte wie in der UI und Markdown-Tabellen. Ohne DB, damit testbar.
 import type {CallToolResult} from "@modelcontextprotocol/sdk/types.js";
-import {type Day, type TimeOfDay, DaySchema} from "../../../../shared/date-schemas";
+import {type Day, type TimeOfDay, DaySchema} from "@shared/date-schemas";
 import {z} from "zod";
-import {formatDayShort, formatDuration, formatTime} from "../../../../shared/format";
-import {localTimeToUtc, TZ} from "../../../../shared/day-range";
-import {type Booking, localDay} from "../../../../shared/time-rules";
+import {formatDayShort, formatDuration, formatTime} from "@shared/format";
+import {localTimeToUtc, TZ} from "@shared/day-range";
+import {type Booking, localDay} from "@shared/time-rules";
 import {hasDbCode} from "../db-errors";
 import {RuleError} from "../rule-error";
 import {NotFoundError, type StoredEntry} from "../time-entries-store";

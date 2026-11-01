@@ -1,5 +1,5 @@
 import {describe, expect, it} from "vitest";
-import {day, month, year} from "../../../../shared/test-dates";
+import {day, month, year} from "@shared/test-dates";
 import type {StoredEntry} from "../time-entries-store";
 import {
     dailyReport,
@@ -11,8 +11,8 @@ import {
     yearlyReport,
     YearlyReportSchema,
 } from "./report-view";
-import {yearTotals} from "../../../../shared/time-report";
-import {defaultHistory} from "../../../../shared/user-setting-rules";
+import {yearTotals} from "@shared/time-report";
+import {defaultHistory} from "@shared/user-setting-rules";
 
 const entry = (id: string, type: StoredEntry["type"], iso: string, projectId: string | null = null): StoredEntry => ({
     id,

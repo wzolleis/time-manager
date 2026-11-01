@@ -14,8 +14,8 @@ import {
 import {isoBase64URL} from "@simplewebauthn/server/helpers";
 import {db} from "./lib/db";
 import {passkeys, users} from "../../db/schema";
-import {LoginSchema, PasswordChangeSchema, PasswordResetSchema} from "../../shared/auth";
-import {CREDENTIAL_ID_MAX_LENGTH, PasskeyLoginSchema, PasskeyRegisterSchema} from "../../shared/passkey";
+import {LoginSchema, PasswordChangeSchema, PasswordResetSchema} from "@shared/auth";
+import {CREDENTIAL_ID_MAX_LENGTH, PasskeyLoginSchema, PasskeyRegisterSchema} from "@shared/passkey";
 import {hasDbCode} from "./lib/db-errors";
 import {consumeChallenge, RP_NAME, relyingParty, saveChallenge} from "./lib/passkey";
 import {withTiming} from "./lib/timing";

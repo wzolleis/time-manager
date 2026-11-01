@@ -6,14 +6,14 @@ import {db} from "./lib/db";
 import {hasDbCode} from "./lib/db-errors";
 import {withTiming} from "./lib/timing";
 import {holidays, sickLeaves, users, vacations} from "../../db/schema";
-import {checkRange, checkYearLimit, findOverlap, overlapMessage} from "../../shared/vacation-rules";
-import {VacationCreateSchema, VacationUpdateSchema} from "../../shared/vacation";
+import {checkRange, checkYearLimit, findOverlap, overlapMessage} from "@shared/vacation-rules";
+import {VacationCreateSchema, VacationUpdateSchema} from "@shared/vacation";
 import {IdSchema, isRoutePath, notFound, pathParams} from "./lib/id";
 import {ensureAccess, forbidden, ForbiddenError} from "./lib/roles";
 import {type Session, withSession} from "./lib/session";
 import {RuleError, ruleViolation} from "./lib/rule-error";
 import {loadSettingHistory} from "./lib/user-settings-store";
-import {VACATION_DAYS_SETTING_ID} from "../../shared/user-setting";
+import {VACATION_DAYS_SETTING_ID} from "@shared/user-setting";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Executor = Pick<typeof db, "select">;

@@ -5,7 +5,7 @@ import {db} from "../db";
 import {holidays, projects, sickLeaves, vacations} from "../../../../db/schema";
 import {listEntries} from "../time-entries-store";
 import {loadSettingHistory} from "../user-settings-store";
-import {SOLL_SETTING_ID} from "../../../../shared/user-setting";
+import {SOLL_SETTING_ID} from "@shared/user-setting";
 import type {ReportData} from "./report-view";
 
 export const loadProjects = () => db.select().from(projects).orderBy(asc(projects.name));

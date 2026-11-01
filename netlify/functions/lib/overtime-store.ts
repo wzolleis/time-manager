@@ -3,7 +3,7 @@
 import {eq} from "drizzle-orm";
 import {db} from "./db";
 import {overtime} from "../../../db/schema";
-import {checkOffset} from "../../../shared/overtime-rules";
+import {checkOffset} from "@shared/overtime-rules";
 import {RuleError} from "./rule-error";
 
 /** Die Korrektur des Users, null: noch keine */

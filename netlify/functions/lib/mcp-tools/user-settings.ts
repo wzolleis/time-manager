@@ -3,11 +3,11 @@
 // Seite „Einstellungen“. Die Regeln prüft lib/user-settings-store.ts wie bei der REST-API.
 import type {McpServer} from "@modelcontextprotocol/sdk/server/mcp.js";
 import {z} from "zod";
-import {localDay} from "../../../../shared/time-rules";
+import {localDay} from "@shared/time-rules";
 import {RuleError} from "../rule-error";
 import type {SessionUser} from "../session";
 import {addSettingValue, changeSettingValue, deleteSettingValue, listUserSettings} from "../user-settings-store";
-import {DaySchema} from "../../../../shared/date-schemas";
+import {DaySchema} from "@shared/date-schemas";
 import {userSettingsReport, UserSettingsReportSchema} from "./user-settings-view";
 import {ok, run} from "./view";
 

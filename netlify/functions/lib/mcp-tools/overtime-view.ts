@@ -1,10 +1,10 @@
 // netlify/functions/lib/mcp-tools/overtime-view.ts
 // Überstunden für den MCP-Server, gerechnet mit denselben Services wie die UI (Regel 2). Ohne DB, damit testbar.
 import {z} from "zod";
-import {DaySchema} from "../../../../shared/date-schemas";
-import {formatDay} from "../../../../shared/format";
-import {balanceMinutes, formatOffset, overtimeBalanceMs} from "../../../../shared/overtime-rules";
-import {localDay} from "../../../../shared/time-rules";
+import {DaySchema} from "@shared/date-schemas";
+import {formatDay} from "@shared/format";
+import {balanceMinutes, formatOffset, overtimeBalanceMs} from "@shared/overtime-rules";
+import {localDay} from "@shared/time-rules";
 import type {ReportData} from "./report-view";
 import {localIso} from "./view";
 

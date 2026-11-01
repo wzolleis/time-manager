@@ -4,15 +4,9 @@ import {randomUUID} from "node:crypto";
 import {and, asc, eq} from "drizzle-orm";
 import {db} from "./db";
 import {userSettings, userSettingValues, users} from "../../../db/schema";
-import {localDay} from "../../../shared/time-rules";
-import type {UserSettingsData, UserSettingValueCreate, UserSettingValueUpdate} from "../../../shared/user-setting";
-import {
-    checkChange,
-    checkDelete,
-    checkSettingValue,
-    historyOf,
-    type SettingHistory,
-} from "../../../shared/user-setting-rules";
+import {localDay} from "@shared/time-rules";
+import type {UserSettingsData, UserSettingValueCreate, UserSettingValueUpdate} from "@shared/user-setting";
+import {checkChange, checkDelete, checkSettingValue, historyOf, type SettingHistory} from "@shared/user-setting-rules";
 import {RuleError} from "./rule-error";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];

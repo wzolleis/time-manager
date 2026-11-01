@@ -4,7 +4,7 @@ import type {Context} from "@netlify/functions";
 import {eq} from "drizzle-orm";
 import {db} from "./db";
 import {apiTokens, users} from "../../../db/schema";
-import {API_TOKEN_PREFIX, isTokenExpired} from "../../../shared/api-token-rules";
+import {API_TOKEN_PREFIX, isTokenExpired} from "@shared/api-token-rules";
 import {endpointPath, forbidden, hasEndpointAccess} from "./roles";
 import type {SessionUser} from "./session";
 

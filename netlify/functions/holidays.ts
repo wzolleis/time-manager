@@ -1,5 +1,5 @@
 import type {Config, Context} from "@netlify/functions";
-import type {Day} from "../../shared/date-schemas";
+import type {Day} from "@shared/date-schemas";
 import {randomUUID} from "node:crypto";
 import {asc, eq, isNull, or} from "drizzle-orm";
 import {z} from "zod";
@@ -7,8 +7,8 @@ import {db} from "./lib/db";
 import {hasDbCode} from "./lib/db-errors";
 import {withTiming} from "./lib/timing";
 import {holidays, users} from "../../db/schema";
-import {findHolidayClash, holidayClashMessage, type HolidayRange} from "../../shared/holiday-rules";
-import {HolidayCreateSchema, HolidayUpdateSchema} from "../../shared/holiday";
+import {findHolidayClash, holidayClashMessage, type HolidayRange} from "@shared/holiday-rules";
+import {HolidayCreateSchema, HolidayUpdateSchema} from "@shared/holiday";
 import {IdSchema, isRoutePath, notFound, pathParams} from "./lib/id";
 import {ensureAccess, forbidden, ForbiddenError} from "./lib/roles";
 import {type Session, withSession} from "./lib/session";
