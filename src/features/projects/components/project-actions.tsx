@@ -1,13 +1,12 @@
 import {useState} from "react";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {Button} from "@/components/ui/button";
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import type {Project, ProjectUpdate} from "@shared/project";
 import {deleteProject, updateProject} from "@/api/projects";
 import {ErrorText} from "@/components/text/error-text";
 import {FormField} from "@/components/form/form-field";
-import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {EditDialog} from "@/components/form/edit-dialog";
 import {ConfirmDeleteButton} from "@/components/buttons/confirm-delete-button";
 
 /** Aktionen je Zeile: Projekt bearbeiten oder löschen */
@@ -72,29 +71,18 @@ export function ProjectActions({project}: {project: Project}) {
 
             {remove.isError && <ErrorText className="text-right">{remove.error.message}</ErrorText>}
 
-            <Dialog open={open} onOpenChange={handleOpenChange}>
-                <DialogContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <DialogHeader>
-                            <DialogTitle>Projekt bearbeiten</DialogTitle>
-                            <DialogDescription>Änderungen gelten nach dem Speichern sofort.</DialogDescription>
-                        </DialogHeader>
-
-                        <FormField label="Name" htmlFor={fieldId("name")}>
-                            <Input
-                                id={fieldId("name")}
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                required
-                            />
-                        </FormField>
-
-                        {update.isError && <ErrorText>{update.error.message}</ErrorText>}
-
-                        <FormDialogFooter onCancel={() => setOpen(false)} saving={update.isPending} />
-                    </form>
-                </DialogContent>
-            </Dialog>
+            <EditDialog
+                title="Projekt bearbeiten"
+                open={open}
+                onOpenChange={handleOpenChange}
+                onSubmit={handleSubmit}
+                saving={update.isPending}
+                error={update.error}
+            >
+                <FormField label="Name" htmlFor={fieldId("name")}>
+                    <Input id={fieldId("name")} value={name} onChange={(e) => setName(e.target.value)} required />
+                </FormField>
+            </EditDialog>
         </div>
     );
 }
