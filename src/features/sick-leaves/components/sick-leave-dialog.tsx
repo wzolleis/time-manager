@@ -17,6 +17,7 @@ import {useChangeSickLeave} from "@features/sick-leaves/use-cases/use-change-sic
 import {Muted} from "@/components/text/muted";
 import {ErrorText} from "@/components/text/error-text";
 import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {DateRangeFields} from "@/components/form/date-range-fields";
 import {FormField} from "@/components/form/form-field";
 
 type Props = {
@@ -59,12 +60,6 @@ export function SickLeaveDialog({sickLeave, label, variant = "outline", size = "
         setOpen(next);
     };
 
-    const onStartChange = (value: string) => {
-        if (!value) return;
-        setStart(value);
-        if (end < value) setEnd(value); // das Ende zieht mit, wenn es sonst davor läge
-    };
-
     const range = {startDate: start, endDate: end};
     const problem =
         !start || !end
@@ -97,27 +92,14 @@ export function SickLeaveDialog({sickLeave, label, variant = "outline", size = "
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <FormField label="Beginn" htmlFor={`${uid}-start`}>
-                            <Input
-                                id={`${uid}-start`}
-                                type="date"
-                                value={start}
-                                onChange={(e) => onStartChange(e.target.value)}
-                                required
-                            />
-                        </FormField>
-                        <FormField label="Ende" htmlFor={`${uid}-end`}>
-                            <Input
-                                id={`${uid}-end`}
-                                type="date"
-                                value={end}
-                                min={start || undefined}
-                                onChange={(e) => e.target.value && setEnd(e.target.value)}
-                                required
-                            />
-                        </FormField>
-                    </div>
+                    <DateRangeFields
+                        start={start}
+                        end={end}
+                        onChange={(s, e) => {
+                            setStart(s);
+                            setEnd(e);
+                        }}
+                    />
 
                     <FormField label="Notiz" htmlFor={`${uid}-note`}>
                         <Input
