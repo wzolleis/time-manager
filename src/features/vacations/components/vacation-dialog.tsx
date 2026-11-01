@@ -1,4 +1,4 @@
-import {type ComponentProps, useId, useState} from "react";
+import {type ComponentProps, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {Muted} from "@/components/text/muted";
 import {
@@ -9,7 +9,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import {Input} from "@/components/ui/input";
 import {localDay} from "@shared/time-rules";
 import {dayCount} from "@shared/vacation-rules";
 import {toDayRange} from "@shared/day-range";
@@ -18,7 +17,7 @@ import {useAddVacation} from "@features/vacations/use-cases/use-add-vacation";
 import {useChangeVacation} from "@features/vacations/use-cases/use-change-vacation";
 import {ErrorText} from "@/components/text/error-text";
 import {FormDialogFooter} from "@/components/form/form-dialog-footer";
-import {FormField} from "@/components/form/form-field";
+import {DateRangeFields} from "@/components/form/date-range-fields";
 
 type Props = {
     vacation?: Vacation; // mit Urlaub: bearbeiten, ohne: neu anlegen
@@ -28,7 +27,6 @@ type Props = {
 };
 
 export function VacationDialog({vacation, label, variant = "outline", size = "sm"}: Props) {
-    const uid = useId();
     const add = useAddVacation();
     const change = useChangeVacation();
     const save = vacation ? change : add;
@@ -53,12 +51,6 @@ export function VacationDialog({vacation, label, variant = "outline", size = "sm
             save.reset();
         }
         setOpen(next);
-    };
-
-    const onStartChange = (value: string) => {
-        if (!value) return;
-        setStart(value);
-        if (end < value) setEnd(value); // das Ende zieht mit, wenn es sonst davor läge
     };
 
     const range = {startDate: start, endDate: end};
@@ -93,27 +85,14 @@ export function VacationDialog({vacation, label, variant = "outline", size = "sm
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <FormField label="Beginn" htmlFor={`${uid}-start`}>
-                            <Input
-                                id={`${uid}-start`}
-                                type="date"
-                                value={start}
-                                onChange={(e) => onStartChange(e.target.value)}
-                                required
-                            />
-                        </FormField>
-                        <FormField label="Ende" htmlFor={`${uid}-end`}>
-                            <Input
-                                id={`${uid}-end`}
-                                type="date"
-                                value={end}
-                                min={start || undefined}
-                                onChange={(e) => e.target.value && setEnd(e.target.value)}
-                                required
-                            />
-                        </FormField>
-                    </div>
+                    <DateRangeFields
+                        start={start}
+                        end={end}
+                        onChange={(s, e) => {
+                            setStart(s);
+                            setEnd(e);
+                        }}
+                    />
 
                     {problem ? (
                         <ErrorText alert={false}>{problem}</ErrorText>

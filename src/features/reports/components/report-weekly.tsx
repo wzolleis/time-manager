@@ -2,16 +2,8 @@ import {Link, useNavigate} from "@tanstack/react-router";
 import type {Day} from "@shared/date-schemas";
 import {MetricCard} from "@/components/cards/metric-card";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
-import {diffClass} from "@/lib/format";
 import {useTimeFormat} from "@/lib/use-time-format";
-import {
-    formatDayMonth,
-    formatDayShort,
-    formatDifference,
-    formatDuration,
-    dayKindLabel,
-    type TimeFormat,
-} from "@shared/format";
+import {formatDayMonth, formatDayShort, formatDuration, dayKindLabel, type TimeFormat} from "@shared/format";
 import {addDays, localDayRange} from "@shared/day-range";
 import type {WeekDayTotals} from "@shared/time-report";
 import {isoWeekId} from "@shared/week";
@@ -21,66 +13,46 @@ import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
 import {PageHeader} from "@/components/page/page-header";
 import {PeriodNav} from "@/components/buttons/period-nav";
+import {dash, periodColumns} from "@features/reports/components/report-columns";
+import {DiffMetric, WorkMetric} from "@features/reports/components/report-metrics";
 
 type DayRow = WeekDayTotals & {isToday: boolean};
 
-const dash = "–";
-
-const columnsOf = (format: TimeFormat): DataTableColumnDef<DayRow>[] => [
-    {
-        accessorKey: "day",
-        header: "Tag",
-        cell: ({row}) => (
-            <span className={row.original.isToday ? "font-semibold" : undefined}>
-                <Link to="/user/reports/daily/$day" params={{day: row.original.day}} className="underline">
-                    {formatDayShort(localDayRange(row.original.day).start)}
-                </Link>
-                {row.original.isToday && " · heute"}
-                {(row.original.kind === "vacation" ||
-                    row.original.kind === "holiday" ||
-                    row.original.kind === "sick") && (
-                    <span className="ml-2 text-muted-foreground">
-                        {dayKindLabel(row.original.kind, row.original.holidayName)}
-                    </span>
-                )}
-                {row.original.missingGehen && <span className="ml-2 text-destructive">Gehen fehlt</span>}
-            </span>
-        ),
-    },
-    {
-        accessorKey: "targetMs",
-        header: "Soll",
-        enableSorting: false,
-        cell: ({row}) => (row.original.targetMs > 0 ? formatDuration(row.original.targetMs, format) : dash),
-    },
-    {
-        accessorKey: "workMs",
-        header: "Arbeitszeit",
-        enableSorting: false,
-        cell: ({row}) => (row.original.workMs > 0 ? formatDuration(row.original.workMs, format) : dash),
-    },
-    {
-        accessorKey: "breakMs",
-        header: "Pausen",
-        enableSorting: false,
-        cell: ({row}) => (row.original.breakMs > 0 ? formatDuration(row.original.breakMs, format) : dash),
-    },
-    {
-        accessorKey: "diffMs",
-        header: "Differenz",
-        enableSorting: false,
-        cell: ({row}) => {
-            const diff = row.original.diffMs;
-            return diff === null ? dash : <span className={diffClass(diff)}>{formatDifference(diff, format)}</span>;
+const columnsOf = (format: TimeFormat): DataTableColumnDef<DayRow>[] => {
+    const sums = periodColumns<DayRow>(format);
+    return [
+        {
+            accessorKey: "day",
+            header: "Tag",
+            cell: ({row}) => (
+                <span className={row.original.isToday ? "font-semibold" : undefined}>
+                    <Link to="/user/reports/daily/$day" params={{day: row.original.day}} className="underline">
+                        {formatDayShort(localDayRange(row.original.day).start)}
+                    </Link>
+                    {row.original.isToday && " · heute"}
+                    {(row.original.kind === "vacation" ||
+                        row.original.kind === "holiday" ||
+                        row.original.kind === "sick") && (
+                        <span className="ml-2 text-muted-foreground">
+                            {dayKindLabel(row.original.kind, row.original.holidayName)}
+                        </span>
+                    )}
+                    {row.original.missingGehen && <span className="ml-2 text-destructive">Gehen fehlt</span>}
+                </span>
+            ),
         },
-    },
-    {
-        accessorKey: "count",
-        header: "Buchungen",
-        enableSorting: false,
-        cell: ({row}) => (row.original.count > 0 ? row.original.count : dash),
-    },
-];
+        sums.target,
+        sums.work,
+        sums.duration("breakMs", "Pausen", (r) => r.breakMs),
+        sums.diff,
+        {
+            accessorKey: "count",
+            header: "Buchungen",
+            enableSorting: false,
+            cell: ({row}) => (row.original.count > 0 ? row.original.count : dash),
+        },
+    ];
+};
 
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
 const columns = {minutes: columnsOf("minutes"), industrial: columnsOf("industrial")};
@@ -136,21 +108,15 @@ export function ReportWeekly({anchor}: {anchor: Day}) {
             />
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <MetricCard
-                    title="Arbeitszeit"
-                    value={formatDuration(totals.workMs, timeFormat)}
-                    hint={rows.some((r) => r.running) ? "läuft noch" : undefined}
-                />
+                <WorkMetric workMs={totals.workMs} running={rows.some((r) => r.running)} />
                 <MetricCard title="Pausen" value={formatDuration(totals.breakMs, timeFormat)} />
                 <MetricCard
                     title="Soll"
                     value={formatDuration(totals.targetWeekMs, timeFormat)}
                     hint={targetHint || undefined}
                 />
-                <MetricCard
-                    title="Differenz"
-                    value={futureWeek ? dash : formatDifference(totals.diffMs, timeFormat)}
-                    valueClassName={futureWeek ? undefined : diffClass(totals.diffMs)}
+                <DiffMetric
+                    diffMs={futureWeek ? null : totals.diffMs}
                     hint={partial && !futureWeek ? "gegen das Soll bis heute" : undefined}
                 />
             </div>

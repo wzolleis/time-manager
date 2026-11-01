@@ -2,11 +2,11 @@ import {useNavigate} from "@tanstack/react-router";
 import type {Day} from "@shared/date-schemas";
 import {Input} from "@/components/ui/input";
 import {MetricCard} from "@/components/cards/metric-card";
+import {DiffMetric, WorkMetric} from "@features/reports/components/report-metrics";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {actionsColumn} from "@/components/table/actions-column";
-import {diffClass} from "@/lib/format";
 import {useTimeFormat} from "@/lib/use-time-format";
-import {formatDate, formatDifference, formatDuration, formatTime, dayKindLabel} from "@shared/format";
+import {formatDate, formatDuration, formatTime, dayKindLabel} from "@shared/format";
 import {addDays} from "@shared/day-range";
 import {EntryActions} from "@features/reports/components/time-entry-actions";
 import {TimeEntryCreateDialog} from "@features/reports/components/time-entry-create-dialog";
@@ -97,22 +97,14 @@ export function ReportDailyEdit({day}: {day: Day}) {
                 {totals.missingGehen && (
                     <ErrorText>An diesem Tag fehlt das Gehen. Trage es mit „Buchung nachtragen" nach.</ErrorText>
                 )}
-                <MetricCard
-                    title="Arbeitszeit"
-                    value={formatDuration(totals.workMs, timeFormat)}
-                    hint={totals.running ? "läuft noch" : undefined}
-                />
+                <WorkMetric workMs={totals.workMs} running={totals.running} />
                 <MetricCard title="Pausen" value={formatDuration(totals.breakMs, timeFormat)} />
                 <MetricCard
                     title="Soll"
                     value={formatDuration(report.target, timeFormat)}
                     hint={dayKindLabel(report.kind, report.holidayName)}
                 />
-                <MetricCard
-                    title="Differenz"
-                    value={report.diff === null ? "–" : formatDifference(report.diff, timeFormat)}
-                    valueClassName={report.diff === null ? undefined : diffClass(report.diff)}
-                />
+                <DiffMetric diffMs={report.diff} />
             </div>
 
             {report.isPending && <Loading />}

@@ -1,7 +1,6 @@
 import {useState} from "react";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {Button} from "@/components/ui/button";
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import {deleteUser, updateUser} from "@/api/users";
 import type {User, UserUpdate} from "@shared/user";
@@ -9,7 +8,7 @@ import {PasswordResetDialog} from "@features/users/components/password-reset-dia
 import {UserRolesDialog} from "@features/users/components/user-roles-dialog";
 import {ErrorText} from "@/components/text/error-text";
 import {FormField} from "@/components/form/form-field";
-import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {EditDialog} from "@/components/form/edit-dialog";
 import {ConfirmDeleteButton} from "@/components/buttons/confirm-delete-button";
 
 /** Aktionen je Zeile: User bearbeiten, Rollen und Passwort setzen oder löschen */
@@ -84,48 +83,37 @@ export function UserActions({user}: {user: User}) {
 
             {remove.isError && <ErrorText className="text-right">{remove.error.message}</ErrorText>}
 
-            <Dialog open={open} onOpenChange={handleOpenChange}>
-                <DialogContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <DialogHeader>
-                            <DialogTitle>User bearbeiten</DialogTitle>
-                            <DialogDescription>Änderungen gelten nach dem Speichern sofort.</DialogDescription>
-                        </DialogHeader>
+            <EditDialog
+                title="User bearbeiten"
+                open={open}
+                onOpenChange={handleOpenChange}
+                onSubmit={handleSubmit}
+                saving={update.isPending}
+                error={update.error}
+            >
+                <FormField label="Name" htmlFor={fieldId("name")}>
+                    <Input id={fieldId("name")} value={name} onChange={(e) => setName(e.target.value)} required />
+                </FormField>
 
-                        <FormField label="Name" htmlFor={fieldId("name")}>
-                            <Input
-                                id={fieldId("name")}
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                required
-                            />
-                        </FormField>
+                <FormField label="E-Mail" htmlFor={fieldId("email")}>
+                    <Input
+                        id={fieldId("email")}
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                    />
+                </FormField>
 
-                        <FormField label="E-Mail" htmlFor={fieldId("email")}>
-                            <Input
-                                id={fieldId("email")}
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                            />
-                        </FormField>
-
-                        <FormField label="Avatar-URL (optional)" htmlFor={fieldId("avatar")}>
-                            <Input
-                                id={fieldId("avatar")}
-                                value={avatarUrl}
-                                onChange={(e) => setAvatarUrl(e.target.value)}
-                                placeholder="https://…"
-                            />
-                        </FormField>
-
-                        {update.isError && <ErrorText>{update.error.message}</ErrorText>}
-
-                        <FormDialogFooter onCancel={() => setOpen(false)} saving={update.isPending} />
-                    </form>
-                </DialogContent>
-            </Dialog>
+                <FormField label="Avatar-URL (optional)" htmlFor={fieldId("avatar")}>
+                    <Input
+                        id={fieldId("avatar")}
+                        value={avatarUrl}
+                        onChange={(e) => setAvatarUrl(e.target.value)}
+                        placeholder="https://…"
+                    />
+                </FormField>
+            </EditDialog>
         </div>
     );
 }
