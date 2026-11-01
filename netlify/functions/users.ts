@@ -5,14 +5,14 @@ import {asc, eq} from "drizzle-orm";
 import {z} from "zod";
 import {db} from "./lib/db";
 import {userRoles, users} from "../../db/schema";
-import {UserCreateSchema, UserUpdateSchema} from "../../shared/user";
+import {UserCreateSchema, UserUpdateSchema} from "@shared/user";
 import {hasDbCode} from "./lib/db-errors";
 import {withTiming} from "./lib/timing";
 import {IdSchema, isApiPath, notFound, pathParams} from "./lib/id";
 import {hashPassword} from "./lib/password";
 import {withSession} from "./lib/session";
 import {lastAdmin, lockAdmins} from "./lib/roles";
-import {USER_ROLE_ID} from "../../shared/role";
+import {USER_ROLE_ID} from "@shared/role";
 
 // Bewusst explizit statt select(): der Passwort-Hash darf nie in einer Antwort landen
 const publicColumns = {

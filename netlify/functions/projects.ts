@@ -9,7 +9,7 @@ import {withTiming} from "./lib/timing";
 
 import {IdSchema, isApiPath, notFound, pathParams} from "./lib/id";
 import {withSession} from "./lib/session";
-import {ProjectCreateSchema, ProjectUpdateSchema} from "../../shared/project";
+import {ProjectCreateSchema, ProjectUpdateSchema} from "@shared/project";
 
 const getProject = async (id: string) => {
     const [row] = await db.select().from(projects).where(eq(projects.id, id)).limit(1);

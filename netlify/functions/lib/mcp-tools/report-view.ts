@@ -2,7 +2,7 @@
 // Tages-, Wochen-, Monats- und Jahresbericht für den MCP-Server, gerechnet mit denselben Services wie die UI (Regel 2).
 // Ohne DB: die Daten kommen als Parameter, damit sich die Berichte testen lassen.
 import {z} from "zod";
-import type {Day, Month, Year} from "../../../../shared/date-schemas";
+import type {Day, Month, Year} from "@shared/date-schemas";
 import {
     dayKindLabel,
     formatDate,
@@ -11,22 +11,15 @@ import {
     formatDuration,
     formatMonth,
     formatMonthName,
-} from "../../../../shared/format";
-import {type DayRange, localDayRange} from "../../../../shared/day-range";
-import {holidayOn} from "../../../../shared/holiday-rules";
-import {isSickDay} from "../../../../shared/sick-leave-rules";
-import {dayKind, targetMs} from "../../../../shared/target-hours";
-import {
-    dayDiffMs,
-    dayTotals,
-    monthTotals,
-    type WeekDayTotals,
-    weekTotals,
-    yearTotals,
-} from "../../../../shared/time-report";
-import {firstBookingDay, localDay} from "../../../../shared/time-rules";
-import type {SettingHistory} from "../../../../shared/user-setting-rules";
-import {isoWeek, weekDays} from "../../../../shared/week";
+} from "@shared/format";
+import {type DayRange, localDayRange} from "@shared/day-range";
+import {holidayOn} from "@shared/holiday-rules";
+import {isSickDay} from "@shared/sick-leave-rules";
+import {dayKind, targetMs} from "@shared/target-hours";
+import {dayDiffMs, dayTotals, monthTotals, type WeekDayTotals, weekTotals, yearTotals} from "@shared/time-report";
+import {firstBookingDay, localDay} from "@shared/time-rules";
+import type {SettingHistory} from "@shared/user-setting-rules";
+import {isoWeek, weekDays} from "@shared/week";
 import type {StoredEntry} from "../time-entries-store";
 import {dayShort, EntrySchema, entryView, mdTable, minutes, typeLabel} from "./view";
 

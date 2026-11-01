@@ -2,7 +2,7 @@
 import type {Config, Context} from "@netlify/functions";
 import {z} from "zod";
 import {hasDbCode} from "./lib/db-errors";
-import {TimeEntryCreateSchema, TimeEntryDayCreateSchema, TimeEntryUpdateSchema} from "../../shared/time-entry";
+import {TimeEntryCreateSchema, TimeEntryDayCreateSchema, TimeEntryUpdateSchema} from "@shared/time-entry";
 import {withTiming} from "./lib/timing";
 
 import {IdSchema, isRoutePath, notFound, pathParams} from "./lib/id";

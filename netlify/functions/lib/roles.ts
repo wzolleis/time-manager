@@ -2,7 +2,7 @@
 import {and, eq} from "drizzle-orm";
 import {db} from "./db";
 import {endpointRoles, userRoles} from "../../../db/schema";
-import {ADMIN_ROLE_ID, USER_ROLE_ID} from "../../../shared/role";
+import {ADMIN_ROLE_ID, USER_ROLE_ID} from "@shared/role";
 import {stripRetrySuffix} from "./id";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];

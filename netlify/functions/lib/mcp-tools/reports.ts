@@ -1,9 +1,9 @@
 // netlify/functions/lib/mcp-tools/reports.ts
 // Tools der Berichte. Gerechnet wird in report-view.ts mit den Services der UI (Regel 2).
 import type {McpServer} from "@modelcontextprotocol/sdk/server/mcp.js";
-import {localDay} from "../../../../shared/time-rules";
-import {monthOf, yearOf} from "../../../../shared/week";
-import {DaySchema, MonthSchema, YearSchema} from "../../../../shared/date-schemas";
+import {localDay} from "@shared/time-rules";
+import {monthOf, yearOf} from "@shared/week";
+import {DaySchema, MonthSchema, YearSchema} from "@shared/date-schemas";
 import type {SessionUser} from "../session";
 import {loadReportData} from "./data";
 import {

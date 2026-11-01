@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
-import {day} from "../../../../shared/test-dates";
-import {formatDifference} from "../../../../shared/format";
+import {day} from "@shared/test-dates";
+import {formatDifference} from "@shared/format";
 import {RuleError} from "../rule-error";
 import {NotFoundError} from "../time-entries-store";
 import {type EntryView, errorResult, localIso, mdTable, minutes, workDayText} from "./view";

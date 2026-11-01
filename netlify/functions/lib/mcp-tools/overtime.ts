@@ -2,7 +2,7 @@
 // Tools der Überstunden: Saldo abfragen und den Korrekturwert setzen, wie auf der Seite „Überstunden“
 import type {McpServer} from "@modelcontextprotocol/sdk/server/mcp.js";
 import {z} from "zod";
-import {MAX_OFFSET_HOURS, toOffset} from "../../../../shared/overtime-rules";
+import {MAX_OFFSET_HOURS, toOffset} from "@shared/overtime-rules";
 import {getOvertime, saveOvertime} from "../overtime-store";
 import type {SessionUser} from "../session";
 import {loadReportData} from "./data";

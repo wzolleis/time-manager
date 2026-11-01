@@ -2,7 +2,7 @@ import type {Config, Context} from "@netlify/functions";
 import {z} from "zod";
 import {hasDbCode} from "./lib/db-errors";
 import {withTiming} from "./lib/timing";
-import {UserSettingValueCreateSchema, UserSettingValueUpdateSchema} from "../../shared/user-setting";
+import {UserSettingValueCreateSchema, UserSettingValueUpdateSchema} from "@shared/user-setting";
 import {IdSchema, isRoutePath, notFound, pathParams} from "./lib/id";
 import {
     addSettingValue,

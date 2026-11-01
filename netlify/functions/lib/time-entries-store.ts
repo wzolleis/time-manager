@@ -6,15 +6,8 @@ import {randomUUID} from "node:crypto";
 import {and, asc, eq, gte, inArray, lt} from "drizzle-orm";
 import {db} from "./db";
 import {timeEntries, timeEntryProjects} from "../../../db/schema";
-import type {TimeEntryCreate, TimeEntryDayCreate, TimeEntryUpdate} from "../../../shared/time-entry";
-import {
-    type Booking,
-    checkProject,
-    checkSequence,
-    checkWorkDay,
-    findPartner,
-    planWorkDay,
-} from "../../../shared/time-rules";
+import type {TimeEntryCreate, TimeEntryDayCreate, TimeEntryUpdate} from "@shared/time-entry";
+import {type Booking, checkProject, checkSequence, checkWorkDay, findPartner, planWorkDay} from "@shared/time-rules";
 import {RuleError} from "./rule-error";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];

@@ -2,7 +2,7 @@ import {describe, expect, it} from "vitest";
 import type {StoredEntry} from "../time-entries-store";
 import {overtimeReport, OvertimeReportSchema} from "./overtime-view";
 import type {ReportData} from "./report-view";
-import {defaultHistory} from "../../../../shared/user-setting-rules";
+import {defaultHistory} from "@shared/user-setting-rules";
 
 const entry = (id: string, type: StoredEntry["type"], iso: string): StoredEntry => ({
     id,

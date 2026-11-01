@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
-import {day} from "../../../../shared/test-dates";
-import {SOLL_SETTING_ID, type UserSettingsData, VACATION_DAYS_SETTING_ID} from "../../../../shared/user-setting";
+import {day} from "@shared/test-dates";
+import {SOLL_SETTING_ID, type UserSettingsData, VACATION_DAYS_SETTING_ID} from "@shared/user-setting";
 import {userSettingsReport, UserSettingsReportSchema} from "./user-settings-view";
 
 const data: UserSettingsData = {

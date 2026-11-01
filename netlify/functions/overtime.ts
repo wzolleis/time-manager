@@ -2,7 +2,7 @@ import type {Config, Context} from "@netlify/functions";
 import {z} from "zod";
 import {hasDbCode} from "./lib/db-errors";
 import {withTiming} from "./lib/timing";
-import {OvertimeUpdateSchema} from "../../shared/overtime";
+import {OvertimeUpdateSchema} from "@shared/overtime";
 import {IdSchema, isRoutePath, notFound, pathParams} from "./lib/id";
 import {getOvertime, saveOvertime} from "./lib/overtime-store";
 import {forbidden} from "./lib/roles";

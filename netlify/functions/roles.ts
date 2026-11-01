@@ -4,7 +4,7 @@ import {asc, eq} from "drizzle-orm";
 import {z} from "zod";
 import {db} from "./lib/db";
 import {roles, userRoles, users} from "../../db/schema";
-import {ADMIN_ROLE_ID, UserRolesSchema} from "../../shared/role";
+import {ADMIN_ROLE_ID, UserRolesSchema} from "@shared/role";
 import {hasDbCode} from "./lib/db-errors";
 import {withTiming} from "./lib/timing";
 import {IdSchema, notFound, pathParams, stripRetrySuffix} from "./lib/id";

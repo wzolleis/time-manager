@@ -3,12 +3,12 @@
 // prüft lib/time-entries-store.ts wie bei der REST-API (Regel 1).
 import type {McpServer} from "@modelcontextprotocol/sdk/server/mcp.js";
 import {z} from "zod";
-import {formatTime} from "../../../../shared/format";
-import {addDays, localTimeToUtc, startOfLocalDay} from "../../../../shared/day-range";
-import {DaySchema, TimeOfDaySchema} from "../../../../shared/date-schemas";
-import {isSickDay, sickDayMessage} from "../../../../shared/sick-leave-rules";
-import type {TimeEntryUpdate} from "../../../../shared/time-entry";
-import {findMissingGehen, localDay, WORK_DAY_MINUTES, WORK_DAY_START} from "../../../../shared/time-rules";
+import {formatTime} from "@shared/format";
+import {addDays, localTimeToUtc, startOfLocalDay} from "@shared/day-range";
+import {DaySchema, TimeOfDaySchema} from "@shared/date-schemas";
+import {isSickDay, sickDayMessage} from "@shared/sick-leave-rules";
+import type {TimeEntryUpdate} from "@shared/time-entry";
+import {findMissingGehen, localDay, WORK_DAY_MINUTES, WORK_DAY_START} from "@shared/time-rules";
 import type {SessionUser} from "../session";
 import {
     type Authorize,
