@@ -1,12 +1,20 @@
+import {Temporal} from "temporal-polyfill";
 import type {ApiTokenValidity} from "./api-token";
-
-const DAY_MS = 24 * 60 * 60 * 1000;
+import {TZ} from "./day-range";
 
 export const API_TOKEN_PREFIX = "tm_";
 
-/** Ablauf eines Tokens, das zum Zeitpunkt createdAt erzeugt wird (null: kein Ablauf) */
-export const tokenExpiry = (createdAt: Date, expiresInDays: ApiTokenValidity): Date | null =>
-    expiresInDays === null ? null : new Date(createdAt.getTime() + expiresInDays * DAY_MS);
+/**
+ * Ablauf eines Tokens, das zum Zeitpunkt createdAt erzeugt wird (null: kein Ablauf). Gezählt werden Kalendertage
+ * in TZ: das Token läuft zur selben lokalen Uhrzeit ab, zu der es erzeugt wurde, auch über eine Zeitumstellung.
+ */
+export function tokenExpiry(createdAt: Date, expiresInDays: ApiTokenValidity): Date | null {
+    if (expiresInDays === null) return null;
+    const expiry = Temporal.Instant.fromEpochMilliseconds(createdAt.getTime())
+        .toZonedDateTimeISO(TZ)
+        .add({days: expiresInDays});
+    return new Date(expiry.epochMilliseconds);
+}
 
 /** Ist das Token zum Zeitpunkt now abgelaufen? Ohne Ablauf nie. */
 export const isTokenExpired = (expiresAt: Date | string | null, now: Date): boolean =>
