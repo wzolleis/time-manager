@@ -6,6 +6,7 @@ description: Beschreibt die Verzeichnisse der UI unter src/ und was wohin gehör
 # Aufbau der Module in der UI
 
 Der Skill gilt nur für `src/`, nicht für die Verzeichnisse `features/`, `shared/` oder `netlify/` im Projekt-Root.
+Für `shared/` gilt der Skill `shared-modules`, für `netlify/`, `db/` und `scripts/` der Skill `backend-modules`.
 Pfad-Aliase: `@/*` → `src/*`, `@features/*` → `src/features/*`, `@shared/*` → `shared/*`.
 
 # Wohin gehört eine Datei?
@@ -35,7 +36,11 @@ Pfad-Aliase: `@/*` → `src/*`, `@features/*` → `src/features/*`, `@shared/*` 
 - **`application/`**: nur die Unterordner `breadcrumb`, `layout` (inkl. `not-found.tsx`) und `navigation`.
   In `navigation` liegen nur Definitionen der Navigations-Items, keine Komponenten.
 - **`common/`**: nur Typen, kein ausführbarer Code.
-- **`lib/`**: kennt keine fachlichen Features.
+- **`lib/`**: kennt keine fachlichen Features. Hier liegt, was nur die UI braucht: React-Hooks wie `use-now` und
+  `use-time-format`, den Kontext des angemeldeten Users (`user-context`) und Hilfen für Bibliotheken (`utils` mit
+  `cn`). Was Client und Server beide brauchen, gehört nach `shared/`. Beispiel Formatierung: Texte für Zeiten
+  und Dauern stehen in `shared/format.ts`, weil auch der MCP-Server sie zeigt. Die CSS-Klasse für eine Differenz
+  steht in `src/lib/format.ts`, weil nur die UI sie braucht.
 - **`components/`**: nur die Unterordner `buttons`, `cards`, `dashboard-action`, `form`, `login`, `page`, `table`, `text`, `ui`, `utils`.
   Keine Dateien direkt in `components/`.
 - **`components/ui/`**: shadcn-Elemente, **nie von Hand ändern**, nur über shadcn. Anpassungen kommen in eine eigene
@@ -57,6 +62,7 @@ Pfad-Aliase: `@/*` → `src/*`, `@features/*` → `src/features/*`, `@shared/*` 
 - `application` → `features`, `components`, `lib`, `views`, `common`
 - `features` → `components`, `lib`, `views`, `api`, `common`, `@shared`. Features importieren nicht aus anderen
   Features.
+- `lib` → `lib`, `common`, `@shared` und Bibliotheken. Nie `api`, `views` oder `components`.
 - `components`, `lib`, `views`, `api`, `common` importieren nie aus `features`, `application` oder `routes`.
 
 # Beim Umsetzen eines Features oder Changes

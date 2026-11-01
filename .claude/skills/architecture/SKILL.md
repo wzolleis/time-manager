@@ -47,7 +47,7 @@ Geprüft wird auf dem Server, Details im Skill `authorization`.
 ## Layout
 
 ```text
-shared/                 Geteilt zwischen Client und Netlify Functions
+shared/                 Geteilt zwischen Client und Netlify Functions (Einzelheiten im Skill shared-modules)
 ├ <thema>.ts            Zod-Schemas und Typen eines Aggregats, z. B. vacation.ts
 ├ <thema>-rules.ts      Services: Regeln und Berechnungen (siehe service.md)
 └ <thema>-report.ts     Services: Auswertungen für Berichte
