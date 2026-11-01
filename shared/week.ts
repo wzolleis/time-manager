@@ -1,11 +1,9 @@
+import {Temporal} from "temporal-polyfill";
 import {addDays} from "./day-range";
 import {type Day, type Month, MonthSchema, type Year, YearSchema} from "./date-schemas";
 
 /** Wochentag eines Tages ("JJJJ-MM-TT"): 0 = Montag ... 6 = Sonntag */
-export function weekdayIndex(day: Day): number {
-    const [y, m, d] = day.split("-").map(Number);
-    return (new Date(Date.UTC(y, m - 1, d)).getUTCDay() + 6) % 7;
-}
+export const weekdayIndex = (day: Day): number => Temporal.PlainDate.from(day).dayOfWeek - 1; // Temporal: 1 = Montag
 
 /** Samstag oder Sonntag */
 export const isWeekend = (day: Day): boolean => weekdayIndex(day) >= 5;
@@ -21,17 +19,9 @@ export const weekDays = (day: Day): Day[] => {
 
 /** Kalenderwoche nach ISO 8601 (Woche mit dem ersten Donnerstag des Jahres ist KW 1) */
 export function isoWeek(day: Day): {year: number; week: number} {
-    const [y, m, d] = day.split("-").map(Number);
-    const thursday = new Date(Date.UTC(y, m - 1, d));
-    thursday.setUTCDate(thursday.getUTCDate() - weekdayIndex(day) + 3); // Donnerstag dieser Woche
-
-    const year = thursday.getUTCFullYear();
-    const jan4 = new Date(Date.UTC(year, 0, 4)); // der 4. Januar liegt immer in KW 1
-    const firstThursday = new Date(jan4);
-    firstThursday.setUTCDate(jan4.getUTCDate() - weekdayIndex(jan4.toISOString().slice(0, 10) as Day) + 3);
-
-    const week = 1 + Math.round((thursday.getTime() - firstThursday.getTime()) / (7 * 86_400_000));
-    return {year, week};
+    const date = Temporal.PlainDate.from(day);
+    // Im ISO-Kalender, den PlainDate.from verwendet, gibt es Woche und Wochenjahr immer
+    return {year: date.yearOfWeek!, week: date.weekOfYear!};
 }
 
 /** Die ISO-Woche eines Tages ("JJJJ-MM-TT") als "JJJJ-Www", z. B. "2026-W43". Das Jahr ist das ISO-Wochenjahr. */
@@ -63,10 +53,8 @@ export const firstDayOfYear = (year: number | Year): Day => `${year}-01-01` as D
 export const lastDayOfYear = (year: number | Year): Day => `${year}-12-31` as Day;
 
 /** Verschiebt einen Monat ("JJJJ-MM") um ganze Monate */
-export function addMonths(month: Month, delta: number): Month {
-    const [y, m] = month.split("-").map(Number);
-    return new Date(Date.UTC(y, m - 1 + delta, 1)).toISOString().slice(0, 7) as Month;
-}
+export const addMonths = (month: Month, delta: number): Month =>
+    Temporal.PlainYearMonth.from(month).add({months: delta}).toString() as Month;
 
 /** Monat als "JJJJ-MM" mit Monat 01 bis 12 */
 export const isValidMonth = (month: string): month is Month => MonthSchema.safeParse(month).success;

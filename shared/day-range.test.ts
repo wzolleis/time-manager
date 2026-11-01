@@ -47,6 +47,14 @@ describe("localDayRange", () => {
             expect(localTimeToUtc(day("2026-10-25"), time("01:30")).toISOString()).toBe("2026-10-24T23:30:00.000Z");
             expect(localTimeToUtc(day("2026-10-25"), time("04:00")).toISOString()).toBe("2026-10-25T03:00:00.000Z");
         });
+
+        it("Lücke im Frühjahr: 02:30 gibt es nicht, es gilt 03:30 MESZ", () => {
+            expect(localTimeToUtc(day("2026-03-29"), time("02:30")).toISOString()).toBe("2026-03-29T01:30:00.000Z");
+        });
+
+        it("doppelte Stunde im Herbst: 02:30 ist die zweite, in MEZ", () => {
+            expect(localTimeToUtc(day("2026-10-25"), time("02:30")).toISOString()).toBe("2026-10-25T01:30:00.000Z");
+        });
     });
 
     describe("addDays", () => {

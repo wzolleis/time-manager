@@ -1,3 +1,4 @@
+import {Temporal} from "temporal-polyfill";
 import {type Day, parseDay} from "./date-schemas";
 import {formatDay} from "./format";
 import {addDays, type DayRange, isInRanges, isValidDay} from "./day-range";
@@ -12,14 +13,8 @@ export type RangeInput = {id: string; startDate: string; endDate: string};
 
 export const MAX_VACATION_DAYS = 366;
 
-const DAY_MS = 86_400_000;
-const utc = (day: Day): number => {
-    const [y, m, d] = day.split("-").map(Number);
-    return Date.UTC(y, m - 1, d);
-};
-
 /** Kalendertage inklusive Beginn und Ende */
-export const dayCount = (start: Day, end: Day): number => Math.round((utc(end) - utc(start)) / DAY_MS) + 1;
+export const dayCount = (start: Day, end: Day): number => Temporal.PlainDate.from(start).until(end).days + 1;
 
 /** null = gültig, sonst eine verständliche Fehlermeldung. what nennt den Zeitraum in der Meldung zur Länge. */
 export function checkRange(start: string, end: string, what = "Ein Urlaub"): string | null {
