@@ -27,11 +27,3 @@ export type ConfirmAction = ActionBase & {
 };
 
 export type DashboardAction = LinkAction | ConfirmAction;
-
-export const isLinkAction = (action: unknown | undefined): action is LinkAction => {
-    return (action as LinkAction).kind === "link";
-};
-
-export const isConfirmAction = (action: unknown | undefined): action is ConfirmAction => {
-    return (action as ConfirmAction).kind === "confirm";
-};
