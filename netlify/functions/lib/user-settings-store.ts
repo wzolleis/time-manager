@@ -3,18 +3,17 @@
 import {randomUUID} from "node:crypto";
 import {and, asc, eq} from "drizzle-orm";
 import {db} from "./db";
-import {userSettings, userSettingValues, users} from "../../../db/schema";
+import {userSettings, userSettingValues} from "../../../db/schema";
 import {localDay} from "@shared/time-rules";
 import type {UserSettingsData, UserSettingValueCreate, UserSettingValueUpdate} from "@shared/user-setting";
 import {checkChange, checkDelete, checkSettingValue, historyOf, type SettingHistory} from "@shared/user-setting-rules";
 import {RuleError} from "./rule-error";
+import {lockUser} from "./lock-user";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Executor = Pick<typeof db, "select">;
 
 export class SettingNotFoundError extends Error {}
-
-export class UnknownUserError extends Error {}
 
 /** Einstellungen nach Namen, die Werte des Users nach Einstellung und Tag */
 export async function listUserSettings(userId: string, ex: Executor = db): Promise<UserSettingsData> {
@@ -44,13 +43,6 @@ const getSetting = async (ex: Executor, id: string) => {
     return row ?? null;
 };
 
-// Sperrt die Zeile des Users bis zum Ende der Transaktion, damit zwei Werte nicht gleichzeitig als
-// "erster eigener Wert" rückwirkend eingetragen werden (Regel 3)
-const lockUser = async (tx: Tx, userId: string) => {
-    const rows = await tx.select({id: users.id}).from(users).where(eq(users.id, userId)).for("update");
-    if (rows.length === 0) throw new UnknownUserError();
-};
-
 const valuesOf = (tx: Tx, userId: string, settingId: string) =>
     tx
         .select()
@@ -63,6 +55,7 @@ const today = () => localDay(new Date());
 export async function addSettingValue(userId: string, input: UserSettingValueCreate) {
     const id = randomUUID();
     await db.transaction(async (tx) => {
+        // Damit zwei Werte nicht gleichzeitig als "erster eigener Wert" rückwirkend eingetragen werden (Regel 3)
         await lockUser(tx, userId);
         const setting = await getSetting(tx, input.settingId);
         if (!setting) throw new SettingNotFoundError();

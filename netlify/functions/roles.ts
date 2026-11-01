@@ -1,7 +1,7 @@
 // netlify/functions/roles.ts
 import type {Config, Context} from "@netlify/functions";
 import {asc, eq} from "drizzle-orm";
-import {z} from "zod";
+import {errorResponse, readBody} from "./lib/http";
 import {db} from "./lib/db";
 import {roles, userRoles, users} from "../../db/schema";
 import {ADMIN_ROLE_ID, UserRolesSchema} from "@shared/role";
@@ -14,14 +14,6 @@ import {lastAdmin, lockAdmins} from "./lib/roles";
 // Nur diese beiden Pfade, alles andere (auch Netlifys .html-Varianten) bekommt 410 ohne DB-Zugriff
 const isRolesPath = (url: string) =>
     /^(\/api|\/\.netlify\/functions)\/(roles|users\/[^/.]+\/roles)\/?$/.test(stripRetrySuffix(new URL(url).pathname));
-
-const readBody = async (req: Request): Promise<unknown> => {
-    try {
-        return await req.json();
-    } catch {
-        return undefined;
-    }
-};
 
 type Db = Pick<typeof db, "select">;
 
@@ -82,14 +74,10 @@ const handler = async (req: Request, _context: Context) => {
 
         return new Response(null, {status: 405});
     } catch (err) {
-        if (err instanceof z.ZodError) {
-            return Response.json({errors: err.issues}, {status: 400});
-        }
         if (hasDbCode(err, "ER_NO_REFERENCED_ROW_2")) {
             return Response.json({error: "Unbekannte Rolle"}, {status: 400});
         }
-        console.error(err);
-        return Response.json({error: "Interner Fehler"}, {status: 500});
+        return errorResponse(err);
     }
 };
 

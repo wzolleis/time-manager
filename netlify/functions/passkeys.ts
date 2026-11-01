@@ -1,6 +1,6 @@
 import type {Config, Context} from "@netlify/functions";
 import {and, desc, eq} from "drizzle-orm";
-import {z} from "zod";
+import {errorResponse} from "./lib/http";
 import {db} from "./lib/db";
 import {withTiming} from "./lib/timing";
 import {passkeys} from "../../db/schema";
@@ -42,9 +42,7 @@ const handler = async (req: Request, _context: Context, session: Session) => {
             .where(and(eq(passkeys.id, IdSchema.parse(id)), eq(passkeys.userId, userId)));
         return result.affectedRows > 0 ? new Response(null, {status: 204}) : notFound();
     } catch (err) {
-        if (err instanceof z.ZodError) return Response.json({errors: err.issues}, {status: 400});
-        console.error(err);
-        return Response.json({error: "Interner Fehler"}, {status: 500});
+        return errorResponse(err);
     }
 };
 

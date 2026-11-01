@@ -1,7 +1,7 @@
 import type {Config, Context} from "@netlify/functions";
 import {randomUUID} from "node:crypto";
 import {and, asc, desc, eq} from "drizzle-orm";
-import {z} from "zod";
+import {errorResponse, readBody} from "./lib/http";
 import {db} from "./lib/db";
 import {withTiming} from "./lib/timing";
 import {apiTokens, users} from "../../db/schema";
@@ -19,14 +19,6 @@ const tokenColumns = {
     createdAt: apiTokens.createdAt,
     lastUsedAt: apiTokens.lastUsedAt,
     expiresAt: apiTokens.expiresAt,
-};
-
-const readBody = async (req: Request): Promise<unknown> => {
-    try {
-        return await req.json();
-    } catch {
-        return undefined;
-    }
 };
 
 const deleted = (affectedRows: number) => (affectedRows > 0 ? new Response(null, {status: 204}) : notFound());
@@ -104,9 +96,7 @@ const handler = async (req: Request, _context: Context, session: Session) => {
         const id = pathParams(req.url, config.path).id;
         return admin ? await allTokens(req, id) : await ownTokens(req, id, session);
     } catch (err) {
-        if (err instanceof z.ZodError) return Response.json({errors: err.issues}, {status: 400});
-        console.error(err);
-        return Response.json({error: "Interner Fehler"}, {status: 500});
+        return errorResponse(err);
     }
 };
 

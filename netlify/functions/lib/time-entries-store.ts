@@ -9,12 +9,10 @@ import {timeEntries, timeEntryProjects} from "../../../db/schema";
 import type {TimeEntryCreate, TimeEntryDayCreate, TimeEntryUpdate} from "@shared/time-entry";
 import {type Booking, checkProject, checkSequence, checkWorkDay, findPartner, planWorkDay} from "@shared/time-rules";
 import {RuleError} from "./rule-error";
+import {NotFoundError} from "./errors";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 export type Executor = Pick<typeof db, "select">;
-
-/** Die Buchung gibt es nicht. Die Function antwortet darauf mit notFound(). */
-export class NotFoundError extends Error {}
 
 /**
  * Prüft den Zugriff auf die Buchungen eines Users, wirft bei Verbot (ForbiddenError, NotFoundError).

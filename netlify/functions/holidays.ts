@@ -2,34 +2,26 @@ import type {Config, Context} from "@netlify/functions";
 import type {Day} from "@shared/date-schemas";
 import {randomUUID} from "node:crypto";
 import {asc, eq, isNull, or} from "drizzle-orm";
-import {z} from "zod";
 import {db} from "./lib/db";
 import {hasDbCode} from "./lib/db-errors";
 import {withTiming} from "./lib/timing";
-import {holidays, users} from "../../db/schema";
+import {holidays} from "../../db/schema";
 import {findHolidayClash, holidayClashMessage, type HolidayRange} from "@shared/holiday-rules";
 import {HolidayCreateSchema, HolidayUpdateSchema} from "@shared/holiday";
 import {IdSchema, isRoutePath, notFound, pathParams} from "./lib/id";
-import {ensureAccess, forbidden, ForbiddenError} from "./lib/roles";
+import {ensureAccess} from "./lib/roles";
 import {type Session, withSession} from "./lib/session";
-import {RuleError, ruleViolation} from "./lib/rule-error";
+import {RuleError} from "./lib/rule-error";
+import {errorResponse, readBody, unknownUser} from "./lib/http";
+import {NotFoundError} from "./lib/errors";
+import {lockUser} from "./lib/lock-user";
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Executor = Pick<typeof db, "select">;
 
-class NotFoundError extends Error {}
-
-class UnknownUserError extends Error {}
-
 const getHoliday = async (ex: Executor, id: string) => {
     const [row] = await ex.select().from(holidays).where(eq(holidays.id, id)).limit(1);
     return row ?? null;
-};
-
-// Sperrt die Zeile des Users bis zum Ende der Transaktion und prüft, dass er existiert
-const lockUser = async (tx: Tx, userId: string) => {
-    const rows = await tx.select({id: users.id}).from(users).where(eq(users.id, userId)).for("update");
-    if (rows.length === 0) throw new UnknownUserError();
 };
 
 // FOR UPDATE sperrt auch die Lücke im Index auf date: ein paralleles Anlegen am selben Tag wartet
@@ -38,14 +30,6 @@ const holidaysOn = (tx: Tx, date: Day) => tx.select().from(holidays).where(eq(ho
 const checkClash = async (tx: Tx, candidate: HolidayRange) => {
     const clash = findHolidayClash(await holidaysOn(tx, candidate.date), candidate);
     if (clash) throw new RuleError(holidayClashMessage(clash));
-};
-
-const readBody = async (req: Request): Promise<unknown> => {
-    try {
-        return await req.json();
-    } catch {
-        return undefined;
-    }
 };
 
 const handler = async (req: Request, _context: Context, session: Session) => {
@@ -119,15 +103,8 @@ const handler = async (req: Request, _context: Context, session: Session) => {
 
         return new Response(null, {status: 405});
     } catch (err) {
-        if (err instanceof z.ZodError) return Response.json({errors: err.issues}, {status: 400});
-        if (err instanceof RuleError) return ruleViolation(err);
-        if (err instanceof ForbiddenError) return forbidden();
-        if (err instanceof NotFoundError) return notFound();
-        if (err instanceof UnknownUserError || hasDbCode(err, "ER_NO_REFERENCED_ROW_2")) {
-            return Response.json({error: "User existiert nicht"}, {status: 400});
-        }
-        console.error(err);
-        return Response.json({error: "Interner Fehler"}, {status: 500});
+        if (hasDbCode(err, "ER_NO_REFERENCED_ROW_2")) return unknownUser();
+        return errorResponse(err);
     }
 };
 

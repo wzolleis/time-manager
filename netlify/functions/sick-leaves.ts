@@ -1,47 +1,31 @@
 import type {Config, Context} from "@netlify/functions";
 import {randomUUID} from "node:crypto";
 import {asc, eq} from "drizzle-orm";
-import {z} from "zod";
 import {db} from "./lib/db";
 import {hasDbCode} from "./lib/db-errors";
 import {withTiming} from "./lib/timing";
-import {sickLeaves, users} from "../../db/schema";
+import {sickLeaves} from "../../db/schema";
 import {checkSickLeave} from "@shared/sick-leave-rules";
 import {SickLeaveCreateSchema, SickLeaveUpdateSchema} from "@shared/sick-leave";
 import {IdSchema, isRoutePath, notFound, pathParams} from "./lib/id";
-import {ensureAccess, forbidden, ForbiddenError} from "./lib/roles";
+import {ensureAccess} from "./lib/roles";
 import {type Session, withSession} from "./lib/session";
-import {RuleError, ruleViolation} from "./lib/rule-error";
+import {RuleError} from "./lib/rule-error";
+import {errorResponse, readBody, unknownUser} from "./lib/http";
+import {NotFoundError} from "./lib/errors";
+import {lockUser} from "./lib/lock-user";
 
 // Die Buchungen werden weder geprüft noch geändert: an Krankheitstagen zählen sie nur nicht zur Arbeitszeit
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Executor = Pick<typeof db, "select">;
 
-class NotFoundError extends Error {}
-
-class UnknownUserError extends Error {}
-
 const getSickLeave = async (ex: Executor, id: string) => {
     const [row] = await ex.select().from(sickLeaves).where(eq(sickLeaves.id, id)).limit(1);
     return row ?? null;
 };
 
-// Sperrt die Zeile des Users bis zum Ende der Transaktion und prüft, dass er existiert
-const lockUser = async (tx: Tx, userId: string) => {
-    const rows = await tx.select({id: users.id}).from(users).where(eq(users.id, userId)).for("update");
-    if (rows.length === 0) throw new UnknownUserError();
-};
-
 const userSickLeaves = (tx: Tx, userId: string) => tx.select().from(sickLeaves).where(eq(sickLeaves.userId, userId));
-
-const readBody = async (req: Request): Promise<unknown> => {
-    try {
-        return await req.json();
-    } catch {
-        return undefined;
-    }
-};
 
 const handler = async (req: Request, _context: Context, session: Session) => {
     try {
@@ -121,15 +105,8 @@ const handler = async (req: Request, _context: Context, session: Session) => {
 
         return new Response(null, {status: 405});
     } catch (err) {
-        if (err instanceof z.ZodError) return Response.json({errors: err.issues}, {status: 400});
-        if (err instanceof RuleError) return ruleViolation(err);
-        if (err instanceof NotFoundError) return notFound();
-        if (err instanceof ForbiddenError) return forbidden();
-        if (err instanceof UnknownUserError || hasDbCode(err, "ER_NO_REFERENCED_ROW_2")) {
-            return Response.json({error: "User existiert nicht"}, {status: 400});
-        }
-        console.error(err);
-        return Response.json({error: "Interner Fehler"}, {status: 500});
+        if (hasDbCode(err, "ER_NO_REFERENCED_ROW_2")) return unknownUser();
+        return errorResponse(err);
     }
 };
 
