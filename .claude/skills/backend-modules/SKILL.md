@@ -14,8 +14,8 @@ dort stehen die Schemas und Regeln, die beide Seiten verwenden.
 
 Netlify Edge Functions werden nicht verwendet. Es gibt kein `netlify/edge-functions/`.
 
-Für die UI unter `src/` gilt der Skill `ui-modules`. Wie Services und Repositories aufgebaut sind, beschreibt
-der Skill `architecture`.
+Für die UI unter `src/` gilt der Skill `ui-modules`, für `shared/` der Skill `shared-modules`.
+Wie Services und Repositories aufgebaut sind, beschreibt der Skill `architecture`.
 
 # Wohin gehört eine Datei?
 
