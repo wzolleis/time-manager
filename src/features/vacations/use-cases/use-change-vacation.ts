@@ -9,6 +9,8 @@ import type {Vacation, VacationUpdate} from "@shared/vacation";
 import {checkVacation, countVacationDays} from "@shared/vacation-rules";
 import {VACATION_DAYS_SETTING_ID} from "@shared/user-setting";
 import {historyOf} from "@shared/user-setting-rules";
+import {toDayRange} from "@shared/day-range";
+import {parseDay} from "@shared/date-schemas";
 
 type Change = {vacation: Vacation; startDate: string; endDate: string};
 
@@ -26,8 +28,8 @@ export function useChangeVacation() {
         mutationFn: async ({vacation, startDate, endDate}: Change) => {
             // Nur Geändertes senden
             const patch: VacationUpdate = {};
-            if (startDate !== vacation.startDate) patch.startDate = startDate;
-            if (endDate !== vacation.endDate) patch.endDate = endDate;
+            if (startDate !== vacation.startDate) patch.startDate = parseDay(startDate);
+            if (endDate !== vacation.endDate) patch.endDate = parseDay(endDate);
             if (Object.keys(patch).length === 0) return;
             await updateVacation(vacation.userId, vacation.id, patch);
         },
@@ -45,8 +47,12 @@ export function useChangeVacation() {
                 sickLeaves.data ?? [],
                 historyOf(settings.data, VACATION_DAYS_SETTING_ID),
             ),
-        workdays: ({startDate, endDate}: Pick<Change, "startDate" | "endDate">) =>
-            countVacationDays(startDate, endDate, holidays.data ?? [], sickLeaves.data ?? []),
+        workdays: (input: Pick<Change, "startDate" | "endDate">) => {
+            const range = toDayRange(input);
+            return range
+                ? countVacationDays(range.startDate, range.endDate, holidays.data ?? [], sickLeaves.data ?? [])
+                : 0;
+        },
         change: save.mutate,
         isSaving: save.isPending,
         error: save.error,

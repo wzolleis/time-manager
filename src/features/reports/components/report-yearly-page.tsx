@@ -1,6 +1,6 @@
 import {Link, useParams} from "@tanstack/react-router";
 import {localDay} from "@shared/time-rules";
-import {isValidYear} from "@shared/week";
+import {isValidYear, yearOf} from "@shared/week";
 import {ReportYearly} from "@features/reports/components/report-yearly";
 import {ErrorText} from "@/components/text/error-text";
 import {PageHeader} from "@/components/page/page-header";
@@ -24,7 +24,7 @@ export const ReportYearlyPage = () => {
 
     return (
         <Page>
-            <ReportYearly year={year ?? localDay(new Date()).slice(0, 4)} />
+            <ReportYearly year={year ?? yearOf(localDay(new Date()))} />
         </Page>
     );
 };

@@ -13,7 +13,7 @@ export const DEFAULT_VACATION_DAYS = 30;
 const value = z.string().trim().min(1, "Bitte einen Wert eingeben").max(100);
 
 export const UserSettingSchema = createSelectSchema(userSettings);
-export const UserSettingValueSchema = createSelectSchema(userSettingValues);
+export const UserSettingValueSchema = createSelectSchema(userSettingValues, {validFrom: DaySchema});
 
 // Der User steht im Pfad der API. Ob Wert und Tag zur Einstellung passen, prüft checkSettingValue,
 // damit eine Verletzung als 422 mit Meldung zurückkommt.

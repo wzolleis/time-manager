@@ -1,5 +1,6 @@
 import {useState} from "react";
 import {formatDay} from "@shared/format";
+import type {Day} from "@shared/date-schemas";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {actionsColumn} from "@/components/table/actions-column";
 import {MetricCard} from "@/components/cards/metric-card";
@@ -18,12 +19,12 @@ const columns: DataTableColumnDef<Row>[] = [
     {
         accessorKey: "startDate",
         header: "Beginn",
-        cell: ({getValue}) => formatDay(getValue<string>()),
+        cell: ({getValue}) => formatDay(getValue<Day>()),
     },
     {
         accessorKey: "endDate",
         header: "Ende",
-        cell: ({getValue}) => formatDay(getValue<string>()),
+        cell: ({getValue}) => formatDay(getValue<Day>()),
     },
     {accessorKey: "days", header: "Kalendertage", enableSorting: false},
     {accessorKey: "sickDays", header: "Krankheitstage", enableSorting: false}, // ohne Wochenenden und Feiertage

@@ -4,7 +4,7 @@ import {vacations} from "../db/schema";
 import {DaySchema} from "./date-schemas";
 import {checkRange} from "./vacation-rules";
 
-export const VacationSchema = createSelectSchema(vacations);
+export const VacationSchema = createSelectSchema(vacations, {startDate: DaySchema, endDate: DaySchema});
 
 // Der User steht im Pfad der API, nicht im Body
 export const VacationCreateSchema = createInsertSchema(vacations, {

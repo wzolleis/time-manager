@@ -7,7 +7,7 @@ import {checkRange} from "./vacation-rules";
 const note = z.string().max(500, "Die Notiz darf höchstens 500 Zeichen lang sein").nullable();
 const RANGE_LABEL = "Eine Krankmeldung";
 
-export const SickLeaveSchema = createSelectSchema(sickLeaves);
+export const SickLeaveSchema = createSelectSchema(sickLeaves, {startDate: DaySchema, endDate: DaySchema});
 
 // Der User steht im Pfad der API, nicht im Body
 export const SickLeaveCreateSchema = createInsertSchema(sickLeaves, {

@@ -1,4 +1,5 @@
 import {describe, expect, it} from "vitest";
+import {day, time} from "./test-dates";
 import {
     type Booking,
     breakMinutes,
@@ -315,11 +316,12 @@ const pair = (from: string, to: string, n = from): Booking[] => [
     b(`k${n}`, "kommen", `2026-10-26T${from}:00+01:00`),
     b(`g${n}`, "gehen", `2026-10-26T${to}:00+01:00`),
 ];
-const DAY = "2026-10-26";
+const DAY = day("2026-10-26");
 const H = 60;
 
 describe("planWorkDay am leeren Tag", () => {
-    const plan = (start: string, minutes: number) => times(planWorkDay([], "2026-06-10", minutes, start).bookings);
+    const plan = (start: string, minutes: number) =>
+        times(planWorkDay([], day("2026-06-10"), minutes, time(start)).bookings);
 
     it("legt bis 6 h ein Buchungspaar an", () => {
         expect(plan("08:00", 4 * H)).toEqual(["kommen 08:00", "gehen 12:00"]);
@@ -336,19 +338,23 @@ describe("planWorkDay am leeren Tag", () => {
     });
 
     it("beginnt ohne Angabe um 08:00 und nennt die Pause", () => {
-        const {bookings, pauseMinutes} = planWorkDay([], "2026-06-10", 8 * H);
+        const {bookings, pauseMinutes} = planWorkDay([], day("2026-06-10"), 8 * H);
         expect(times(bookings)[0]).toBe("kommen 08:00");
         expect(pauseMinutes).toBe(30);
     });
 
     it("rechnet am Tag der Umstellung auf Sommerzeit mit der echten Dauer", () => {
         // 29.03.2026: um 02:00 springt die Uhr auf 03:00
-        expect(times(planWorkDay([], "2026-03-29", 4 * H, "00:30").bookings)).toEqual(["kommen 00:30", "gehen 05:30"]);
+        expect(times(planWorkDay([], day("2026-03-29"), 4 * H, time("00:30")).bookings)).toEqual([
+            "kommen 00:30",
+            "gehen 05:30",
+        ]);
     });
 });
 
 describe("planWorkDay an einem Tag mit Buchungen", () => {
-    const plan = (existing: Booking[], minutes: number, start?: string) => planWorkDay(existing, DAY, minutes, start);
+    const plan = (existing: Booking[], minutes: number, start?: string) =>
+        planWorkDay(existing, DAY, minutes, start === undefined ? undefined : time(start));
 
     it("legt das Paar 1 min nach dem letzten Gehen, wenn keine Pause nötig ist", () => {
         const p = plan(pair("08:00", "12:00"), 1 * H);
@@ -408,28 +414,28 @@ describe("earliestStart", () => {
 
 describe("checkWorkDay", () => {
     it("akzeptiert einen leeren Tag", () => {
-        expect(checkWorkDay([], "2026-06-11", 8 * H, "08:00")).toBeNull();
-        expect(checkWorkDay(workday, "2026-06-11", 10 * H, "08:00")).toBeNull();
+        expect(checkWorkDay([], day("2026-06-11"), 8 * H, time("08:00"))).toBeNull();
+        expect(checkWorkDay(workday, day("2026-06-11"), 10 * H, time("08:00"))).toBeNull();
     });
 
     it("lehnt mehr als 10 h ab, auch zusammen mit den vorhandenen", () => {
-        expect(checkWorkDay([], "2026-06-11", 10 * H + 1, "08:00")).toMatch(/höchstens 10 Stunden/);
+        expect(checkWorkDay([], day("2026-06-11"), 10 * H + 1, time("08:00"))).toMatch(/höchstens 10 Stunden/);
         const existing = [...pair("08:00", "14:00"), ...pair("14:30", "16:30")];
         expect(checkWorkDay(existing, DAY, 2 * H)).toBeNull(); // genau 10 h
         expect(checkWorkDay(existing, DAY, 2.5 * H)).toMatch(/höchstens 10 Stunden/);
     });
 
     it("lehnt eine Arbeitszeit von 0 ab", () => {
-        expect(checkWorkDay([], "2026-06-11", 0, "08:00")).not.toBeNull();
+        expect(checkWorkDay([], day("2026-06-11"), 0, time("08:00"))).not.toBeNull();
     });
 
     it("lehnt ein Gehen nach Mitternacht ab", () => {
-        expect(checkWorkDay([], "2026-06-11", 10 * H, "15:00")).toMatch(/am selben Tag/);
+        expect(checkWorkDay([], day("2026-06-11"), 10 * H, time("15:00"))).toMatch(/am selben Tag/);
         expect(checkWorkDay(pair("17:00", "21:00"), DAY, 4 * H)).toMatch(/am selben Tag/);
     });
 
     it("lehnt einen zu frühen Beginn ab", () => {
-        expect(checkWorkDay(pair("08:00", "12:00"), DAY, 3 * H, "12:15")).toBe("Beginn frühestens um 12:30");
+        expect(checkWorkDay(pair("08:00", "12:00"), DAY, 3 * H, time("12:15"))).toBe("Beginn frühestens um 12:30");
     });
 
     it("lehnt ein offenes Kommen am Tag ab", () => {
@@ -441,6 +447,6 @@ describe("checkWorkDay", () => {
     it("prüft die Abfolge mit den übrigen Buchungen", () => {
         // Am Vortag fehlt das gehen
         const open = [b("1", "kommen", "2026-06-10T06:00:00Z")];
-        expect(checkWorkDay(open, "2026-06-11", 4 * H, "08:00")).not.toBeNull();
+        expect(checkWorkDay(open, day("2026-06-11"), 4 * H, time("08:00"))).not.toBeNull();
     });
 });

@@ -1,4 +1,5 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
+import {type Day, toTimeOfDay} from "@shared/date-schemas";
 import {toBooking, updateTimeEntry} from "@/api/time-entries";
 import {formatTime} from "@shared/format";
 import {useCurrentUser} from "@/lib/user-context";
@@ -19,8 +20,11 @@ type Change = {
 
 // Die Zeit bleibt unangetastet, wenn sie nicht geändert wurde,
 // damit die Sekunden der ursprünglichen Buchung erhalten bleiben.
-const changedBookedAt = (entry: Entry, time: string): Date | null =>
-    time === formatTime(entry.bookedAt) ? null : localTimeToUtc(localDay(entry.bookedAt), time);
+// Eine ungültige Uhrzeit ergibt ebenfalls null, es gibt dann nichts zu ändern.
+const changedBookedAt = (entry: Entry, time: string): Date | null => {
+    const valid = toTimeOfDay(time);
+    return !valid || time === formatTime(entry.bookedAt) ? null : localTimeToUtc(localDay(entry.bookedAt), valid);
+};
 
 /** Der User ändert Uhrzeit oder Projekt einer Buchung */
 export function useChangeTimeEntry() {
@@ -54,7 +58,7 @@ export function useChangeTimeEntry() {
     return {
         problem,
         // Hinweis, wenn der Tag ("JJJJ-MM-TT") ein Krankheitstag ist. Speichern bleibt möglich.
-        sickNotice: (day: string) => (isSickDay(day, sickLeaves.data ?? []) ? sickDayMessage(day) : null),
+        sickNotice: (day: Day) => (isSickDay(day, sickLeaves.data ?? []) ? sickDayMessage(day) : null),
         change: save.mutate,
         isSaving: save.isPending,
         error: save.error,

@@ -1,4 +1,5 @@
 // db/schema.ts
+import type {Day} from "../shared/date-schemas";
 import {
     boolean,
     char,
@@ -21,8 +22,8 @@ export const vacations = mysqlTable(
         userId: char("user_id", {length: 36})
             .notNull()
             .references(() => users.id),
-        startDate: date("start_date", {mode: "string"}).notNull(),
-        endDate: date("end_date", {mode: "string"}).notNull(), // inklusive
+        startDate: date("start_date", {mode: "string"}).$type<Day>().notNull(),
+        endDate: date("end_date", {mode: "string"}).$type<Day>().notNull(), // inklusive
     },
     (t) => [index("idx_vacations_user_start").on(t.userId, t.startDate)],
 );
@@ -35,8 +36,8 @@ export const sickLeaves = mysqlTable(
         userId: char("user_id", {length: 36})
             .notNull()
             .references(() => users.id),
-        startDate: date("start_date", {mode: "string"}).notNull(),
-        endDate: date("end_date", {mode: "string"}).notNull(), // inklusive
+        startDate: date("start_date", {mode: "string"}).$type<Day>().notNull(),
+        endDate: date("end_date", {mode: "string"}).$type<Day>().notNull(), // inklusive
         note: varchar("note", {length: 500}),
     },
     (t) => [index("idx_sick_leaves_user_start").on(t.userId, t.startDate)],
@@ -76,7 +77,7 @@ export const userSettingValues = mysqlTable(
             .notNull()
             .references(() => userSettings.id),
         value: varchar("value", {length: 100}).notNull(), // als String, ausgewertet nach user_settings.type
-        validFrom: date("valid_from", {mode: "string"}).notNull(),
+        validFrom: date("valid_from", {mode: "string"}).$type<Day>().notNull(),
     },
     (t) => [uniqueIndex("uq_user_setting_values").on(t.userId, t.settingId, t.validFrom)],
 );
@@ -87,7 +88,7 @@ export const holidays = mysqlTable(
     {
         id: char("id", {length: 36}).primaryKey(),
         userId: char("user_id", {length: 36}).references(() => users.id),
-        date: date("date", {mode: "string"}).notNull(),
+        date: date("date", {mode: "string"}).$type<Day>().notNull(),
         name: varchar("name", {length: 100}).notNull(),
     },
     (t) => [index("idx_holidays_date").on(t.date), index("idx_holidays_user_date").on(t.userId, t.date)],

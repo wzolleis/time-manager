@@ -5,7 +5,7 @@ import {DaySchema} from "./date-schemas";
 
 const name = z.string().trim().min(1, "Bitte einen Namen angeben").max(100);
 
-export const HolidaySchema = createSelectSchema(holidays);
+export const HolidaySchema = createSelectSchema(holidays, {date: DaySchema});
 
 // Wem der Feiertag gehört, sagt der Pfad: /api/holidays für alle, /api/users/:userId/holidays für einen User
 export const HolidayCreateSchema = createInsertSchema(holidays, {

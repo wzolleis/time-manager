@@ -1,4 +1,5 @@
 import {Link, useNavigate} from "@tanstack/react-router";
+import type {Day, Month} from "@shared/date-schemas";
 import {MetricCard} from "@/components/cards/metric-card";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {diffClass} from "@/lib/format";
@@ -16,7 +17,7 @@ import {PeriodNav} from "@/components/buttons/period-nav";
 
 const dash = "–";
 
-const dayLabel = (day: string) => formatDayMonth(localDayRange(day).start);
+const dayLabel = (day: Day) => formatDayMonth(localDayRange(day).start);
 
 const columnsOf = (format: TimeFormat): DataTableColumnDef<MonthWeekTotals>[] => [
     {
@@ -59,7 +60,7 @@ const columnsOf = (format: TimeFormat): DataTableColumnDef<MonthWeekTotals>[] =>
 const columns = {minutes: columnsOf("minutes"), industrial: columnsOf("industrial")};
 
 /** month ist ein gültiger Monat "JJJJ-MM", geprüft in ReportMonthlyPage */
-export function ReportMonthly({month}: {month: string}) {
+export function ReportMonthly({month}: {month: Month}) {
     const navigate = useNavigate();
     const report = useShowMonthlyReport(month);
     const timeFormat = useTimeFormat();

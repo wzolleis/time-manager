@@ -7,6 +7,8 @@ import {useSickLeaves} from "@/views/sick-leaves";
 import {useTimeEntries} from "@/views/time-entries";
 import {checkSickLeave, countBookingsInRange} from "@shared/sick-leave-rules";
 import {countWorkdays} from "@shared/vacation-rules";
+import {toDayRange} from "@shared/day-range";
+import {parseDay} from "@shared/date-schemas";
 
 type Addition = {startDate: string; endDate: string; note: string | null};
 type Range = Pick<Addition, "startDate" | "endDate">;
@@ -20,7 +22,12 @@ export function useAddSickLeave() {
     const entries = useTimeEntries(currentUser?.id); // für den Hinweis auf Buchungen im Zeitraum
 
     const save = useMutation({
-        mutationFn: (data: Addition) => createSickLeave(currentUser!.id, data),
+        mutationFn: (data: Addition) =>
+            createSickLeave(currentUser!.id, {
+                ...data,
+                startDate: parseDay(data.startDate),
+                endDate: parseDay(data.endDate),
+            }),
         onSuccess: () => qc.invalidateQueries({queryKey: ["sick-leaves"]}),
     });
 
@@ -29,8 +36,14 @@ export function useAddSickLeave() {
         // Service, null = alles in Ordnung
         problem: ({startDate, endDate}: Range) =>
             checkSickLeave(sickLeaves.data ?? [], {id: "neu", startDate, endDate}),
-        sickDays: ({startDate, endDate}: Range) => countWorkdays(startDate, endDate, holidays.data ?? []),
-        entriesInRange: (range: Range) => countBookingsInRange((entries.data ?? []).map(toBooking), range),
+        sickDays: (input: Range) => {
+            const range = toDayRange(input);
+            return range ? countWorkdays(range.startDate, range.endDate, holidays.data ?? []) : 0;
+        },
+        entriesInRange: (input: Range) => {
+            const range = toDayRange(input);
+            return range ? countBookingsInRange((entries.data ?? []).map(toBooking), range) : 0;
+        },
         add: save.mutate,
         isSaving: save.isPending,
         error: save.error,

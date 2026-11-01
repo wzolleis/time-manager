@@ -1,4 +1,5 @@
 import {useMemo} from "react";
+import type {Year} from "@shared/date-schemas";
 import {toBooking} from "@/api/time-entries";
 import {useNow} from "@/lib/use-now";
 import {useCurrentUser} from "@/lib/user-context";
@@ -11,9 +12,10 @@ import {yearTotals} from "@shared/time-report";
 import {firstBookingDay, localDay} from "@shared/time-rules";
 import {SOLL_SETTING_ID} from "@shared/user-setting";
 import {historyOf} from "@shared/user-setting-rules";
+import {yearOf} from "@shared/week";
 
 /** Der User sieht seinen Jahresbericht für ein Jahr "JJJJ" */
-export function useShowYearlyReport(year: string) {
+export function useShowYearlyReport(year: Year) {
     const {currentUser} = useCurrentUser();
     const now = useNow();
     const userId = currentUser?.id;
@@ -26,8 +28,9 @@ export function useShowYearlyReport(year: string) {
     const soll = useMemo(() => historyOf(settings.data, SOLL_SETTING_ID), [settings.data]);
 
     const today = localDay(new Date(now));
-    const currentYear = today.slice(0, 4);
+    const currentYear = yearOf(today);
     const bookings = useMemo(() => (entries.data ?? []).map(toBooking), [entries.data]);
+    const firstDay = firstBookingDay(bookings);
 
     const totals = useMemo(
         () =>
@@ -48,7 +51,7 @@ export function useShowYearlyReport(year: string) {
         currentUser,
         currentYear,
         // Frühestes Jahr: das der ersten Buchung, ohne Buchungen das laufende
-        firstYear: firstBookingDay(bookings)?.slice(0, 4) ?? currentYear,
+        firstYear: firstDay ? yearOf(firstDay) : currentYear,
         totals,
         futureYear: `${year}-01-01` > today,
         partial: totals.targetToDateMs !== totals.targetYearMs,

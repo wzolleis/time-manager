@@ -1,4 +1,5 @@
 import {formatDay} from "@shared/format";
+import type {Day} from "@shared/date-schemas";
 import {useState} from "react";
 import {VacationActions} from "@features/vacations/components/vacation-actions";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
@@ -18,12 +19,12 @@ const columns: DataTableColumnDef<Row>[] = [
     {
         accessorKey: "startDate",
         header: "Beginn",
-        cell: ({getValue}) => formatDay(getValue<string>()),
+        cell: ({getValue}) => formatDay(getValue<Day>()),
     },
     {
         accessorKey: "endDate",
         header: "Ende",
-        cell: ({getValue}) => formatDay(getValue<string>()),
+        cell: ({getValue}) => formatDay(getValue<Day>()),
     },
     {accessorKey: "days", header: "Kalendertage", enableSorting: false},
     {accessorKey: "workdays", header: "Urlaubstage", enableSorting: false}, // ohne Wochenenden, Feiertage und Krankheitstage

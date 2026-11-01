@@ -2,15 +2,17 @@ import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {createHoliday} from "@/api/holidays";
 import {checkHoliday} from "@shared/holiday-rules";
 import type {HolidayCreate} from "@shared/holiday";
+import {parseDay} from "@shared/date-schemas";
 
-type Addition = HolidayCreate & {userId: string | null};
+// Der Tag kommt ungeprüft aus dem Formular
+type Addition = Omit<HolidayCreate, "date"> & {date: string; userId: string | null};
 
 /** Ein Feiertag wird eingetragen: mit userId null für alle, sonst nur für diesen User */
 export function useAddHoliday() {
     const qc = useQueryClient();
 
     const save = useMutation({
-        mutationFn: ({userId, ...data}: Addition) => createHoliday(userId, data),
+        mutationFn: ({userId, date, ...data}: Addition) => createHoliday(userId, {...data, date: parseDay(date)}),
         onSuccess: () => qc.invalidateQueries({queryKey: ["holidays"]}),
     });
 

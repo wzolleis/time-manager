@@ -1,4 +1,5 @@
 // shared/time-rules.ts
+import type {Day, TimeOfDay} from "./date-schemas";
 import {localTimeToUtc, TZ} from "./day-range";
 
 export type Booking = {
@@ -16,7 +17,7 @@ const timeFormat = new Intl.DateTimeFormat("de-DE", {
     timeStyle: "short",
 });
 
-export const localDay = (d: Date) => dayFormat.format(d);
+export const localDay = (d: Date): Day => dayFormat.format(d) as Day;
 const clockFormat = new Intl.DateTimeFormat("de-DE", {timeZone: TZ, hour: "2-digit", minute: "2-digit"});
 const formatClock = (d: Date) => clockFormat.format(d); // "HH:mm" in Berliner Zeit
 
@@ -93,7 +94,7 @@ export function findPartner(entries: Booking[], id: string): Booking | null {
 }
 
 /** Tag ("JJJJ-MM-TT") der ersten Buchung, also der Beginn der Zeiterfassung (null: noch keine Buchung) */
-export function firstBookingDay(entries: Booking[]): string | null {
+export function firstBookingDay(entries: Booking[]): Day | null {
     const first = sorted(entries)[0];
     return first ? localDay(first.bookedAt) : null;
 }
@@ -106,7 +107,7 @@ export function checkProject(type: Booking["type"], projectId: string | null | u
 // Zeitraum (features/changes/time-stamp-whole-day.md, time-stamp-period.md): am leeren Tag ab Beginn, sonst nach
 // dem letzten Gehen. Pflichtpause für die Arbeitszeit des ganzen Tages, höchstens 6 h am Stück, höchstens 10 h am Tag.
 /** Vorgaben eines leeren Tages für Dialog und MCP-Tool: Beginn 08:00, 8 h Arbeitszeit */
-export const WORK_DAY_START = "08:00";
+export const WORK_DAY_START = "08:00" as TimeOfDay;
 export const WORK_DAY_MINUTES = 8 * 60;
 
 const MINUTE = 60_000;
@@ -143,7 +144,7 @@ function block(from: number, workMinutes: number, splitPause: number): Booking[]
     ];
 }
 
-function planPeriod(existing: Booking[], day: string, workMinutes: number, start?: string): Planned {
+function planPeriod(existing: Booking[], day: Day, workMinutes: number, start?: TimeOfDay): Planned {
     const none = (problem: string, earliest: Date | null = null): Planned => ({
         plan: {bookings: [], pauseMinutes: 0},
         earliest,
@@ -194,15 +195,15 @@ function planPeriod(existing: Booking[], day: string, workMinutes: number, start
 }
 
 /** Die neuen Buchungen eines Zeitraums am Tag ("JJJJ-MM-TT"), leer, wenn eine Regel verletzt ist */
-export const planWorkDay = (existing: Booking[], day: string, workMinutes: number, start?: string): WorkDayPlan =>
+export const planWorkDay = (existing: Booking[], day: Day, workMinutes: number, start?: TimeOfDay): WorkDayPlan =>
     planPeriod(existing, day, workMinutes, start).plan;
 
 /** Frühester Beginn eines Zeitraums an einem Tag mit Buchungen (null: leerer Tag oder offenes Kommen) */
-export const earliestStart = (existing: Booking[], day: string, workMinutes: number): Date | null =>
+export const earliestStart = (existing: Booking[], day: Day, workMinutes: number): Date | null =>
     planPeriod(existing, day, workMinutes).earliest;
 
 /** null = der Zeitraum lässt sich zu den vorhandenen Buchungen eintragen, sonst eine Fehlermeldung */
-export function checkWorkDay(existing: Booking[], day: string, workMinutes: number, start?: string): string | null {
+export function checkWorkDay(existing: Booking[], day: Day, workMinutes: number, start?: TimeOfDay): string | null {
     if (workMinutes <= 0) return "Die Arbeitszeit muss größer als 0 sein";
     const {plan, problem} = planPeriod(existing, day, workMinutes, start);
     return problem ?? checkSequence([...existing, ...plan.bookings]);

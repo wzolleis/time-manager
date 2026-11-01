@@ -1,4 +1,5 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
+import {parseDay} from "@shared/date-schemas";
 import {updateUserSettingValue} from "@/api/user-settings";
 import {useCurrentUser} from "@/lib/user-context";
 import {useUserSettings} from "@/views/user-settings";
@@ -19,7 +20,7 @@ export function useChangeUserSetting() {
             // Nur Geändertes senden
             const patch: UserSettingValueUpdate = {};
             if (value !== current.value) patch.value = value;
-            if (validFrom !== current.validFrom) patch.validFrom = validFrom;
+            if (validFrom !== current.validFrom) patch.validFrom = parseDay(validFrom);
             if (Object.keys(patch).length === 0) return;
             await updateUserSettingValue(current.userId, current.id, patch);
         },

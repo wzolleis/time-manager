@@ -1,4 +1,5 @@
 import {describe, expect, it} from "vitest";
+import {day, month, year} from "../../../../shared/test-dates";
 import type {StoredEntry} from "../time-entries-store";
 import {
     dailyReport,
@@ -46,7 +47,7 @@ const data = (extra: Partial<ReportData> = {}): ReportData => ({
 
 describe("weeklyReport", () => {
     it("zeigt die Woche als Tabelle mit Summenzeile wie im Beispiel", () => {
-        const {text} = weeklyReport(data(), "2026-10-21", NOW);
+        const {text} = weeklyReport(data(), day("2026-10-21"), NOW);
         expect(text).toContain("## KW 43, 19.10.–25.10.2026");
         expect(text).toContain("| Mo., 19.10. | 8 Std 15 Min | 45 Min | 8 Std | +15 Min |");
         expect(text).toContain("| Mi., 21.10. | 4 Std 10 Min, läuft | – | 8 Std | −3 Std 50 Min |");
@@ -55,7 +56,7 @@ describe("weeklyReport", () => {
     });
 
     it("liefert Minuten und Texte passend zum outputSchema", () => {
-        const {structured} = weeklyReport(data(), "2026-10-21", NOW);
+        const {structured} = weeklyReport(data(), day("2026-10-21"), NOW);
         expect(WeeklyReportSchema.parse(structured)).toBeTruthy();
         expect(structured).toMatchObject({
             year: 2026,
@@ -66,11 +67,11 @@ describe("weeklyReport", () => {
             diffMinutes: -245,
             diff: "−4 Std 5 Min",
         });
-        expect(structured.days[0]).toMatchObject({day: "2026-10-19", workMinutes: 495, diffMinutes: 15});
+        expect(structured.days[0]).toMatchObject({day: day("2026-10-19"), workMinutes: 495, diffMinutes: 15});
     });
 
     it("hat in einer künftigen Woche keine Differenz", () => {
-        const {structured, text} = weeklyReport(data(), "2026-11-02", NOW);
+        const {structured, text} = weeklyReport(data(), day("2026-11-02"), NOW);
         expect(structured.diffMinutes).toBeNull();
         expect(text).toContain("Soll der Woche 40 Std.");
         expect(text).not.toContain("Bis heute");
@@ -79,7 +80,7 @@ describe("weeklyReport", () => {
 
 describe("dailyReport", () => {
     it("zeigt die Buchungen mit Projekt und ID und darunter die Summen", () => {
-        const {structured, text} = dailyReport(data(), "2026-10-19", NOW);
+        const {structured, text} = dailyReport(data(), day("2026-10-19"), NOW);
         expect(DailyReportSchema.parse(structured)).toBeTruthy();
         expect(text).toContain("## Montag, 19.10.2026");
         expect(text).toContain("| 08:00 Uhr | Kommen | Alpha | m1 |");
@@ -88,8 +89,8 @@ describe("dailyReport", () => {
     });
 
     it("markiert Buchungen an Krankheitstagen, sie zählen nicht", () => {
-        const sick = data({sickLeaves: [{startDate: "2026-10-19", endDate: "2026-10-19"}]});
-        const {structured, text} = dailyReport(sick, "2026-10-19", NOW);
+        const sick = data({sickLeaves: [{startDate: day("2026-10-19"), endDate: day("2026-10-19")}]});
+        const {structured, text} = dailyReport(sick, day("2026-10-19"), NOW);
         expect(structured.kindText).toBe("krank");
         expect(structured.workMinutes).toBe(0);
         expect(structured.entries.every((e) => e.ignored)).toBe(true);
@@ -100,7 +101,7 @@ describe("dailyReport", () => {
 
 describe("monthlyReport", () => {
     it("zeigt eine Zeile pro Kalenderwoche, nur mit den Tagen im Monat", () => {
-        const {structured, text} = monthlyReport(data(), "2026-10", NOW);
+        const {structured, text} = monthlyReport(data(), month("2026-10"), NOW);
         expect(text).toContain("## Oktober 2026");
         expect(text).toContain("| KW 40 (01.10.–04.10.) | – | – | – |");
         expect(text).toContain("| KW 43 (19.10.–25.10.) | 19 Std 55 Min, läuft | 40 Std | −4 Std 5 Min |");
@@ -111,15 +112,15 @@ describe("monthlyReport", () => {
 describe("yearlyReport", () => {
     it("zeigt eine Zeile pro Monat mit Summen wie yearTotals", () => {
         const d = data();
-        const {structured, text} = yearlyReport(d, "2026", NOW);
+        const {structured, text} = yearlyReport(d, year("2026"), NOW);
         const t = yearTotals(
             d.entries.map((e) => ({id: e.id, type: e.type, bookedAt: e.bookedAt})),
-            "2026",
+            year("2026"),
             d.vacations,
             d.holidays,
             d.sickLeaves,
             d.soll,
-            "2026-10-21",
+            day("2026-10-21"),
             NOW,
         );
         expect(YearlyReportSchema.parse(structured)).toBeTruthy();
@@ -140,17 +141,17 @@ describe("yearlyReport", () => {
     });
 
     it("hat in einem künftigen Jahr keine Differenz", () => {
-        const {structured, text} = yearlyReport(data(), "2027", NOW);
+        const {structured, text} = yearlyReport(data(), year("2027"), NOW);
         expect(structured.diffMinutes).toBeNull();
         expect(structured.months.every((m) => m.diffMinutes === null)).toBe(true);
         expect(text).not.toContain("Bis heute");
     });
 
     it("nennt vor der ersten Buchung den Beginn der Zeiterfassung", () => {
-        const {structured, text} = yearlyReport(data(), "2025", NOW);
+        const {structured, text} = yearlyReport(data(), year("2025"), NOW);
         expect(structured.targetYearMinutes).toBe(0);
         expect(structured.months.every((m) => m.diffMinutes === null)).toBe(true);
         expect(text).toContain("Die Zeiterfassung beginnt 2026.");
-        expect(yearlyReport(data(), "2026", NOW).text).not.toContain("Die Zeiterfassung beginnt");
+        expect(yearlyReport(data(), year("2026"), NOW).text).not.toContain("Die Zeiterfassung beginnt");
     });
 });

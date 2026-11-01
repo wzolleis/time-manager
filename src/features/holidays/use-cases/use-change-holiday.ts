@@ -2,6 +2,7 @@ import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {updateHoliday} from "@/api/holidays";
 import {checkHoliday} from "@shared/holiday-rules";
 import type {Holiday, HolidayUpdate} from "@shared/holiday";
+import {parseDay} from "@shared/date-schemas";
 
 type Change = {holiday: Holiday; date: string; name: string};
 
@@ -13,7 +14,7 @@ export function useChangeHoliday() {
         mutationFn: async ({holiday, date, name}: Change) => {
             // Nur Geändertes senden
             const patch: HolidayUpdate = {};
-            if (date !== holiday.date) patch.date = date;
+            if (date !== holiday.date) patch.date = parseDay(date);
             if (name.trim() !== holiday.name) patch.name = name;
             if (Object.keys(patch).length === 0) return;
             await updateHoliday(holiday.userId, holiday.id, patch);

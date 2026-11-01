@@ -1,4 +1,5 @@
 import {useMemo} from "react";
+import type {Day} from "@shared/date-schemas";
 import {useNow} from "@/lib/use-now";
 import {useCurrentUser} from "@/lib/user-context";
 import {useHolidays} from "@/views/holidays";
@@ -20,7 +21,7 @@ import type {EntryRow} from "@features/reports/time-entry-row";
 export type DailyReportRow = EntryRow & {ignored: boolean}; // ignored: am Krankheitstag, zählt nicht
 
 /** Der User sieht seinen Tagesbericht für einen Tag "JJJJ-MM-TT" */
-export function useShowDailyReport(day: string) {
+export function useShowDailyReport(day: Day) {
     const {currentUser} = useCurrentUser();
     const now = useNow();
     const userId = currentUser?.id;

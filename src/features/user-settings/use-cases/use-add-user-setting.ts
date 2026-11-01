@@ -1,4 +1,5 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
+import {parseDay} from "@shared/date-schemas";
 import {createUserSettingValue} from "@/api/user-settings";
 import {useCurrentUser} from "@/lib/user-context";
 import {useUserSettings} from "@/views/user-settings";
@@ -16,7 +17,7 @@ export function useAddUserSetting() {
 
     const save = useMutation({
         mutationFn: ({setting, value, validFrom}: Addition) =>
-            createUserSettingValue(currentUser!.id, {settingId: setting.id, value, validFrom}),
+            createUserSettingValue(currentUser!.id, {settingId: setting.id, value, validFrom: parseDay(validFrom)}),
         // Berichte und Urlaubskonto lesen dieselbe Query und rechnen damit neu
         onSuccess: () => qc.invalidateQueries({queryKey: ["user-settings"]}),
     });

@@ -8,6 +8,8 @@ import {useTimeEntries} from "@/views/time-entries";
 import type {SickLeave, SickLeaveUpdate} from "@shared/sick-leave";
 import {checkSickLeave, countBookingsInRange} from "@shared/sick-leave-rules";
 import {countWorkdays} from "@shared/vacation-rules";
+import {toDayRange} from "@shared/day-range";
+import {parseDay} from "@shared/date-schemas";
 
 type Change = {sickLeave: SickLeave; startDate: string; endDate: string; note: string | null};
 type Range = Pick<Change, "startDate" | "endDate">;
@@ -24,8 +26,8 @@ export function useChangeSickLeave() {
         mutationFn: async ({sickLeave, startDate, endDate, note}: Change) => {
             // Nur Geändertes senden
             const patch: SickLeaveUpdate = {};
-            if (startDate !== sickLeave.startDate) patch.startDate = startDate;
-            if (endDate !== sickLeave.endDate) patch.endDate = endDate;
+            if (startDate !== sickLeave.startDate) patch.startDate = parseDay(startDate);
+            if (endDate !== sickLeave.endDate) patch.endDate = parseDay(endDate);
             if (note !== sickLeave.note) patch.note = note;
             if (Object.keys(patch).length === 0) return;
             await updateSickLeave(sickLeave.userId, sickLeave.id, patch);
@@ -38,8 +40,14 @@ export function useChangeSickLeave() {
         // Service, null = alles in Ordnung
         problem: ({sickLeave, startDate, endDate}: Omit<Change, "note">) =>
             checkSickLeave(sickLeaves.data ?? [], {id: sickLeave.id, startDate, endDate}),
-        sickDays: ({startDate, endDate}: Range) => countWorkdays(startDate, endDate, holidays.data ?? []),
-        entriesInRange: (range: Range) => countBookingsInRange((entries.data ?? []).map(toBooking), range),
+        sickDays: (input: Range) => {
+            const range = toDayRange(input);
+            return range ? countWorkdays(range.startDate, range.endDate, holidays.data ?? []) : 0;
+        },
+        entriesInRange: (input: Range) => {
+            const range = toDayRange(input);
+            return range ? countBookingsInRange((entries.data ?? []).map(toBooking), range) : 0;
+        },
         change: save.mutate,
         isSaving: save.isPending,
         error: save.error,

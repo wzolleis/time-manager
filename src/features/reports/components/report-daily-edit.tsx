@@ -1,4 +1,5 @@
 import {useNavigate} from "@tanstack/react-router";
+import type {Day} from "@shared/date-schemas";
 import {Input} from "@/components/ui/input";
 import {MetricCard} from "@/components/cards/metric-card";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
@@ -46,7 +47,7 @@ const columns: DataTableColumnDef<DailyReportRow>[] = [
 ];
 
 /** day ist ein gültiger Tag "JJJJ-MM-TT", geprüft in ReportDailyPage */
-export function ReportDailyEdit({day}: {day: string}) {
+export function ReportDailyEdit({day}: {day: Day}) {
     const navigate = useNavigate();
     const report = useShowDailyReport(day);
     const timeFormat = useTimeFormat();

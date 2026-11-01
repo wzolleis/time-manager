@@ -12,6 +12,7 @@ import {
 import {Input} from "@/components/ui/input";
 import {localDay} from "@shared/time-rules";
 import {dayCount} from "@shared/vacation-rules";
+import {toDayRange} from "@shared/day-range";
 import type {Vacation} from "@shared/vacation";
 import {useAddVacation} from "@features/vacations/use-cases/use-add-vacation";
 import {useChangeVacation} from "@features/vacations/use-cases/use-change-vacation";
@@ -61,6 +62,7 @@ export function VacationDialog({vacation, label, variant = "outline", size = "sm
     };
 
     const range = {startDate: start, endDate: end};
+    const days = toDayRange(range); // null, solange ein Tag fehlt oder ungültig ist
     const problem =
         !start || !end
             ? "Bitte Beginn und Ende wählen"
@@ -116,7 +118,7 @@ export function VacationDialog({vacation, label, variant = "outline", size = "sm
                     {problem ? (
                         <ErrorText alert={false}>{problem}</ErrorText>
                     ) : (
-                        <Muted>{`${dayCount(start, end)} Kalendertage · ${save.workdays(range)} Urlaubstage`}</Muted>
+                        <Muted>{`${days ? dayCount(days.startDate, days.endDate) : 0} Kalendertage · ${save.workdays(range)} Urlaubstage`}</Muted>
                     )}
 
                     {save.error && <ErrorText>{save.error.message}</ErrorText>}

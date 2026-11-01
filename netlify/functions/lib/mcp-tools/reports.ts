@@ -2,7 +2,7 @@
 // Tools der Berichte. Gerechnet wird in report-view.ts mit den Services der UI (Regel 2).
 import type {McpServer} from "@modelcontextprotocol/sdk/server/mcp.js";
 import {localDay} from "../../../../shared/time-rules";
-import {monthOf} from "../../../../shared/week";
+import {monthOf, yearOf} from "../../../../shared/week";
 import {DaySchema, MonthSchema, YearSchema} from "../../../../shared/date-schemas";
 import type {SessionUser} from "../session";
 import {loadReportData} from "./data";
@@ -92,7 +92,7 @@ export function registerReportTools(server: McpServer, user: SessionUser): void 
         ({year}) =>
             run(async () => {
                 const now = new Date();
-                const report = yearlyReport(await loadReportData(user.id), year ?? localDay(now).slice(0, 4), now);
+                const report = yearlyReport(await loadReportData(user.id), year ?? yearOf(localDay(now)), now);
                 return ok(report.text, report.structured);
             }),
     );

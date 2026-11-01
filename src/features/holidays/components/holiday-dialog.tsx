@@ -13,6 +13,7 @@ import {useAddHoliday} from "@features/holidays/use-cases/use-add-holiday";
 import {useChangeHoliday} from "@features/holidays/use-cases/use-change-holiday";
 import {localDay} from "@shared/time-rules";
 import {isWeekend} from "@shared/week";
+import {isValidDay} from "@shared/day-range";
 import type {Holiday} from "@shared/holiday";
 import {Muted} from "@/components/text/muted";
 import {ErrorText} from "@/components/text/error-text";
@@ -58,7 +59,7 @@ export function HolidayDialog({holiday, userId, userName, label, variant = "outl
 
     const global = (holiday ? holiday.userId : userId) === null;
     const problem = save.problem(date, name);
-    const weekend = !problem && isWeekend(date);
+    const weekend = !problem && isValidDay(date) && isWeekend(date);
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>

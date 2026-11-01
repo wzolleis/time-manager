@@ -1,6 +1,7 @@
 // netlify/functions/lib/mcp-tools/user-settings-view.ts
 // Einstellungen für den MCP-Server, mit denselben Regeln wie die Seite „Einstellungen“. Ohne DB, damit testbar.
 import {z} from "zod";
+import type {Day} from "../../../../shared/date-schemas";
 import {formatDay} from "../../../../shared/format";
 import type {UserSettingsData} from "../../../../shared/user-setting";
 import {historyOf, settingStatus, valueOn} from "../../../../shared/user-setting-rules";
@@ -32,7 +33,7 @@ export const UserSettingsReportSchema = z.object({
 
 const UNIT_TEXT = {hour: "Stunden", day: "Tage"} as const;
 
-export function userSettingsReport(data: UserSettingsData, today: string) {
+export function userSettingsReport(data: UserSettingsData, today: Day) {
     const settings = data.settings.map((s) => {
         const history = historyOf(data, s.id);
         return {

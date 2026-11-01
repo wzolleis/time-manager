@@ -2,6 +2,7 @@
 // Tages-, Wochen-, Monats- und Jahresbericht für den MCP-Server, gerechnet mit denselben Services wie die UI (Regel 2).
 // Ohne DB: die Daten kommen als Parameter, damit sich die Berichte testen lassen.
 import {z} from "zod";
+import type {Day, Month, Year} from "../../../../shared/date-schemas";
 import {
     dayKindLabel,
     formatDate,
@@ -33,7 +34,7 @@ export type ReportData = {
     entries: StoredEntry[]; // alle Buchungen des Users, wie sie die UI lädt
     projects: {id: string; name: string}[];
     vacations: DayRange[];
-    holidays: {date: string; name: string}[]; // globale und eigene
+    holidays: {date: Day; name: string}[]; // globale und eigene
     sickLeaves: DayRange[];
     soll: SettingHistory; // Soll aus den Einstellungen des Users
 };
@@ -71,7 +72,7 @@ export const DailyReportSchema = z.object({
     missingGehen: z.boolean().describe("an diesem vergangenen Tag fehlt das Gehen"),
 });
 
-export function dailyReport(data: ReportData, day: string, now: Date) {
+export function dailyReport(data: ReportData, day: Day, now: Date) {
     const today = localDay(now);
     const range = localDayRange(day);
     const bookings = toBookings(data.entries);
@@ -204,7 +205,7 @@ function summaryLine(
     return partial ? `Bis heute ${work} ${total}` : `Gearbeitet ${work}`;
 }
 
-export function weeklyReport(data: ReportData, day: string, now: Date) {
+export function weeklyReport(data: ReportData, day: Day, now: Date) {
     const today = localDay(now);
     const days = weekDays(day);
     const {year, week} = isoWeek(day);
@@ -284,7 +285,7 @@ export const MonthlyReportSchema = z.object({
     running: z.boolean(),
 });
 
-export function monthlyReport(data: ReportData, month: string, now: Date) {
+export function monthlyReport(data: ReportData, month: Month, now: Date) {
     const today = localDay(now);
     const t = monthTotals(
         toBookings(data.entries),
@@ -297,7 +298,7 @@ export function monthlyReport(data: ReportData, month: string, now: Date) {
         now,
     );
     const future = `${month}-01` > today;
-    const dayLabel = (day: string) => formatDayMonth(localDayRange(day).start);
+    const dayLabel = (day: Day) => formatDayMonth(localDayRange(day).start);
 
     const weeks = t.weeks.map((w) => ({
         year: w.year,
@@ -369,7 +370,7 @@ export const YearlyReportSchema = z.object({
     running: z.boolean(),
 });
 
-export function yearlyReport(data: ReportData, year: string, now: Date) {
+export function yearlyReport(data: ReportData, year: Year, now: Date) {
     const today = localDay(now);
     const bookings = toBookings(data.entries);
     const t = yearTotals(bookings, year, data.vacations, data.holidays, data.sickLeaves, data.soll, today, now);

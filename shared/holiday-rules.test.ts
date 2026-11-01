@@ -1,24 +1,25 @@
 // shared/holiday-rules.test.ts
 import {describe, expect, it} from "vitest";
+import {day} from "./test-dates";
 import {checkHoliday, findHolidayClash, holidayClashMessage, holidayOn, isHoliday} from "./holiday-rules";
 
 const ALICE = "275f12fb-e116-4857-9f12-fbe116b857fb";
 const BOB = "8a1c2f0e-3b4d-4e5f-9a6b-7c8d9e0f1a2b";
 
-const h = (id: string, userId: string | null, date: string, name = "Feiertag") => ({id, userId, date, name});
+const h = (id: string, userId: string | null, date: string, name = "Feiertag") => ({id, userId, date: day(date), name});
 
 describe("isHoliday und holidayOn", () => {
     const holidays = [h("a", null, "2026-10-03", "Tag der Deutschen Einheit")];
 
     it("erkennt den Tag", () => {
-        expect(isHoliday("2026-10-03", holidays)).toBe(true);
-        expect(holidayOn("2026-10-03", holidays)?.name).toBe("Tag der Deutschen Einheit");
+        expect(isHoliday(day("2026-10-03"), holidays)).toBe(true);
+        expect(holidayOn(day("2026-10-03"), holidays)?.name).toBe("Tag der Deutschen Einheit");
     });
 
     it("andere Tage nicht", () => {
-        expect(isHoliday("2026-10-02", holidays)).toBe(false);
-        expect(holidayOn("2026-10-02", holidays)).toBeUndefined();
-        expect(isHoliday("2026-10-03", [])).toBe(false);
+        expect(isHoliday(day("2026-10-02"), holidays)).toBe(false);
+        expect(holidayOn(day("2026-10-02"), holidays)).toBeUndefined();
+        expect(isHoliday(day("2026-10-03"), [])).toBe(false);
     });
 });
 

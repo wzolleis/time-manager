@@ -1,4 +1,4 @@
-import {DaySchema} from "./date-schemas";
+import {type Day, DaySchema, type TimeOfDay, toDay} from "./date-schemas";
 
 /** Alle lokalen Tage und Uhrzeiten gelten in dieser Zeitzone */
 export const TZ = "Europe/Berlin";
@@ -23,7 +23,7 @@ function offsetMs(at: Date): number {
 }
 
 /** Lokale Uhrzeit ("HH:mm") an einem lokalen Tag ("JJJJ-MM-TT") als UTC-Zeitpunkt */
-export function localTimeToUtc(day: string, time: string): Date {
+export function localTimeToUtc(day: Day, time: TimeOfDay): Date {
     const [y, m, d] = day.split("-").map(Number);
     const [hh, mm] = time.split(":").map(Number);
     const guess = Date.UTC(y, m - 1, d, hh, mm);
@@ -34,25 +34,32 @@ export function localTimeToUtc(day: string, time: string): Date {
 }
 
 /** Mitternacht eines lokalen Tages als UTC-Zeitpunkt */
-export const startOfLocalDay = (day: string): Date => localTimeToUtc(day, "00:00");
+export const startOfLocalDay = (day: Day): Date => localTimeToUtc(day, "00:00" as TimeOfDay);
 
 /** Verschiebt einen Tag ("JJJJ-MM-TT") um ganze Tage */
-export function addDays(day: string, delta: number): string {
+export function addDays(day: Day, delta: number): Day {
     const [y, m, d] = day.split("-").map(Number);
-    return new Date(Date.UTC(y, m - 1, d + delta)).toISOString().slice(0, 10);
+    return new Date(Date.UTC(y, m - 1, d + delta)).toISOString().slice(0, 10) as Day;
 }
 
 /** [start, end): end ist der Beginn des Folgetags und gehört nicht mehr dazu */
-export function localDayRange(day: string): {start: Date; end: Date} {
+export function localDayRange(day: Day): {start: Date; end: Date} {
     return {start: startOfLocalDay(day), end: startOfLocalDay(addDays(day, 1))};
 }
 
 /** "JJJJ-MM-TT", ein echtes Kalenderdatum ab 1970 (2026-02-30 ist ungültig), geprüft mit DaySchema */
-export const isValidDay = (day: string): boolean => DaySchema.safeParse(day).success;
+export const isValidDay = (day: string): day is Day => DaySchema.safeParse(day).success;
 
 /** Ein Zeitraum ganzer Tage ("JJJJ-MM-TT"), das Ende ist eingeschlossen */
-export type DayRange = {startDate: string; endDate: string};
+export type DayRange = {startDate: Day; endDate: Day};
+
+/** Beginn und Ende aus einem Formular als Zeitraum, null, wenn einer der beiden Tage ungültig ist */
+export function toDayRange(input: {startDate: string; endDate: string}): DayRange | null {
+    const startDate = toDay(input.startDate);
+    const endDate = toDay(input.endDate);
+    return startDate && endDate ? {startDate, endDate} : null;
+}
 
 /** Liegt der Tag ("JJJJ-MM-TT") in einem der Zeiträume? Beginn und Ende zählen mit. */
-export const isInRanges = (day: string, ranges: DayRange[]): boolean =>
+export const isInRanges = (day: Day, ranges: DayRange[]): boolean =>
     ranges.some((r) => r.startDate <= day && day <= r.endDate);
