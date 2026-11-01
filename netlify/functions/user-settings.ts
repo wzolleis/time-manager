@@ -1,6 +1,6 @@
 import type {Config, Context} from "@netlify/functions";
-import {z} from "zod";
 import {hasDbCode} from "./lib/db-errors";
+import {errorResponse, readBody, unknownUser} from "./lib/http";
 import {withTiming} from "./lib/timing";
 import {UserSettingValueCreateSchema, UserSettingValueUpdateSchema} from "@shared/user-setting";
 import {IdSchema, isRoutePath, notFound, pathParams} from "./lib/id";
@@ -10,21 +10,11 @@ import {
     deleteSettingValue,
     listUserSettings,
     SettingNotFoundError,
-    UnknownUserError,
 } from "./lib/user-settings-store";
 import {forbidden} from "./lib/roles";
-import {RuleError, ruleViolation} from "./lib/rule-error";
 import {type Session, withSession} from "./lib/session";
 
 // Die Regeln prüft der Store mit den Services aus shared/user-setting-rules.ts
-
-const readBody = async (req: Request): Promise<unknown> => {
-    try {
-        return await req.json();
-    } catch {
-        return undefined;
-    }
-};
 
 const handler = async (req: Request, _context: Context, session: Session) => {
     try {
@@ -63,18 +53,13 @@ const handler = async (req: Request, _context: Context, session: Session) => {
 
         return new Response(null, {status: 405});
     } catch (err) {
-        if (err instanceof z.ZodError) return Response.json({errors: err.issues}, {status: 400});
-        if (err instanceof RuleError) return ruleViolation(err);
         if (err instanceof SettingNotFoundError) return notFound();
         // Zwei gleichzeitige Werte für denselben Tag: der Unique-Index greift (Regel 5)
         if (hasDbCode(err, "ER_DUP_ENTRY")) {
             return Response.json({error: "Für diesen Tag gibt es schon einen Wert"}, {status: 422});
         }
-        if (err instanceof UnknownUserError || hasDbCode(err, "ER_NO_REFERENCED_ROW_2")) {
-            return Response.json({error: "User existiert nicht"}, {status: 400});
-        }
-        console.error(err);
-        return Response.json({error: "Interner Fehler"}, {status: 500});
+        if (hasDbCode(err, "ER_NO_REFERENCED_ROW_2")) return unknownUser();
+        return errorResponse(err);
     }
 };
 

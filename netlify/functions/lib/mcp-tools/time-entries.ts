@@ -18,9 +18,9 @@ import {
     deleteEntry,
     getEntry,
     listEntries,
-    NotFoundError,
     type StoredEntry,
 } from "../time-entries-store";
+import {NotFoundError} from "../errors";
 import {loadProjectNames, loadProjects, loadSickLeaves} from "./data";
 import {
     dayShort,

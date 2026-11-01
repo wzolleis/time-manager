@@ -1,7 +1,7 @@
 import type {Config, Context} from "@netlify/functions";
 import {randomUUID} from "node:crypto";
 import {asc, eq} from "drizzle-orm";
-import {z} from "zod";
+import {errorResponse, readBody} from "./lib/http";
 import {db} from "./lib/db";
 import {hasDbCode} from "./lib/db-errors";
 import {projects} from "../../db/schema";
@@ -14,14 +14,6 @@ import {ProjectCreateSchema, ProjectUpdateSchema} from "@shared/project";
 const getProject = async (id: string) => {
     const [row] = await db.select().from(projects).where(eq(projects.id, id)).limit(1);
     return row ?? null;
-};
-
-const readBody = async (req: Request): Promise<unknown> => {
-    try {
-        return await req.json();
-    } catch {
-        return undefined;
-    }
 };
 
 const handler = async (req: Request, _context: Context) => {
@@ -68,12 +60,10 @@ const handler = async (req: Request, _context: Context) => {
 
         return new Response(null, {status: 405});
     } catch (err) {
-        if (err instanceof z.ZodError) return Response.json({errors: err.issues}, {status: 400});
         if (hasDbCode(err, "ER_DUP_ENTRY")) {
             return Response.json({error: "Dieses Projekt existiert bereits"}, {status: 409});
         }
-        console.error(err);
-        return Response.json({error: "Interner Fehler"}, {status: 500});
+        return errorResponse(err);
     }
 };
 

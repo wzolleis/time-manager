@@ -2,7 +2,7 @@
 import type {Config, Context} from "@netlify/functions";
 import {randomUUID} from "node:crypto";
 import {eq} from "drizzle-orm";
-import {z} from "zod";
+import {errorResponse, readBody} from "./lib/http";
 import {
     type AuthenticationResponseJSON,
     generateAuthenticationOptions,
@@ -31,14 +31,6 @@ import {
     type Session,
     unauthorized,
 } from "./lib/session";
-
-const readBody = async (req: Request): Promise<unknown> => {
-    try {
-        return await req.json();
-    } catch {
-        return undefined;
-    }
-};
 
 const getPasswordHash = async (userId: string) => {
     const [row] = await db.select({passwordHash: users.passwordHash}).from(users).where(eq(users.id, userId)).limit(1);
@@ -285,11 +277,7 @@ const handler = async (req: Request, _context: Context) => {
                 return notFound();
         }
     } catch (err) {
-        if (err instanceof z.ZodError) {
-            return Response.json({errors: err.issues}, {status: 400});
-        }
-        console.error(err);
-        return Response.json({error: "Interner Fehler"}, {status: 500});
+        return errorResponse(err);
     }
 };
 
