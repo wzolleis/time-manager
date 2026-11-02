@@ -1,10 +1,8 @@
 import {StrictMode} from "react";
 import {createRoot} from "react-dom/client";
 import "./index.css";
-import "@radix-ui/themes/styles.css";
 import {PersistQueryClientProvider} from "@tanstack/react-query-persist-client";
 
-import {Theme} from "@radix-ui/themes";
 import {createRouter, RouterProvider} from "@tanstack/react-router";
 
 // Wird vom Router-Plugin automatisch aus src/routes/ generiert
@@ -29,12 +27,10 @@ const rootElement = document.getElementById("root")!;
 
 createRoot(rootElement).render(
     <StrictMode>
-        <Theme>
-            <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
-                <UserProvider>
-                    <RouterProvider router={router} />
-                </UserProvider>
-            </PersistQueryClientProvider>
-        </Theme>
+        <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
+            <UserProvider>
+                <RouterProvider router={router} />
+            </UserProvider>
+        </PersistQueryClientProvider>
     </StrictMode>,
 );

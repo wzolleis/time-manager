@@ -1,21 +1,21 @@
-import {DropdownMenu} from "@radix-ui/themes";
 import {Settings} from "lucide-react";
 import {IconButton} from "@/components/buttons/icon-button";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {navItemsOf, type NavItem} from "@/application/navigation/nav-items";
 
 // Das Administrator-Menü oben rechts neben dem Avatar. Ob der User es sieht, entscheidet der Header.
 export const AdminDropdown = ({onItemSelected}: {onItemSelected: (item: NavItem) => void}) => (
-    <DropdownMenu.Root>
-        <DropdownMenu.Trigger>
+    <DropdownMenu>
+        <DropdownMenuTrigger asChild>
             <IconButton icon={Settings} label="Administration" />
-        </DropdownMenu.Trigger>
+        </DropdownMenuTrigger>
 
-        <DropdownMenu.Content variant="soft">
+        <DropdownMenuContent align="end" className="w-auto">
             {navItemsOf("admin").map((item) => (
-                <DropdownMenu.Item key={item.id} onClick={() => onItemSelected(item)}>
-                    <item.icon size={14} style={{marginRight: "6px"}} /> {item.label}
-                </DropdownMenu.Item>
+                <DropdownMenuItem key={item.id} onClick={() => onItemSelected(item)}>
+                    <item.icon /> {item.label}
+                </DropdownMenuItem>
             ))}
-        </DropdownMenu.Content>
-    </DropdownMenu.Root>
+        </DropdownMenuContent>
+    </DropdownMenu>
 );

@@ -1,7 +1,5 @@
 // Layout.tsx
 import React from "react";
-import {Box, Flex, Grid, Theme} from "@radix-ui/themes";
-import "@radix-ui/themes/styles.css";
 import Content from "@/application/layout/content";
 import {Header} from "@/application/layout/header";
 import {navItemsOf} from "@/application/navigation/nav-items";
@@ -9,27 +7,23 @@ import {Sidebar} from "@/application/layout/sidebar";
 
 export default function ApplicationLayout(): React.JSX.Element {
     return (
-        <Flex direction="column" gap="2">
-            <Theme accentColor="indigo" grayColor="slate" radius="large" scaling="95%">
-                {/* minmax(0, 1fr): breiter Inhalt (Tabellen) darf das Layout und damit den Header nicht verbreitern */}
-                <Grid columns={{initial: "minmax(0, 1fr)", md: "250px minmax(0, 1fr)"}} style={{minHeight: "100vh"}}>
-                    {/* 1. Wiederverwendbare Sidebar (unterhalb von md im Hamburger-Menü des Headers) */}
-                    <Box display={{initial: "none", md: "block"}}>
-                        <Sidebar items={navItemsOf("sidebar")} />
-                    </Box>
+        // minmax(0, 1fr): breiter Inhalt (Tabellen) darf das Layout und damit den Header nicht verbreitern
+        <div className="grid min-h-screen grid-cols-[minmax(0,1fr)] md:grid-cols-[250px_minmax(0,1fr)]">
+            {/* 1. Wiederverwendbare Sidebar (unterhalb von md im Hamburger-Menü des Headers) */}
+            <div className="hidden md:block">
+                <Sidebar items={navItemsOf("sidebar")} />
+            </div>
 
-                    {/* CONTAINER FÜR NAVBAR + CONTENT */}
-                    <Flex direction="column" style={{background: "var(--gray-2)"}}>
-                        <Header />
+            {/* CONTAINER FÜR NAVBAR + CONTENT */}
+            <div className="flex flex-col bg-slate-50">
+                <Header />
 
-                        {/* CONTENT BEREICH */}
-                        <Box p={{initial: "3", sm: "6"}} style={{flexGrow: 1, overflowX: "auto", overflowY: "auto"}}>
-                            {/* Hier steht der Inhalt der aktuellen route */}
-                            <Content />
-                        </Box>
-                    </Flex>
-                </Grid>
-            </Theme>
-        </Flex>
+                {/* CONTENT BEREICH */}
+                <div className="grow overflow-auto p-3 sm:p-8">
+                    {/* Hier steht der Inhalt der aktuellen route */}
+                    <Content />
+                </div>
+            </div>
+        </div>
     );
 }

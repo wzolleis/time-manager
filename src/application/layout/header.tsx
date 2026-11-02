@@ -1,4 +1,3 @@
-import {Box, Flex, Text} from "@radix-ui/themes";
 import {UserDropdown} from "@features/users/components/user-dropdown";
 import {StartEnd} from "@/components/utils/start-end";
 import {MenuButton} from "@/components/buttons/menu-button";
@@ -32,19 +31,13 @@ export const Header = () => {
     const currentUser: CurrentUser = userContext.currentUser;
 
     return (
-        <Flex
-            justify="between"
-            align="center"
-            px="4"
-            py="3"
-            style={{background: "var(--color-background)", borderBottom: "1px solid var(--gray-4)"}}
-        >
+        <div className="flex items-center justify-between border-b bg-background px-4 py-3">
             {/* minWidth 0: die linke Seite schrumpft, Glocke und Avatar bleiben im Bild */}
-            <Flex align="center" gap="3" width={"100%"} minWidth="0">
+            <div className="flex w-full min-w-0 items-center gap-3">
                 {/* Hamburger */}
-                <Box display={{md: "none"}}>
+                <div className="md:hidden">
                     <MenuButton onClick={() => setMenuOpen(true)} />
-                </Box>
+                </div>
                 <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
                     <SheetContent side="left" className="w-72 overflow-y-auto">
                         <SheetHeader>
@@ -58,13 +51,13 @@ export const Header = () => {
                     <Breadcrumb items={NAVIGATION_ITEMS} />{" "}
                     {/* alle Einträge, auch die aus Administrator- und Avatar-Menü */}
                     {/* Auf schmalen Bildschirmen braucht die Breadcrumb den Platz */}
-                    <Box display={{initial: "none", sm: "block"}} minWidth="0">
-                        <Text as="div" color="gray" truncate>{`Hallo ${currentUser?.name}`}</Text>
-                    </Box>
+                    <div className="hidden min-w-0 truncate text-muted-foreground sm:block">
+                        {`Hallo ${currentUser?.name}`}
+                    </div>
                 </StartEnd>
-            </Flex>
+            </div>
 
-            <Flex align="center" gap="3" flexShrink="0">
+            <div className="flex shrink-0 items-center gap-3">
                 <TimeFormatToggle />
                 {isAdmin && <AdminDropdown onItemSelected={onItemSelected} />}
                 {/* 2. Wiederverwendbares Dropdown */}
@@ -77,7 +70,7 @@ export const Header = () => {
                 />
                 <PasswordChangeDialog open={passwordOpen} onOpenChange={setPasswordOpen} />
                 <VersionDialog open={versionOpen} onOpenChange={setVersionOpen} />
-            </Flex>
-        </Flex>
+            </div>
+        </div>
     );
 };
