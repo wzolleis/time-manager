@@ -63,6 +63,12 @@ Ein Use Case dagegen ist die Stelle, an der der aktuelle Stand steht. Er wird au
 angepasst, samt seiner Verweise auf Code: Beim Umsetzen eines Changes wird im selben Commit der geänderte Use Case
 aktualisiert, sodass Regeln, Beispiele und Abschnitte zur Umsetzung danach den neuen Stand beschreiben.
 
+Dabei wird der Change nicht in den Use Case kopiert. Übernommen werden nur Begründungen, die weiter gelten, als
+kurzer Satz bei der Regel, die sie begründen. Beispiel aus `user-settings-reset-default.md`: „Vergangene Werte
+bleiben stehen: Das Zurücksetzen wirkt wie jeder neue Wert erst ab „gültig ab“.“ Der Plan (Dateien, Schritte,
+„Fertig, wenn“) bleibt im Change. Ändert ein Change mehrere Use Cases, bekommt jeder die Begründungen, die ihn
+betreffen. Der erledigte Change bleibt in `features/changes/` stehen.
+
 Eine Übersicht aller Beschreibungen nach Epic und Status erzeugt `npm run features:overview` aus dem
 Frontmatter in `generated/overview.md` (Skill `overview`). Sie wird nicht von Hand bearbeitet und nicht
 committet. Ändert sich `name`, `type`, `epics` oder `state` einer Beschreibung, wird sie neu erzeugt.
