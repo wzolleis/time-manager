@@ -65,19 +65,16 @@ Beim Aufnehmen einer neuen Dependency oder einer neuen Version einer Dependency:
 
 - `npm run build` vorher und nachher vergleichen: Wird der Haupt-Chunk oder das CSS deutlich größer?
 - Keine zweite Bibliothek für dasselbe Thema, z. B. kein Luxon neben Temporal.
-- Vorhandene Pakete bevorzugen (Temporal, zod, `cn`, Radix).
+- Vorhandene Pakete bevorzugen (Temporal, zod, `cn`, shadcn mit `radix-ui`). Radix Themes wurde entfernt und
+  kommt nicht wieder: Es lädt seine ganze CSS und bringt ein zweites Design-System neben Tailwind.
 
 # Ladezeit beim Start
 
 Der heutige Ablauf beim Öffnen der App:
 
-1. Der Browser lädt `index.html`, den Haupt-Chunk und das CSS. Stand 02.11.2026: JavaScript 444 kB
-   (139 kB gzip), CSS 735 kB (92 kB gzip).
+1. Der Browser lädt `index.html`, den Haupt-Chunk und das CSS. Stand 02.11.2026: JavaScript 456 kB
+   (145 kB gzip), CSS 60 kB (11 kB gzip).
 2. Der Cache aus dem localStorage steht sofort zur Verfügung, gespeicherte Daten erscheinen ohne Request.
 3. Der angemeldete User (`/api/auth/me`) wird nie aus dem Cache genommen, sondern immer beim Server erfragt.
    Bis zur Antwort zeigt `UserProvider` „Laden“.
 4. Die Seite der Route wird als eigener Chunk nachgeladen (Code-Splitting mit `autoCodeSplitting`).
-
-Bekannter Befund: `@radix-ui/themes/styles.css` (roh etwa 813 kB) wird in `src/main.tsx` vollständig geladen,
-obwohl Radix Themes nur in wenigen Dateien verwendet wird. Das ist der größte Teil des CSS. Eine Änderung nur
-nach Absprache mit dem User.

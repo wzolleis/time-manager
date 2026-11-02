@@ -1,6 +1,13 @@
 // components/UserDropdown.tsx
 import React from "react";
-import {Avatar, DropdownMenu} from "@radix-ui/themes";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {Info, KeyRound, LogOut, User as UserIcon, type LucideIcon} from "lucide-react";
 import {findNavigationItem} from "@/application/navigation/nav-utils";
 import type {NavItem} from "@/application/navigation/nav-items";
@@ -19,13 +26,13 @@ type MenuItemProps = {
     icon: LucideIcon;
     label: string;
     onClick?: () => void;
-    color?: "red";
+    variant?: "destructive";
 };
 
-const MenuItem = ({icon: Icon, label, onClick, color}: MenuItemProps) => (
-    <DropdownMenu.Item color={color} onClick={onClick}>
-        <Icon size={14} style={{marginRight: "6px"}} /> {label}
-    </DropdownMenu.Item>
+const MenuItem = ({icon: Icon, label, onClick, variant}: MenuItemProps) => (
+    <DropdownMenuItem variant={variant} onClick={onClick}>
+        <Icon /> {label}
+    </DropdownMenuItem>
 );
 
 export const UserDropdown: React.FC<UserDropdownProps> = ({
@@ -42,15 +49,22 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
     const settingsNavItem = findNavigationItem("user-settings");
 
     return (
-        <DropdownMenu.Root>
-            <DropdownMenu.Trigger>
-                {/* Ungestylter Button, damit das Styling von Radix/nativem HTML nicht interferiert; auf Touch 44×44 */}
-                <button className="inline-flex cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 outline-none pointer-coarse:size-11">
-                    <Avatar src={user?.avatarUrl ?? ""} fallback={fallbackInitials} size="2" radius="full" />
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                {/* Ungestylter Button um den Avatar; auf Touch 44×44 */}
+                <button
+                    type="button"
+                    aria-label="Benutzermenü"
+                    className="inline-flex cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-0 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 pointer-coarse:size-11"
+                >
+                    <Avatar>
+                        <AvatarImage src={user?.avatarUrl ?? undefined} alt="" />
+                        <AvatarFallback className="bg-indigo-50 text-indigo-700">{fallbackInitials}</AvatarFallback>
+                    </Avatar>
                 </button>
-            </DropdownMenu.Trigger>
+            </DropdownMenuTrigger>
 
-            <DropdownMenu.Content variant="soft">
+            <DropdownMenuContent align="end" className="w-auto">
                 <MenuItem icon={UserIcon} label="Mein Profil" />
                 <MenuItem
                     icon={settingsNavItem.icon}
@@ -59,9 +73,9 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
                 />
                 <MenuItem icon={KeyRound} label="Passwort ändern" onClick={onChangePassword} />
                 <MenuItem icon={Info} label="Version" onClick={onShowVersion} />
-                <DropdownMenu.Separator />
-                <MenuItem icon={LogOut} label="Log out" color="red" onClick={onLogout} />
-            </DropdownMenu.Content>
-        </DropdownMenu.Root>
+                <DropdownMenuSeparator />
+                <MenuItem icon={LogOut} label="Log out" variant="destructive" onClick={onLogout} />
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 };
