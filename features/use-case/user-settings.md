@@ -1,6 +1,6 @@
 ---
 name: user-settings
-description: Der User passt das Verhalten der Anwendung mit seinen Einstellungen an (Soll pro Tag, Urlaubstage pro Jahr). Jeder Wert gilt ab einem Tag, ältere Werte gelten für die Vergangenheit weiter.
+description: Der User passt das Verhalten der Anwendung mit seinen Einstellungen an (Soll pro Tag, Urlaubstage pro Jahr, Action-Bar anzeigen). Jeder Wert gilt ab einem Tag, ältere Werte gelten für die Vergangenheit weiter. Einstellungen ohne Historie gelten sofort.
 type: story
 epics: zeiterfassung, einstellungen
 state: resolved
@@ -29,12 +29,25 @@ Pro Einstellung gibt es eine Zeile je Wert, also auch für ältere und geplante 
 |-------------|--------|---------|---------|------------------|-------------------|------------------------------------------------------------------------------|
 | Soll        | number | hour    | 8       | ein Tag          | ganze Zahl 1–10   | Die Anzahl der Stunden, die pro Tag gearbeitet wird. Das heißt auch Soll.   |
 | Urlaubstage | number | day     | 30      | 1. Januar        | ganze Zahl ≥ 0    | Die Anzahl der Urlaubstage pro Jahr                                          |
+| show_action_bar | boolean | –   | true    | sofort           | `true`, `false`   | Zeige die Action-Bar an (`action-bar.md`)                                    |
 
 Hat der User keine eigenen Werte eingetragen, wird der Default angezeigt. Der Default hat kein „gültig ab“, er gilt ab dem ersten Eintrag in der Zeiterfassung.
 
 Der User kann einen neuen Wert eintragen, aber keine neuen Einstellungen anlegen. Dazu wählt er den Wert
 und das Datum „gültig ab“. Beim Speichern wird ein neuer Eintrag angelegt und angezeigt. Der alte Wert
 bleibt stehen und gilt bis zum Tag vor dem neuen „gültig ab“ weiter.
+
+## Einstellungen ohne Historie
+
+Manche Einstellungen betreffen nur die Oberfläche von jetzt an, keine Berechnung, z. B. `show_action_bar`. Sie
+haben keine Historie (`valid_from_unit = immediately`): Ein neuer Wert gilt sofort und ersetzt den bisherigen.
+
+- Pro User höchstens ein eigener Wert. `valid_from` ist der Tag der letzten Änderung, er wird nur angezeigt.
+- Die Tabelle zeigt eine Zeile je Einstellung: den eigenen Wert oder den Default, Status immer „aktuell“.
+  Werte vom Typ `boolean` stehen als „Ja“ oder „Nein“ da.
+- „Ändern“ öffnet den Dialog ohne „gültig ab“, bei `boolean` mit der Auswahl „Ja“ / „Nein“. „Auf Default
+  zurücksetzen“ gilt sofort, ohne Dialog. „Bearbeiten“ und „Löschen“ gibt es nicht.
+- Statt der Regeln 3, 4, 5 und 7 gilt nur: „Default“ geht nicht, wenn schon der Default gilt.
 
 ## Auf den Default zurücksetzen
 
@@ -59,10 +72,10 @@ Tabelle `user_settings` mit den definierten Einstellungen. Initial stehen dort d
 | `id`              | UUID                 |                                                               |
 | `name`            | Text, eindeutig      | z. B. `Soll`, `Urlaubstage`                                   |
 | `description`     | Text                 | Beschreibung für die Tabelle                                  |
-| `type`            | `number` \| `string` | Typ des Werts                                                 |
+| `type`            | `number` \| `string` \| `boolean` | Typ des Werts, `boolean` als `true` oder `false`     |
 | `unit`            | `hour` \| `day`, nullable | Einheit des Werts                                        |
 | `default_value`   | Text                 | Default als String, z. B. `8`                                 |
-| `valid_from_unit` | `day` \| `year`      | `year`: „gültig ab“ muss ein 1. Januar sein (Urlaubstage)     |
+| `valid_from_unit` | `day` \| `year` \| `immediately` | `year`: „gültig ab“ muss ein 1. Januar sein (Urlaubstage); `immediately`: ohne Historie, gilt sofort |
 
 Tabelle `user_setting_values` mit den Werten der User:
 
@@ -94,6 +107,7 @@ Eindeutig ist `(user_id, setting_id, valid_from)`.
 5. **Ein „gültig ab“ je Einstellung nur einmal.** Ein zweiter Wert mit demselben „gültig ab“ für dieselbe
    Einstellung wird abgelehnt.
 6. **Gültige Werte.** Nur ganze Zahlen, keine Dezimalzahlen. Soll ist 1 bis 10, Urlaubstage sind nicht negativ.
+   Bei `boolean` nur `true` oder `false`.
    Oder „Default“: Das geht nur, wenn am Tag vor „gültig ab“ ein eigener Wert gilt, sonst gilt dort schon
    der Default („Soll: ab dem 27.10.2026 gilt schon der Default“).
 7. **Ändern und Löschen.** Geplante Werte darf man ändern und löschen. Abgelaufene Werte darf man weder ändern noch löschen, sie gelten für die Vergangenheit weiter (Regel 2).
@@ -115,7 +129,7 @@ Der Agent kann die Einstellungen über MCP-Tools nutzen, mit denselben Regeln wi
 | Tool                   | Inhalt                                                                  |
 |------------------------|-------------------------------------------------------------------------|
 | `list_user_settings`   | alle Einstellungen mit ihren Werten, „gültig ab“ und Status            |
-| `set_user_setting`     | neuen Wert mit „gültig ab“ eintragen (Name der Einstellung, Wert, Tag); Wert `null`: „Default“ |
+| `set_user_setting`     | neuen Wert mit „gültig ab“ eintragen (Name der Einstellung, Wert, Tag); Wert `null`: „Default“. Bei Einstellungen ohne Historie ohne Tag, Wert bei `show_action_bar` `true` oder `false` |
 | `change_user_setting`  | geplanten Wert ändern (Regel 7), auch auf `null`                        |
 | `delete_user_setting`  | geplanten Wert löschen (Regel 7)                                        |
 
@@ -135,4 +149,7 @@ Verstöße gegen eine Regel liefern die Meldung der Regel zurück.
 - „Auf Default zurücksetzen“ ab morgen legt den Wert „Default“ an, die Tabelle zeigt „Default (8 Stunden)“
   als „geplant“. Ab morgen rechnen Berichte und Urlaubsplanung mit dem Default, davor mit dem eigenen Wert.
 - Ohne eigenen Wert ist „Auf Default zurücksetzen“ gesperrt; „Default“ ohne eigenen Wert am Tag davor wird
+  abgelehnt.
+- `show_action_bar` steht ohne eigenen Wert als „Ja“ in einer Zeile. Ändern auf „Nein“ braucht kein „gültig ab“,
+  die Zeile zeigt sofort „Nein“; ein zweiter Wert überschreibt den ersten. Werte außer `true` und `false` werden
   abgelehnt.

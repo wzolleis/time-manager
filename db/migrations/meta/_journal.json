@@ -120,6 +120,13 @@
       "when": 1793654362209,
       "tag": "0016_user_setting_value_default",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "5",
+      "when": 1793661705419,
+      "tag": "0017_user_setting_show_action_bar",
+      "breakpoints": true
     }
   ]
 }

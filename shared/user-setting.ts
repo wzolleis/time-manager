@@ -7,8 +7,10 @@ import {DaySchema} from "./date-schemas";
 // nur über die id auf sie. Die Defaults hier gelten nur, solange die Einstellungen noch nicht geladen sind.
 export const SOLL_SETTING_ID = "fcf78946-28c3-4152-9abb-35af0c50cb8f"; // "Soll", Stunden pro Tag
 export const VACATION_DAYS_SETTING_ID = "6fdfc98d-8096-4e64-92be-638b938929ed"; // "Urlaubstage" pro Jahr
+export const SHOW_ACTION_BAR_SETTING_ID = "e2e48edb-c612-466e-a886-03c72466e4f3"; // "show_action_bar", sofort gültig
 export const DEFAULT_SOLL_HOURS = 8;
 export const DEFAULT_VACATION_DAYS = 30;
+export const DEFAULT_SHOW_ACTION_BAR = true;
 
 const value = z.string().trim().min(1, "Bitte einen Wert eingeben").max(100);
 
@@ -17,11 +19,12 @@ export const UserSettingValueSchema = createSelectSchema(userSettingValues, {val
 
 // Der User steht im Pfad der API. Ob Wert und Tag zur Einstellung passen, prüft checkSettingValue,
 // damit eine Verletzung als 422 mit Meldung zurückkommt.
-// value null: ab validFrom gilt wieder der Default der Einstellung
+// value null: ab validFrom gilt wieder der Default der Einstellung.
+// validFrom fehlt nur bei Einstellungen, die sofort gelten (valid_from_unit immediately), dann setzt der Server heute.
 export const UserSettingValueCreateSchema = z.object({
     settingId: z.string().uuid(),
     value: value.nullable(),
-    validFrom: DaySchema,
+    validFrom: DaySchema.optional(),
 });
 
 // Die Einstellung eines Werts ändert sich nicht

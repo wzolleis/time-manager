@@ -11,7 +11,7 @@ import {DaySchema} from "@shared/date-schemas";
 import {userSettingsReport, UserSettingsReportSchema} from "./user-settings-view";
 import {ok, run} from "./view";
 
-const textOf = (value: number | null) => (value === null ? null : String(value));
+const textOf = (value: number | boolean | null) => (value === null ? null : String(value));
 
 const report = async (userId: string) => userSettingsReport(await listUserSettings(userId), localDay(new Date()));
 
@@ -19,9 +19,10 @@ const RULES =
     "Ein neuer Wert gilt frühestens ab morgen, nur der erste eigene Wert einer Einstellung darf auch rückwirkend " +
     "gelten. Urlaubstage gelten immer ab dem 1. Januar. Nur ganze Zahlen, Soll 1 bis 10 Stunden. value null " +
     "setzt auf den Default zurück: ab validFrom gilt wieder der Default, auch wenn er sich später ändert. Das " +
-    "geht nur, wenn am Tag davor ein eigener Wert gilt.";
+    "geht nur, wenn am Tag davor ein eigener Wert gilt. show_action_bar (true oder false) hat keine Historie: " +
+    "ohne validFrom, der neue Wert ersetzt den bisherigen und gilt sofort.";
 
-const VALUE = "ganze Zahl, oder null für „Default“";
+const VALUE = "ganze Zahl, bei show_action_bar true oder false, oder null für „Default“";
 
 export function registerUserSettingTools(server: McpServer, user: SessionUser): void {
     server.registerTool(
@@ -29,7 +30,7 @@ export function registerUserSettingTools(server: McpServer, user: SessionUser): 
         {
             title: "Einstellungen",
             description:
-                "Einstellungen des Users (Soll in Stunden pro Tag, Urlaubstage pro Jahr) mit Default, eigenen " +
+                "Einstellungen des Users (Soll in Stunden pro Tag, Urlaubstage pro Jahr, show_action_bar) mit Default, eigenen " +
                 "Werten, gültig ab und Status (aktuell, geplant, abgelaufen). Abgelaufene Werte gelten für die " +
                 "Vergangenheit weiter.",
             outputSchema: UserSettingsReportSchema,
@@ -49,8 +50,10 @@ export function registerUserSettingTools(server: McpServer, user: SessionUser): 
             description: `Trägt einen neuen Wert zu einer Einstellung ein. Der bisherige Wert gilt bis zum Tag davor. ${RULES}`,
             inputSchema: {
                 name: z.string().describe("Name der Einstellung aus list_user_settings, z. B. Soll"),
-                value: z.number().int().nullable().describe(VALUE),
-                validFrom: DaySchema.describe("Tag JJJJ-MM-TT, ab dem der Wert gilt"),
+                value: z.union([z.number().int(), z.boolean()]).nullable().describe(VALUE),
+                validFrom: DaySchema.optional().describe(
+                    "Tag JJJJ-MM-TT, ab dem der Wert gilt; entfällt bei Einstellungen, die sofort gelten",
+                ),
             },
             outputSchema: UserSettingsReportSchema,
             annotations: {destructiveHint: false, idempotentHint: false},

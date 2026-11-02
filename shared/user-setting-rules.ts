@@ -1,14 +1,17 @@
 // shared/user-setting-rules.ts
-// Regeln der Einstellungen (features/use-case/user-settings.md, Regeln 1 bis 7)
+// Regeln der Einstellungen (features/use-case/user-settings.md, Regeln 1 bis 7 und Einstellungen ohne Historie)
 import type {Day} from "./date-schemas";
 import {formatDay} from "./format";
 import {addDays, isValidDay} from "./day-range";
 import {
+    DEFAULT_SHOW_ACTION_BAR,
     DEFAULT_SOLL_HOURS,
     DEFAULT_VACATION_DAYS,
+    SHOW_ACTION_BAR_SETTING_ID,
     SOLL_SETTING_ID,
     type UserSetting,
     type UserSettingsData,
+    type UserSettingValue,
     VACATION_DAYS_SETTING_ID,
 } from "./user-setting";
 
@@ -31,7 +34,31 @@ const FALLBACK: Record<string, number> = {
     [VACATION_DAYS_SETTING_ID]: DEFAULT_VACATION_DAYS,
 };
 
-/** Die History aus den Daten der API. Ohne geladene Einstellung gilt der Default aus shared/user-setting.ts. */
+const BOOLEAN_FALLBACK: Record<string, boolean> = {[SHOW_ACTION_BAR_SETTING_ID]: DEFAULT_SHOW_ACTION_BAR};
+
+/** Die Einstellung hat keine Historie: ein eigener Wert je User, er gilt sofort und wird überschrieben */
+export const isImmediate = (setting: Pick<UserSetting, "validFromUnit">) => setting.validFromUnit === "immediately";
+
+/** Text eines Werts vom Typ boolean */
+export const booleanText = (value: string) => (value === "true" ? "Ja" : "Nein");
+
+/**
+ * Der Wert einer Einstellung vom Typ boolean, der jetzt gilt: der eigene Wert oder der Default. Ohne geladene
+ * Einstellung gilt der Default aus shared/user-setting.ts.
+ */
+export function booleanSettingOf(data: UserSettingsData | undefined, settingId: string): boolean {
+    const own = (data?.values ?? [])
+        .filter((v) => v.settingId === settingId)
+        .reduce<UserSettingValue | null>((a, b) => (a && a.validFrom > b.validFrom ? a : b), null);
+    const setting = data?.settings.find((s) => s.id === settingId);
+    const text = own?.value ?? setting?.defaultValue;
+    return text === undefined ? (BOOLEAN_FALLBACK[settingId] ?? false) : text === "true";
+}
+
+/**
+ * Die History aus den Daten der API, für die Berechnungen mit Zahlen. Bei boolean ist value NaN, es zählt dort nur,
+ * ob ein eigener Wert „Default“ (null) ist. Ohne geladene Einstellung gilt der Default aus shared/user-setting.ts.
+ */
 export function historyOf(data: UserSettingsData | undefined, settingId: string): SettingHistory {
     const setting = data?.settings.find((s) => s.id === settingId);
     const values = (data?.values ?? [])
@@ -70,10 +97,23 @@ export function settingStatus(history: SettingHistory, validFrom: Day | null, to
 export function checkSettingValue(
     setting: Pick<UserSetting, "id" | "name" | "type" | "validFromUnit">,
     others: SettingPoint[],
-    candidate: {value: string | null; validFrom: string},
+    candidate: {value: string | null; validFrom?: string},
     today: Day,
 ): string | null {
     const {value, validFrom} = candidate;
+
+    if (value !== null && setting.type === "boolean" && !["true", "false"].includes(value.trim())) {
+        return `${setting.name}: bitte true oder false angeben`;
+    }
+
+    // Ohne Historie gilt der neue Wert sofort, die Regeln 3 bis 5 entfallen
+    if (isImmediate(setting)) {
+        if (value === null && others.every((p) => p.value === null))
+            return `${setting.name}: es gilt schon der Default`;
+        return null;
+    }
+
+    if (!validFrom) return "Bitte „gültig ab“ angeben";
     if (!isValidDay(validFrom)) return "Ungültiges Datum";
 
     if (value !== null && setting.type === "number") {
@@ -106,6 +146,10 @@ export function checkSettingValue(
     }
     return null;
 }
+
+/** null = erlaubt. Ohne Historie gibt es keine geplanten Werte, ein neuer Wert ersetzt den bisherigen. */
+export const checkImmediateEdit = (setting: Pick<UserSetting, "name" | "validFromUnit">): string | null =>
+    isImmediate(setting) ? `${setting.name}: bitte einen neuen Wert eintragen` : null;
 
 /** null = erlaubt. Ändern lassen sich nur geplante Werte (Regel 7). */
 export const checkChange = (history: SettingHistory, validFrom: Day, today: Day): string | null =>

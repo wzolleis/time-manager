@@ -6,7 +6,7 @@ import {createMemoryHistory, createRouter, RouterProvider} from "@tanstack/react
 import {routeTree} from "@/routeTree.gen";
 import {UserProvider} from "@/components/login/user-provider";
 import {NotFound} from "@/application/layout/not-found";
-import {SOLL_SETTING_ID, VACATION_DAYS_SETTING_ID} from "@shared/user-setting";
+import {SHOW_ACTION_BAR_SETTING_ID, SOLL_SETTING_ID, VACATION_DAYS_SETTING_ID} from "@shared/user-setting";
 
 const USER = {
     id: "275f12fb-e116-4857-9f12-fbe116b857fb",
@@ -35,6 +35,15 @@ const SETTINGS = [
         defaultValue: "30",
         validFromUnit: "year",
     },
+    {
+        id: SHOW_ACTION_BAR_SETTING_ID,
+        name: "show_action_bar",
+        description: "Zeige die Action-Bar an",
+        type: "boolean",
+        unit: null,
+        defaultValue: "true",
+        validFromUnit: "immediately",
+    },
 ];
 
 const value = (id: string, v: string | null, validFrom: string) => ({
@@ -45,14 +54,33 @@ const value = (id: string, v: string | null, validFrom: string) => ({
     validFrom,
 });
 
-function mockApi(values: unknown[]) {
+// Einstellung ohne Historie: der Server überschreibt den Wert und setzt heute als gültig ab
+const actionBarValue = (v: string | null) => ({
+    ...value("bar", v, "2026-10-14"),
+    settingId: SHOW_ACTION_BAR_SETTING_ID,
+});
+
+function mockApi(values: ReturnType<typeof value>[]) {
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
         const raw = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
         const {pathname} = new URL(raw, "http://localhost");
         if (pathname === "/api/auth/me") return Response.json(USER);
         if (pathname === "/api/users") return Response.json([USER]);
         if (pathname === `/api/users/${USER.id}/settings`) {
-            if (init?.method === "POST") return Response.json(value("neu", "6", "2026-10-15"), {status: 201});
+            if (init?.method === "POST") {
+                const body = JSON.parse(String(init.body));
+                if (body.settingId !== SHOW_ACTION_BAR_SETTING_ID) {
+                    return Response.json(value("neu", "6", "2026-10-15"), {status: 201});
+                }
+                const saved = actionBarValue(body.value);
+                values.splice(
+                    0,
+                    values.length,
+                    ...values.filter((v) => v.settingId !== SHOW_ACTION_BAR_SETTING_ID),
+                    saved,
+                );
+                return Response.json(saved, {status: 201});
+            }
             return Response.json({settings: SETTINGS, values});
         }
         return Response.json({error: `Nicht gemockt: ${pathname}`}, {status: 404});
@@ -79,6 +107,12 @@ function renderPage() {
 
 const rowOf = (text: string) => screen.getByText(text).closest("tr")!;
 
+/** Body des ersten POST an die API */
+const postedBody = (fetchMock: ReturnType<typeof mockApi>) => {
+    const post = fetchMock.mock.calls.find(([, init]) => init?.method === "POST");
+    return JSON.parse(String(post?.[1]?.body));
+};
+
 beforeEach(() => {
     // Nur Date fälschen, Timer laufen normal weiter (React Query, findBy*)
     vi.useFakeTimers({toFake: ["Date"]});
@@ -94,6 +128,9 @@ beforeEach(() => {
         },
     );
     vi.stubGlobal("scrollTo", vi.fn());
+    // Für das Select von Radix, jsdom kennt beides nicht
+    Element.prototype.scrollIntoView = vi.fn();
+    Element.prototype.hasPointerCapture = vi.fn(() => false);
 });
 
 afterEach(() => {
@@ -159,8 +196,7 @@ describe("Einstellungen", () => {
         fireEvent.click(screen.getByRole("button", {name: "Speichern"}));
 
         await waitFor(() => {
-            const post = fetchMock.mock.calls.find(([, init]) => init?.method === "POST");
-            expect(JSON.parse(String(post?.[1]?.body))).toEqual({
+            expect(postedBody(fetchMock)).toEqual({
                 settingId: SOLL_SETTING_ID,
                 value: "6",
                 validFrom: "2026-10-15",
@@ -179,8 +215,7 @@ describe("Einstellungen", () => {
         fireEvent.click(screen.getByRole("button", {name: "Speichern"}));
 
         await waitFor(() => {
-            const post = fetchMock.mock.calls.find(([, init]) => init?.method === "POST");
-            expect(JSON.parse(String(post?.[1]?.body))).toEqual({
+            expect(postedBody(fetchMock)).toEqual({
                 settingId: SOLL_SETTING_ID,
                 value: null,
                 validFrom: "2026-10-15",
@@ -205,5 +240,57 @@ describe("Einstellungen", () => {
         await screen.findByText("8 Stunden");
         const button = within(rowOf("8 Stunden")).getByRole("button", {name: "Auf Default zurücksetzen"});
         expect(button.hasAttribute("disabled")).toBe(true);
+    });
+});
+
+describe("Einstellung show_action_bar ohne Historie", () => {
+    it("zeigt eine Zeile mit „Ja“, Status aktuell und ohne gültig ab", async () => {
+        mockApi([]);
+        renderPage();
+
+        const row = (await screen.findByText("show_action_bar")).closest("tr")!;
+        expect(within(row).getByText("Ja")).toBeTruthy();
+        expect(within(row).getByText("aktuell")).toBeTruthy();
+        expect(within(row).getByText("–")).toBeTruthy();
+        expect(within(row).getByRole("button", {name: "Auf Default zurücksetzen"}).hasAttribute("disabled")).toBe(true);
+        expect(screen.getAllByText("show_action_bar")).toHaveLength(1);
+    });
+
+    it("ändert auf „Nein“ ohne gültig ab, die Zeile zeigt sofort „Nein“", async () => {
+        const fetchMock = mockApi([]);
+        renderPage();
+
+        const row = (await screen.findByText("show_action_bar")).closest("tr")!;
+        fireEvent.click(within(row).getByRole("button", {name: "Ändern"}));
+        await screen.findByLabelText("Wert");
+        expect(screen.queryByLabelText("gültig ab")).toBeNull();
+        expect(screen.queryByLabelText("Art")).toBeNull();
+
+        // Auswahl „Nein“ im Select von Radix
+        fireEvent.click(screen.getByLabelText("Wert"));
+        fireEvent.click(await screen.findByRole("option", {name: "Nein"}));
+        fireEvent.click(screen.getByRole("button", {name: "Speichern"}));
+
+        await waitFor(() => {
+            expect(postedBody(fetchMock)).toEqual({
+                settingId: SHOW_ACTION_BAR_SETTING_ID,
+                value: "false",
+            });
+        });
+        const updated = (await screen.findByText("Nein")).closest("tr")!;
+        expect(within(updated).getByText("show_action_bar")).toBeTruthy();
+        expect(within(updated).getByText("14.10.2026")).toBeTruthy();
+        expect(screen.getAllByText("show_action_bar")).toHaveLength(1);
+    });
+
+    it("setzt sofort auf den Default zurück", async () => {
+        const fetchMock = mockApi([actionBarValue("false")]);
+        renderPage();
+
+        const row = (await screen.findByText("Nein")).closest("tr")!;
+        fireEvent.click(within(row).getByRole("button", {name: "Auf Default zurücksetzen"}));
+
+        await screen.findByText("Default (Ja)");
+        expect(postedBody(fetchMock)).toEqual({settingId: SHOW_ACTION_BAR_SETTING_ID, value: null});
     });
 });

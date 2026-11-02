@@ -2,10 +2,18 @@
 import {describe, expect, it} from "vitest";
 import {day} from "./test-dates";
 import {targetMs} from "./target-hours";
-import {SOLL_SETTING_ID, type UserSetting, VACATION_DAYS_SETTING_ID} from "./user-setting";
 import {
+    SHOW_ACTION_BAR_SETTING_ID,
+    SOLL_SETTING_ID,
+    type UserSetting,
+    type UserSettingsData,
+    VACATION_DAYS_SETTING_ID,
+} from "./user-setting";
+import {
+    booleanSettingOf,
     checkChange,
     checkDelete,
+    checkImmediateEdit,
     checkSettingValue,
     historyOf,
     type SettingHistory,
@@ -244,5 +252,72 @@ describe("Wertwechsel in den Berechnungen (Regeln 8 und 9)", () => {
         expect(checkYearLimit([], vacation, [], [], days)).toBeNull();
         const longer = {...vacation, endDate: day("2027-02-08")}; // 26 Arbeitstage
         expect(checkYearLimit([], longer, [], [], days)).toMatch(/erlaubt sind 25/);
+    });
+});
+
+describe("Einstellung ohne Historie (show_action_bar)", () => {
+    const BAR: UserSetting = {
+        id: SHOW_ACTION_BAR_SETTING_ID,
+        name: "show_action_bar",
+        description: "Zeige die Action-Bar an",
+        type: "boolean",
+        unit: null,
+        defaultValue: "true",
+        validFromUnit: "immediately",
+    };
+    const check = (v: string | null, others = [] as ReturnType<typeof p>[], validFrom?: string) =>
+        checkSettingValue(BAR, others, {value: v, validFrom}, TODAY);
+
+    it("true, false und „Default“ nach eigenem Wert sind erlaubt", () => {
+        expect(check("true")).toBeNull();
+        expect(check("false")).toBeNull();
+        expect(check(null, [p("a", "2026-10-01", Number.NaN)])).toBeNull();
+    });
+
+    it("andere Werte werden abgelehnt", () => {
+        for (const v of ["ja", "1", ""]) expect(check(v)).toBe("show_action_bar: bitte true oder false angeben");
+    });
+
+    it("gültig ab heute oder in der Vergangenheit ist auch mit eigenem Wert kein Problem", () => {
+        const own = [p("a", "2026-10-01", Number.NaN)];
+        expect(check("false", own, "2026-10-26")).toBeNull();
+        expect(check("false", own, "2020-01-01")).toBeNull();
+        expect(check("true", own)).toBeNull();
+    });
+
+    it("„Default“, wenn schon der Default gilt, wird abgelehnt", () => {
+        expect(check(null)).toBe("show_action_bar: es gilt schon der Default");
+        expect(check(null, [p("a", "2026-10-01", null)])).toBe("show_action_bar: es gilt schon der Default");
+    });
+
+    it("lässt sich nicht bearbeiten oder löschen, nur neu eintragen", () => {
+        expect(checkImmediateEdit(BAR)).toBe("show_action_bar: bitte einen neuen Wert eintragen");
+        expect(checkImmediateEdit(SOLL)).toBeNull();
+    });
+
+    it("andere Einstellungen brauchen ein gültig ab", () => {
+        expect(checkSettingValue(SOLL, [], {value: "6"}, TODAY)).toBe("Bitte „gültig ab“ angeben");
+    });
+
+    describe("booleanSettingOf", () => {
+        const data = (value: string | null | undefined): UserSettingsData => ({
+            settings: [BAR],
+            values:
+                value === undefined
+                    ? []
+                    : [{id: "a", userId: "u", settingId: BAR.id, value, validFrom: day("2026-10-01")}],
+        });
+
+        it("ohne Daten und ohne eigenen Wert gilt der Default true", () => {
+            expect(booleanSettingOf(undefined, SHOW_ACTION_BAR_SETTING_ID)).toBe(true);
+            expect(booleanSettingOf(data(undefined), SHOW_ACTION_BAR_SETTING_ID)).toBe(true);
+        });
+
+        it("mit eigenem Wert gilt dieser, nach „Default“ wieder der Default", () => {
+            expect(booleanSettingOf(data("false"), SHOW_ACTION_BAR_SETTING_ID)).toBe(false);
+            expect(booleanSettingOf(data(null), SHOW_ACTION_BAR_SETTING_ID)).toBe(true);
+            const off = {...data(null), settings: [{...BAR, defaultValue: "false"}]};
+            expect(booleanSettingOf(off, SHOW_ACTION_BAR_SETTING_ID)).toBe(false); // geänderter Default
+        });
     });
 });

@@ -7,9 +7,13 @@ import {localDay} from "@shared/time-rules";
 import type {UserSetting} from "@shared/user-setting";
 import {checkSettingValue, historyOf} from "@shared/user-setting-rules";
 
-type Addition = {setting: UserSetting; value: string | null; validFrom: string}; // value null: „Default“
+// value null: „Default“; validFrom fehlt bei Einstellungen ohne Historie, deren Wert sofort gilt
+type Addition = {setting: UserSetting; value: string | null; validFrom?: string};
 
-/** Der User trägt einen neuen Wert zu einer Einstellung ein. Der bisherige Wert bleibt bis dahin gültig. */
+/**
+ * Der User trägt einen neuen Wert zu einer Einstellung ein. Der bisherige Wert bleibt bis dahin gültig, bei einer
+ * Einstellung ohne Historie wird er sofort ersetzt.
+ */
 export function useAddUserSetting() {
     const {currentUser} = useCurrentUser();
     const qc = useQueryClient();
@@ -17,7 +21,11 @@ export function useAddUserSetting() {
 
     const save = useMutation({
         mutationFn: ({setting, value, validFrom}: Addition) =>
-            createUserSettingValue(currentUser!.id, {settingId: setting.id, value, validFrom: parseDay(validFrom)}),
+            createUserSettingValue(currentUser!.id, {
+                settingId: setting.id,
+                value,
+                validFrom: validFrom === undefined ? undefined : parseDay(validFrom),
+            }),
         // Berichte und Urlaubskonto lesen dieselbe Query und rechnen damit neu
         onSuccess: () => qc.invalidateQueries({queryKey: ["user-settings"]}),
     });

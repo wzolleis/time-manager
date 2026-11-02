@@ -5,7 +5,7 @@ import {useCurrentUser} from "@/lib/user-context";
 import {useUserSettings} from "@/views/user-settings";
 import {localDay} from "@shared/time-rules";
 import type {UserSetting, UserSettingValue} from "@shared/user-setting";
-import {historyOf, settingStatus, type SettingStatus} from "@shared/user-setting-rules";
+import {booleanText, historyOf, isImmediate, settingStatus, type SettingStatus} from "@shared/user-setting-rules";
 
 export type UserSettingRow = {
     key: string;
@@ -18,9 +18,13 @@ export type UserSettingRow = {
 
 const UNITS: Record<string, [string, string]> = {hour: ["Stunde", "Stunden"], day: ["Tag", "Tage"]};
 
-/** Wert mit Einheit: "1 Stunde", "8 Stunden", "30 Tage"; null: "Default (8 Stunden)" mit dem aktuellen Default */
-export function valueText(setting: Pick<UserSetting, "unit" | "defaultValue">, value: string | null): string {
+/**
+ * Wert mit Einheit: "1 Stunde", "8 Stunden", "30 Tage", bei boolean "Ja" oder "Nein";
+ * null: "Default (8 Stunden)" mit dem aktuellen Default
+ */
+export function valueText(setting: Pick<UserSetting, "type" | "unit" | "defaultValue">, value: string | null): string {
     if (value === null) return `Default (${valueText(setting, setting.defaultValue)})`;
+    if (setting.type === "boolean") return booleanText(value);
     const unit = setting.unit ? UNITS[setting.unit] : undefined;
     if (!unit) return value;
     return `${value} ${Number(value) === 1 ? unit[0] : unit[1]}`;
@@ -37,10 +41,24 @@ export function useShowUserSettings() {
         const data = settings.data;
         if (!data) return [];
         return data.settings.flatMap((setting) => {
-            const history = historyOf(data, setting.id);
             const own = data.values
                 .filter((v) => v.settingId === setting.id)
                 .sort((a, b) => a.validFrom.localeCompare(b.validFrom));
+            // Ohne Historie eine Zeile: der eigene Wert oder der Default, immer aktuell
+            if (isImmediate(setting)) {
+                const value = own.at(-1) ?? null;
+                return [
+                    {
+                        key: value?.id ?? `${setting.id}-default`,
+                        setting,
+                        value,
+                        text: valueText(setting, value ? value.value : setting.defaultValue),
+                        validFrom: value?.validFrom ?? null,
+                        status: "aktuell" as const,
+                    },
+                ];
+            }
+            const history = historyOf(data, setting.id);
             const defaultRow: UserSettingRow = {
                 key: `${setting.id}-default`,
                 setting,
