@@ -7,7 +7,7 @@ import {localDay} from "@shared/time-rules";
 import type {UserSetting} from "@shared/user-setting";
 import {checkSettingValue, historyOf} from "@shared/user-setting-rules";
 
-type Addition = {setting: UserSetting; value: string; validFrom: string};
+type Addition = {setting: UserSetting; value: string | null; validFrom: string}; // value null: „Default“
 
 /** Der User trägt einen neuen Wert zu einer Einstellung ein. Der bisherige Wert bleibt bis dahin gültig. */
 export function useAddUserSetting() {

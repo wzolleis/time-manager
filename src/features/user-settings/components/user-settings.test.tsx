@@ -37,7 +37,7 @@ const SETTINGS = [
     },
 ];
 
-const value = (id: string, v: string, validFrom: string) => ({
+const value = (id: string, v: string | null, validFrom: string) => ({
     id,
     userId: USER.id,
     settingId: SOLL_SETTING_ID,
@@ -166,5 +166,44 @@ describe("Einstellungen", () => {
                 validFrom: "2026-10-15",
             });
         });
+    });
+
+    it("setzt das Soll ab morgen auf den Default zurück", async () => {
+        const fetchMock = mockApi([value("a", "6", "2026-03-01")]);
+        renderPage();
+
+        await screen.findByText("6 Stunden");
+        fireEvent.click(within(rowOf("6 Stunden")).getByRole("button", {name: "Auf Default zurücksetzen"}));
+        expect(((await screen.findByLabelText("gültig ab")) as HTMLInputElement).value).toBe("2026-10-15");
+        expect(screen.queryByLabelText("Wert")).toBeNull(); // „Default“ hat keine Zahl
+        fireEvent.click(screen.getByRole("button", {name: "Speichern"}));
+
+        await waitFor(() => {
+            const post = fetchMock.mock.calls.find(([, init]) => init?.method === "POST");
+            expect(JSON.parse(String(post?.[1]?.body))).toEqual({
+                settingId: SOLL_SETTING_ID,
+                value: null,
+                validFrom: "2026-10-15",
+            });
+        });
+    });
+
+    it("zeigt einen geplanten „Default“ mit dem aktuellen Default", async () => {
+        mockApi([value("a", "6", "2026-03-01"), value("d", null, "2026-10-15")]);
+        renderPage();
+
+        const planned = (await screen.findByText("Default (8 Stunden)")).closest("tr")!;
+        expect(within(planned).getByText("geplant")).toBeTruthy();
+        expect(within(planned).getByText("15.10.2026")).toBeTruthy();
+        expect(within(planned).getByRole("button", {name: "Löschen"})).toBeTruthy();
+    });
+
+    it("sperrt das Zurücksetzen, solange der Default gilt", async () => {
+        mockApi([]);
+        renderPage();
+
+        await screen.findByText("8 Stunden");
+        const button = within(rowOf("8 Stunden")).getByRole("button", {name: "Auf Default zurücksetzen"});
+        expect(button.hasAttribute("disabled")).toBe(true);
     });
 });

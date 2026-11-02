@@ -1,0 +1,1 @@
+ALTER TABLE `user_setting_values` MODIFY COLUMN `value` varchar(100);

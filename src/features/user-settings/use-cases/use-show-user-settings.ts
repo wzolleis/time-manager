@@ -11,15 +11,16 @@ export type UserSettingRow = {
     key: string;
     setting: UserSetting;
     value: UserSettingValue | null; // null: der Default
-    text: string; // Wert mit Einheit, z. B. "8 Stunden"
+    text: string; // Wert mit Einheit, z. B. "8 Stunden" oder "Default (8 Stunden)"
     validFrom: Day | null; // null: der Default, gilt ab Beginn der Zeiterfassung
     status: SettingStatus;
 };
 
 const UNITS: Record<string, [string, string]> = {hour: ["Stunde", "Stunden"], day: ["Tag", "Tage"]};
 
-/** Wert mit Einheit: "1 Stunde", "8 Stunden", "30 Tage" */
-export function valueText(setting: Pick<UserSetting, "unit">, value: string): string {
+/** Wert mit Einheit: "1 Stunde", "8 Stunden", "30 Tage"; null: "Default (8 Stunden)" mit dem aktuellen Default */
+export function valueText(setting: Pick<UserSetting, "unit" | "defaultValue">, value: string | null): string {
+    if (value === null) return `Default (${valueText(setting, setting.defaultValue)})`;
     const unit = setting.unit ? UNITS[setting.unit] : undefined;
     if (!unit) return value;
     return `${value} ${Number(value) === 1 ? unit[0] : unit[1]}`;

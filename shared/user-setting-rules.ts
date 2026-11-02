@@ -2,7 +2,7 @@
 // Regeln der Einstellungen (features/use-case/user-settings.md, Regeln 1 bis 7)
 import type {Day} from "./date-schemas";
 import {formatDay} from "./format";
-import {isValidDay} from "./day-range";
+import {addDays, isValidDay} from "./day-range";
 import {
     DEFAULT_SOLL_HOURS,
     DEFAULT_VACATION_DAYS,
@@ -12,7 +12,8 @@ import {
     VACATION_DAYS_SETTING_ID,
 } from "./user-setting";
 
-export type SettingPoint = {id: string; validFrom: Day; value: number};
+/** Ein eigener Wert. value null: ab validFrom gilt wieder der Default */
+export type SettingPoint = {id: string; validFrom: Day; value: number | null};
 
 /** Default und eigene Werte einer Einstellung, für die Berechnungen */
 export type SettingHistory = {defaultValue: number; values: SettingPoint[]};
@@ -35,7 +36,7 @@ export function historyOf(data: UserSettingsData | undefined, settingId: string)
     const setting = data?.settings.find((s) => s.id === settingId);
     const values = (data?.values ?? [])
         .filter((v) => v.settingId === settingId)
-        .map((v) => ({id: v.id, validFrom: v.validFrom, value: Number(v.value)}));
+        .map((v) => ({id: v.id, validFrom: v.validFrom, value: v.value === null ? null : Number(v.value)}));
     return {defaultValue: setting ? Number(setting.defaultValue) : (FALLBACK[settingId] ?? 0), values};
 }
 
@@ -50,7 +51,7 @@ export function pointOn(history: SettingHistory, day: Day): SettingPoint | null 
     return best;
 }
 
-/** Der Wert, der an day "JJJJ-MM-TT" gilt (Regel 1) */
+/** Der Wert, der an day "JJJJ-MM-TT" gilt (Regel 1). Ein Wert „Default“ (null) liefert den Default. */
 export const valueOn = (history: SettingHistory, day: Day): number =>
     pointOn(history, day)?.value ?? history.defaultValue;
 
@@ -69,13 +70,13 @@ export function settingStatus(history: SettingHistory, validFrom: Day | null, to
 export function checkSettingValue(
     setting: Pick<UserSetting, "id" | "name" | "type" | "validFromUnit">,
     others: SettingPoint[],
-    candidate: {value: string; validFrom: string},
+    candidate: {value: string | null; validFrom: string},
     today: Day,
 ): string | null {
     const {value, validFrom} = candidate;
     if (!isValidDay(validFrom)) return "Ungültiges Datum";
 
-    if (setting.type === "number") {
+    if (value !== null && setting.type === "number") {
         if (!/^\d+$/.test(value.trim())) return `${setting.name}: bitte eine ganze Zahl eingeben`;
         const n = Number(value);
         const limit = LIMITS[setting.id];
@@ -97,6 +98,11 @@ export function checkSettingValue(
 
     if (others.some((p) => p.validFrom === validFrom)) {
         return `Für ${setting.name} gibt es ab dem ${formatDay(validFrom)} schon einen Wert`;
+    }
+
+    // Zurücksetzen nur, wenn am Tag davor ein eigener Wert gilt, sonst gilt dort schon der Default
+    if (value === null && pointOn({defaultValue: 0, values: others}, addDays(validFrom, -1))?.value == null) {
+        return `${setting.name}: ab dem ${formatDay(validFrom)} gilt schon der Default`;
     }
     return null;
 }

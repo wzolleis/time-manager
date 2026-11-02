@@ -14,12 +14,16 @@ export function UserSettingActions({row}: {row: UserSettingRow}) {
     const {setting, value, status} = row;
 
     if (status === "aktuell") {
+        const ownValue = value?.value ?? null; // null: es gilt der Default
         return (
-            <div className="flex justify-end">
+            <div className="flex flex-wrap justify-end gap-2">
+                <UserSettingDialog setting={setting} initialValue={ownValue ?? setting.defaultValue} label="Ändern" />
+                {/* Gilt schon der Default, gibt es nichts zurückzusetzen */}
                 <UserSettingDialog
                     setting={setting}
-                    initialValue={value?.value ?? setting.defaultValue}
-                    label="Ändern"
+                    initialValue={null}
+                    label="Auf Default zurücksetzen"
+                    disabled={ownValue === null}
                 />
             </div>
         );

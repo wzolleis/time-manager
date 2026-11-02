@@ -7,7 +7,7 @@ import {localDay} from "@shared/time-rules";
 import type {UserSetting, UserSettingValue, UserSettingValueUpdate} from "@shared/user-setting";
 import {checkChange, checkSettingValue, historyOf} from "@shared/user-setting-rules";
 
-type Change = {setting: UserSetting; current: UserSettingValue; value: string; validFrom: string};
+type Change = {setting: UserSetting; current: UserSettingValue; value: string | null; validFrom: string}; // value null: „Default“
 
 /** Der User ändert einen geplanten Wert */
 export function useChangeUserSetting() {

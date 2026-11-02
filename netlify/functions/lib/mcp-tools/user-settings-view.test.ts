@@ -27,6 +27,7 @@ const data: UserSettingsData = {
     values: [
         {id: "b", userId: "u1", settingId: SOLL_SETTING_ID, value: "7", validFrom: day("2026-11-01")},
         {id: "a", userId: "u1", settingId: SOLL_SETTING_ID, value: "6", validFrom: day("2026-03-01")},
+        {id: "d", userId: "u1", settingId: SOLL_SETTING_ID, value: null, validFrom: day("2027-01-01")},
     ],
 };
 
@@ -40,6 +41,7 @@ describe("userSettingsReport", () => {
         expect(soll.values).toEqual([
             {id: "a", value: 6, validFrom: day("2026-03-01"), status: "aktuell"},
             {id: "b", value: 7, validFrom: day("2026-11-01"), status: "geplant"},
+            {id: "d", value: null, validFrom: day("2027-01-01"), status: "geplant"},
         ]);
         expect(days).toMatchObject({name: "Urlaubstage", current: 30, defaultStatus: "aktuell", values: []});
     });
@@ -48,5 +50,6 @@ describe("userSettingsReport", () => {
         expect(r.text).toContain("| Soll | 8 Stunden | – | abgelaufen |  |");
         expect(r.text).toContain("| Soll | 7 Stunden | 01.11.2026 | geplant | b |");
         expect(r.text).toContain("| Urlaubstage | 30 Tage | – | aktuell |  |");
+        expect(r.text).toContain("| Soll | Default (8 Stunden) | 01.01.2027 | geplant | d |");
     });
 });
