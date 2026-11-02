@@ -1,9 +1,18 @@
 ---
 name: pull-request
-description: Erstellt aus dem Arbeitsstand einen Branch, committet, pusht, öffnet einen Pull Request gegen main und merged ihn. Bei Code-Änderungen erst nach grünen Netlify-Checks, bei reiner Dokumentation sofort. Verwenden, wenn der User „PR“, „Pull Request“ oder „commit, PR und merge“ sagt.
+description: Erstellt aus dem Arbeitsstand einen Branch, committet, pusht, öffnet einen Pull Request gegen main und merged ihn. Bei Code-Änderungen erst nach grünen Netlify-Checks, bei reiner Dokumentation sofort. Verwenden, wenn der User „PR“, „Pull Request“ oder „commit, PR und merge“ sagt. Nie von selbst nach Abschluss einer Arbeit.
 ---
 
 # Pull Request erstellen und mergen
+
+## Nur auf ausdrücklichen Auftrag
+
+- Der Skill läuft nur, wenn der User im aktuellen Auftrag ausdrücklich einen PR verlangt. Ein „mach weiter“
+  oder „setz das um“ ist kein Auftrag für einen PR, auch wenn frühere Änderungen mit einem PR endeten.
+- Ist eine Arbeit fertig und es gibt keinen solchen Auftrag, wird nichts committet, gepusht oder gemerged.
+  Stattdessen dem User das Ergebnis melden und fragen, ob ein PR erstellt werden soll.
+- Ändert der PR das Aussehen der App, vor dem Merge den Link zur Deploy-Vorschau nennen und auf das OK des
+  Users warten, auch wenn die Checks grün sind.
 
 1. Den Arbeitsstand ansehen mit `git status --short` und `git log --oneline -5`.
 2. Steht man auf `main`, zuerst einen Branch anlegen: `git checkout -b <type>/<thema>`, z. B.
