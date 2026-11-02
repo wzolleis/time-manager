@@ -89,7 +89,7 @@ describe("Überstunden", () => {
     it("zeigt den Saldo ab dem Tag der Korrektur und die Korrektur", async () => {
         mockApi(CORRECTION);
         renderPage();
-        // 3:30 + 3 × 1:00, das Soll von heute zählt vor dem ersten Gehen noch nicht
+        // 3:30 + 3 × 1:00, heute zählt vor dem ersten Gehen noch nicht
         expect(await screen.findByText("+6:30 h")).toBeTruthy();
         expect(screen.getByText("Korrektur am 12.10.2026: +3:30 h")).toBeTruthy();
     });
