@@ -76,7 +76,7 @@ export const userSettingValues = mysqlTable(
         settingId: char("setting_id", {length: 36})
             .notNull()
             .references(() => userSettings.id),
-        value: varchar("value", {length: 100}).notNull(), // als String, ausgewertet nach user_settings.type
+        value: varchar("value", {length: 100}), // als String, ausgewertet nach user_settings.type; null: der Default
         validFrom: date("valid_from", {mode: "string"}).$type<Day>().notNull(),
     },
     (t) => [uniqueIndex("uq_user_setting_values").on(t.userId, t.settingId, t.validFrom)],

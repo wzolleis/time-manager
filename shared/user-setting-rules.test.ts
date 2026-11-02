@@ -35,7 +35,7 @@ const VACATION_DAYS: UserSetting = {
     validFromUnit: "year",
 };
 
-const p = (id: string, validFrom: string, value: number) => ({id, validFrom: day(validFrom), value});
+const p = (id: string, validFrom: string, value: number | null) => ({id, validFrom: day(validFrom), value});
 const history = (...values: ReturnType<typeof p>[]): SettingHistory => ({defaultValue: 8, values});
 
 describe("valueOn (Regel 1)", () => {
@@ -141,6 +141,63 @@ describe("checkChange und checkDelete (Regel 7)", () => {
     });
 });
 
+describe("Wert „Default“ (null)", () => {
+    const h = history(p("a", "2026-03-01", 6), p("d", "2026-11-01", null), p("b", "2027-02-01", 7));
+
+    it("ab dem Default gilt der Default, davor der eigene Wert, danach ein späterer eigener Wert", () => {
+        expect(valueOn(h, day("2026-10-31"))).toBe(6);
+        expect(valueOn(h, day("2026-11-01"))).toBe(8);
+        expect(valueOn(h, day("2027-01-31"))).toBe(8);
+        expect(valueOn(h, day("2027-02-01"))).toBe(7);
+    });
+
+    it("ein geänderter Default wirkt ab dem Wert „Default“ sofort", () => {
+        expect(valueOn({...h, defaultValue: 7}, day("2026-12-01"))).toBe(7);
+        expect(valueOn({...h, defaultValue: 7}, day("2026-10-01"))).toBe(6); // davor gilt der eigene Wert weiter
+    });
+
+    it("hat einen Status wie jeder Wert", () => {
+        expect(settingStatus(h, day("2026-11-01"), TODAY)).toBe("geplant");
+        expect(settingStatus(h, day("2026-11-01"), day("2026-11-01"))).toBe("aktuell");
+    });
+
+    it("ist erlaubt, wenn am Tag davor ein eigener Wert gilt", () => {
+        expect(
+            checkSettingValue(SOLL, [p("a", "2026-03-01", 6)], {value: null, validFrom: "2026-10-27"}, TODAY),
+        ).toBeNull();
+    });
+
+    it("ohne eigenen Wert davor gilt schon der Default", () => {
+        expect(checkSettingValue(SOLL, [], {value: null, validFrom: "2026-10-27"}, TODAY)).toBe(
+            "Soll: ab dem 27.10.2026 gilt schon der Default",
+        );
+        // der eigene Wert beginnt erst nach dem Default
+        expect(
+            checkSettingValue(SOLL, [p("a", "2026-12-01", 6)], {value: null, validFrom: "2026-11-01"}, TODAY),
+        ).toMatch(/gilt schon der Default/);
+    });
+
+    it("zwei „Default“ hintereinander werden abgelehnt", () => {
+        const others = [p("a", "2026-03-01", 6), p("d", "2026-11-01", null)];
+        expect(checkSettingValue(SOLL, others, {value: null, validFrom: "2026-12-01"}, TODAY)).toMatch(
+            /gilt schon der Default/,
+        );
+    });
+
+    it("es gelten die Regeln für „gültig ab“", () => {
+        const others = [p("a", "2026-03-01", 6)];
+        expect(checkSettingValue(SOLL, others, {value: null, validFrom: "2026-10-26"}, TODAY)).toMatch(
+            /in der Zukunft/,
+        );
+        expect(
+            checkSettingValue(VACATION_DAYS, [p("v", "2026-01-01", 28)], {value: null, validFrom: "2027-02-01"}, TODAY),
+        ).toMatch(/1. Januar/);
+        expect(
+            checkSettingValue(VACATION_DAYS, [p("v", "2026-01-01", 28)], {value: null, validFrom: "2027-01-01"}, TODAY),
+        ).toBeNull();
+    });
+});
+
 describe("historyOf", () => {
     it("liest Default und Werte einer Einstellung aus den Daten der API", () => {
         const value = (id: string, settingId: string, v: string, validFrom: string) => ({
@@ -155,9 +212,13 @@ describe("historyOf", () => {
             values: [
                 value("a", SOLL_SETTING_ID, "6", "2026-03-01"),
                 value("b", VACATION_DAYS_SETTING_ID, "28", "2027-01-01"),
+                {...value("c", SOLL_SETTING_ID, "", "2026-11-01"), value: null},
             ],
         };
-        expect(historyOf(data, SOLL_SETTING_ID)).toEqual({defaultValue: 7, values: [p("a", "2026-03-01", 6)]});
+        expect(historyOf(data, SOLL_SETTING_ID)).toEqual({
+            defaultValue: 7,
+            values: [p("a", "2026-03-01", 6), p("c", "2026-11-01", null)],
+        });
     });
 
     it("ohne geladene Daten gelten 8 Stunden und 30 Urlaubstage", () => {

@@ -113,6 +113,13 @@
       "when": 1793136995619,
       "tag": "0015_passkeys",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "5",
+      "when": 1793654362209,
+      "tag": "0016_user_setting_value_default",
+      "breakpoints": true
     }
   ]
 }

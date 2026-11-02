@@ -17,10 +17,18 @@ export const UserSettingValueSchema = createSelectSchema(userSettingValues, {val
 
 // Der User steht im Pfad der API. Ob Wert und Tag zur Einstellung passen, prüft checkSettingValue,
 // damit eine Verletzung als 422 mit Meldung zurückkommt.
-export const UserSettingValueCreateSchema = z.object({settingId: z.string().uuid(), value, validFrom: DaySchema});
+// value null: ab validFrom gilt wieder der Default der Einstellung
+export const UserSettingValueCreateSchema = z.object({
+    settingId: z.string().uuid(),
+    value: value.nullable(),
+    validFrom: DaySchema,
+});
 
 // Die Einstellung eines Werts ändert sich nicht
-export const UserSettingValueUpdateSchema = z.object({value: value.optional(), validFrom: DaySchema.optional()});
+export const UserSettingValueUpdateSchema = z.object({
+    value: value.nullable().optional(),
+    validFrom: DaySchema.optional(),
+});
 
 export type UserSetting = z.infer<typeof UserSettingSchema>;
 export type UserSettingValue = z.infer<typeof UserSettingValueSchema>;

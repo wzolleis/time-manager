@@ -14,7 +14,8 @@ Im Avatar-Menü oben rechts gibt es den Eintrag „Einstellungen“ (Route `/use
 Ein Klick darauf zeigt die Einstellungsseite.
 Dort steht eine Tabelle mit den Spalten „Name“, „Wert“, „gültig ab“, „Status“ und „Beschreibung“:
 * Name = der Name der Einstellung
-* Wert = der Wert der Einstellung mit Einheit, z. B. „8 Stunden“
+* Wert = der Wert der Einstellung mit Einheit, z. B. „8 Stunden“, oder „Default (8 Stunden)“ (siehe
+  [Auf den Default zurücksetzen](#auf-den-default-zurücksetzen))
 * gültig ab = ab welchem Tag der Wert gilt. Es werden nur Tage ausgewählt, der Wert gilt ab 00:00 dieses
   Tages (Europe/Berlin).
 * Status = „aktuell“, „geplant“ oder „abgelaufen“ (siehe [Regeln](#regeln))
@@ -34,6 +35,20 @@ Hat der User keine eigenen Werte eingetragen, wird der Default angezeigt. Der De
 Der User kann einen neuen Wert eintragen, aber keine neuen Einstellungen anlegen. Dazu wählt er den Wert
 und das Datum „gültig ab“. Beim Speichern wird ein neuer Eintrag angelegt und angezeigt. Der alte Wert
 bleibt stehen und gilt bis zum Tag vor dem neuen „gültig ab“ weiter.
+
+## Auf den Default zurücksetzen
+
+Statt einer Zahl kann der User den Wert **„Default“** eintragen: Ab „gültig ab“ gilt wieder der Default
+der Einstellung, wie bei einem User ohne eigene Werte. Ändert sich später der Default, gilt der neue
+Default auch hier. Gespeichert wird „Default“ als `value = null`.
+
+- In der Zeile des aktuellen Werts öffnet „Auf Default zurücksetzen“ den Dialog mit der Auswahl „Default“.
+  Vorgabe für „gültig ab“: morgen, bei Urlaubstagen der 1. Januar des nächsten Jahres. Gilt schon der
+  Default, ist der Button gesperrt.
+- Im Dialog zum Ändern und Bearbeiten wählt der User unter „Art“ zwischen „Eigener Wert“ und „Default“.
+- Die Tabelle zeigt „Default (8 Stunden)“ mit dem aktuellen Default.
+- Vergangene Werte bleiben stehen: Das Zurücksetzen wirkt wie jeder neue Wert erst ab „gültig ab“.
+  Bestehende eigene Werte, deren Zahl dem Default entspricht, bleiben Zahlen.
 
 ## Daten
 
@@ -56,7 +71,7 @@ Tabelle `user_setting_values` mit den Werten der User:
 | `id`         | UUID         |                                                 |
 | `user_id`    | UUID         | der User, für den der Wert gilt                 |
 | `setting_id` | UUID         | Verweis auf `user_settings.id`                  |
-| `value`      | Text         | Wert als String, wird nach `type` ausgewertet  |
+| `value`      | Text, nullable | Wert als String, wird nach `type` ausgewertet; `null`: „Default“ |
 | `valid_from` | Date         | erster Tag, an dem der Wert gilt                |
 
 Eindeutig ist `(user_id, setting_id, valid_from)`.
@@ -64,7 +79,7 @@ Eindeutig ist `(user_id, setting_id, valid_from)`.
 ## Regeln
 
 1. **Wert zu einem Tag.** Für einen Tag gilt der Wert mit dem größten `valid_from`, das nicht nach diesem
-   Tag liegt. Gibt es keinen, gilt der Default.
+   Tag liegt. Gibt es keinen oder ist es „Default“, gilt der Default.
 2. **Status.**
    - „aktuell“: der Wert, der heute nach Regel 1 gilt (auch der Default)
    - „geplant“: `valid_from` liegt nach heute
@@ -79,6 +94,8 @@ Eindeutig ist `(user_id, setting_id, valid_from)`.
 5. **Ein „gültig ab“ je Einstellung nur einmal.** Ein zweiter Wert mit demselben „gültig ab“ für dieselbe
    Einstellung wird abgelehnt.
 6. **Gültige Werte.** Nur ganze Zahlen, keine Dezimalzahlen. Soll ist 1 bis 10, Urlaubstage sind nicht negativ.
+   Oder „Default“: Das geht nur, wenn am Tag vor „gültig ab“ ein eigener Wert gilt, sonst gilt dort schon
+   der Default („Soll: ab dem 27.10.2026 gilt schon der Default“).
 7. **Ändern und Löschen.** Geplante Werte darf man ändern und löschen. Abgelaufene Werte darf man weder ändern noch löschen, sie gelten für die Vergangenheit weiter (Regel 2).
    Den aktuellen Wert ändert man nicht, man trägt einen neuen Wert mit späterem „gültig ab“ ein.
    Den Default kann man nicht löschen.
@@ -98,8 +115,8 @@ Der Agent kann die Einstellungen über MCP-Tools nutzen, mit denselben Regeln wi
 | Tool                   | Inhalt                                                                  |
 |------------------------|-------------------------------------------------------------------------|
 | `list_user_settings`   | alle Einstellungen mit ihren Werten, „gültig ab“ und Status            |
-| `set_user_setting`     | neuen Wert mit „gültig ab“ eintragen (Name der Einstellung, Wert, Tag) |
-| `change_user_setting`  | geplanten Wert ändern (Regel 7)                                         |
+| `set_user_setting`     | neuen Wert mit „gültig ab“ eintragen (Name der Einstellung, Wert, Tag); Wert `null`: „Default“ |
+| `change_user_setting`  | geplanten Wert ändern (Regel 7), auch auf `null`                        |
 | `delete_user_setting`  | geplanten Wert löschen (Regel 7)                                        |
 
 Verstöße gegen eine Regel liefern die Meldung der Regel zurück.
@@ -115,3 +132,7 @@ Verstöße gegen eine Regel liefern die Meldung der Regel zurück.
 - Urlaubstage nicht ab einem 1. Januar, Dezimalzahlen und Soll außerhalb von 1–10 werden abgelehnt.
 - Zwei Werte mit demselben „gültig ab“ für dieselbe Einstellung werden abgelehnt.
 - Abgelaufene Werte und der aktuelle Wert lassen sich weder ändern noch löschen.
+- „Auf Default zurücksetzen“ ab morgen legt den Wert „Default“ an, die Tabelle zeigt „Default (8 Stunden)“
+  als „geplant“. Ab morgen rechnen Berichte und Urlaubsplanung mit dem Default, davor mit dem eigenen Wert.
+- Ohne eigenen Wert ist „Auf Default zurücksetzen“ gesperrt; „Default“ ohne eigenen Wert am Tag davor wird
+  abgelehnt.

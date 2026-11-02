@@ -22,7 +22,7 @@ export const UserSettingsReportSchema = z.object({
             values: z.array(
                 z.object({
                     id: z.string().describe("ID für change_user_setting und delete_user_setting"),
-                    value: z.number(),
+                    value: z.number().nullable().describe("null: „Default“, ab validFrom gilt wieder der Default"),
                     validFrom: z.string().describe("Tag JJJJ-MM-TT, ab dem der Wert gilt"),
                     status: StatusSchema.describe("nur geplante Werte lassen sich ändern und löschen"),
                 }),
@@ -59,7 +59,13 @@ export function userSettingsReport(data: UserSettingsData, today: Day) {
         const unit = s.unit ? ` ${UNIT_TEXT[s.unit]}` : "";
         return [
             [s.name, `${s.defaultValue}${unit}`, "–", s.defaultStatus, ""],
-            ...s.values.map((v) => [s.name, `${v.value}${unit}`, formatDay(v.validFrom), v.status, v.id]),
+            ...s.values.map((v) => [
+                s.name,
+                v.value === null ? `Default (${s.defaultValue}${unit})` : `${v.value}${unit}`,
+                formatDay(v.validFrom),
+                v.status,
+                v.id,
+            ]),
         ];
     });
     const text = mdTable(["Name", "Wert", "gültig ab", "Status", "ID"], rows);

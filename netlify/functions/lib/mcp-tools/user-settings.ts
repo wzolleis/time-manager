@@ -11,11 +11,17 @@ import {DaySchema} from "@shared/date-schemas";
 import {userSettingsReport, UserSettingsReportSchema} from "./user-settings-view";
 import {ok, run} from "./view";
 
+const textOf = (value: number | null) => (value === null ? null : String(value));
+
 const report = async (userId: string) => userSettingsReport(await listUserSettings(userId), localDay(new Date()));
 
 const RULES =
     "Ein neuer Wert gilt frühestens ab morgen, nur der erste eigene Wert einer Einstellung darf auch rückwirkend " +
-    "gelten. Urlaubstage gelten immer ab dem 1. Januar. Nur ganze Zahlen, Soll 1 bis 10 Stunden.";
+    "gelten. Urlaubstage gelten immer ab dem 1. Januar. Nur ganze Zahlen, Soll 1 bis 10 Stunden. value null " +
+    "setzt auf den Default zurück: ab validFrom gilt wieder der Default, auch wenn er sich später ändert. Das " +
+    "geht nur, wenn am Tag davor ein eigener Wert gilt.";
+
+const VALUE = "ganze Zahl, oder null für „Default“";
 
 export function registerUserSettingTools(server: McpServer, user: SessionUser): void {
     server.registerTool(
@@ -43,7 +49,7 @@ export function registerUserSettingTools(server: McpServer, user: SessionUser): 
             description: `Trägt einen neuen Wert zu einer Einstellung ein. Der bisherige Wert gilt bis zum Tag davor. ${RULES}`,
             inputSchema: {
                 name: z.string().describe("Name der Einstellung aus list_user_settings, z. B. Soll"),
-                value: z.number().int(),
+                value: z.number().int().nullable().describe(VALUE),
                 validFrom: DaySchema.describe("Tag JJJJ-MM-TT, ab dem der Wert gilt"),
             },
             outputSchema: UserSettingsReportSchema,
@@ -56,7 +62,7 @@ export function registerUserSettingTools(server: McpServer, user: SessionUser): 
                 if (!setting) {
                     throw new RuleError(`Unbekannte Einstellung, möglich: ${settings.map((s) => s.name).join(", ")}`);
                 }
-                await addSettingValue(user.id, {settingId: setting.id, value: String(value), validFrom});
+                await addSettingValue(user.id, {settingId: setting.id, value: textOf(value), validFrom});
                 const r = await report(user.id);
                 return ok(`Gespeichert.\n${r.text}`, r.structured);
             }),
@@ -69,7 +75,7 @@ export function registerUserSettingTools(server: McpServer, user: SessionUser): 
             description: `Ändert Wert oder gültig ab eines geplanten Werts. Aktuelle und abgelaufene Werte lassen sich nicht ändern. ${RULES}`,
             inputSchema: {
                 id: z.uuid().describe("ID des Werts aus list_user_settings"),
-                value: z.number().int().optional(),
+                value: z.number().int().nullable().optional().describe(VALUE),
                 validFrom: DaySchema.optional().describe("Tag JJJJ-MM-TT"),
             },
             outputSchema: UserSettingsReportSchema,
@@ -78,7 +84,7 @@ export function registerUserSettingTools(server: McpServer, user: SessionUser): 
         ({id, value, validFrom}) =>
             run(async () => {
                 await changeSettingValue(user.id, id, {
-                    ...(value !== undefined && {value: String(value)}),
+                    ...(value !== undefined && {value: textOf(value)}),
                     ...(validFrom !== undefined && {validFrom}),
                 });
                 const r = await report(user.id);

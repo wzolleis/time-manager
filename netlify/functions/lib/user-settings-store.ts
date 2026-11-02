@@ -62,7 +62,7 @@ export async function addSettingValue(userId: string, input: UserSettingValueCre
         const history = historyOf({settings: [setting], values: await valuesOf(tx, userId, setting.id)}, setting.id);
         const problem = checkSettingValue(setting, history.values, input, today());
         if (problem) throw new RuleError(problem);
-        await tx.insert(userSettingValues).values({id, userId, ...input, value: input.value.trim()});
+        await tx.insert(userSettingValues).values({id, userId, ...input, value: input.value?.trim() ?? null});
     });
     return (await getValue(db, id))!;
 }
@@ -79,15 +79,18 @@ export async function changeSettingValue(userId: string, id: string, patch: User
         const changeProblem = checkChange(history, current.validFrom, today());
         if (changeProblem) throw new RuleError(changeProblem);
 
-        // Wurde nur ein Feld gesendet, gilt für das andere der gespeicherte Wert
-        const next = {value: patch.value ?? current.value, validFrom: patch.validFrom ?? current.validFrom};
+        // Wurde nur ein Feld gesendet, gilt für das andere der gespeicherte Wert. null ist ein Wert („Default“).
+        const next = {
+            value: patch.value !== undefined ? patch.value : current.value,
+            validFrom: patch.validFrom ?? current.validFrom,
+        };
         const others = history.values.filter((p) => p.id !== id);
         const problem = checkSettingValue(setting, others, next, today());
         if (problem) throw new RuleError(problem);
 
         await tx
             .update(userSettingValues)
-            .set({...next, value: next.value.trim()})
+            .set({...next, value: next.value?.trim() ?? null})
             .where(eq(userSettingValues.id, id));
     });
     return (await getValue(db, id))!;
