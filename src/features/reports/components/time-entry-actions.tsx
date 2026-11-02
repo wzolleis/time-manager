@@ -9,6 +9,7 @@ import {useProjects} from "@/views/projects";
 import {TimeEntryDelete} from "@features/reports/components/time-entry-delete";
 import {useChangeTimeEntry} from "@features/reports/use-cases/use-change-time-entry";
 import type {EntryRow} from "@features/reports/time-entry-row";
+import {isOptimistic} from "@features/reports/time-entries-cache";
 import {Muted} from "@/components/text/muted";
 import {ErrorText} from "@/components/text/error-text";
 import {FormDialogFooter} from "@/components/form/form-dialog-footer";
@@ -21,6 +22,7 @@ export function EntryActions({entry}: {entry: EntryRow}) {
     const update = useChangeTimeEntry();
 
     const isKommen = entry.type === "kommen";
+    const pending = isOptimistic(entry.id); // noch nicht gespeichert, der Server kennt die Id nicht
     const typeLabel = isKommen ? "Kommen" : "Gehen";
 
     // --- Bearbeiten ---
@@ -33,7 +35,6 @@ export function EntryActions({entry}: {entry: EntryRow}) {
         if (next) {
             setTime(formatTime(entry.bookedAt));
             setProjectChoice(entry.projectId ?? NO_PROJECT);
-            update.reset();
         }
         setOpen(next);
     };
@@ -44,16 +45,15 @@ export function EntryActions({entry}: {entry: EntryRow}) {
     const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>): void => {
         e.preventDefault();
         if (problem) return;
-        update.change(
-            {entry, time, projectId: projectChoice === NO_PROJECT ? null : projectChoice},
-            {onSuccess: () => setOpen(false)},
-        );
+        // Die Änderung steht sofort in der Liste, ein Fehler des Servers kommt als Toast
+        update.change({entry, time, projectId: projectChoice === NO_PROJECT ? null : projectChoice});
+        setOpen(false);
     };
 
     return (
         <div className="space-y-1">
             <div className="flex justify-end gap-2">
-                <Button variant="outline" size="sm" onClick={() => handleOpenChange(true)}>
+                <Button variant="outline" size="sm" disabled={pending} onClick={() => handleOpenChange(true)}>
                     Bearbeiten
                 </Button>
                 <TimeEntryDelete entry={entry} />
@@ -99,13 +99,8 @@ export function EntryActions({entry}: {entry: EntryRow}) {
 
                         {sickNotice && <Muted>{sickNotice}</Muted>}
                         {problem && <ErrorText alert={false}>{problem}</ErrorText>}
-                        {update.error && <ErrorText>{update.error.message}</ErrorText>}
 
-                        <FormDialogFooter
-                            onCancel={() => setOpen(false)}
-                            saving={update.isSaving}
-                            disabled={problem !== null}
-                        />
+                        <FormDialogFooter onCancel={() => setOpen(false)} saving={false} disabled={problem !== null} />
                     </form>
                 </DialogContent>
             </Dialog>

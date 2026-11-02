@@ -94,12 +94,10 @@ export function StampCard() {
                             disabled={!stamping.isLoaded || stamping.isStamping}
                             onClick={stamp}
                         >
-                            {stamping.isStamping ? "Buche…" : isIn ? "Gehen" : "Kommen"}
+                            {isIn ? "Gehen" : "Kommen"}
                         </Button>
                     </>
                 )}
-
-                {stamping.error && <ErrorText>{stamping.error.message}</ErrorText>}
             </CardContent>
         </Card>
     );

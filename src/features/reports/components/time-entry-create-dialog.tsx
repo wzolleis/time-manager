@@ -79,7 +79,6 @@ export function TimeEntryCreateDialog({
             setProjectChoice(NO_PROJECT);
             setStart(WORK_DAY_START);
             setWorkTime(DAY_WORK_TIME);
-            create.reset();
             createDay.reset();
         }
         setOpen(next);
@@ -106,16 +105,19 @@ export function TimeEntryCreateDialog({
         mode === "day" && !problem ? createDay.preview(workDay) : {bookings: [], pauseMinutes: 0};
     const earliest = mode === "day" && !start ? createDay.earliestStart(day, workDay.workMinutes) : null;
     const sickNotice = create.sickNotice(day);
-    const saving = mode === "stamp" ? create.isSaving : createDay.isSaving;
-    const error = mode === "stamp" ? create.error : createDay.error;
+    // Ein Zeitstempel ist optimistisch, nur der Zeitraum wartet auf den Server
+    const saving = mode === "day" && createDay.isSaving;
+    const error = mode === "day" ? createDay.error : null;
     const projectId = projectChoice === NO_PROJECT ? null : projectChoice;
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!currentUser || problem) return;
-        const onSuccess = () => setOpen(false);
-        if (mode === "stamp") create.add({type, day, time, projectId}, {onSuccess});
-        else createDay.add({...workDay, projectId}, {onSuccess});
+        if (mode === "stamp") {
+            // Die Buchung steht sofort in der Liste, ein Fehler des Servers kommt als Toast
+            create.add({type, day, time, projectId});
+            setOpen(false);
+        } else createDay.add({...workDay, projectId}, {onSuccess: () => setOpen(false)});
     };
 
     const projectField = (

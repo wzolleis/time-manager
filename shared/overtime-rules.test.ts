@@ -96,7 +96,7 @@ describe("overtimeBalanceMs", () => {
     const correction = {offset: 210, created: new Date("2026-10-12T07:00:00Z")}; // Mo 12.10. 09:00
     const secondWeek = [...worked("2026-10-12", 17), ...worked("2026-10-13", 17), ...worked("2026-10-14", 17)];
 
-    it("rechnet ab dem Tag der Korrektur, heute vor dem ersten Gehen ohne Soll", () => {
+    it("rechnet ab dem Tag der Korrektur, heute vor dem ersten Gehen noch nicht", () => {
         // 3:30 + 3 × 1:00 am Do vor dem ersten Kommen; die erste Woche zählt nicht mehr
         expect(balance(correction, [...firstWeek, ...secondWeek], "2026-10-15T05:00:00Z")).toBe(390 * MIN);
     });
@@ -149,15 +149,15 @@ describe("overtimeBalanceMs heute erst ab dem ersten Gehen", () => {
     const bookedUntil = (now: string) => [...monTue, ...wednesday].filter((e) => e.bookedAt.toISOString() <= now);
 
     it.each([
-        ["2026-10-28", "00:00", 5], // Soll von Mi zählt noch nicht
+        ["2026-10-28", "00:00", 5], // Mi zählt noch nicht
         ["2026-10-28", "08:00", 5], // Kommen
-        ["2026-10-28", "10:00", 7], // 5 h + 2 h laufende Arbeitszeit
+        ["2026-10-28", "10:00", 5], // vor dem ersten Gehen zählt auch die laufende Arbeitszeit noch nicht
         ["2026-10-28", "12:00", 1], // Gehen: 5 h + 4 h − 8 h Soll
         ["2026-10-28", "13:00", 1], // Kommen
         ["2026-10-28", "14:00", 2], // 5 h + 5 h − 8 h
         ["2026-10-28", "16:00", 4], // Gehen: 5 h + 7 h − 8 h
-        ["2026-10-29", "00:00", 4], // Soll von Do zählt noch nicht
-        ["2026-10-29", "18:00", 4], // ohne Gehen zählt das Soll von Do noch nicht
+        ["2026-10-29", "00:00", 4], // Do zählt noch nicht
+        ["2026-10-29", "18:00", 4], // ohne Gehen zählt Do noch nicht
         ["2026-10-30", "00:00", -4], // Do ist vergangen: 4 h − 8 h Soll
     ])("am %s um %s beträgt der Saldo %i h", (d, t, expected) => {
         const now = at(d, t);
@@ -187,7 +187,7 @@ describe("overtimeBalanceMs heute erst ab dem ersten Gehen", () => {
         const entries = [...monTue, booking("2026-10-28", "08:00", "kommen"), booking("2026-10-28", "12:00", "gehen")];
         const before = at("2026-10-28", "10:00");
         const after = at("2026-10-28", "12:00");
-        // 3:30 + 2 h laufende Arbeitszeit, die Tage vor der Korrektur zählen nicht
+        // 3:30 vor dem ersten Gehen, die Tage vor der Korrektur zählen nicht
         expect(
             overtimeBalanceMs(
                 correction,
@@ -199,7 +199,7 @@ describe("overtimeBalanceMs heute erst ab dem ersten Gehen", () => {
                 day("2026-10-28"),
                 new Date(before),
             ),
-        ).toBe(330 * MIN);
+        ).toBe(210 * MIN);
         // 3:30 + 4 h − 8 h Soll
         expect(overtimeBalanceMs(correction, entries, [], [], [], SOLL, day("2026-10-28"), new Date(after))).toBe(
             -30 * MIN,

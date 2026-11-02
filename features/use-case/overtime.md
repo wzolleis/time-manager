@@ -24,9 +24,9 @@ genau wie in den Berichten. Ändert sich eine Buchung, ein Urlaub, eine Krankmel
 stimmt der Saldo deshalb automatisch wieder.
 Ohne Korrektur ist der Korrekturwert 0 und gerechnet wird ab Beginn der Zeiterfassung.
 
-Für heute gilt eine Ausnahme: Das Soll des heutigen Tages zählt erst, sobald heute ein „Gehen“ gebucht ist.
-Vorher zählt nur die Arbeitszeit von heute, auch die laufende seit einem offenen Kommen. Vergangene Tage
-zählen immer mit dem vollen Soll, auch ohne Gehen. Die Berichte rechnen heute weiter mit dem vollen Soll.
+Für heute gilt eine Ausnahme: Der heutige Tag zählt erst, sobald heute ein „Gehen“ gebucht ist. Vorher
+zählen weder das Soll noch die Arbeitszeit von heute (auch nicht die laufende seit einem offenen Kommen),
+der Saldo bleibt beim Stand vom Vortag. Vergangene Tage zählen immer mit dem vollen Soll, auch ohne Gehen. Die Berichte rechnen heute weiter mit dem vollen Soll.
 
 # Korrektur (Offset)
 Die Überstunden müssen ab und zu korrigiert werden. Anfangs ist das notwendig, da die Zeiten nicht komplett
@@ -95,7 +95,7 @@ Feiertage, Urlaub und Krankmeldungen gibt es im Beispiel nicht. Sollzeit 8 h je 
 - **Ohne Korrektur:** Die Zeiterfassung beginnt am Mo 05.10.2026. Bis Fr 09.10. sind 42 h gebucht, Soll 40 h.
   Am Sa 10.10. zeigt die Karte „+2:00 h“ und „Keine Korrektur“.
 - **Mit Korrektur:** Am Mo 12.10.2026 um 09:00 trägt der User `+3:30` ein. Am Mo, Di und Mi bucht er je 9 h.
-  Am Do 15.10. vor dem ersten Kommen zeigt die Karte 3:30 + 3 × 1:00 (das Soll von Do zählt noch nicht)
+  Am Do 15.10. vor dem ersten Kommen zeigt die Karte 3:30 + 3 × 1:00 (Do zählt vor dem ersten Gehen noch nicht)
   = „+6:30 h“ und „Korrektur am 12.10.2026: +3:30 h“. Die Tage vor dem 12.10. zählen nicht mehr.
 - **Nachträgliche Änderung:** Der User ändert danach das Gehen am Di 13.10., sodass dort nur 8 h stehen.
   Ohne neue Korrektur zeigt die Karte „+5:30 h“.

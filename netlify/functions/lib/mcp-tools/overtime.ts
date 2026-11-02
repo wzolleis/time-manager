@@ -21,7 +21,8 @@ export function registerOvertimeTools(server: McpServer, user: SessionUser): voi
             title: "Überstunden",
             description:
                 "Saldo der Überstunden (negativ: Fehlzeit) mit Tag und Wert der letzten Korrektur. Gerechnet wird " +
-                "ab dem Tag der Korrektur. Das Soll von heute zählt erst ab dem ersten Gehen des Tages. Die " +
+                "ab dem Tag der Korrektur. Heute zählt erst ab dem ersten Gehen des Tages, vorher gilt der Saldo vom " +
+                "Vortag. Die " +
                 "Differenzen in den Berichten sind davon getrennt.",
             outputSchema: OvertimeReportSchema,
             annotations: {readOnlyHint: true},

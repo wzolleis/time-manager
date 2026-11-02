@@ -5,10 +5,12 @@ import {useCurrentUser} from "@/lib/user-context";
 import {useProjects} from "@/views/projects";
 import {useSickLeaves} from "@/views/sick-leaves";
 import {useTimeEntries} from "@/views/time-entries";
+import {optimisticId, optimisticTimeEntries, withAdded} from "@features/reports/time-entries-cache";
 import {isSickDay, sickDayMessage} from "@shared/sick-leave-rules";
 import {findMissingGehen, localDay} from "@shared/time-rules";
 
 type Stamp = {type: "kommen" | "gehen"; projectId: string | null};
+type StampAt = Stamp & {bookedAt: Date}; // die Zeit einmal festlegen, für Cache und Server gleich
 
 /** Der User stempelt sich mit Kommen ein oder mit Gehen aus */
 export function useStampTime() {
@@ -22,13 +24,22 @@ export function useStampTime() {
     const sickLeaves = useSickLeaves(userId);
 
     const save = useMutation({
-        mutationFn: ({type, projectId}: Stamp) =>
+        mutationFn: ({type, projectId, bookedAt}: StampAt) =>
             createTimeEntry(userId!, {
                 type,
-                bookedAt: new Date(),
+                bookedAt,
                 projectId: type === "kommen" ? (projectId ?? undefined) : undefined,
             }),
-        onSuccess: () => qc.invalidateQueries({queryKey: ["time-entries"]}),
+        // Der neue Status erscheint sofort, ohne auf den Server zu warten
+        ...optimisticTimeEntries(qc, userId, (list, {type, projectId, bookedAt}: StampAt) =>
+            withAdded(list, {
+                id: optimisticId(),
+                userId: userId!,
+                type,
+                bookedAt: bookedAt.toISOString(),
+                projectId: type === "kommen" ? projectId : null,
+            }),
+        ),
     });
 
     // Die API liefert die Buchungen nach Zeit sortiert, die letzte bestimmt den Status
@@ -50,8 +61,7 @@ export function useStampTime() {
         isPending: entries.isPending,
         isLoaded: entries.isSuccess,
         loadError: entries.error,
-        stamp: save.mutate,
-        isStamping: save.isPending,
-        error: save.error,
+        stamp: (stamp: Stamp) => save.mutate({...stamp, bookedAt: new Date()}),
+        isStamping: save.isPending, // nur gegen Doppelklick, der neue Status steht schon im Cache
     };
 }

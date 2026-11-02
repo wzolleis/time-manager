@@ -55,7 +55,8 @@ export type OvertimeCorrection = {offset: number; created: Date};
 /**
  * Saldo der Überstunden in ms: Korrekturwert plus Σ (Arbeitszeit − Soll) aller Tage ab dem Tag der Korrektur
  * bis heute, ohne Korrektur ab Beginn der Zeiterfassung. Jeder Tag zählt wie in den Berichten (dayDiffMs), nur
- * das Soll von heute erst ab dem ersten Gehen des Tages. today ist der heutige Tag "JJJJ-MM-TT".
+ * heute erst ab dem ersten Gehen des Tages, vorher bleibt der Saldo vom Vortag stehen. today ist der heutige Tag
+ * "JJJJ-MM-TT".
  */
 export function overtimeBalanceMs(
     correction: OvertimeCorrection | null,
@@ -80,11 +81,9 @@ export function overtimeBalanceMs(
     let sum = offsetMs;
     for (let day = start; day <= today; day = addDays(day, 1)) {
         const range = localDayRange(day);
+        if (day === today && !hasGehen(counted, range, now)) break; // vor dem ersten Gehen zählt heute noch nicht
         const {workMs} = periodTotals(periods, range, now);
-        const target =
-            day < today || hasGehen(counted, range, now)
-                ? targetMs(day, vacations, holidays, sickLeaves, trackingStart, soll)
-                : 0; // vor dem ersten Gehen zählt das Soll von heute noch nicht
+        const target = targetMs(day, vacations, holidays, sickLeaves, trackingStart, soll);
         sum += dayDiffMs(day, today, workMs, target) ?? 0;
     }
     return sum;
