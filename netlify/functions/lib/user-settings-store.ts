@@ -6,7 +6,15 @@ import {db} from "./db";
 import {userSettings, userSettingValues} from "../../../db/schema";
 import {localDay} from "@shared/time-rules";
 import type {UserSettingsData, UserSettingValueCreate, UserSettingValueUpdate} from "@shared/user-setting";
-import {checkChange, checkDelete, checkSettingValue, historyOf, type SettingHistory} from "@shared/user-setting-rules";
+import {
+    checkChange,
+    checkDelete,
+    checkImmediateEdit,
+    checkSettingValue,
+    historyOf,
+    isImmediate,
+    type SettingHistory,
+} from "@shared/user-setting-rules";
 import {RuleError} from "./rule-error";
 import {lockUser} from "./lock-user";
 
@@ -51,9 +59,12 @@ const valuesOf = (tx: Tx, userId: string, settingId: string) =>
 
 const today = () => localDay(new Date());
 
-/** Legt einen neuen Wert an (Regeln 3 bis 6) und liefert ihn zurück */
+/**
+ * Legt einen neuen Wert an (Regeln 3 bis 6) und liefert ihn zurück. Bei einer Einstellung ohne Historie
+ * (immediately) wird der vorhandene Wert des Users überschrieben, er gilt ab heute.
+ */
 export async function addSettingValue(userId: string, input: UserSettingValueCreate) {
-    const id = randomUUID();
+    let id: string = randomUUID();
     await db.transaction(async (tx) => {
         // Damit zwei Werte nicht gleichzeitig als "erster eigener Wert" rückwirkend eingetragen werden (Regel 3)
         await lockUser(tx, userId);
@@ -62,7 +73,22 @@ export async function addSettingValue(userId: string, input: UserSettingValueCre
         const history = historyOf({settings: [setting], values: await valuesOf(tx, userId, setting.id)}, setting.id);
         const problem = checkSettingValue(setting, history.values, input, today());
         if (problem) throw new RuleError(problem);
-        await tx.insert(userSettingValues).values({id, userId, ...input, value: input.value?.trim() ?? null});
+        const value = input.value?.trim() ?? null;
+
+        if (isImmediate(setting)) {
+            const [existing] = history.values;
+            if (existing) {
+                id = existing.id;
+                await tx.update(userSettingValues).set({value, validFrom: today()}).where(eq(userSettingValues.id, id));
+                return;
+            }
+            await tx.insert(userSettingValues).values({id, userId, settingId: setting.id, value, validFrom: today()});
+            return;
+        }
+        // validFrom fehlt hier nicht, das prüft checkSettingValue
+        await tx
+            .insert(userSettingValues)
+            .values({id, userId, settingId: setting.id, value, validFrom: input.validFrom!});
     });
     return (await getValue(db, id))!;
 }
@@ -76,7 +102,7 @@ export async function changeSettingValue(userId: string, id: string, patch: User
         const setting = (await getSetting(tx, current.settingId))!;
         const history = historyOf({settings: [setting], values: await valuesOf(tx, userId, setting.id)}, setting.id);
 
-        const changeProblem = checkChange(history, current.validFrom, today());
+        const changeProblem = checkImmediateEdit(setting) ?? checkChange(history, current.validFrom, today());
         if (changeProblem) throw new RuleError(changeProblem);
 
         // Wurde nur ein Feld gesendet, gilt für das andere der gespeicherte Wert. null ist ein Wert („Default“).
@@ -101,11 +127,9 @@ export async function deleteSettingValue(userId: string, id: string) {
     await db.transaction(async (tx) => {
         const current = await getValue(tx, id);
         if (current?.userId !== userId) throw new SettingNotFoundError();
-        const history = historyOf(
-            {settings: [], values: await valuesOf(tx, userId, current.settingId)},
-            current.settingId,
-        );
-        const problem = checkDelete(history, current.validFrom, today());
+        const setting = (await getSetting(tx, current.settingId))!;
+        const history = historyOf({settings: [], values: await valuesOf(tx, userId, setting.id)}, setting.id);
+        const problem = checkImmediateEdit(setting) ?? checkDelete(history, current.validFrom, today());
         if (problem) throw new RuleError(problem);
         await tx.delete(userSettingValues).where(eq(userSettingValues.id, id));
     });

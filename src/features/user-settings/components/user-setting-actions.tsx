@@ -1,7 +1,10 @@
 import {formatDay} from "@shared/format";
+import {isImmediate} from "@shared/user-setting-rules";
+import {Button} from "@/components/ui/button";
 import {UserSettingDialog} from "@features/user-settings/components/user-setting-dialog";
 import type {UserSettingRow} from "@features/user-settings/use-cases/use-show-user-settings";
 import {useDeleteUserSetting} from "@features/user-settings/use-cases/use-delete-user-setting";
+import {useAddUserSetting} from "@features/user-settings/use-cases/use-add-user-setting";
 import {ErrorText} from "@/components/text/error-text";
 import {ConfirmDeleteButton} from "@/components/buttons/confirm-delete-button";
 
@@ -12,6 +15,8 @@ import {ConfirmDeleteButton} from "@/components/buttons/confirm-delete-button";
 export function UserSettingActions({row}: {row: UserSettingRow}) {
     const remove = useDeleteUserSetting();
     const {setting, value, status} = row;
+
+    if (isImmediate(setting)) return <ImmediateSettingActions row={row} />;
 
     if (status === "aktuell") {
         const ownValue = value?.value ?? null; // null: es gilt der Default
@@ -50,6 +55,32 @@ export function UserSettingActions({row}: {row: UserSettingRow}) {
             </div>
 
             {remove.error && <ErrorText className="text-right">{remove.error.message}</ErrorText>}
+        </div>
+    );
+}
+
+/** Einstellung ohne Historie: Ändern und Zurücksetzen gelten sofort, ohne „gültig ab“ */
+function ImmediateSettingActions({row}: {row: UserSettingRow}) {
+    const add = useAddUserSetting();
+    const {setting} = row;
+    const ownValue = row.value?.value ?? null; // null: es gilt der Default
+
+    return (
+        <div className="space-y-1">
+            <div className="flex flex-wrap justify-end gap-2">
+                <UserSettingDialog setting={setting} initialValue={ownValue ?? setting.defaultValue} label="Ändern" />
+                {/* Gilt schon der Default, gibt es nichts zurückzusetzen */}
+                <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={!add.currentUser || ownValue === null || add.isSaving}
+                    onClick={() => add.add({setting, value: null})}
+                >
+                    Auf Default zurücksetzen
+                </Button>
+            </div>
+
+            {add.error && <ErrorText className="text-right">{add.error.message}</ErrorText>}
         </div>
     );
 }

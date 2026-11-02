@@ -416,6 +416,23 @@ wt_step "'vitest' ändert den geplanten Wert" 200 '"value":"7"' PATCH "$SET/$PLA
 wt_step "'vitest' sieht keine fremden Einstellungen" 403 "notwendigen Rechte" GET "/api/users/$ADMIN_ID/settings"
 wt_step "'vitest' löscht den geplanten Wert" 204 "" DELETE "$SET/$PLANNED"
 
+# show_action_bar hat keine Historie: ohne validFrom, ein zweiter Wert überschreibt den ersten
+BAR_ID="e2e48edb-c612-466e-a886-03c72466e4f3"
+wt_step "'vitest' blendet die Action-Bar aus" 201 '"value":"false"' POST "$SET" \
+  "{\"settingId\":\"$BAR_ID\",\"value\":\"false\"}"
+BAR_VALUE=$(wt_id "$WT_BODY")
+wt_step "Ein zweiter Wert überschreibt den ersten" 201 "\"id\":\"$BAR_VALUE\"" POST "$SET" \
+  "{\"settingId\":\"$BAR_ID\",\"value\":\"true\"}"
+wt_step "show_action_bar nur true oder false" 422 "true oder false" POST "$SET" \
+  "{\"settingId\":\"$BAR_ID\",\"value\":\"ja\"}"
+wt_step "show_action_bar lässt sich nicht bearbeiten" 422 "neuen Wert eintragen" PATCH "$SET/$BAR_VALUE" '{"value":"false"}'
+wt_step "show_action_bar lässt sich nicht löschen" 422 "neuen Wert eintragen" DELETE "$SET/$BAR_VALUE"
+wt_step "show_action_bar auf den Default zurücksetzen" 201 '"value":null' POST "$SET" \
+  "{\"settingId\":\"$BAR_ID\",\"value\":null}"
+wt_step "Ein zweites Mal gilt schon der Default" 422 "schon der Default" POST "$SET" \
+  "{\"settingId\":\"$BAR_ID\",\"value\":null}"
+wt_step "Soll ohne gültig ab wird abgelehnt" 422 "gültig ab" POST "$SET" "{\"settingId\":\"$SOLL_ID\",\"value\":\"6\"}"
+
 wt_step "'vitest' sieht die eigenen Buchungen" 200 "\"id\":\"$KOMMEN1\"" GET "$ENTRY"
 wt_step "'vitest' sieht eine eigene Buchung" 200 "\"id\":\"$KOMMEN1\"" GET "$ENTRY/$KOMMEN1"
 wt_step "'vitest' sieht keine fremden Buchungen" 403 "notwendigen Rechte" GET "$ADMIN_ENTRY"
@@ -598,11 +615,16 @@ WT_TOKEN=""
 mcp_step "list_user_settings zeigt das Soll" "$MCP_TOKEN" '"name":"Soll"' list_user_settings
 mcp_step "set_user_setting plant ein Soll" "$MCP_TOKEN" 'Gespeichert' set_user_setting \
   '{"name":"Soll","value":6,"validFrom":"2099-03-01"}'
-MCP_PLANNED=$(wt_id "$WT_BODY") # der einzige eigene Wert, list_user_settings hat sonst keine String-IDs
+# Die ID des geplanten Solls, show_action_bar hat schon einen eigenen Wert
+MCP_PLANNED=$(printf '%s' "$WT_BODY" | grep -o '"id":"[^"]*","value":6,"validFrom":"2099-03-01"' | head -1 | cut -d'"' -f4)
 mcp_error_step "set_user_setting mit unbekannter Einstellung" "$MCP_TOKEN" 'Unbekannte Einstellung' set_user_setting \
   '{"name":"Gibtsnicht","value":1,"validFrom":"2099-03-01"}'
 mcp_step "delete_user_setting löscht den geplanten Wert" "$MCP_TOKEN" 'Gelöscht' delete_user_setting \
   "{\"id\":\"$MCP_PLANNED\"}"
+mcp_step "set_user_setting blendet die Action-Bar aus" "$MCP_TOKEN" '| show_action_bar | Nein |' set_user_setting \
+  '{"name":"show_action_bar","value":false}'
+mcp_step "set_user_setting überschreibt show_action_bar" "$MCP_TOKEN" '| show_action_bar | Ja |' set_user_setting \
+  '{"name":"show_action_bar","value":true}'
 
 mcp_step "stamp Kommen" "$MCP_TOKEN" '"type":"kommen"' stamp '{"type":"kommen"}'
 STAMP_ID=$(wt_id "$WT_BODY")

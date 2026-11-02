@@ -13,7 +13,7 @@ export const persister = createAsyncStoragePersister({
 export const persistOptions = {
     persister, // dein bestehender localStorage-Persister
     maxAge: DAY,
-    buster: "2", // erhöhen, wenn sich das Datenformat ändert
+    buster: "3", // erhöhen, wenn sich das Datenformat ändert
     dehydrateOptions: {
         // Den Anmeldestatus nie aus dem Speicher übernehmen, sondern immer beim Server erfragen
         shouldDehydrateQuery: (query: Parameters<typeof defaultShouldDehydrateQuery>[0]) =>

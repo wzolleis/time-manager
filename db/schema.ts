@@ -59,10 +59,10 @@ export const userSettings = mysqlTable("user_settings", {
     id: char("id", {length: 36}).primaryKey(),
     name: varchar("name", {length: 50}).notNull().unique(),
     description: varchar("description", {length: 500}).notNull(),
-    type: mysqlEnum("type", ["number", "string"]).notNull(),
+    type: mysqlEnum("type", ["number", "string", "boolean"]).notNull(),
     unit: mysqlEnum("unit", ["hour", "day"]),
     defaultValue: varchar("default_value", {length: 100}).notNull(), // gilt, solange der User keinen Wert hat
-    validFromUnit: mysqlEnum("valid_from_unit", ["day", "year"]).notNull(), // year: gültig ab einem 1. Januar
+    validFromUnit: mysqlEnum("valid_from_unit", ["day", "year", "immediately"]).notNull(), // year: gültig ab einem 1. Januar; immediately: ein Wert ohne Historie, gilt sofort
 });
 
 // Werte eines Users zu einer Einstellung. Jeder Wert gilt ab valid_from bis zum Tag vor dem nächsten Wert.
