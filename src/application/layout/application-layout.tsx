@@ -4,6 +4,7 @@ import Content from "@/application/layout/content";
 import {Header} from "@/application/layout/header";
 import {navItemsOf} from "@/application/navigation/nav-items";
 import {Sidebar} from "@/application/layout/sidebar";
+import {Toaster} from "@/components/ui/sonner";
 
 export default function ApplicationLayout(): React.JSX.Element {
     return (
@@ -24,6 +25,10 @@ export default function ApplicationLayout(): React.JSX.Element {
                     <Content />
                 </div>
             </div>
+
+            {/* Meldungen, die nach dem Schließen eines Dialogs kommen, z. B. ein abgelehnter Optimistic Write */}
+            {/* theme fest auf hell: die App hat keinen Dark Mode, "system" würde sonst dunkle Toasts zeigen */}
+            <Toaster theme="light" richColors position="top-center" />
         </div>
     );
 }

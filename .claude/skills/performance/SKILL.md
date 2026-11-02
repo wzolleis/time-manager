@@ -33,13 +33,15 @@ Dieser Skill wiederholt sie nicht, sondern sagt, was davon für die Performance 
 
 # Schreiben
 
-Heute gilt `repository.md`: Nach dem Schreiben werden die betroffenen Daten mit `invalidateQueries` ungültig
+Für alle Aggregate außer Buchungen gilt `repository.md`: Nach dem Schreiben werden die betroffenen Daten mit `invalidateQueries` ungültig
 gemacht und neu geladen. Die Änderung erscheint, sobald der Server geantwortet hat.
 
-## Optimistic Write (noch nicht umgesetzt)
+## Optimistic Write
 
-Die UI zeigt die Änderung sofort und wartet nicht auf den Server. Das gibt es noch nicht im Code und wird noch
-verfeinert. **Nur nach Absprache mit dem User einsetzen.**
+Die UI zeigt die Änderung sofort und wartet nicht auf den Server. Umgesetzt für Buchungen (Stempeln,
+Zeitstempel nachtragen, Ändern, Löschen), siehe `features/changes/optimistic-write-time-entries.md` und
+`src/features/reports/time-entries-cache.ts`. **Für weitere Aggregate nur nach Absprache mit dem User
+einsetzen.**
 
 - Die UI prüft vor dem Absenden dieselben Regeln aus `shared/` wie der Server (z. B. `checkVacation`,
   `checkSequence`). Der Server prüft sie noch einmal, weil das Backend auch über MCP und REST erreichbar ist.
@@ -49,7 +51,9 @@ verfeinert. **Nur nach Absprache mit dem User einsetzen.**
 - Muster mit tanstack-query: `onMutate` hält laufende Abfragen an (`cancelQueries`), merkt sich den alten
   Stand und setzt den neuen (`setQueryData`). `onError` stellt den alten Stand wieder her und zeigt den Fehler.
   `onSettled` lädt die Daten neu (`invalidateQueries`).
-- Wird es eingeführt, muss `architecture/repository.md` mitgeändert werden.
+- Fehler erscheinen als Toast über `notifyError` aus `src/lib/notify.ts` (`<Toaster />` in
+  `application-layout.tsx`), weil der Dialog dann schon geschlossen ist. Sonner nicht direkt importieren.
+- Eine neue Buchung hat bis zur Antwort eine vorläufige Id, Ändern und Löschen sind für sie gesperrt.
 
 # Backend
 
@@ -65,15 +69,15 @@ Beim Aufnehmen einer neuen Dependency oder einer neuen Version einer Dependency:
 
 - `npm run build` vorher und nachher vergleichen: Wird der Haupt-Chunk oder das CSS deutlich größer?
 - Keine zweite Bibliothek für dasselbe Thema, z. B. kein Luxon neben Temporal.
-- Vorhandene Pakete bevorzugen (Temporal, zod, `cn`, shadcn mit `radix-ui`). Radix Themes wurde entfernt und
+- Vorhandene Pakete bevorzugen (Temporal, zod, `cn`, shadcn mit `radix-ui`, Sonner für Toasts). Radix Themes wurde entfernt und
   kommt nicht wieder: Es lädt seine ganze CSS und bringt ein zweites Design-System neben Tailwind.
 
 # Ladezeit beim Start
 
 Der heutige Ablauf beim Öffnen der App:
 
-1. Der Browser lädt `index.html`, den Haupt-Chunk und das CSS. Stand 02.11.2026: JavaScript 456 kB
-   (145 kB gzip), CSS 60 kB (11 kB gzip).
+1. Der Browser lädt `index.html`, den Haupt-Chunk und das CSS. Stand 02.11.2026: JavaScript 492 kB
+   (155 kB gzip), CSS 60 kB (11 kB gzip). Sonner mit `next-themes` brachte davon 36 kB (10 kB gzip).
 2. Der Cache aus dem localStorage steht sofort zur Verfügung, gespeicherte Daten erscheinen ohne Request.
 3. Der angemeldete User (`/api/auth/me`) wird nie aus dem Cache genommen, sondern immer beim Server erfragt.
    Bis zur Antwort zeigt `UserProvider` „Laden“.

@@ -1,10 +1,11 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {type Day, toTimeOfDay} from "@shared/date-schemas";
-import {toBooking, updateTimeEntry} from "@/api/time-entries";
+import {type TimeEntryDto, toBooking, updateTimeEntry} from "@/api/time-entries";
 import {formatTime} from "@shared/format";
 import {useCurrentUser} from "@/lib/user-context";
 import {useSickLeaves} from "@/views/sick-leaves";
 import {useTimeEntries} from "@/views/time-entries";
+import {optimisticTimeEntries, withChanged} from "@features/reports/time-entries-cache";
 import {localTimeToUtc} from "@shared/day-range";
 import {isSickDay, sickDayMessage} from "@shared/sick-leave-rules";
 import type {TimeEntryUpdate} from "@shared/time-entry";
@@ -26,6 +27,25 @@ const changedBookedAt = (entry: Entry, time: string): Date | null => {
     return !valid || time === formatTime(entry.bookedAt) ? null : localTimeToUtc(localDay(entry.bookedAt), valid);
 };
 
+// Nur Geändertes, leer: nichts zu tun
+const patchOf = ({entry, time, projectId}: Change): TimeEntryUpdate => {
+    const patch: TimeEntryUpdate = {};
+    const bookedAt = changedBookedAt(entry, time);
+    if (bookedAt) patch.bookedAt = bookedAt;
+    const newProject = entry.type === "kommen" ? projectId : null;
+    if (newProject !== entry.projectId) patch.projectId = newProject;
+    return patch;
+};
+
+// Die Buchungen mit der Änderung, für den Cache und die Prüfung der Abfolge
+const applyChange = (list: TimeEntryDto[], change: Change) => {
+    const {bookedAt, projectId} = patchOf(change);
+    return withChanged(list, change.entry.id, {
+        ...(bookedAt && {bookedAt: bookedAt.toISOString()}),
+        ...(projectId !== undefined && {projectId}),
+    });
+};
+
 /** Der User ändert Uhrzeit oder Projekt einer Buchung */
 export function useChangeTimeEntry() {
     const {currentUser} = useCurrentUser();
@@ -34,25 +54,19 @@ export function useChangeTimeEntry() {
     const sickLeaves = useSickLeaves(currentUser?.id); // für den Hinweis an Krankheitstagen
 
     const save = useMutation({
-        mutationFn: async ({entry, time, projectId}: Change) => {
-            // Nur Geändertes senden
-            const patch: TimeEntryUpdate = {};
-            const bookedAt = changedBookedAt(entry, time);
-            if (bookedAt) patch.bookedAt = bookedAt;
-            const newProject = entry.type === "kommen" ? projectId : null;
-            if (newProject !== entry.projectId) patch.projectId = newProject;
+        mutationFn: async (change: Change) => {
+            const patch = patchOf(change);
             if (Object.keys(patch).length === 0) return;
-            await updateTimeEntry(currentUser!.id, entry.id, patch);
+            await updateTimeEntry(currentUser!.id, change.entry.id, patch);
         },
-        onSuccess: () => qc.invalidateQueries({queryKey: ["time-entries"]}),
+        ...optimisticTimeEntries(qc, currentUser?.id, applyChange),
     });
 
     /** Service, null = alles in Ordnung. Ohne neue Uhrzeit gibt es nichts zu prüfen. */
     const problem = ({entry, time}: Pick<Change, "entry" | "time">) => {
-        const bookedAt = time ? changedBookedAt(entry, time) : null;
-        if (!bookedAt) return null;
-        const bookings = (entries.data ?? []).map(toBooking);
-        return checkSequence(bookings.map((b) => (b.id === entry.id ? {...b, bookedAt} : b)));
+        if (!time || !changedBookedAt(entry, time)) return null;
+        const changed = applyChange(entries.data ?? [], {entry, time, projectId: entry.projectId});
+        return checkSequence(changed.map(toBooking));
     };
 
     return {
@@ -60,8 +74,5 @@ export function useChangeTimeEntry() {
         // Hinweis, wenn der Tag ("JJJJ-MM-TT") ein Krankheitstag ist. Speichern bleibt möglich.
         sickNotice: (day: Day) => (isSickDay(day, sickLeaves.data ?? []) ? sickDayMessage(day) : null),
         change: save.mutate,
-        isSaving: save.isPending,
-        error: save.error,
-        reset: save.reset,
     };
 }

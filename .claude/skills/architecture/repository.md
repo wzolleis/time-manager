@@ -74,6 +74,14 @@ Regeln:
 - **Fehler anzeigen, nicht abfangen.** Die Komponente zeigt `mutation.error.message` an (`role="alert"`). Beim erneuten
   Öffnen eines Dialogs ruft sie `mutation.reset()` auf, damit die
   alte Meldung verschwindet.
+- **Ausnahme Buchungen: Optimistic Write.** Stempeln, Nachtragen eines Zeitstempels, Ändern und Löschen
+  einer Buchung schreiben den neuen Stand sofort in den Cache, bevor der Server antwortet. Die Optionen
+  dafür liefert `optimisticTimeEntries` aus `src/features/reports/time-entries-cache.ts`: `onMutate`
+  setzt den neuen Stand, `onError` stellt den alten wieder her und zeigt den Fehler als Toast
+  (`notifyError` aus `src/lib/notify.ts`), `onSettled` invalidiert `["time-entries"]` nach Erfolg und Fehler. Der
+  Dialog schließt direkt nach `mutate` und zeigt keinen Fehler. Eine neue Buchung hat bis zur Antwort
+  eine vorläufige Id (`isOptimistic`), Ändern und Löschen sind für sie gesperrt. Andere Aggregate nur
+  nach Absprache mit dem User (Skill `performance`).
 - **401 nicht selbst behandeln.** Das erledigt `onError` im `MutationCache` (`src/query-client.ts`)
   und zeigt die Anmeldung. 403, 409 und 422 kommen mit verständlicher Meldung vom Server und werden
   wie jeder andere Fehler angezeigt.

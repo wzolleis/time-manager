@@ -2,7 +2,8 @@ import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {deleteTimeEntry, toBooking} from "@/api/time-entries";
 import {useCurrentUser} from "@/lib/user-context";
 import {useTimeEntries} from "@/views/time-entries";
-import {checkSequence, findPartner} from "@shared/time-rules";
+import {checkSequence} from "@shared/time-rules";
+import {optimisticTimeEntries, withRemoved} from "@features/reports/time-entries-cache";
 
 type Deletion = {id: string; pair: boolean}; // pair: das Gegenstück wird mit gelöscht
 
@@ -14,21 +15,14 @@ export function useDeleteTimeEntry() {
 
     const remove = useMutation({
         mutationFn: ({id, pair}: Deletion) => deleteTimeEntry(currentUser!.id, id, pair),
-        onSuccess: () => qc.invalidateQueries({queryKey: ["time-entries"]}),
+        ...optimisticTimeEntries(qc, currentUser?.id, (list, {id, pair}: Deletion) => withRemoved(list, id, pair)),
     });
 
     /** Service, null = alles in Ordnung */
-    const problem = ({id, pair}: Deletion) => {
-        const bookings = (entries.data ?? []).map(toBooking);
-        const partner = pair ? findPartner(bookings, id) : null;
-        return checkSequence(bookings.filter((b) => b.id !== id && b.id !== partner?.id));
-    };
+    const problem = ({id, pair}: Deletion) => checkSequence(withRemoved(entries.data ?? [], id, pair).map(toBooking));
 
     return {
         problem,
         remove: remove.mutate,
-        isDeleting: remove.isPending,
-        error: remove.error,
-        reset: remove.reset,
     };
 }
