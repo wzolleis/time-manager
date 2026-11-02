@@ -3,7 +3,7 @@ import {type DayRange, localDayRange} from "./day-range";
 import {type HolidayRange, holidayOn} from "./holiday-rules";
 import {withoutSickDays} from "./sick-leave-rules";
 import {dayKind, type DayKind, targetMs} from "./target-hours";
-import {type Booking, buildPeriods, firstBookingDay} from "./time-rules";
+import {type Booking, buildPeriods, firstBookingDay, type Period} from "./time-rules";
 import type {SettingHistory} from "./user-setting-rules";
 import {monthWeeks, yearMonths} from "./week";
 
@@ -14,15 +14,26 @@ export type DayTotals = {
     missingGehen: boolean; // an diesem vergangenen Tag fehlt das gehen
 };
 
+export type CountedPeriods = {work: Period[]; breaks: Period[]};
+
+/**
+ * Arbeitszeiten und Pausen aller Buchungen ohne die an Krankheitstagen. Einmal aufbauen und für jeden Tag mit
+ * periodTotals auswerten: pro Tag neu aufgebaut wächst die Rechenzeit mit Tagen × Buchungen.
+ */
+export const countedPeriods = (entries: Booking[], sickLeaves: DayRange[]): CountedPeriods =>
+    // Ein Buchungspaar liegt immer an einem Tag, die Abfolge bleibt ohne die Krankheitstage gültig
+    buildPeriods(withoutSickDays(entries, sickLeaves));
+
 /** Summen eines Tages. Buchungen an Krankheitstagen zählen nicht, auch keine laufende Arbeitszeit. */
-export function dayTotals(
+export const dayTotals = (
     entries: Booking[],
     range: {start: Date; end: Date},
     sickLeaves: DayRange[],
     now: Date,
-): DayTotals {
-    // Ein Buchungspaar liegt immer an einem Tag, die Abfolge bleibt ohne die Krankheitstage gültig
-    const {work, breaks} = buildPeriods(withoutSickDays(entries, sickLeaves));
+): DayTotals => periodTotals(countedPeriods(entries, sickLeaves), range, now);
+
+/** Summen eines Tages aus den Zeiträumen von countedPeriods */
+export function periodTotals({work, breaks}: CountedPeriods, range: {start: Date; end: Date}, now: Date): DayTotals {
     const start = range.start.getTime();
     const end = range.end.getTime();
     const nowMs = now.getTime();
@@ -80,7 +91,10 @@ export type WeekTotals = {
     diffMs: number; // gegen das Soll bis heute, damit die Differenz mitten in der Woche aussagekräftig ist
 };
 
-/** Summen je Tag und für die ganze Woche. today ist der heutige Tag "JJJJ-MM-TT" */
+/**
+ * Summen je Tag und für die ganze Woche. today ist der heutige Tag "JJJJ-MM-TT". periods übergeben Monat und
+ * Jahr, damit die Zeiträume nur einmal aufgebaut werden.
+ */
 export function weekTotals(
     entries: Booking[],
     days: Day[],
@@ -90,12 +104,13 @@ export function weekTotals(
     soll: SettingHistory,
     today: Day,
     now: Date,
+    // Alle Buchungen gehen in die Summen ein, damit Nachtschichten am Tageswechsel stimmen
+    periods: CountedPeriods = countedPeriods(entries, sickLeaves),
 ): WeekTotals {
     const trackingStart = firstBookingDay(entries); // mit allen Buchungen, auch denen an Krankheitstagen
     const rows: WeekDayTotals[] = days.map((day) => {
         const range = localDayRange(day);
-        // Alle Buchungen gehen in die Summen ein, damit Nachtschichten am Tageswechsel stimmen
-        const totals = dayTotals(entries, range, sickLeaves, now);
+        const totals = periodTotals(periods, range, now);
         const target = targetMs(day, vacations, holidays, sickLeaves, trackingStart, soll);
 
         return {
@@ -159,9 +174,10 @@ export function monthTotals(
     soll: SettingHistory,
     today: Day,
     now: Date,
+    periods: CountedPeriods = countedPeriods(entries, sickLeaves),
 ): MonthTotals {
     const parts = monthWeeks(month).map(({year, week, days}) => {
-        const t = weekTotals(entries, days, vacations, holidays, sickLeaves, soll, today, now);
+        const t = weekTotals(entries, days, vacations, holidays, sickLeaves, soll, today, now, periods);
         const row: MonthWeekTotals = {
             year,
             week,
@@ -219,8 +235,9 @@ export function yearTotals(
     today: Day,
     now: Date,
 ): YearTotals {
+    const periods = countedPeriods(entries, sickLeaves);
     const parts = yearMonths(year).map((month) => {
-        const t = monthTotals(entries, month, vacations, holidays, sickLeaves, soll, today, now);
+        const t = monthTotals(entries, month, vacations, holidays, sickLeaves, soll, today, now, periods);
         const row: YearMonthTotals = {
             month,
             targetMs: t.targetMonthMs,

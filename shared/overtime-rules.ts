@@ -3,7 +3,7 @@ import {addDays, type DayRange, localDayRange, startOfLocalDay} from "./day-rang
 import {industrialHours, type TimeFormat} from "./format";
 import type {HolidayRange} from "./holiday-rules";
 import {targetMs} from "./target-hours";
-import {dayDiffMs, dayTotals} from "./time-report";
+import {countedPeriods, dayDiffMs, periodTotals} from "./time-report";
 import {type Booking, firstBookingDay, localDay} from "./time-rules";
 import type {SettingHistory} from "./user-setting-rules";
 
@@ -75,11 +75,12 @@ export function overtimeBalanceMs(
     // Ein Buchungspaar liegt immer an einem Tag, die Buchungen vor dem Start fallen also ganz weg
     const from = startOfLocalDay(start);
     const counted = entries.filter((e) => e.bookedAt >= from);
+    const periods = countedPeriods(counted, sickLeaves);
 
     let sum = offsetMs;
     for (let day = start; day <= today; day = addDays(day, 1)) {
         const range = localDayRange(day);
-        const {workMs} = dayTotals(counted, range, sickLeaves, now);
+        const {workMs} = periodTotals(periods, range, now);
         const target =
             day < today || hasGehen(counted, range, now)
                 ? targetMs(day, vacations, holidays, sickLeaves, trackingStart, soll)
