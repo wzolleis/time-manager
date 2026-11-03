@@ -3,15 +3,17 @@ import React from "react";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {
     DropdownMenu,
+    DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {Info, KeyRound, LogOut, User as UserIcon, type LucideIcon} from "lucide-react";
+import {Factory, Info, KeyRound, LogOut, User as UserIcon, type LucideIcon} from "lucide-react";
 import {findNavigationItem} from "@/application/navigation/nav-utils";
 import type {NavItem} from "@/application/navigation/nav-items";
 import type {User} from "@shared/user";
+import {useIndustrialTime} from "@/lib/use-time-format";
 
 // Interface für die Component Props
 interface UserDropdownProps {
@@ -47,6 +49,7 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
     fallbackInitials = fallbackInitials.substring(0, 1);
 
     const settingsNavItem = findNavigationItem("user-settings");
+    const [industrialTime, setIndustrialTime] = useIndustrialTime();
 
     return (
         <DropdownMenu>
@@ -71,6 +74,10 @@ export const UserDropdown: React.FC<UserDropdownProps> = ({
                     label={settingsNavItem.label}
                     onClick={() => onItemSelected(settingsNavItem)}
                 />
+                {/* Anzeige der Dauern: Häkchen = Industriezeit (8,50 h), sonst Stunden und Minuten */}
+                <DropdownMenuCheckboxItem checked={industrialTime} onCheckedChange={setIndustrialTime}>
+                    <Factory /> Industriezeit
+                </DropdownMenuCheckboxItem>
                 <MenuItem icon={KeyRound} label="Passwort ändern" onClick={onChangePassword} />
                 <MenuItem icon={Info} label="Version" onClick={onShowVersion} />
                 <DropdownMenuSeparator />

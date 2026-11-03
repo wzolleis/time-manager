@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-// Use Case features/use-case/industriezeit.md: Umschalten mit dem Button im Kopf
+// Use Case features/use-case/industriezeit.md: Umschalten im Benutzermenü
 import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 import {cleanup, fireEvent, render, screen} from "@testing-library/react";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
@@ -84,36 +84,41 @@ afterEach(() => {
 
 const DAY = "/user/reports/daily/2026-03-02";
 
-async function toggle(label: "60 min/h" | "Industriezeit") {
-    fireEvent.click(await screen.findByRole("button", {name: label}));
+// Öffnet das Benutzermenü (Radix öffnet in jsdom über die Tastatur) und liefert den Eintrag Industriezeit
+async function openIndustrialTimeItem() {
+    fireEvent.keyDown(await screen.findByRole("button", {name: "Benutzermenü"}), {key: "Enter"});
+    return screen.findByRole("menuitemcheckbox", {name: "Industriezeit"});
+}
+
+async function toggle() {
+    fireEvent.click(await openIndustrialTimeItem());
 }
 
 describe("Industriezeit", () => {
-    it("zeigt ohne Einstellung Stunden und Minuten und im Kopf „60 min/h“", async () => {
+    it("zeigt ohne Einstellung Stunden und Minuten, im Benutzermenü ist Industriezeit nicht angehakt", async () => {
         renderPage(DAY);
         expect(await screen.findByText("8 Std 30 Min")).toBeTruthy();
         expect(screen.getByText("+30 Min")).toBeTruthy();
-        expect(screen.getByRole("button", {name: "60 min/h"})).toBeTruthy();
+        expect((await openIndustrialTimeItem()).getAttribute("aria-checked")).toBe("false");
     });
 
-    it("schaltet mit dem Button im Kopf hin und zurück, der Button zeigt den aktuellen Zustand", async () => {
+    it("schaltet im Benutzermenü hin und zurück, das Häkchen zeigt den aktuellen Zustand", async () => {
         renderPage(DAY);
         await screen.findByText("8 Std 30 Min");
-        await toggle("60 min/h");
+        await toggle();
         expect(await screen.findByText("8,50 h")).toBeTruthy();
         expect(screen.getByText("+0,50 h")).toBeTruthy();
         expect(screen.getByText("8,00 h")).toBeTruthy(); // Soll
-        expect(screen.queryByRole("button", {name: "60 min/h"})).toBeNull();
+        expect((await openIndustrialTimeItem()).getAttribute("aria-checked")).toBe("true");
 
-        await toggle("Industriezeit");
+        fireEvent.click(screen.getByRole("menuitemcheckbox", {name: "Industriezeit"}));
         expect(await screen.findByText("8 Std 30 Min")).toBeTruthy();
-        expect(screen.getByRole("button", {name: "60 min/h"})).toBeTruthy();
     });
 
     it("bleibt nach erneutem Rendern aktiv, pro User", async () => {
         renderPage(DAY);
         await screen.findByText("8 Std 30 Min");
-        await toggle("60 min/h");
+        await toggle();
         await screen.findByText("8,50 h");
         cleanup();
 

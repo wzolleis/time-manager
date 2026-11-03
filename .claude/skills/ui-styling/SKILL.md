@@ -37,6 +37,28 @@ gehört (`src/components/<art>/` oder `src/features/<feature>/components/`), ent
    Wiederholungen herauslösen (Regel 4). Das gilt, wenn die Komponente ohnehin geändert wird oder wenn der User
    eine Untersuchung des Codes nach diesem Skill verlangt.
 
+# Eigene Komponenten bauen
+
+Die Komponenten in `src/components/<art>/` sind eine zweite Schicht über shadcn. shadcn liefert offene Bausteine
+(`Dialog`, `DialogTrigger`, `DialogContent` …). Unsere Komponenten sind fertige Vorlagen, die Aussehen und Ablauf
+festlegen, damit Seiten gleich aussehen. Deshalb gelten diese Konventionen:
+
+1. **Vorlagen mit Properties.** Eine Komponente bekommt ihre Inhalte als Properties (`title`, `description`,
+   `label`, `icon` …), nicht als Teilkomponenten. Teilkomponenten wie bei shadcn nur, wenn eine Vorlage sonst zu
+   viele Sonder-Properties bräuchte.
+2. **Native Props durchreichen, `className` nicht.** Was das zugrunde liegende Element kennt (`id`, `aria-*`,
+   `data-*`, `disabled`, `onClick`, `ref` …), wird durchgereicht. `className` nur bei Layout-Komponenten wie `Page`,
+   `Muted` oder `ErrorText`, sonst kämen über die Hintertür wieder Klassen in die Seiten.
+3. **Dialoge verwalten selbst, ob sie offen sind.** Wie bei shadcn ist `open` optional. Zurücksetzen beim Öffnen
+   über `onOpen`, Schließen nach dem Speichern über `close`, das `onSubmit` bekommt:
+   `mutate(data, {onSuccess: close})`. `open` und `onOpenChange` nur, wenn etwas anderes als der Trigger den
+   Dialog öffnet (z. B. ein Menüeintrag, `password-change-dialog.tsx`) oder der Aufrufer `open` braucht (z. B. um
+   Daten erst beim Öffnen zu laden, `user-roles-dialog.tsx`).
+4. **Trigger als Property `trigger`.** Ein Dialog bekommt den Button, der ihn öffnet, als `trigger={<Button …/>}`.
+   `children` ist immer der Inhalt, nie der Trigger.
+5. **Varianten ohne Klassen-Properties.** Keine Properties wie `valueClassName`. Eine Variante ist eine fachliche
+   Property (`variant`, `columns` …), die Komponente wählt die Klassen dazu.
+
 # Beispiele aus dem Projekt
 
 - `src/components/buttons/`: `edit-button.tsx` und `delete-button.tsx` sind Spezialisierungen von
@@ -44,7 +66,9 @@ gehört (`src/components/<art>/` oder `src/features/<feature>/components/`), ent
 - Bausteine, die vor einer neuen Komponente geprüft werden:
   - Seite: `src/components/page/page.tsx`, `src/components/page/page-header.tsx`
   - Formulare: `src/components/form/form-row.tsx`, `src/components/form/form-field.tsx`,
-    `src/components/form/edit-dialog.tsx`
+    `src/components/form/form-dialog.tsx`, `src/components/form/edit-dialog.tsx`
+  - Links: `src/components/text/text-link.tsx` (`TextLink`, `ExternalLink`)
+- `src/features/passkeys/components/passkey-add-dialog.tsx`: `FormDialog` ohne `open`, mit `onOpen` und `close`
   - Text: `src/components/text/muted.tsx`, `src/components/text/error-text.tsx`, `src/components/text/loading.tsx`
   - Kennzahlen: `src/components/cards/metric-card.tsx`, `src/components/cards/metric-grid.tsx`
   - Tabellen: `src/components/table/data-table.tsx`

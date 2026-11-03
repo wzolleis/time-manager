@@ -11,22 +11,20 @@ import {ActionButton} from "@/components/buttons/action-button";
 
 // Der Admin setzt ein neues Passwort, ohne das alte zu kennen
 export function PasswordResetDialog({user}: {user: User}) {
-    const [open, setOpen] = useState(false);
     const [password, setPassword] = useState("");
 
     const reset = useMutation({
         mutationFn: () => resetPassword({userId: user.id, password}),
-        onSuccess: () => setOpen(false),
     });
 
-    const handleOpenChange = (next: boolean) => {
+    // Beim Öffnen leeres Feld und keine alte Fehlermeldung
+    const clear = () => {
         setPassword("");
         reset.reset();
-        setOpen(next);
     };
 
-    const handleSubmit = () => {
-        reset.mutate();
+    const handleSubmit = (close: () => void) => {
+        reset.mutate(undefined, {onSuccess: close});
     };
 
     const fieldId = `reset-password-${user.id}`;
@@ -37,8 +35,7 @@ export function PasswordResetDialog({user}: {user: User}) {
             description={
                 <>Alle Anmeldungen von {user.name} werden beendet. Das neue Passwort teilst du dem User mit.</>
             }
-            open={open}
-            onOpenChange={handleOpenChange}
+            onOpen={clear}
             onSubmit={handleSubmit}
             saving={reset.isPending}
             submitLabel="Zurücksetzen"

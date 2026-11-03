@@ -22,7 +22,6 @@ type Props = {
 export function HolidayDialog({holiday, userId, userName, trigger}: Props) {
     const uid = useId();
 
-    const [open, setOpen] = useState(false);
     const [date, setDate] = useState("");
     const [name, setName] = useState("");
 
@@ -31,20 +30,17 @@ export function HolidayDialog({holiday, userId, userName, trigger}: Props) {
     const change = useChangeHoliday();
     const save = holiday ? change : add;
 
-    const submit = () => {
-        const close = {onSuccess: () => setOpen(false)};
+    const submit = (onClose: () => void) => {
+        const close = {onSuccess: onClose};
         if (holiday) change.change({holiday, date, name}, close);
         else add.add({userId, date, name}, close);
     };
 
     // Beim Öffnen immer mit den gespeicherten Werten bzw. mit heute starten
-    const handleOpenChange = (next: boolean) => {
-        if (next) {
-            setDate(holiday?.date ?? localDay(new Date()));
-            setName(holiday?.name ?? "");
-            save.reset();
-        }
-        setOpen(next);
+    const reset = () => {
+        setDate(holiday?.date ?? localDay(new Date()));
+        setName(holiday?.name ?? "");
+        save.reset();
     };
 
     const global = (holiday ? holiday.userId : userId) === null;
@@ -60,10 +56,9 @@ export function HolidayDialog({holiday, userId, userName, trigger}: Props) {
                     ist das Soll 0, im Urlaub verbraucht er keinen Urlaubstag.
                 </>
             }
-            open={open}
-            onOpenChange={handleOpenChange}
-            onSubmit={() => {
-                submit();
+            onOpen={reset}
+            onSubmit={(close) => {
+                submit(close);
             }}
             saving={save.isSaving}
             disabled={problem !== null}

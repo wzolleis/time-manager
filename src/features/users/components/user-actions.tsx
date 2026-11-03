@@ -14,17 +14,13 @@ import {EditButton} from "@/components/buttons/edit-button";
 /** Aktionen je Zeile: User bearbeiten, Rollen und Passwort setzen oder löschen */
 export function UserActions({user}: {user: User}) {
     const qc = useQueryClient();
-    const [open, setOpen] = useState(false);
     const [name, setName] = useState(user.name);
     const [email, setEmail] = useState(user.email);
     const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl ?? "");
 
     const update = useMutation({
         mutationFn: (data: UserUpdate) => updateUser(user.id, data),
-        onSuccess: async () => {
-            await qc.invalidateQueries({queryKey: ["users"]});
-            setOpen(false);
-        },
+        onSuccess: () => qc.invalidateQueries({queryKey: ["users"]}),
     });
 
     const remove = useMutation({
@@ -33,17 +29,14 @@ export function UserActions({user}: {user: User}) {
     });
 
     // Beim Öffnen immer mit den gespeicherten Werten starten
-    const handleOpenChange = (next: boolean) => {
-        if (next) {
-            setName(user.name);
-            setEmail(user.email);
-            setAvatarUrl(user.avatarUrl ?? "");
-            update.reset();
-        }
-        setOpen(next);
+    const reset = () => {
+        setName(user.name);
+        setEmail(user.email);
+        setAvatarUrl(user.avatarUrl ?? "");
+        update.reset();
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = (close: () => void) => {
         // Nur geänderte Felder senden; ein leeres Avatar-Feld entfernt den Avatar
         const patch: UserUpdate = {};
         if (name !== user.name) patch.name = name;
@@ -53,34 +46,20 @@ export function UserActions({user}: {user: User}) {
         }
 
         if (Object.keys(patch).length === 0) {
-            setOpen(false);
+            close();
             return;
         }
-        update.mutate(patch);
+        update.mutate(patch, {onSuccess: close});
     };
 
     const fieldId = (field: string) => `${field}-${user.id}`;
 
     return (
-        <>
-            <RowActions error={remove.error}>
-                <EditButton onClick={() => handleOpenChange(true)} />
-                <UserRolesDialog user={user} />
-                <PasswordResetDialog user={user} />
-
-                <ConfirmDeleteButton
-                    title={<>{user.name} löschen?</>}
-                    description="Der User wird dauerhaft aus der Datenbank entfernt. Das lässt sich nicht rückgängig machen."
-                    onConfirm={() => remove.mutate(user.id)}
-                    onOpen={() => remove.reset()}
-                    pending={remove.isPending}
-                />
-            </RowActions>
-
+        <RowActions error={remove.error}>
             <EditDialog
                 title="User bearbeiten"
-                open={open}
-                onOpenChange={handleOpenChange}
+                trigger={<EditButton />}
+                onOpen={reset}
                 onSubmit={handleSubmit}
                 saving={update.isPending}
                 error={update.error}
@@ -108,6 +87,16 @@ export function UserActions({user}: {user: User}) {
                     />
                 </FormField>
             </EditDialog>
-        </>
+            <UserRolesDialog user={user} />
+            <PasswordResetDialog user={user} />
+
+            <ConfirmDeleteButton
+                title={<>{user.name} löschen?</>}
+                description="Der User wird dauerhaft aus der Datenbank entfernt. Das lässt sich nicht rückgängig machen."
+                onConfirm={() => remove.mutate(user.id)}
+                onOpen={() => remove.reset()}
+                pending={remove.isPending}
+            />
+        </RowActions>
     );
 }

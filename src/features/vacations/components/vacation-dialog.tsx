@@ -21,25 +21,21 @@ export function VacationDialog({vacation, trigger}: Props) {
     const save = vacation ? change : add;
     const {currentUser} = save;
 
-    const [open, setOpen] = useState(false);
     const [start, setStart] = useState("");
     const [end, setEnd] = useState("");
 
-    const submit = () => {
-        const close = {onSuccess: () => setOpen(false)};
+    const submit = (onClose: () => void) => {
+        const close = {onSuccess: onClose};
         if (vacation) change.change({vacation, startDate: start, endDate: end}, close);
         else add.add({startDate: start, endDate: end}, close);
     };
 
     // Beim Öffnen immer mit den gespeicherten Werten bzw. mit heute starten
-    const handleOpenChange = (next: boolean) => {
-        if (next) {
-            const today = localDay(new Date());
-            setStart(vacation?.startDate ?? today);
-            setEnd(vacation?.endDate ?? today);
-            save.reset();
-        }
-        setOpen(next);
+    const reset = () => {
+        const today = localDay(new Date());
+        setStart(vacation?.startDate ?? today);
+        setEnd(vacation?.endDate ?? today);
+        save.reset();
     };
 
     const range = {startDate: start, endDate: end};
@@ -60,10 +56,9 @@ export function VacationDialog({vacation, trigger}: Props) {
                     Kalendertage, aber nicht als Urlaubstage.
                 </>
             }
-            open={open}
-            onOpenChange={handleOpenChange}
-            onSubmit={() => {
-                if (!problem) submit();
+            onOpen={reset}
+            onSubmit={(close) => {
+                if (!problem) submit(close);
             }}
             saving={save.isSaving}
             disabled={problem !== null}

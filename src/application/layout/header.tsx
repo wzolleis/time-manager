@@ -12,7 +12,6 @@ import {PasswordChangeDialog} from "@features/auth/components/password-change-di
 import {VersionDialog} from "@features/version/components/version-dialog";
 import {Sidebar} from "@/application/layout/sidebar";
 import {AdminDropdown} from "@/application/layout/admin-dropdown";
-import {TimeFormatToggle} from "@/application/layout/time-format-toggle";
 import {Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle} from "@/components/ui/sheet";
 
 export const Header = () => {
@@ -58,7 +57,6 @@ export const Header = () => {
             </div>
 
             <div className="flex shrink-0 items-center gap-3">
-                <TimeFormatToggle />
                 {isAdmin && <AdminDropdown onItemSelected={onItemSelected} />}
                 {/* 2. Wiederverwendbares Dropdown */}
                 <UserDropdown

@@ -69,6 +69,10 @@ bleiben stehen: Das Zurücksetzen wirkt wie jeder neue Wert erst ab „gültig a
 „Fertig, wenn“) bleibt im Change. Ändert ein Change mehrere Use Cases, bekommt jeder die Begründungen, die ihn
 betreffen. Der erledigte Change bleibt in `features/changes/` stehen.
 
+Eine neue Beschreibung legt `npm run feature:new` an (`scripts/new-feature.ts`). Das Skript fragt Typ, Name, die
+geänderten Use Cases (nur bei einem Change), Epics und Beschreibung ab, prüft sie gegen die vorhandenen
+Beschreibungen und legt die Datei im passenden Ordner mit `state: open` und den üblichen Abschnitten an.
+
 Eine Übersicht aller Beschreibungen nach Epic und Status erzeugt `npm run features:overview` aus dem
 Frontmatter in `generated/overview.md` (Skill `overview`). Sie wird nicht von Hand bearbeitet und nicht
 committet. Ändert sich `name`, `type`, `epics` oder `state` einer Beschreibung, wird sie neu erzeugt.

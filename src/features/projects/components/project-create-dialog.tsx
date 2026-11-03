@@ -9,36 +9,28 @@ import {FormDialog} from "@/components/form/form-dialog";
 
 export function ProjectCreateDialog() {
     const qc = useQueryClient();
-    const [open, setOpen] = useState(false);
     const [name, setName] = useState("");
 
     const create = useMutation({
         mutationFn: (data: ProjectCreate) => createProject(data),
-        onSuccess: async () => {
-            await qc.invalidateQueries({queryKey: ["projects"]});
-            setOpen(false);
-        },
+        onSuccess: () => qc.invalidateQueries({queryKey: ["projects"]}),
     });
 
-    // Beim Öffnen und Schließen leeres Formular und keine alte Fehlermeldung
-    const handleOpenChange = (next: boolean) => {
+    // Beim Öffnen leeres Formular und keine alte Fehlermeldung
+    const reset = () => {
         setName("");
         create.reset();
-        setOpen(next);
     };
 
-    const handleSubmit = () => {
-        create.mutate({
-            name,
-        });
+    const handleSubmit = (close: () => void) => {
+        create.mutate({name}, {onSuccess: close});
     };
 
     return (
         <FormDialog
             title="Neues Projekt anlegen"
             description="Name ist Pflicht"
-            open={open}
-            onOpenChange={handleOpenChange}
+            onOpen={reset}
             onSubmit={handleSubmit}
             saving={create.isPending}
             submitLabel="Anlegen"

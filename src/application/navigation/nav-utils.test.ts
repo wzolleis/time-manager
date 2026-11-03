@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
-import {buildNavTree, findNavigationItem} from "@/application/navigation/nav-utils";
-import {navItemsOf} from "@/application/navigation/nav-items";
+import {buildNavTree, findBreadcrumbTrail, findNavigationItem} from "@/application/navigation/nav-utils";
+import {NAVIGATION_ITEMS, navItemsOf} from "@/application/navigation/nav-items";
 
 describe("Navigationsbaum", () => {
     it("zeigt die Einträge unter /user ohne den Eintrag User auf der obersten Ebene", () => {
@@ -47,5 +47,27 @@ describe("Navigationsbaum", () => {
 
     it("führt im Avatar-Menü mit Einstellungen zu den Einstellungen des Users", () => {
         expect(findNavigationItem("user-settings")).toMatchObject({to: "/user/settings", menu: "avatar"});
+    });
+
+    it("liefert in der Breadcrumb die Unterseiten von Report und Administration", () => {
+        const tree = buildNavTree(NAVIGATION_ITEMS);
+
+        const reports = findBreadcrumbTrail(tree, "/user/reports/daily/2026-10-21")!;
+        expect(reports.map((node) => node.id)).toEqual(["reports", "reports-daily"]);
+        expect(reports[0].childItems.map((node) => node.id)).toEqual([
+            "reports-daily",
+            "reports-weekly",
+            "reports-monthly",
+            "reports-yearly",
+            "reports-overtime",
+        ]);
+
+        const admin = findBreadcrumbTrail(tree, "/admin")!;
+        expect(admin[0].childItems.map((node) => node.id)).toEqual([
+            "settings",
+            "users",
+            "holidays-admin",
+            "api-tokens-admin",
+        ]);
     });
 });

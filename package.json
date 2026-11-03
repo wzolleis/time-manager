@@ -27,7 +27,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "simple-git-hooks",
-    "skill:new": "node scripts/new-skill.ts"
+    "skill:new": "node scripts/new-skill.ts",
+    "feature:new": "node scripts/new-feature.ts"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",

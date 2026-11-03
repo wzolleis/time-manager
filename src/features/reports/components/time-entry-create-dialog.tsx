@@ -52,7 +52,6 @@ export function TimeEntryCreateDialog({
     const createDay = useAddTimeEntryDay();
     const {currentUser} = create;
 
-    const [open, setOpen] = useState(false);
     const [mode, setMode] = useState<Mode>("stamp");
     const [day, setDay] = useState(defaultDay);
     const [time, setTime] = useState<string>(""); // Eingaben als Text, geprüft wird im Use Case
@@ -62,18 +61,15 @@ export function TimeEntryCreateDialog({
     const [workTime, setWorkTime] = useState(""); // Arbeitszeit als "HH:mm", vorbelegt beim Wechsel in den Zeitraum
 
     // Beim Öffnen immer mit den Vorgaben starten, keine alten Eingaben oder Fehler
-    const handleOpenChange = (next: boolean) => {
-        if (next) {
-            setMode("stamp");
-            setDay(defaultDay);
-            setType(defaultType);
-            setTime(defaultTime ?? (defaultDay === localDay(new Date()) ? formatTime(new Date()) : ""));
-            setProjectChoice(NO_PROJECT);
-            setStart(WORK_DAY_START);
-            setWorkTime("");
-            createDay.reset();
-        }
-        setOpen(next);
+    const reset = () => {
+        setMode("stamp");
+        setDay(defaultDay);
+        setType(defaultType);
+        setTime(defaultTime ?? (defaultDay === localDay(new Date()) ? formatTime(new Date()) : ""));
+        setProjectChoice(NO_PROJECT);
+        setStart(WORK_DAY_START);
+        setWorkTime("");
+        createDay.reset();
     };
 
     // Vorgaben für einen Zeitraum: Beginn am leeren Tag 08:00, an einem Tag mit Buchungen leer: so früh wie möglich,
@@ -103,13 +99,13 @@ export function TimeEntryCreateDialog({
     const error = mode === "day" ? createDay.error : null;
     const projectId = projectChoice === NO_PROJECT ? null : projectChoice;
 
-    const handleSubmit = () => {
+    const handleSubmit = (close: () => void) => {
         if (!currentUser || problem) return;
         if (mode === "stamp") {
             // Die Buchung steht sofort in der Liste, ein Fehler des Servers kommt als Toast
             create.add({type, day, time, projectId});
-            setOpen(false);
-        } else createDay.add({...workDay, projectId}, {onSuccess: () => setOpen(false)});
+            close();
+        } else createDay.add({...workDay, projectId}, {onSuccess: close});
     };
 
     const projectField = (
@@ -155,8 +151,7 @@ export function TimeEntryCreateDialog({
                     Speichern geprüft. Bei einem Zeitraum wird die nötige Pause eingeplant.
                 </>
             }
-            open={open}
-            onOpenChange={handleOpenChange}
+            onOpen={reset}
             onSubmit={handleSubmit}
             saving={saving}
             disabled={problem !== null}
