@@ -202,6 +202,19 @@ export const planWorkDay = (existing: Booking[], day: Day, workMinutes: number, 
 export const earliestStart = (existing: Booking[], day: Day, workMinutes: number): Date | null =>
     planPeriod(existing, day, workMinutes).earliest;
 
+/** Vorgabe für die Arbeitszeit, wenn das Soll des Tages schon erreicht ist */
+export const FALLBACK_WORK_MINUTES = 60;
+
+/**
+ * Vorgabe für die Arbeitszeit eines Zeitraums am Tag ("JJJJ-MM-TT"): was zum Soll (targetMinutes) noch fehlt,
+ * ist das Soll erreicht oder 0, dann FALLBACK_WORK_MINUTES. Ein offenes Kommen zählt nicht.
+ */
+export function suggestedWorkMinutes(existing: Booking[], day: Day, targetMinutes: number): number {
+    const {work} = buildPeriods(sorted(existing).filter((e) => localDay(e.bookedAt) === day));
+    const missing = Math.round(targetMinutes - minutesOf(work));
+    return missing > 0 ? missing : FALLBACK_WORK_MINUTES;
+}
+
 /** null = der Zeitraum lässt sich zu den vorhandenen Buchungen eintragen, sonst eine Fehlermeldung */
 export function checkWorkDay(existing: Booking[], day: Day, workMinutes: number, start?: TimeOfDay): string | null {
     if (workMinutes <= 0) return "Die Arbeitszeit muss größer als 0 sein";

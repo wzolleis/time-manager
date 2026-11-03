@@ -5,7 +5,7 @@ import {Input} from "@/components/ui/input";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {formatDuration, formatTime} from "@shared/format";
 import {useProjects} from "@/views/projects";
-import {localDay, WORK_DAY_MINUTES, WORK_DAY_START} from "@shared/time-rules";
+import {localDay, WORK_DAY_START} from "@shared/time-rules";
 import {useAddTimeEntry} from "@features/reports/use-cases/use-add-time-entry";
 import {useAddTimeEntryDay} from "@features/reports/use-cases/use-add-time-entry-day";
 import {Muted} from "@/components/text/muted";
@@ -31,7 +31,6 @@ const NO_PROJECT = "none"; // Radix Select erlaubt keinen leeren String als Wert
 /** Minuten als "HH:mm", für das Feld der Arbeitszeit */
 const toHhmm = (minutes: number) =>
     `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
-const DAY_WORK_TIME = toHhmm(WORK_DAY_MINUTES);
 
 /** "HH:mm" als Minuten, leer ergibt 0 */
 const toMinutes = (hhmm: string) => {
@@ -60,7 +59,7 @@ export function TimeEntryCreateDialog({
     const [type, setType] = useState<EntryType>(defaultType);
     const [projectChoice, setProjectChoice] = useState(NO_PROJECT);
     const [start, setStart] = useState<string>(WORK_DAY_START);
-    const [workTime, setWorkTime] = useState(DAY_WORK_TIME); // Arbeitszeit als "HH:mm"
+    const [workTime, setWorkTime] = useState(""); // Arbeitszeit als "HH:mm", vorbelegt beim Wechsel in den Zeitraum
 
     // Beim Öffnen immer mit den Vorgaben starten, keine alten Eingaben oder Fehler
     const handleOpenChange = (next: boolean) => {
@@ -71,17 +70,18 @@ export function TimeEntryCreateDialog({
             setTime(defaultTime ?? (defaultDay === localDay(new Date()) ? formatTime(new Date()) : ""));
             setProjectChoice(NO_PROJECT);
             setStart(WORK_DAY_START);
-            setWorkTime(DAY_WORK_TIME);
+            setWorkTime("");
             createDay.reset();
         }
         setOpen(next);
     };
 
-    // Vorgaben für einen Zeitraum: am leeren Tag 08:00 und 8 h, an einem Tag mit Buchungen keine
+    // Vorgaben für einen Zeitraum: Beginn am leeren Tag 08:00, an einem Tag mit Buchungen leer: so früh wie möglich,
+    // das Feld zeigt dann den frühesten Beginn. Die Arbeitszeit ist immer vorbelegt. Kein Zeitfeld bleibt leer:
+    // Ein leeres Zeitfeld zeigt im Browser eine Uhrzeit, die nicht gilt.
     const applyDayDefaults = (d: Day) => {
-        const busy = createDay.hasBookings(d);
-        setStart(busy ? "" : WORK_DAY_START);
-        setWorkTime(busy ? "" : DAY_WORK_TIME);
+        setStart(createDay.hasBookings(d) ? "" : WORK_DAY_START);
+        setWorkTime(toHhmm(createDay.suggestedWorkMinutes(d)));
     };
     const changeMode = (next: Mode) => {
         if (next === "day") applyDayDefaults(day);
@@ -216,7 +216,7 @@ export function TimeEntryCreateDialog({
                             <Input
                                 id={`${uid}-start`}
                                 type="time"
-                                value={start}
+                                value={start || (earliest ? formatTime(earliest) : "")}
                                 onChange={(e) => setStart(e.target.value)}
                             />
                         </FormField>
@@ -231,7 +231,7 @@ export function TimeEntryCreateDialog({
                         </FormField>
                     </FormRow>
 
-                    {earliest && <Muted>Ohne Beginn so früh wie möglich, ab {formatTime(earliest)}.</Muted>}
+                    {earliest && <Muted>Der früheste Beginn, er folgt der Arbeitszeit, bis du ihn änderst.</Muted>}
 
                     {projectField}
 

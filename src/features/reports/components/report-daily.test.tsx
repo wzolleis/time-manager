@@ -183,3 +183,59 @@ describe("Optimistic Write", () => {
         expect(await screen.findAllByRole("button", {name: "Löschen"})).toHaveLength(2);
     });
 });
+
+describe("Zeitraum nachtragen", () => {
+    // 08:00–10:00 Berlin am Mittwoch, 2026-10-14
+    const ENTRIES = [
+        {id: "k1", userId: USER.id, type: "kommen", bookedAt: "2026-10-14T06:00:00.000Z", projectId: null},
+        {id: "g1", userId: USER.id, type: "gehen", bookedAt: "2026-10-14T08:00:00.000Z", projectId: null},
+    ];
+
+    beforeEach(() => {
+        // Für das Select von Radix, jsdom kennt beides nicht
+        Element.prototype.scrollIntoView = vi.fn();
+        Element.prototype.hasPointerCapture = vi.fn(() => false);
+    });
+
+    async function openPeriod(entries: object[]) {
+        const fallback = globalThis.fetch;
+        vi.stubGlobal(
+            "fetch",
+            vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+                const {pathname} = new URL(String(input), "http://localhost");
+                if (pathname === `/api/users/${USER.id}/time-entries`) return Response.json(entries);
+                return fallback(input, init);
+            }),
+        );
+        renderPage();
+        await screen.findByRole("button", {name: "Kommen"});
+        fireEvent.click(screen.getByRole("button", {name: "Buchung nachtragen"}));
+        fireEvent.click(await screen.findByLabelText("Nachtragen"));
+        fireEvent.click(await screen.findByRole("option", {name: "Zeitraum"}));
+        return (await screen.findByLabelText("Arbeitszeit")) as HTMLInputElement;
+    }
+
+    it("belegt am leeren Tag das Soll vor", async () => {
+        const workTime = await openPeriod([]);
+        await waitFor(() => expect(workTime.value).toBe("08:00"));
+    });
+
+    it("belegt an einem Tag mit Buchungen den Rest zum Soll vor", async () => {
+        const workTime = await openPeriod(ENTRIES);
+        await waitFor(() => expect(workTime.value).toBe("06:00"));
+    });
+
+    it("zeigt an einem Tag mit Buchungen den frühesten Beginn, der der Arbeitszeit folgt", async () => {
+        const workTime = await openPeriod(ENTRIES);
+        const start = screen.getByLabelText("Beginn") as HTMLInputElement;
+        // 2 h + 6 h = 8 h am Tag: 30 min Pause nach dem Gehen um 10:00
+        await waitFor(() => expect(start.value).toBe("10:30"));
+        // 2 h + 1 h = 3 h: keine Pause, 1 min nach dem Gehen
+        fireEvent.change(workTime, {target: {value: "01:00"}});
+        expect(start.value).toBe("10:01");
+        // Ein eigener Beginn bleibt stehen
+        fireEvent.change(start, {target: {value: "11:00"}});
+        fireEvent.change(workTime, {target: {value: "06:00"}});
+        expect(start.value).toBe("11:00");
+    });
+});

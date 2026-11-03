@@ -14,6 +14,7 @@ import {
     localDay,
     nextType,
     planWorkDay,
+    suggestedWorkMinutes,
 } from "./time-rules";
 
 const b = (id: string, type: Booking["type"], iso: string): Booking => ({
@@ -409,6 +410,29 @@ describe("earliestStart", () => {
         expect(
             times([{id: "x", type: "kommen", bookedAt: earliestStart(pair("08:00", "12:00"), DAY, 3 * H)!}]),
         ).toEqual(["kommen 12:30"]);
+    });
+});
+
+describe("suggestedWorkMinutes", () => {
+    it("ist am leeren Tag das Soll", () => {
+        expect(suggestedWorkMinutes([], DAY, 8 * H)).toBe(8 * H);
+    });
+
+    it("ist an einem Tag mit Buchungen der Rest zum Soll", () => {
+        const existing = [...pair("08:00", "12:00"), ...pair("12:30", "13:45")]; // 5:15 h gearbeitet
+        expect(suggestedWorkMinutes(existing, DAY, 8 * H)).toBe(2 * H + 45);
+    });
+
+    it("ist 1 h, wenn das Soll erreicht oder 0 ist", () => {
+        expect(suggestedWorkMinutes(pair("08:00", "16:00"), DAY, 8 * H)).toBe(1 * H);
+        expect(suggestedWorkMinutes(pair("08:00", "17:00"), DAY, 8 * H)).toBe(1 * H);
+        expect(suggestedWorkMinutes([], DAY, 0)).toBe(1 * H);
+    });
+
+    it("zählt nur die Buchungen dieses Tages und kein offenes Kommen", () => {
+        const otherDay = [b("x", "kommen", "2026-10-27T08:00:00+01:00"), b("y", "gehen", "2026-10-27T12:00:00+01:00")];
+        const open = [b("k", "kommen", "2026-10-26T08:00:00+01:00")];
+        expect(suggestedWorkMinutes([...otherDay, ...open], DAY, 8 * H)).toBe(8 * H);
     });
 });
 
