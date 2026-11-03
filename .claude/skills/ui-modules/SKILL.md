@@ -69,7 +69,8 @@ Pfad-Aliase: `@/*` → `src/*`, `@features/*` → `src/features/*`, `@shared/*` 
 
 Schon beim Planen und Anlegen der Dateien entscheidet dieser Skill, wohin jede neue Datei kommt. Ein angepasstes
 shadcn-Element (z. B. ein Button mit eigenem Stil) wird sofort eine eigene Komponente in `components/<art>/`,
-nicht erst im Review.
+nicht erst im Review. Wo CSS-Klassen stehen dürfen und wann daraus eine Komponente wird, regelt der Skill
+`ui-styling`.
 
 # Prüfung vor dem Commit
 
