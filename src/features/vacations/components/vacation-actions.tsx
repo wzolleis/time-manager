@@ -4,13 +4,14 @@ import type {Vacation} from "@shared/vacation";
 import {useDeleteVacation} from "@features/vacations/use-cases/use-delete-vacation";
 import {ConfirmDeleteButton} from "@/components/buttons/confirm-delete-button";
 import {RowActions} from "@/components/table/row-actions";
+import {EditButton} from "@/components/buttons/edit-button";
 
 export function VacationActions({vacation}: {vacation: Vacation}) {
     const remove = useDeleteVacation();
 
     return (
         <RowActions error={remove.error}>
-            <VacationDialog vacation={vacation} label="Bearbeiten" />
+            <VacationDialog vacation={vacation} trigger={<EditButton />} />
 
             <ConfirmDeleteButton
                 title="Urlaub löschen?"

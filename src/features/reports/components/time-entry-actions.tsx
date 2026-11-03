@@ -1,5 +1,4 @@
 import React, {useState} from "react";
-import {Button} from "@/components/ui/button";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
@@ -15,6 +14,7 @@ import {ErrorText} from "@/components/text/error-text";
 import {FormDialogFooter} from "@/components/form/form-dialog-footer";
 import {FormField} from "@/components/form/form-field";
 import {RowActions} from "@/components/table/row-actions";
+import {EditButton} from "@/components/buttons/edit-button";
 
 const NO_PROJECT = "none"; // Radix Select erlaubt keinen leeren String als Wert
 
@@ -54,9 +54,7 @@ export function EntryActions({entry}: {entry: EntryRow}) {
     return (
         <>
             <RowActions>
-                <Button variant="outline" size="sm" disabled={pending} onClick={() => handleOpenChange(true)}>
-                    Bearbeiten
-                </Button>
+                <EditButton disabled={pending} onClick={() => handleOpenChange(true)} />
                 <TimeEntryDelete entry={entry} />
             </RowActions>
 

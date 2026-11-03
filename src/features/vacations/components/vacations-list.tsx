@@ -14,6 +14,7 @@ import {LoadError} from "@/components/text/load-error";
 import {PageHeader} from "@/components/page/page-header";
 import {PeriodNav} from "@/components/buttons/period-nav";
 import {MetricGrid} from "@/components/cards/metric-grid";
+import {Button} from "@/components/ui/button";
 
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
 const columns: DataTableColumnDef<Row>[] = [
@@ -53,7 +54,7 @@ export function VacationsList() {
                         {allowed} Urlaubstage im Jahr
                     </>
                 }
-                actions={<VacationDialog label="Urlaub eintragen" variant="default" size="default" />}
+                actions={<VacationDialog trigger={<Button>Urlaub eintragen</Button>} />}
             />
 
             <PeriodNav

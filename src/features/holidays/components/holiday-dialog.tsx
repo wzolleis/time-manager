@@ -1,5 +1,4 @@
-import {type ComponentProps, useId, useState} from "react";
-import {Button} from "@/components/ui/button";
+import {type ReactElement, useId, useState} from "react";
 import {
     Dialog,
     DialogContent,
@@ -25,12 +24,10 @@ type Props = {
     holiday?: Holiday; // mit Feiertag: bearbeiten, ohne: neu anlegen
     userId: string | null; // beim Anlegen: null = für alle
     userName?: string;
-    label: string;
-    variant?: ComponentProps<typeof Button>["variant"];
-    size?: ComponentProps<typeof Button>["size"];
+    trigger: ReactElement; // der Button, der den Dialog öffnet, z. B. ein EditButton in der Zeile
 };
 
-export function HolidayDialog({holiday, userId, userName, label, variant = "outline", size = "sm"}: Props) {
+export function HolidayDialog({holiday, userId, userName, trigger}: Props) {
     const uid = useId();
 
     const [open, setOpen] = useState(false);
@@ -64,11 +61,7 @@ export function HolidayDialog({holiday, userId, userName, label, variant = "outl
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogTrigger asChild>
-                <Button variant={variant} size={size}>
-                    {label}
-                </Button>
-            </DialogTrigger>
+            <DialogTrigger asChild>{trigger}</DialogTrigger>
             <DialogContent>
                 <form
                     onSubmit={(e) => {

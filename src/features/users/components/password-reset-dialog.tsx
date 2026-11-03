@@ -1,6 +1,5 @@
 import {useState} from "react";
 import {useMutation} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -16,6 +15,8 @@ import type {User} from "@shared/user";
 import {ErrorText} from "@/components/text/error-text";
 import {FormField} from "@/components/form/form-field";
 import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {KeyRound} from "lucide-react";
+import {ActionButton} from "@/components/buttons/action-button";
 
 // Der Admin setzt ein neues Passwort, ohne das alte zu kennen
 export function PasswordResetDialog({user}: {user: User}) {
@@ -43,9 +44,7 @@ export function PasswordResetDialog({user}: {user: User}) {
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                    Passwort zurücksetzen
-                </Button>
+                <ActionButton icon={KeyRound} label="Passwort zurücksetzen" variant="outline" />
             </DialogTrigger>
             <DialogContent>
                 <form onSubmit={handleSubmit} className="space-y-4">

@@ -10,7 +10,8 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {Button, buttonVariants} from "@/components/ui/button";
+import {buttonVariants} from "@/components/ui/button";
+import {DeleteButton} from "@/components/buttons/delete-button";
 
 type ConfirmDeleteButtonProps = {
     title: ReactNode;
@@ -22,7 +23,7 @@ type ConfirmDeleteButtonProps = {
     pendingLabel?: string;
 };
 
-/** Roter Button, der erst nach Bestätigung in einem Dialog löscht */
+/** Roter Button mit Mülleimer-Icon, der erst nach Bestätigung in einem Dialog löscht */
 export function ConfirmDeleteButton({
     title,
     description,
@@ -35,9 +36,7 @@ export function ConfirmDeleteButton({
     return (
         <AlertDialog onOpenChange={(next) => next && onOpen?.()}>
             <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm" disabled={pending}>
-                    {pending ? pendingLabel : label}
-                </Button>
+                <DeleteButton disabled={pending} label={pending ? pendingLabel : label} />
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>

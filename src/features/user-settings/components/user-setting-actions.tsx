@@ -1,12 +1,19 @@
 import {formatDay} from "@shared/format";
 import {isImmediate} from "@shared/user-setting-rules";
-import {Button} from "@/components/ui/button";
 import {UserSettingDialog} from "@features/user-settings/components/user-setting-dialog";
 import type {UserSettingRow} from "@features/user-settings/use-cases/use-show-user-settings";
 import {useDeleteUserSetting} from "@features/user-settings/use-cases/use-delete-user-setting";
 import {useAddUserSetting} from "@features/user-settings/use-cases/use-add-user-setting";
 import {ConfirmDeleteButton} from "@/components/buttons/confirm-delete-button";
 import {RowActions} from "@/components/table/row-actions";
+import {EditButton} from "@/components/buttons/edit-button";
+import {ActionButton, type ActionButtonProps} from "@/components/buttons/action-button";
+import {RotateCcw} from "lucide-react";
+
+/** Setzt die Einstellung auf den Default zurück */
+const ResetButton = (props: Omit<ActionButtonProps, "icon" | "label">) => (
+    <ActionButton icon={RotateCcw} label="Auf Default zurücksetzen" variant="outline" {...props} />
+);
 
 /**
  * Aktionen je Zeile (Regel 7): Zum aktuellen Wert trägt der User einen neuen Wert ein, einen geplanten Wert
@@ -22,12 +29,16 @@ export function UserSettingActions({row}: {row: UserSettingRow}) {
         const ownValue = value?.value ?? null; // null: es gilt der Default
         return (
             <RowActions>
-                <UserSettingDialog setting={setting} initialValue={ownValue ?? setting.defaultValue} label="Ändern" />
+                <UserSettingDialog
+                    setting={setting}
+                    initialValue={ownValue ?? setting.defaultValue}
+                    trigger={<EditButton label="Ändern" />}
+                />
                 {/* Gilt schon der Default, gibt es nichts zurückzusetzen */}
                 <UserSettingDialog
                     setting={setting}
                     initialValue={null}
-                    label="Auf Default zurücksetzen"
+                    trigger={<ResetButton />}
                     disabled={ownValue === null}
                 />
             </RowActions>
@@ -37,7 +48,7 @@ export function UserSettingActions({row}: {row: UserSettingRow}) {
 
     return (
         <RowActions error={remove.error}>
-            <UserSettingDialog setting={setting} current={value} initialValue={value.value} label="Bearbeiten" />
+            <UserSettingDialog setting={setting} current={value} initialValue={value.value} trigger={<EditButton />} />
 
             <ConfirmDeleteButton
                 title="Geplanten Wert löschen?"
@@ -63,16 +74,16 @@ function ImmediateSettingActions({row}: {row: UserSettingRow}) {
 
     return (
         <RowActions error={add.error}>
-            <UserSettingDialog setting={setting} initialValue={ownValue ?? setting.defaultValue} label="Ändern" />
+            <UserSettingDialog
+                setting={setting}
+                initialValue={ownValue ?? setting.defaultValue}
+                trigger={<EditButton label="Ändern" />}
+            />
             {/* Gilt schon der Default, gibt es nichts zurückzusetzen */}
-            <Button
-                variant="outline"
-                size="sm"
+            <ResetButton
                 disabled={!add.currentUser || ownValue === null || add.isSaving}
                 onClick={() => add.add({setting, value: null})}
-            >
-                Auf Default zurücksetzen
-            </Button>
+            />
         </RowActions>
     );
 }

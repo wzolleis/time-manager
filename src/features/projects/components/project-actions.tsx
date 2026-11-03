@@ -1,6 +1,5 @@
 import {useState} from "react";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import type {Project, ProjectUpdate} from "@shared/project";
 import {deleteProject, updateProject} from "@/api/projects";
@@ -8,6 +7,7 @@ import {FormField} from "@/components/form/form-field";
 import {EditDialog} from "@/components/form/edit-dialog";
 import {ConfirmDeleteButton} from "@/components/buttons/confirm-delete-button";
 import {RowActions} from "@/components/table/row-actions";
+import {EditButton} from "@/components/buttons/edit-button";
 
 /** Aktionen je Zeile: Projekt bearbeiten oder löschen */
 export function ProjectActions({project}: {project: Project}) {
@@ -56,9 +56,7 @@ export function ProjectActions({project}: {project: Project}) {
     return (
         <>
             <RowActions error={remove.error}>
-                <Button variant="outline" size="sm" onClick={() => handleOpenChange(true)}>
-                    Bearbeiten
-                </Button>
+                <EditButton onClick={() => handleOpenChange(true)} />
 
                 <ConfirmDeleteButton
                     title={<>{project.name} löschen?</>}

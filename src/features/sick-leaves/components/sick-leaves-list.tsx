@@ -14,6 +14,7 @@ import {LoadError} from "@/components/text/load-error";
 import {PageHeader} from "@/components/page/page-header";
 import {PeriodNav} from "@/components/buttons/period-nav";
 import {MetricGrid} from "@/components/cards/metric-grid";
+import {Button} from "@/components/ui/button";
 
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
 const columns: DataTableColumnDef<Row>[] = [
@@ -58,7 +59,7 @@ export function SickLeavesList() {
                         {currentUser.name} · {year} · {rows.length} {rows.length === 1 ? "Eintrag" : "Einträge"}
                     </>
                 }
-                actions={<SickLeaveDialog label="Krankmeldung eintragen" variant="default" size="default" />}
+                actions={<SickLeaveDialog trigger={<Button>Krankmeldung eintragen</Button>} />}
             />
 
             <PeriodNav

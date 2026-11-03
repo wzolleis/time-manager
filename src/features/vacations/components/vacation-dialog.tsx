@@ -1,5 +1,4 @@
-import {type ComponentProps, useState} from "react";
-import {Button} from "@/components/ui/button";
+import {type ReactElement, useState} from "react";
 import {Muted} from "@/components/text/muted";
 import {
     Dialog,
@@ -21,12 +20,10 @@ import {DateRangeFields} from "@/components/form/date-range-fields";
 
 type Props = {
     vacation?: Vacation; // mit Urlaub: bearbeiten, ohne: neu anlegen
-    label: string;
-    variant?: ComponentProps<typeof Button>["variant"];
-    size?: ComponentProps<typeof Button>["size"];
+    trigger: ReactElement; // der Button, der den Dialog öffnet, z. B. ein EditButton in der Zeile, ohne eigenes disabled
 };
 
-export function VacationDialog({vacation, label, variant = "outline", size = "sm"}: Props) {
+export function VacationDialog({vacation, trigger}: Props) {
     const add = useAddVacation();
     const change = useChangeVacation();
     const save = vacation ? change : add;
@@ -64,10 +61,8 @@ export function VacationDialog({vacation, label, variant = "outline", size = "sm
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogTrigger asChild>
-                <Button variant={variant} size={size} disabled={!currentUser}>
-                    {label}
-                </Button>
+            <DialogTrigger asChild disabled={!currentUser}>
+                {trigger}
             </DialogTrigger>
             <DialogContent>
                 <form

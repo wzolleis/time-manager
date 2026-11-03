@@ -9,12 +9,13 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {Button, buttonVariants} from "@/components/ui/button";
+import {buttonVariants} from "@/components/ui/button";
 import {formatTime} from "@shared/format";
 import type {EntryRow} from "@features/reports/time-entry-row";
 import {isOptimistic} from "@features/reports/time-entries-cache";
 import {useDeleteTimeEntry} from "@features/reports/use-cases/use-delete-time-entry";
 import {ErrorText} from "@/components/text/error-text";
+import {DeleteButton} from "@/components/buttons/delete-button";
 
 export const TimeEntryDelete = ({entry}: {entry: EntryRow}) => {
     const remove = useDeleteTimeEntry();
@@ -27,9 +28,7 @@ export const TimeEntryDelete = ({entry}: {entry: EntryRow}) => {
         <AlertDialog>
             <AlertDialogTrigger asChild>
                 {/* Eine vorläufige Buchung kennt der Server noch nicht */}
-                <Button variant="destructive" size="sm" disabled={isOptimistic(entry.id)}>
-                    Löschen
-                </Button>
+                <DeleteButton disabled={isOptimistic(entry.id)} />
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>

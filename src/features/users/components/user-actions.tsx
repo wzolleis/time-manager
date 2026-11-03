@@ -1,6 +1,5 @@
 import {useState} from "react";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {deleteUser, updateUser} from "@/api/users";
 import type {User, UserUpdate} from "@shared/user";
@@ -10,6 +9,7 @@ import {FormField} from "@/components/form/form-field";
 import {EditDialog} from "@/components/form/edit-dialog";
 import {ConfirmDeleteButton} from "@/components/buttons/confirm-delete-button";
 import {RowActions} from "@/components/table/row-actions";
+import {EditButton} from "@/components/buttons/edit-button";
 
 /** Aktionen je Zeile: User bearbeiten, Rollen und Passwort setzen oder löschen */
 export function UserActions({user}: {user: User}) {
@@ -66,9 +66,7 @@ export function UserActions({user}: {user: User}) {
     return (
         <>
             <RowActions error={remove.error}>
-                <Button variant="outline" size="sm" onClick={() => handleOpenChange(true)}>
-                    Bearbeiten
-                </Button>
+                <EditButton onClick={() => handleOpenChange(true)} />
                 <UserRolesDialog user={user} />
                 <PasswordResetDialog user={user} />
 
