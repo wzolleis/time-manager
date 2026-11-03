@@ -32,8 +32,9 @@ Die Zeiterfassung beim Arbeitgeber zeigt die Zeiten in Industriezeit. Der User v
 Zeiten leichter damit, wenn sie ebenfalls in Industriezeit angezeigt werden.
 
 Normalerweise sieht der User die Zeiten in Stunden und Minuten. Er schaltet nur kurz auf Industriezeit um, um
-die Zeiten zu vergleichen, und danach wieder zurück. Der Button dafür muss deshalb immer sichtbar sein, und
-man muss sehen, dass die Industriezeit gerade an ist.
+die Zeiten zu vergleichen, und danach wieder zurück. Der Schalter dafür muss deshalb schnell erreichbar sein.
+Welche Anzeige gerade gilt, muss nicht jederzeit sichtbar sein: Man erkennt es an den Dauern und am Häkchen im
+Benutzermenü.
 
 ## Was soll geändert werden
 
@@ -43,9 +44,9 @@ und gespeicherte Daten ändern sich nicht.
 
 ## Einstellung
 
-- Im Kopf der Anwendung steht neben dem Avatar immer ein Button, der den aktuellen Zustand zeigt:
-  „60 min/h“ (Stunden und Minuten) oder „Industriezeit“, dann farbig hervorgehoben. Ein Klick schaltet um.
-  Es muss kein Menü aufgeklappt werden, und man sieht jederzeit, welche Anzeige gerade gilt.
+- Im Benutzermenü (Avatar oben rechts) steht der Eintrag „Industriezeit“ mit Häkchen, wenn sie an ist. Ein
+  Klick schaltet um. Früher stand dafür ein eigener Button „60 min/h“ im Kopf. Er ist ins Menü gewandert, damit
+  die Breadcrumb auf schmalen Bildschirmen Platz hat (Change `../changes/breadcrumb-dropdown.md`).
 - Default: aus, also Stunden und Minuten wie bisher.
 - Die Einstellung gilt pro User. Sie wird im `localStorage` des Browsers gespeichert, nicht auf dem
   Server, unter einem Schlüssel mit der id des Users. Wechselt der User im selben Browser, gilt die
@@ -94,7 +95,7 @@ und gespeicherte Daten ändern sich nicht.
 ## Akzeptanzkriterien
 
 - Ohne Einstellung zeigen alle Seiten die Dauern wie bisher in Stunden und Minuten.
-- Der Button im Kopf zeigt auf jeder Seite „60 min/h“ oder „Industriezeit“ und schaltet mit einem Klick um.
+- Der Eintrag „Industriezeit“ im Benutzermenü zeigt mit dem Häkchen den Zustand und schaltet mit einem Klick um.
 - Nach dem Einschalten zeigen Tages-, Wochen-, Monats- und Jahresbericht, die Stempelkarte und die Überstunden
   alle Dauern in Industriezeit, ohne Neuladen.
 - Nach dem Neuladen des Browsers ist die Einstellung noch aktiv.
@@ -121,12 +122,13 @@ und gespeicherte Daten ändern sich nicht.
   `../../shared/overtime-rules.ts`. Ohne Parameter gilt `"minutes"`, deshalb bleiben die MCP-Tools unverändert.
 - Der Hook `useTimeFormat` in `../../src/lib/use-time-format.ts` liefert das Format des angemeldeten Users.
   `useIndustrialTime` schaltet um. Die Komponenten übergeben das Format nur an die Formate.
-- Der Button im Kopf ist `TimeFormatToggle`.
+- Der Schalter ist ein `DropdownMenuCheckboxItem` in `UserDropdown`
+  (`../../src/features/users/components/user-dropdown.tsx`).
 
 ## Tests
 
 - **Service-Tests:** `describe("Industriezeit")` in `../../shared/format.test.ts` mit den Beispielen oben,
   `formatOffset` in `../../shared/overtime-rules.test.ts`
-- **Komponenten-Test:** `../../src/tests/industrial-time.test.tsx` schaltet mit dem Button im Kopf um, prüft
-  Tagesbericht und Beschriftung des Buttons, schaltet zurück und prüft, dass die Einstellung nach erneutem
+- **Komponenten-Test:** `../../src/tests/industrial-time.test.tsx` schaltet im Benutzermenü um, prüft
+  Tagesbericht und Häkchen des Eintrags, schaltet zurück und prüft, dass die Einstellung nach erneutem
   Rendern erhalten bleibt.
