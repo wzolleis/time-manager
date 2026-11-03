@@ -13,6 +13,7 @@ import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
 import {PageHeader} from "@/components/page/page-header";
 import {PeriodNav} from "@/components/buttons/period-nav";
+import {MetricGrid} from "@/components/cards/metric-grid";
 
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
 const columns: DataTableColumnDef<Row>[] = [
@@ -64,7 +65,7 @@ export function VacationsList() {
             />
 
             {loaded && (
-                <div className="grid gap-4 sm:grid-cols-3">
+                <MetricGrid columns={3}>
                     <MetricCard title="Genommen" value={dayLabel(balance.taken)} hint="bis einschließlich heute" />
                     <MetricCard title="Geplant" value={dayLabel(balance.planned)} hint="ab morgen eingetragen" />
                     <MetricCard
@@ -77,7 +78,7 @@ export function VacationsList() {
                                 : `verfällt am 31.12.${year}`
                         }
                     />
-                </div>
+                </MetricGrid>
             )}
 
             {isPending && <Loading />}

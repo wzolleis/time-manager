@@ -18,6 +18,7 @@ import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
 import {PageHeader} from "@/components/page/page-header";
 import {PeriodNav} from "@/components/buttons/period-nav";
+import {MetricGrid} from "@/components/cards/metric-grid";
 
 // Buchungen an einem Krankheitstag bleiben sichtbar, aber ausgegraut
 const muted = (row: DailyReportRow, text: string) =>
@@ -93,7 +94,7 @@ export function ReportDailyEdit({day}: {day: Day}) {
                 <TimeEntryCreateDialog defaultDay={day} defaultType={report.next} label="Buchung nachtragen" />
             </PeriodNav>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <MetricGrid columns={4}>
                 {totals.missingGehen && (
                     <ErrorText>An diesem Tag fehlt das Gehen. Trage es mit „Buchung nachtragen" nach.</ErrorText>
                 )}
@@ -105,7 +106,7 @@ export function ReportDailyEdit({day}: {day: Day}) {
                     hint={dayKindLabel(report.kind, report.holidayName)}
                 />
                 <DiffMetric diffMs={report.diff} />
-            </div>
+            </MetricGrid>
 
             {report.isPending && <Loading />}
             {report.error && <LoadError error={report.error} onRetry={report.retry} />}

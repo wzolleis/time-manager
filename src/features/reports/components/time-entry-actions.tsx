@@ -14,6 +14,7 @@ import {Muted} from "@/components/text/muted";
 import {ErrorText} from "@/components/text/error-text";
 import {FormDialogFooter} from "@/components/form/form-dialog-footer";
 import {FormField} from "@/components/form/form-field";
+import {RowActions} from "@/components/table/row-actions";
 
 const NO_PROJECT = "none"; // Radix Select erlaubt keinen leeren String als Wert
 
@@ -51,13 +52,13 @@ export function EntryActions({entry}: {entry: EntryRow}) {
     };
 
     return (
-        <div className="space-y-1">
-            <div className="flex justify-end gap-2">
+        <>
+            <RowActions>
                 <Button variant="outline" size="sm" disabled={pending} onClick={() => handleOpenChange(true)}>
                     Bearbeiten
                 </Button>
                 <TimeEntryDelete entry={entry} />
-            </div>
+            </RowActions>
 
             <Dialog open={open} onOpenChange={handleOpenChange}>
                 <DialogContent>
@@ -104,6 +105,6 @@ export function EntryActions({entry}: {entry: EntryRow}) {
                     </form>
                 </DialogContent>
             </Dialog>
-        </div>
+        </>
     );
 }

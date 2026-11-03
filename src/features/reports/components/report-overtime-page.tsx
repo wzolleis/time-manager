@@ -11,6 +11,7 @@ import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
 import {PageHeader} from "@/components/page/page-header";
 import {Page} from "@/components/page/page";
+import {MetricGrid} from "@/components/cards/metric-grid";
 
 /** Saldo der Überstunden als Karte, darunter die letzte Korrektur. Seite für /user/reports/overtime */
 export function ReportOvertimePage() {
@@ -33,7 +34,7 @@ export function ReportOvertimePage() {
             {report.isPending && <Loading />}
             {report.error && <LoadError error={report.error} onRetry={report.retry} />}
             {!report.isPending && !report.error && (
-                <div className="grid gap-4 sm:grid-cols-3">
+                <MetricGrid columns={3}>
                     <MetricCard
                         title="Überstunden"
                         value={`${formatOffset(balanceMinutes(report.balanceMs), timeFormat)} h`}
@@ -44,7 +45,7 @@ export function ReportOvertimePage() {
                                 : "Keine Korrektur"
                         }
                     />
-                </div>
+                </MetricGrid>
             )}
         </Page>
     );

@@ -6,10 +6,10 @@ import {deleteUser, updateUser} from "@/api/users";
 import type {User, UserUpdate} from "@shared/user";
 import {PasswordResetDialog} from "@features/users/components/password-reset-dialog";
 import {UserRolesDialog} from "@features/users/components/user-roles-dialog";
-import {ErrorText} from "@/components/text/error-text";
 import {FormField} from "@/components/form/form-field";
 import {EditDialog} from "@/components/form/edit-dialog";
 import {ConfirmDeleteButton} from "@/components/buttons/confirm-delete-button";
+import {RowActions} from "@/components/table/row-actions";
 
 /** Aktionen je Zeile: User bearbeiten, Rollen und Passwort setzen oder löschen */
 export function UserActions({user}: {user: User}) {
@@ -64,8 +64,8 @@ export function UserActions({user}: {user: User}) {
     const fieldId = (field: string) => `${field}-${user.id}`;
 
     return (
-        <div className="space-y-1">
-            <div className="flex flex-wrap justify-end gap-2">
+        <>
+            <RowActions error={remove.error}>
                 <Button variant="outline" size="sm" onClick={() => handleOpenChange(true)}>
                     Bearbeiten
                 </Button>
@@ -79,9 +79,7 @@ export function UserActions({user}: {user: User}) {
                     onOpen={() => remove.reset()}
                     pending={remove.isPending}
                 />
-            </div>
-
-            {remove.isError && <ErrorText className="text-right">{remove.error.message}</ErrorText>}
+            </RowActions>
 
             <EditDialog
                 title="User bearbeiten"
@@ -114,6 +112,6 @@ export function UserActions({user}: {user: User}) {
                     />
                 </FormField>
             </EditDialog>
-        </div>
+        </>
     );
 }

@@ -13,6 +13,7 @@ import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
 import {PageHeader} from "@/components/page/page-header";
 import {PeriodNav} from "@/components/buttons/period-nav";
+import {MetricGrid} from "@/components/cards/metric-grid";
 
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
 const columns: DataTableColumnDef<Row>[] = [
@@ -69,9 +70,9 @@ export function SickLeavesList() {
             />
 
             {loaded && (
-                <div className="grid gap-4 sm:grid-cols-3">
+                <MetricGrid columns={3}>
                     <MetricCard title="Krankheitstage" value={dayLabel(total)} hint="ohne Wochenenden und Feiertage" />
-                </div>
+                </MetricGrid>
             )}
 
             {isPending && <Loading />}

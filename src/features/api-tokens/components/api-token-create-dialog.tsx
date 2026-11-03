@@ -17,6 +17,7 @@ import {validityLabel} from "@shared/api-token-rules";
 import {ErrorText} from "@/components/text/error-text";
 import {FormDialogFooter} from "@/components/form/form-dialog-footer";
 import {FormField} from "@/components/form/form-field";
+import {FormRow} from "@/components/form/form-row";
 
 const NO_EXPIRY = "none"; // Radix Select braucht Texte als Werte
 
@@ -109,7 +110,7 @@ export function ApiTokenCreateDialog() {
                             </DialogDescription>
                         </DialogHeader>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <FormRow>
                             <FormField label="Name" htmlFor={`${uid}-name`}>
                                 <Input
                                     id={`${uid}-name`}
@@ -134,7 +135,7 @@ export function ApiTokenCreateDialog() {
                                     </SelectContent>
                                 </Select>
                             </FormField>
-                        </div>
+                        </FormRow>
 
                         {create.error && <ErrorText>{create.error.message}</ErrorText>}
 

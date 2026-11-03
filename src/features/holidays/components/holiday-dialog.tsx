@@ -19,6 +19,7 @@ import {Muted} from "@/components/text/muted";
 import {ErrorText} from "@/components/text/error-text";
 import {FormDialogFooter} from "@/components/form/form-dialog-footer";
 import {FormField} from "@/components/form/form-field";
+import {FormRow} from "@/components/form/form-row";
 
 type Props = {
     holiday?: Holiday; // mit Feiertag: bearbeiten, ohne: neu anlegen
@@ -84,7 +85,7 @@ export function HolidayDialog({holiday, userId, userName, label, variant = "outl
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <FormRow>
                         <FormField label="Datum" htmlFor={`${uid}-date`}>
                             <Input
                                 id={`${uid}-date`}
@@ -103,7 +104,7 @@ export function HolidayDialog({holiday, userId, userName, label, variant = "outl
                                 required
                             />
                         </FormField>
-                    </div>
+                    </FormRow>
 
                     {problem && <ErrorText alert={false}>{problem}</ErrorText>}
                     {weekend && <Muted>Der Tag fällt auf ein Wochenende und ändert das Soll nicht.</Muted>}

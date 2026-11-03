@@ -20,6 +20,7 @@ import {valueText} from "@features/user-settings/use-cases/use-show-user-setting
 import {ErrorText} from "@/components/text/error-text";
 import {FormDialogFooter} from "@/components/form/form-dialog-footer";
 import {FormField} from "@/components/form/form-field";
+import {FormRow} from "@/components/form/form-row";
 
 type Props = {
     setting: UserSetting;
@@ -136,7 +137,7 @@ export function UserSettingDialog({
                         </FormField>
                     )}
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <FormRow>
                         {value !== null && (
                             <FormField label="Wert" htmlFor={`${uid}-value`}>
                                 {setting.type === "boolean" ? (
@@ -188,7 +189,7 @@ export function UserSettingDialog({
                                 )}
                             </FormField>
                         )}
-                    </div>
+                    </FormRow>
 
                     {problem && <ErrorText alert={false}>{problem}</ErrorText>}
 
