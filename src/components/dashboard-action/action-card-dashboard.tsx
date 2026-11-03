@@ -1,5 +1,6 @@
 import {ActionCard} from "@/components/dashboard-action/action-card";
 import type {DashboardAction} from "@/components/dashboard-action/types";
+import {PageTitle} from "@/components/page/page-title";
 
 export interface DashboardActionCardDashboardProps {
     onActionConfirm: (id: string) => void;
@@ -12,7 +13,7 @@ export const ActionCardDashboard = (props: DashboardActionCardDashboardProps) =>
     return (
         <main className="mx-auto max-w-5xl p-6">
             <header className="mb-8">
-                <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+                <PageTitle>{title}</PageTitle>
                 <p className="text-muted-foreground">Was möchtest du als Nächstes tun?</p>
             </header>
 

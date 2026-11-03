@@ -1,17 +1,8 @@
 import {useId, useState} from "react";
 import {Button} from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import {useAddPasskey} from "@features/passkeys/use-cases/use-add-passkey";
-import {ErrorText} from "@/components/text/error-text";
-import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {FormDialog} from "@/components/form/form-dialog";
 import {FormField} from "@/components/form/form-field";
 
 export function PasskeyAddDialog() {
@@ -32,50 +23,33 @@ export function PasskeyAddDialog() {
     const problem = add.problem(name);
 
     return (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogTrigger asChild>
-                <Button>Passkey hinzufügen</Button>
-            </DialogTrigger>
-            <DialogContent>
-                <form
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        if (problem) return;
-                        add.add(name, {onSuccess: () => setOpen(false)});
-                    }}
-                    className="space-y-4"
-                >
-                    <DialogHeader>
-                        <DialogTitle>Passkey hinzufügen</DialogTitle>
-                        <DialogDescription>
-                            Danach fragt dein Browser nach Fingerabdruck, Gesicht oder Geräte-PIN und legt den Passkey
-                            an.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <FormField label="Name" htmlFor={`${uid}-name`}>
-                        <Input
-                            id={`${uid}-name`}
-                            value={name}
-                            maxLength={100}
-                            placeholder="z. B. MacBook"
-                            onChange={(e) => setName(e.target.value)}
-                            required
-                            autoFocus
-                        />
-                    </FormField>
-
-                    {add.error && <ErrorText>{add.error.message}</ErrorText>}
-
-                    <FormDialogFooter
-                        onCancel={() => setOpen(false)}
-                        saving={add.isSaving}
-                        disabled={problem !== null}
-                        submitLabel="Weiter"
-                        savingLabel="Lege an…"
-                    />
-                </form>
-            </DialogContent>
-        </Dialog>
+        <FormDialog
+            title="Passkey hinzufügen"
+            description="Danach fragt dein Browser nach Fingerabdruck, Gesicht oder Geräte-PIN und legt den Passkey an."
+            open={open}
+            onOpenChange={handleOpenChange}
+            onSubmit={() => {
+                if (problem) return;
+                add.add(name, {onSuccess: () => setOpen(false)});
+            }}
+            saving={add.isSaving}
+            disabled={problem !== null}
+            submitLabel="Weiter"
+            savingLabel="Lege an…"
+            error={add.error}
+            trigger={<Button>Passkey hinzufügen</Button>}
+        >
+            <FormField label="Name" htmlFor={`${uid}-name`}>
+                <Input
+                    id={`${uid}-name`}
+                    value={name}
+                    maxLength={100}
+                    placeholder="z. B. MacBook"
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    autoFocus
+                />
+            </FormField>
+        </FormDialog>
     );
 }

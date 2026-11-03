@@ -1,6 +1,7 @@
 // src/features/version/components/version-dialog.tsx
 import {Button} from "@/components/ui/button";
 import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
+import {ExternalLink} from "@/components/text/text-link";
 
 const COMMIT_URL = `https://github.com/wzolleis/time-manager/commit/${__APP_COMMIT__}`;
 
@@ -23,9 +24,7 @@ export function VersionDialog({open, onOpenChange}: Props) {
                     <dd className="font-mono">{__APP_VERSION__}</dd>
                     <dt className="text-muted-foreground">Commit</dt>
                     <dd className="font-mono">
-                        <a href={COMMIT_URL} target="_blank" rel="noreferrer" className="underline">
-                            {__APP_COMMIT__}
-                        </a>
+                        <ExternalLink href={COMMIT_URL}>{__APP_COMMIT__}</ExternalLink>
                     </dd>
                 </dl>
 

@@ -43,9 +43,7 @@ export function UserActions({user}: {user: User}) {
         setOpen(next);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-
+    const handleSubmit = () => {
         // Nur geänderte Felder senden; ein leeres Avatar-Feld entfernt den Avatar
         const patch: UserUpdate = {};
         if (name !== user.name) patch.name = name;

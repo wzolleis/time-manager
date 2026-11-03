@@ -1,5 +1,6 @@
 import type {ReactNode} from "react";
 import {Muted} from "@/components/text/muted";
+import {PageTitle} from "@/components/page/page-title";
 
 type PageHeaderProps = {
     title: ReactNode;
@@ -11,7 +12,7 @@ type PageHeaderProps = {
 export function PageHeader({title, description, actions}: PageHeaderProps) {
     const heading = (
         <div>
-            <h1 className="text-2xl font-semibold">{title}</h1>
+            <PageTitle>{title}</PageTitle>
             {description && <Muted>{description}</Muted>}
         </div>
     );

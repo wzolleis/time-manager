@@ -1,4 +1,5 @@
-import {Link, useNavigate} from "@tanstack/react-router";
+import {useNavigate} from "@tanstack/react-router";
+import {TextLink} from "@/components/text/text-link";
 import type {Day} from "@shared/date-schemas";
 import {MetricCard} from "@/components/cards/metric-card";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
@@ -27,9 +28,9 @@ const columnsOf = (format: TimeFormat): DataTableColumnDef<DayRow>[] => {
             header: "Tag",
             cell: ({row}) => (
                 <span className={row.original.isToday ? "font-semibold" : undefined}>
-                    <Link to="/user/reports/daily/$day" params={{day: row.original.day}} className="underline">
+                    <TextLink to="/user/reports/daily/$day" params={{day: row.original.day}}>
                         {formatDayShort(localDayRange(row.original.day).start)}
-                    </Link>
+                    </TextLink>
                     {row.original.isToday && " · heute"}
                     {(row.original.kind === "vacation" ||
                         row.original.kind === "holiday" ||

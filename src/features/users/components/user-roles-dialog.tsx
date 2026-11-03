@@ -1,18 +1,10 @@
 import {useState} from "react";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
 import {fetchRoles, fetchUserRoles, updateUserRoles} from "@/api/roles";
 import type {User} from "@shared/user";
 import {ErrorText} from "@/components/text/error-text";
 import {Loading} from "@/components/text/loading";
-import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {FormDialog} from "@/components/form/form-dialog";
 import {ShieldCheck} from "lucide-react";
 import {ActionButton} from "@/components/buttons/action-button";
 
@@ -49,54 +41,42 @@ export function UserRolesDialog({user}: {user: User}) {
     const toggle = (roleId: string, checked: boolean) =>
         setSelected(checked ? [...current, roleId] : current.filter((id) => id !== roleId));
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = () => {
         save.mutate(current);
     };
 
     const loadError = roles.error ?? userRoles.error;
 
     return (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogTrigger asChild>
-                <ActionButton icon={ShieldCheck} label="Rollen" variant="outline" />
-            </DialogTrigger>
-            <DialogContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <DialogHeader>
-                        <DialogTitle>Rollen von {user.name}</DialogTitle>
-                        <DialogDescription>
-                            Ein Administrator darf alles. Es muss immer mindestens einen Administrator geben.
-                        </DialogDescription>
-                    </DialogHeader>
+        <FormDialog
+            title={<>Rollen von {user.name}</>}
+            description="Ein Administrator darf alles. Es muss immer mindestens einen Administrator geben."
+            open={open}
+            onOpenChange={handleOpenChange}
+            onSubmit={handleSubmit}
+            saving={save.isPending}
+            disabled={!userRoles.data}
+            trigger={<ActionButton icon={ShieldCheck} label="Rollen" variant="outline" />}
+        >
+            {(roles.isPending || userRoles.isPending) && !loadError && <Loading />}
 
-                    {(roles.isPending || userRoles.isPending) && !loadError && <Loading />}
+            {roles.data && userRoles.data && (
+                <fieldset className="space-y-2 text-left">
+                    <legend className="sr-only">Rollen</legend>
+                    {roles.data.map((role) => (
+                        <label key={role.id} className="flex items-center gap-2 text-sm">
+                            <input
+                                type="checkbox"
+                                checked={current.includes(role.id)}
+                                onChange={(e) => toggle(role.id, e.target.checked)}
+                            />
+                            {role.name}
+                        </label>
+                    ))}
+                </fieldset>
+            )}
 
-                    {roles.data && userRoles.data && (
-                        <fieldset className="space-y-2 text-left">
-                            <legend className="sr-only">Rollen</legend>
-                            {roles.data.map((role) => (
-                                <label key={role.id} className="flex items-center gap-2 text-sm">
-                                    <input
-                                        type="checkbox"
-                                        checked={current.includes(role.id)}
-                                        onChange={(e) => toggle(role.id, e.target.checked)}
-                                    />
-                                    {role.name}
-                                </label>
-                            ))}
-                        </fieldset>
-                    )}
-
-                    {(loadError ?? save.error) && <ErrorText>{(loadError ?? save.error)?.message}</ErrorText>}
-
-                    <FormDialogFooter
-                        onCancel={() => handleOpenChange(false)}
-                        saving={save.isPending}
-                        disabled={!userRoles.data}
-                    />
-                </form>
-            </DialogContent>
-        </Dialog>
+            {(loadError ?? save.error) && <ErrorText>{(loadError ?? save.error)?.message}</ErrorText>}
+        </FormDialog>
     );
 }

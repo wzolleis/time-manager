@@ -1,13 +1,5 @@
 import {type ReactElement, useState} from "react";
 import {Muted} from "@/components/text/muted";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
 import {localDay} from "@shared/time-rules";
 import {dayCount} from "@shared/vacation-rules";
 import {toDayRange} from "@shared/day-range";
@@ -15,7 +7,7 @@ import type {Vacation} from "@shared/vacation";
 import {useAddVacation} from "@features/vacations/use-cases/use-add-vacation";
 import {useChangeVacation} from "@features/vacations/use-cases/use-change-vacation";
 import {ErrorText} from "@/components/text/error-text";
-import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {FormDialog} from "@/components/form/form-dialog";
 import {DateRangeFields} from "@/components/form/date-range-fields";
 
 type Props = {
@@ -60,50 +52,39 @@ export function VacationDialog({vacation, trigger}: Props) {
               : add.problem(range);
 
     return (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogTrigger asChild disabled={!currentUser}>
-                {trigger}
-            </DialogTrigger>
-            <DialogContent>
-                <form
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        if (!problem) submit();
-                    }}
-                    className="space-y-4"
-                >
-                    <DialogHeader>
-                        <DialogTitle>{vacation ? "Urlaub bearbeiten" : "Urlaub eintragen"}</DialogTitle>
-                        <DialogDescription>
-                            Für {currentUser?.name}. Das Ende ist eingeschlossen. Wochenenden und Feiertage zählen als
-                            Kalendertage, aber nicht als Urlaubstage.
-                        </DialogDescription>
-                    </DialogHeader>
+        <FormDialog
+            title={vacation ? "Urlaub bearbeiten" : "Urlaub eintragen"}
+            description={
+                <>
+                    Für {currentUser?.name}. Das Ende ist eingeschlossen. Wochenenden und Feiertage zählen als
+                    Kalendertage, aber nicht als Urlaubstage.
+                </>
+            }
+            open={open}
+            onOpenChange={handleOpenChange}
+            onSubmit={() => {
+                if (!problem) submit();
+            }}
+            saving={save.isSaving}
+            disabled={problem !== null}
+            error={save.error}
+            trigger={trigger}
+            triggerDisabled={!currentUser}
+        >
+            <DateRangeFields
+                start={start}
+                end={end}
+                onChange={(s, e) => {
+                    setStart(s);
+                    setEnd(e);
+                }}
+            />
 
-                    <DateRangeFields
-                        start={start}
-                        end={end}
-                        onChange={(s, e) => {
-                            setStart(s);
-                            setEnd(e);
-                        }}
-                    />
-
-                    {problem ? (
-                        <ErrorText alert={false}>{problem}</ErrorText>
-                    ) : (
-                        <Muted>{`${days ? dayCount(days.startDate, days.endDate) : 0} Kalendertage · ${save.workdays(range)} Urlaubstage`}</Muted>
-                    )}
-
-                    {save.error && <ErrorText>{save.error.message}</ErrorText>}
-
-                    <FormDialogFooter
-                        onCancel={() => setOpen(false)}
-                        saving={save.isSaving}
-                        disabled={problem !== null}
-                    />
-                </form>
-            </DialogContent>
-        </Dialog>
+            {problem ? (
+                <ErrorText alert={false}>{problem}</ErrorText>
+            ) : (
+                <Muted>{`${days ? dayCount(days.startDate, days.endDate) : 0} Kalendertage · ${save.workdays(range)} Urlaubstage`}</Muted>
+            )}
+        </FormDialog>
     );
 }

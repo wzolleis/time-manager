@@ -1,4 +1,5 @@
-import {Link, useNavigate} from "@tanstack/react-router";
+import {useNavigate} from "@tanstack/react-router";
+import {TextLink} from "@/components/text/text-link";
 import type {Day, Month} from "@shared/date-schemas";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {useTimeFormat} from "@/lib/use-time-format";
@@ -27,9 +28,9 @@ const columnsOf = (format: TimeFormat): DataTableColumnDef<MonthWeekTotals>[] =>
             cell: ({row}) => {
                 const {year, week, days} = row.original;
                 return (
-                    <Link to="/user/reports/weekly/$week" params={{week: isoWeekId(days[0])}} className="underline">
+                    <TextLink to="/user/reports/weekly/$week" params={{week: isoWeekId(days[0])}}>
                         KW {week}/{year} ({dayLabel(days[0])}–{dayLabel(days[days.length - 1])})
-                    </Link>
+                    </TextLink>
                 );
             },
         },

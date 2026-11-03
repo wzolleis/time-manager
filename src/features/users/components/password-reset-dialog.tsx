@@ -1,20 +1,11 @@
 import {useState} from "react";
 import {useMutation} from "@tanstack/react-query";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import {resetPassword} from "@/api/auth";
 import {PASSWORD_MIN_LENGTH} from "@shared/auth";
 import type {User} from "@shared/user";
-import {ErrorText} from "@/components/text/error-text";
 import {FormField} from "@/components/form/form-field";
-import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {FormDialog} from "@/components/form/form-dialog";
 import {KeyRound} from "lucide-react";
 import {ActionButton} from "@/components/buttons/action-button";
 
@@ -34,49 +25,38 @@ export function PasswordResetDialog({user}: {user: User}) {
         setOpen(next);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = () => {
         reset.mutate();
     };
 
     const fieldId = `reset-password-${user.id}`;
 
     return (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogTrigger asChild>
-                <ActionButton icon={KeyRound} label="Passwort zurücksetzen" variant="outline" />
-            </DialogTrigger>
-            <DialogContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <DialogHeader>
-                        <DialogTitle>Passwort für {user.name} zurücksetzen</DialogTitle>
-                        <DialogDescription>
-                            Alle Anmeldungen von {user.name} werden beendet. Das neue Passwort teilst du dem User mit.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <FormField label="Neues Passwort" htmlFor={fieldId}>
-                        <Input
-                            id={fieldId}
-                            type="password"
-                            autoComplete="new-password"
-                            minLength={PASSWORD_MIN_LENGTH}
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            autoFocus
-                        />
-                    </FormField>
-
-                    {reset.isError && <ErrorText>{reset.error.message}</ErrorText>}
-
-                    <FormDialogFooter
-                        onCancel={() => handleOpenChange(false)}
-                        saving={reset.isPending}
-                        submitLabel="Zurücksetzen"
-                    />
-                </form>
-            </DialogContent>
-        </Dialog>
+        <FormDialog
+            title={<>Passwort für {user.name} zurücksetzen</>}
+            description={
+                <>Alle Anmeldungen von {user.name} werden beendet. Das neue Passwort teilst du dem User mit.</>
+            }
+            open={open}
+            onOpenChange={handleOpenChange}
+            onSubmit={handleSubmit}
+            saving={reset.isPending}
+            submitLabel="Zurücksetzen"
+            error={reset.error}
+            trigger={<ActionButton icon={KeyRound} label="Passwort zurücksetzen" variant="outline" />}
+        >
+            <FormField label="Neues Passwort" htmlFor={fieldId}>
+                <Input
+                    id={fieldId}
+                    type="password"
+                    autoComplete="new-password"
+                    minLength={PASSWORD_MIN_LENGTH}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    autoFocus
+                />
+            </FormField>
+        </FormDialog>
     );
 }

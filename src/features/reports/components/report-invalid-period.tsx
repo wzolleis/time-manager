@@ -1,5 +1,6 @@
 import type {ReactNode} from "react";
-import {Link, type LinkProps} from "@tanstack/react-router";
+import type {LinkProps} from "@tanstack/react-router";
+import {TextLink} from "@/components/text/text-link";
 import {ErrorText} from "@/components/text/error-text";
 import {PageHeader} from "@/components/page/page-header";
 import {Page} from "@/components/page/page";
@@ -17,9 +18,9 @@ export function ReportInvalidPeriod({title, message, to, linkLabel}: ReportInval
         <Page>
             <PageHeader title={title} />
             <ErrorText>{message}</ErrorText>
-            <Link to={to} className="text-sm underline">
+            <TextLink to={to} className="text-sm">
                 {linkLabel}
-            </Link>
+            </TextLink>
         </Page>
     );
 }

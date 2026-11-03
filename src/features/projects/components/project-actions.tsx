@@ -37,9 +37,7 @@ export function ProjectActions({project}: {project: Project}) {
         setOpen(next);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-
+    const handleSubmit = () => {
         // Nur geänderte Felder senden
         const patch: ProjectUpdate = {};
         if (name !== project.name) patch.name = name;

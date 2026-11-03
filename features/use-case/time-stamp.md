@@ -68,11 +68,18 @@ optional Beginn und Projekt an, der Dialog zeigt die Buchungen und die eingeplan
 Server berechnet die Buchungen selbst (`planWorkDay`) und legt sie in einer Transaktion an, alle oder keine
 (`createDay`). Dasselbe kann ein Agent mit dem MCP-Tool `add_time_entry_day` (`../boundaries/mcp-enable.md`).
 
-**Leerer Tag:** Beginn und Arbeitszeit sind mit 08:00 und 8 h vorbelegt (`WORK_DAY_START`, `WORK_DAY_MINUTES` in
-`../../shared/time-rules.ts`). Über 6 h liegt die Pause nach 6 h Arbeit, mit Pause entstehen zwei Buchungspaare.
+**Arbeitszeit im Dialog:** vorbelegt mit dem, was zum Soll des Tages noch fehlt (Soll minus gebuchte Arbeitszeit).
+Ist das Soll erreicht oder 0 (Wochenende, Feiertag, Urlaub, Krankheit), ist 1 h vorbelegt (`suggestedWorkMinutes`
+in `../../shared/time-rules.ts`). Das Feld ist nie leer: Ein leeres Zeitfeld zeigt im Browser eine Uhrzeit, die
+nicht gilt.
 
-**Tag mit Buchungen:** Das neue Buchungspaar liegt nach dem letzten Gehen des Tages. Beginn und Arbeitszeit haben
-keine Vorgabe. Ohne Beginn so früh wie möglich, der Dialog nennt den frühesten Beginn (`earliestStart`).
+**Leerer Tag:** Der Beginn ist mit 08:00 vorbelegt (`WORK_DAY_START` in `../../shared/time-rules.ts`). Über 6 h
+liegt die Pause nach 6 h Arbeit, mit Pause entstehen zwei Buchungspaare. Das MCP-Tool nimmt ohne Angabe 8 h
+(`WORK_DAY_MINUTES`).
+
+**Tag mit Buchungen:** Das neue Buchungspaar liegt nach dem letzten Gehen des Tages. Ohne Beginn so früh wie
+möglich. Der Dialog zeigt im Feld „Beginn“ den frühesten Beginn (`earliestStart`). Er folgt der Arbeitszeit, bis der
+User einen eigenen Beginn eingibt.
 
 - **Kein offenes Kommen.** Ist die letzte Buchung des Tages ein Kommen, wird nichts gebucht.
 - **Pflichtpause für den ganzen Tag:** Die Arbeitszeit des Tages mit der neuen bestimmt die Pause, bis 6 h keine,
