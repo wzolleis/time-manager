@@ -64,6 +64,24 @@ Die Karten stehen in `../../src/features/dashboard/actions/user-dashboard-action
 `Dashboard` ruft für die ID der Abmelde-Karte (`LOGOUT_ACTION_ID`) den Logout auf. Das `console.log`
 entfällt.
 
+## Breadcrumb
+
+Die Breadcrumb im Kopf der Seite (`../../src/application/breadcrumb/breadcrumb.tsx`) zeigt den Pfad zur aktuellen
+Seite. Eine eigene Story zur Navigation gibt es nicht, die Regeln stehen deshalb hier (Change
+`../changes/breadcrumb-dropdown.md`).
+
+1. Ein Glied mit Unterseiten in `nav-items.ts` („Report“, „Administration“) hat ein Dropdown, alle anderen nicht.
+2. Der Name bleibt ein Link auf seine Seite. Daneben öffnet ein Button mit Pfeil nach unten das Dropdown
+   (`aria-label` „Unterseiten von <Name>“). Link und Button sind auf Touch-Geräten mindestens 44 px groß.
+   Der Pfeil nach unten trennt das Glied vom nächsten, der Pfeil nach rechts (›) entfällt dort.
+3. Auch das letzte Glied hat das Dropdown, bleibt aber Text statt Link. Fehlt der Platz, wird nur der Name des
+   letzten Glieds gekürzt und endet mit „…“. Alles davor behält seine Größe.
+4. Das Dropdown zeigt die Unterseiten mit Icon in der Reihenfolge der Navigation, die aktuelle ist mit Häkchen
+   markiert und bleibt anklickbar.
+5. Die Auswahl navigiert und schließt das Dropdown, Escape oder ein Klick daneben schließt ohne Navigation.
+6. Die Unterseiten führen immer auf den aktuellen Zeitraum, auch von einem Bericht mit Zeitraum in der Adresse.
+7. Das Dropdown zeigt nur Einträge aus `nav-items.ts`, die Unterseiten von „Administration“ also nur auf `/admin`.
+
 ## Nicht Teil dieses Use Case
 
 - Der User kann die Karten nicht auswählen oder sortieren (eigenes Feature).
@@ -77,3 +95,5 @@ In `../../src/tests/` nach dem Muster von `dashboard.test.tsx` (Route rendern, A
 - `/user` zeigt die vier Karten in der Reihenfolge der Tabelle. Die Links haben die Ziele aus der Tabelle.
 - „Abmelden“ fragt nach. „Abbrechen“ ruft `/api/auth/logout` nicht auf, „Abmelden“ ruft es auf.
 - Der Eintrag `"/user": "User Dashboard"` in `routes.test.tsx` bleibt grün.
+- Breadcrumb (`navigation.test.tsx`): auf `/user/reports/daily` über das Dropdown von „Report“ zu „Woche“
+  wechseln, ein Glied ohne Unterseiten hat keinen Button.

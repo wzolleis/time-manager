@@ -4,7 +4,7 @@ description: Im Breadcrumb öffnet ein Klick auf ein Glied mit Unterseiten ein D
 type: change
 changes: user-dashboard
 epics: navigation
-state: open
+state: resolved
 ---
 
 # Breadcrumb Dropdown
@@ -35,9 +35,13 @@ nicht, die Regeln der Breadcrumb kommen deshalb dorthin. Frühere Regeln zur Bre
    steht ein kleiner Button mit Pfeil nach unten (`ChevronDown`), der das Dropdown öffnet. So bleibt „Report“ als
    Sprung zur Übersicht erhalten, und die Bedienung entspricht der Seitenleiste (`sidebar-item.tsx`: Link und
    eigener Button zum Aufklappen). Der Button hat das `aria-label` „Unterseiten von <Name>“ und ist auf
-   Touch-Geräten 44 px groß.
+   Touch-Geräten 44 px groß. Nach dem Button steht kein Pfeil nach rechts (›), der Pfeil nach unten trennt das
+   Glied schon vom nächsten. So hat das letzte Glied auf dem Handy mehr Platz.
 3. **Auch das letzte Glied.** Auf `/user/reports` ist „Report“ das letzte Glied und bekommt ebenfalls das Dropdown.
-   Das letzte Glied bleibt Text, nicht Link.
+   Das letzte Glied bleibt Text, nicht Link. Auf Touch-Geräten ist auch der Link eines Glieds mindestens 44 px
+   groß. Fehlt der Platz (z. B. „Report › Überstunden“ auf dem Handy), wird nur der Name des letzten Glieds
+   mit „…“ gekürzt, alles davor nicht. Für den Platz wandert der Button „60 min/h“ für die Industriezeit aus dem Kopf ins Benutzermenü
+   (`../use-case/industriezeit.md`).
 4. **Inhalt des Dropdowns.** Die Unterseiten in der Reihenfolge von `nav-items.ts`, jede mit Icon und Name. Die
    Unterseite, die gerade angezeigt wird, ist markiert (Häkchen oder hervorgehoben) und bleibt anklickbar.
 5. **Auswahl.** Ein Klick auf eine Unterseite navigiert dorthin und schließt das Dropdown. Escape oder ein Klick
@@ -65,12 +69,12 @@ Nach den Skills `ui-modules` (die neue Komponente gehört zum Rahmen, also nach 
 
 ## Fertig, wenn
 
-- [ ] „Report“ und „Administration“ haben in der Breadcrumb einen Button mit Pfeil, alle anderen Glieder nicht.
-- [ ] Ein Klick auf den Namen eines Glieds navigiert wie bisher, ein Klick auf den Pfeil öffnet das Dropdown.
-- [ ] Das Dropdown zeigt die Unterseiten mit Icon in der Reihenfolge der Navigation, die aktuelle ist markiert.
-- [ ] Die Auswahl einer Unterseite navigiert dorthin und schließt das Dropdown, Escape schließt ohne Navigation.
-- [ ] Auf einem Bericht mit Zeitraum in der Adresse führen die Unterseiten auf den aktuellen Zeitraum.
-- [ ] Auf schmalen Bildschirmen und mit Touch ist der Button groß genug, die Breadcrumb bricht nicht um.
-- [ ] Tests, Lint und Typen sind grün.
-- [ ] Der geänderte Use Case beschreibt den neuen Stand (user-dashboard).
-- [ ] `state` steht auf `resolved`.
+- [x] „Report“ und „Administration“ haben in der Breadcrumb einen Button mit Pfeil, alle anderen Glieder nicht.
+- [x] Ein Klick auf den Namen eines Glieds navigiert wie bisher, ein Klick auf den Pfeil öffnet das Dropdown.
+- [x] Das Dropdown zeigt die Unterseiten mit Icon in der Reihenfolge der Navigation, die aktuelle ist markiert.
+- [x] Die Auswahl einer Unterseite navigiert dorthin und schließt das Dropdown, Escape schließt ohne Navigation.
+- [x] Auf einem Bericht mit Zeitraum in der Adresse führen die Unterseiten auf den aktuellen Zeitraum.
+- [x] Auf schmalen Bildschirmen und mit Touch ist der Button groß genug, die Breadcrumb bricht nicht um.
+- [x] Tests, Lint und Typen sind grün.
+- [x] Der geänderte Use Case beschreibt den neuen Stand (user-dashboard).
+- [x] `state` steht auf `resolved`.

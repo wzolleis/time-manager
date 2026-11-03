@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
-import {cleanup, render, screen, within} from "@testing-library/react";
+import {cleanup, fireEvent, render, screen, waitFor, within} from "@testing-library/react";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {createMemoryHistory, createRouter, RouterProvider} from "@tanstack/react-router";
 import {routeTree} from "@/routeTree.gen";
@@ -38,6 +38,7 @@ function renderApp(path: string) {
             </UserProvider>
         </QueryClientProvider>,
     );
+    return router;
 }
 
 beforeEach(() => {
@@ -91,5 +92,37 @@ describe("Navigation", () => {
 
         const breadcrumb = await screen.findByRole("navigation", {name: "Breadcrumb"});
         expect(breadcrumb.textContent).toBe("ReportWoche");
+    });
+
+    it("wechselt über das Dropdown in der Breadcrumb zu einer anderen Unterseite", async () => {
+        mockApi(USER);
+        const router = renderApp("/user/reports/daily");
+
+        const breadcrumb = await screen.findByRole("navigation", {name: "Breadcrumb"});
+        // Nach dem Pfeil nach unten steht kein Pfeil nach rechts
+        expect(breadcrumb.querySelector(".lucide-chevron-right")).toBeNull();
+        // Radix öffnet ein Dropdown in jsdom über die Tastatur
+        fireEvent.keyDown(within(breadcrumb).getByRole("button", {name: "Unterseiten von Report"}), {key: "Enter"});
+
+        const menu = await screen.findByRole("menu");
+        expect(
+            within(menu)
+                .getAllByRole("menuitem")
+                .map((item) => item.textContent),
+        ).toEqual(["Heute", "Woche", "Monat", "Jahr", "Überstunden"]);
+        expect(within(menu).getByRole("menuitem", {name: "Heute"}).getAttribute("aria-current")).toBe("page");
+
+        fireEvent.click(within(menu).getByRole("menuitem", {name: "Woche"}));
+        await waitFor(() => expect(router.state.location.pathname).toBe("/user/reports/weekly"));
+        expect(screen.queryByRole("menu")).toBeNull();
+    });
+
+    it("zeigt in der Breadcrumb ein Dropdown nur bei Gliedern mit Unterseiten", async () => {
+        mockApi(USER);
+        renderApp("/user/vacations");
+
+        const breadcrumb = await screen.findByRole("navigation", {name: "Breadcrumb"});
+        expect(breadcrumb.textContent).toBe("Urlaube");
+        expect(within(breadcrumb).queryByRole("button")).toBeNull();
     });
 });
