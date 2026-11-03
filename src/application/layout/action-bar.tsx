@@ -56,9 +56,11 @@ function ActionBar() {
                         {action.kind === "link" ? (
                             <IconLink icon={action.icon} label={action.title} to={action.to} />
                         ) : (
-                            <ConfirmActionDialog action={action} onConfirm={handleConfirm}>
-                                <IconButton icon={action.icon} label={action.title} />
-                            </ConfirmActionDialog>
+                            <ConfirmActionDialog
+                                action={action}
+                                onConfirm={handleConfirm}
+                                trigger={<IconButton icon={action.icon} label={action.title} />}
+                            />
                         )}
                     </PressFeedback>
                 ))}

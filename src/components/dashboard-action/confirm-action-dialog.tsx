@@ -13,19 +13,19 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-/** Fragt vor einer Aktion nach. children ist der Button, der den Dialog öffnet. */
+/** Fragt vor einer Aktion nach. trigger ist der Button, der den Dialog öffnet. */
 export function ConfirmActionDialog({
     action,
     onConfirm,
-    children,
+    trigger,
 }: {
     action: ConfirmAction;
     onConfirm: (id: string) => void;
-    children: ReactNode;
+    trigger: ReactNode;
 }) {
     return (
         <AlertDialog>
-            <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+            <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>{action.confirmTitle}</AlertDialogTitle>

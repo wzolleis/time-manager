@@ -35,27 +35,23 @@ export function UserSettingDialog({setting, current, initialValue, trigger, disa
     const save = current ? change : add;
     const {currentUser} = save;
 
-    const [open, setOpen] = useState(false);
     const [value, setValue] = useState<string | null>("");
     const [lastOwn, setLastOwn] = useState(""); // die zuletzt eingegebene Zahl, für den Wechsel von „Default“ zurück
     const [validFrom, setValidFrom] = useState("");
 
     // Beim Öffnen mit dem gespeicherten Wert bzw. mit dem frühesten erlaubten Tag starten
-    const handleOpenChange = (next: boolean) => {
-        if (next) {
-            const today = localDay(new Date());
-            const nextYear = `${Number(today.slice(0, 4)) + 1}-01-01`;
-            const start = current ? current.value : initialValue;
-            setValue(start);
-            setLastOwn(start ?? setting.defaultValue);
-            setValidFrom(current?.validFrom ?? (byYear(setting) ? nextYear : addDays(today, 1)));
-            save.reset();
-        }
-        setOpen(next);
+    const reset = () => {
+        const today = localDay(new Date());
+        const nextYear = `${Number(today.slice(0, 4)) + 1}-01-01`;
+        const start = current ? current.value : initialValue;
+        setValue(start);
+        setLastOwn(start ?? setting.defaultValue);
+        setValidFrom(current?.validFrom ?? (byYear(setting) ? nextYear : addDays(today, 1)));
+        save.reset();
     };
 
-    const submit = () => {
-        const close = {onSuccess: () => setOpen(false)};
+    const submit = (onClose: () => void) => {
+        const close = {onSuccess: onClose};
         if (current) change.change({setting, current, value, validFrom}, close);
         else add.add({setting, value, validFrom: immediate ? undefined : validFrom}, close);
     };
@@ -89,10 +85,9 @@ export function UserSettingDialog({setting, current, initialValue, trigger, disa
                     )}
                 </>
             }
-            open={open}
-            onOpenChange={handleOpenChange}
-            onSubmit={() => {
-                if (!problem) submit();
+            onOpen={reset}
+            onSubmit={(close) => {
+                if (!problem) submit(close);
             }}
             saving={save.isSaving}
             disabled={problem !== null}

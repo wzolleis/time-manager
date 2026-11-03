@@ -17,16 +17,12 @@ const LIST = "max-h-60";
 export function OvertimeDialog({offset}: {offset: number | null}) {
     const uid = useId();
     const change = useChangeOvertime();
-    const [open, setOpen] = useState(false);
     const [parts, setParts] = useState<OffsetParts>(fromOffset(offset));
 
     // Beim Öffnen immer mit dem gespeicherten Wert starten
-    const handleOpenChange = (next: boolean) => {
-        if (next) {
-            setParts(fromOffset(offset));
-            change.reset();
-        }
-        setOpen(next);
+    const reset = () => {
+        setParts(fromOffset(offset));
+        change.reset();
     };
 
     const problem = change.problem(parts);
@@ -35,10 +31,9 @@ export function OvertimeDialog({offset}: {offset: number | null}) {
         <FormDialog
             title="Überstunden korrigieren"
             description="Der Korrekturwert ist der Saldo bis gestern. Ab heute wird mit den Buchungen weitergerechnet."
-            open={open}
-            onOpenChange={handleOpenChange}
-            onSubmit={() => {
-                if (!problem) change.change(parts, {onSuccess: () => setOpen(false)});
+            onOpen={reset}
+            onSubmit={(close) => {
+                if (!problem) change.change(parts, {onSuccess: close});
             }}
             saving={change.isSaving}
             disabled={problem !== null}

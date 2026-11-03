@@ -25,28 +25,24 @@ export function SickLeaveDialog({sickLeave, trigger}: Props) {
     const save = sickLeave ? change : add;
     const {currentUser} = save;
 
-    const [open, setOpen] = useState(false);
     const [start, setStart] = useState("");
     const [end, setEnd] = useState("");
     const [note, setNote] = useState("");
 
-    const submit = () => {
-        const close = {onSuccess: () => setOpen(false)};
+    const submit = (onClose: () => void) => {
+        const close = {onSuccess: onClose};
         const data = {startDate: start, endDate: end, note: note.trim() || null};
         if (sickLeave) change.change({sickLeave, ...data}, close);
         else add.add(data, close);
     };
 
     // Beim Öffnen immer mit den gespeicherten Werten bzw. mit heute starten
-    const handleOpenChange = (next: boolean) => {
-        if (next) {
-            const today = localDay(new Date());
-            setStart(sickLeave?.startDate ?? today);
-            setEnd(sickLeave?.endDate ?? today);
-            setNote(sickLeave?.note ?? "");
-            save.reset();
-        }
-        setOpen(next);
+    const reset = () => {
+        const today = localDay(new Date());
+        setStart(sickLeave?.startDate ?? today);
+        setEnd(sickLeave?.endDate ?? today);
+        setNote(sickLeave?.note ?? "");
+        save.reset();
     };
 
     const range = {startDate: start, endDate: end};
@@ -67,10 +63,9 @@ export function SickLeaveDialog({sickLeave, trigger}: Props) {
                     und Feiertage zählen nicht als Krankheitstage.
                 </>
             }
-            open={open}
-            onOpenChange={handleOpenChange}
-            onSubmit={() => {
-                if (!problem) submit();
+            onOpen={reset}
+            onSubmit={(close) => {
+                if (!problem) submit(close);
             }}
             saving={save.isSaving}
             disabled={problem !== null}

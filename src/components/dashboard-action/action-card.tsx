@@ -31,11 +31,15 @@ export function ActionCard({action, onConfirm}: {action: DashboardAction; onConf
                         <Link to={action.to}>{action.label}</Link>
                     </Button>
                 ) : (
-                    <ConfirmActionDialog action={action} onConfirm={onConfirm}>
-                        <Button variant="destructive" className="w-full">
-                            {action.label}
-                        </Button>
-                    </ConfirmActionDialog>
+                    <ConfirmActionDialog
+                        action={action}
+                        onConfirm={onConfirm}
+                        trigger={
+                            <Button variant="destructive" className="w-full">
+                                {action.label}
+                            </Button>
+                        }
+                    />
                 )}
             </CardFooter>
         </Card>

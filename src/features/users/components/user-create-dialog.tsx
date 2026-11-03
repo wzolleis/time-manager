@@ -10,7 +10,6 @@ import {FormDialog} from "@/components/form/form-dialog";
 
 export function UserCreateDialog() {
     const qc = useQueryClient();
-    const [open, setOpen] = useState(false);
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [avatarUrl, setAvatarUrl] = useState("");
@@ -18,38 +17,36 @@ export function UserCreateDialog() {
 
     const create = useMutation({
         mutationFn: (data: UserCreate) => createUser(data),
-        onSuccess: async () => {
-            await qc.invalidateQueries({queryKey: ["users"]});
-            setOpen(false);
-        },
+        onSuccess: () => qc.invalidateQueries({queryKey: ["users"]}),
     });
 
-    // Beim Öffnen und Schließen leeres Formular und keine alte Fehlermeldung
-    const handleOpenChange = (next: boolean) => {
+    // Beim Öffnen leeres Formular und keine alte Fehlermeldung
+    const reset = () => {
         setName("");
         setEmail("");
         setAvatarUrl("");
         setPassword("");
         create.reset();
-        setOpen(next);
     };
 
-    const handleSubmit = () => {
-        create.mutate({
-            name,
-            email,
-            password,
-            // Leeres Feld bedeutet "kein Avatar", die DB speichert dann NULL
-            avatarUrl: avatarUrl === "" ? null : avatarUrl,
-        });
+    const handleSubmit = (close: () => void) => {
+        create.mutate(
+            {
+                name,
+                email,
+                password,
+                // Leeres Feld bedeutet "kein Avatar", die DB speichert dann NULL
+                avatarUrl: avatarUrl === "" ? null : avatarUrl,
+            },
+            {onSuccess: close},
+        );
     };
 
     return (
         <FormDialog
             title="Neuen User anlegen"
             description="Name, E-Mail und Passwort sind Pflicht, der Avatar ist optional. Das Passwort teilst du dem User mit, er kann es danach selbst ändern."
-            open={open}
-            onOpenChange={handleOpenChange}
+            onOpen={reset}
             onSubmit={handleSubmit}
             saving={create.isPending}
             submitLabel="Anlegen"

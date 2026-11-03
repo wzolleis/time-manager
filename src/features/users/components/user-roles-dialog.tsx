@@ -24,25 +24,22 @@ export function UserRolesDialog({user}: {user: User}) {
 
     const save = useMutation({
         mutationFn: (next: string[]) => updateUserRoles(user.id, next),
-        onSuccess: (saved) => {
-            qc.setQueryData(["users", user.id, "roles"], saved);
-            setOpen(false);
-        },
+        onSuccess: (saved) => qc.setQueryData(["users", user.id, "roles"], saved),
     });
 
     const current = selected ?? userRoles.data?.map((r) => r.id) ?? [];
 
-    const handleOpenChange = (next: boolean) => {
+    // Beim Öffnen die gespeicherten Rollen und keine alte Fehlermeldung
+    const reset = () => {
         setSelected(null);
         save.reset();
-        setOpen(next);
     };
 
     const toggle = (roleId: string, checked: boolean) =>
         setSelected(checked ? [...current, roleId] : current.filter((id) => id !== roleId));
 
-    const handleSubmit = () => {
-        save.mutate(current);
+    const handleSubmit = (close: () => void) => {
+        save.mutate(current, {onSuccess: close});
     };
 
     const loadError = roles.error ?? userRoles.error;
@@ -51,8 +48,10 @@ export function UserRolesDialog({user}: {user: User}) {
         <FormDialog
             title={<>Rollen von {user.name}</>}
             description="Ein Administrator darf alles. Es muss immer mindestens einen Administrator geben."
+            // open bleibt hier gesteuert: die Rollen werden erst geladen, wenn der Dialog offen ist
             open={open}
-            onOpenChange={handleOpenChange}
+            onOpenChange={setOpen}
+            onOpen={reset}
             onSubmit={handleSubmit}
             saving={save.isPending}
             disabled={!userRoles.data}

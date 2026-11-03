@@ -12,15 +12,11 @@ import {EditButton} from "@/components/buttons/edit-button";
 /** Aktionen je Zeile: Projekt bearbeiten oder löschen */
 export function ProjectActions({project}: {project: Project}) {
     const qc = useQueryClient();
-    const [open, setOpen] = useState(false);
     const [name, setName] = useState(project.name);
 
     const update = useMutation({
         mutationFn: (data: ProjectUpdate) => updateProject(project.id, data),
-        onSuccess: async () => {
-            await qc.invalidateQueries({queryKey: ["projects"]});
-            setOpen(false);
-        },
+        onSuccess: () => qc.invalidateQueries({queryKey: ["projects"]}),
     });
 
     const remove = useMutation({
@@ -29,46 +25,31 @@ export function ProjectActions({project}: {project: Project}) {
     });
 
     // Beim Öffnen immer mit den gespeicherten Werten starten
-    const handleOpenChange = (next: boolean) => {
-        if (next) {
-            setName(project.name);
-            update.reset();
-        }
-        setOpen(next);
+    const reset = () => {
+        setName(project.name);
+        update.reset();
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = (close: () => void) => {
         // Nur geänderte Felder senden
         const patch: ProjectUpdate = {};
         if (name !== project.name) patch.name = name;
 
         if (Object.keys(patch).length === 0) {
-            setOpen(false);
+            close();
             return;
         }
-        update.mutate(patch);
+        update.mutate(patch, {onSuccess: close});
     };
 
     const fieldId = (field: string) => `${field}-${project.id}`;
 
     return (
-        <>
-            <RowActions error={remove.error}>
-                <EditButton onClick={() => handleOpenChange(true)} />
-
-                <ConfirmDeleteButton
-                    title={<>{project.name} löschen?</>}
-                    description="Das Projekt wird dauerhaft aus der Datenbank entfernt. Das lässt sich nicht rückgängig machen."
-                    onConfirm={() => remove.mutate(project.id)}
-                    onOpen={() => remove.reset()}
-                    pending={remove.isPending}
-                />
-            </RowActions>
-
+        <RowActions error={remove.error}>
             <EditDialog
                 title="Projekt bearbeiten"
-                open={open}
-                onOpenChange={handleOpenChange}
+                trigger={<EditButton />}
+                onOpen={reset}
                 onSubmit={handleSubmit}
                 saving={update.isPending}
                 error={update.error}
@@ -77,6 +58,14 @@ export function ProjectActions({project}: {project: Project}) {
                     <Input id={fieldId("name")} value={name} onChange={(e) => setName(e.target.value)} required />
                 </FormField>
             </EditDialog>
-        </>
+
+            <ConfirmDeleteButton
+                title={<>{project.name} löschen?</>}
+                description="Das Projekt wird dauerhaft aus der Datenbank entfernt. Das lässt sich nicht rückgängig machen."
+                onConfirm={() => remove.mutate(project.id)}
+                onOpen={() => remove.reset()}
+                pending={remove.isPending}
+            />
+        </RowActions>
     );
 }

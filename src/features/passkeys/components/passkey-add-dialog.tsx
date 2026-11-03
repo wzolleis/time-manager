@@ -9,15 +9,12 @@ export function PasskeyAddDialog() {
     const uid = useId();
     const add = useAddPasskey();
 
-    const [open, setOpen] = useState(false);
     const [name, setName] = useState("");
 
-    const handleOpenChange = (next: boolean) => {
-        if (next) {
-            setName("");
-            add.reset();
-        }
-        setOpen(next);
+    // Beim Öffnen leeres Formular und keine alte Fehlermeldung
+    const reset = () => {
+        setName("");
+        add.reset();
     };
 
     const problem = add.problem(name);
@@ -26,11 +23,10 @@ export function PasskeyAddDialog() {
         <FormDialog
             title="Passkey hinzufügen"
             description="Danach fragt dein Browser nach Fingerabdruck, Gesicht oder Geräte-PIN und legt den Passkey an."
-            open={open}
-            onOpenChange={handleOpenChange}
-            onSubmit={() => {
+            onOpen={reset}
+            onSubmit={(close) => {
                 if (problem) return;
-                add.add(name, {onSuccess: () => setOpen(false)});
+                add.add(name, {onSuccess: close});
             }}
             saving={add.isSaving}
             disabled={problem !== null}

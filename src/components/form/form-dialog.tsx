@@ -1,4 +1,4 @@
-import type {ReactNode} from "react";
+import {type ReactNode, useState} from "react";
 import {
     Dialog,
     DialogContent,
@@ -13,9 +13,14 @@ import {FormDialogFooter} from "@/components/form/form-dialog-footer";
 type FormDialogProps = {
     title: ReactNode;
     description: ReactNode;
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    onSubmit: () => void; // das Neuladen der Seite verhindert der Dialog
+    // Wie bei shadcn: ohne open verwaltet der Dialog selbst, ob er offen ist. Mit open steuert der Aufrufer,
+    // z. B. wenn ein Menüeintrag den Dialog öffnet.
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    onOpen?: () => void; // beim Öffnen über den Trigger, z. B. Formular und alte Fehler zurücksetzen
+    // close schließt den Dialog, z. B. nach dem Speichern: mutate(data, {onSuccess: close}).
+    // Das Neuladen der Seite verhindert der Dialog.
+    onSubmit: (close: () => void) => void;
     saving: boolean;
     error?: Error | null; // Fehler beim Speichern
     disabled?: boolean; // sperrt das Absenden, z. B. solange die Eingaben ungültig sind
@@ -32,6 +37,7 @@ export function FormDialog({
     description,
     open,
     onOpenChange,
+    onOpen,
     onSubmit,
     saving,
     error,
@@ -42,8 +48,18 @@ export function FormDialog({
     triggerDisabled,
     children,
 }: FormDialogProps) {
+    const [ownOpen, setOwnOpen] = useState(false);
+    const isOpen = open ?? ownOpen;
+
+    const changeOpen = (next: boolean) => {
+        if (next) onOpen?.();
+        if (open === undefined) setOwnOpen(next);
+        onOpenChange?.(next);
+    };
+    const close = () => changeOpen(false);
+
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={isOpen} onOpenChange={changeOpen}>
             {trigger && (
                 <DialogTrigger asChild disabled={triggerDisabled}>
                     {trigger}
@@ -53,7 +69,7 @@ export function FormDialog({
                 <form
                     onSubmit={(e) => {
                         e.preventDefault();
-                        onSubmit();
+                        onSubmit(close);
                     }}
                     className="space-y-4"
                 >
@@ -67,7 +83,7 @@ export function FormDialog({
                     {error && <ErrorText>{error.message}</ErrorText>}
 
                     <FormDialogFooter
-                        onCancel={() => onOpenChange(false)}
+                        onCancel={close}
                         saving={saving}
                         disabled={disabled}
                         submitLabel={submitLabel}

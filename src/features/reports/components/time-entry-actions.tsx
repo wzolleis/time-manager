@@ -26,41 +26,32 @@ export function EntryActions({entry}: {entry: EntryRow}) {
     const typeLabel = isKommen ? "Kommen" : "Gehen";
 
     // --- Bearbeiten ---
-    const [open, setOpen] = useState(false);
     const [time, setTime] = useState(formatTime(entry.bookedAt));
     const [projectChoice, setProjectChoice] = useState(entry.projectId ?? NO_PROJECT);
 
     // Beim Öffnen immer mit den gespeicherten Werten starten
-    const handleOpenChange = (next: boolean) => {
-        if (next) {
-            setTime(formatTime(entry.bookedAt));
-            setProjectChoice(entry.projectId ?? NO_PROJECT);
-        }
-        setOpen(next);
+    const reset = () => {
+        setTime(formatTime(entry.bookedAt));
+        setProjectChoice(entry.projectId ?? NO_PROJECT);
     };
 
     const problem = update.problem({entry, time});
     const sickNotice = update.sickNotice(localDay(entry.bookedAt)); // der Tag bleibt beim Bearbeiten gleich
 
-    const handleSubmit = () => {
+    const handleSubmit = (close: () => void) => {
         if (problem) return;
         // Die Änderung steht sofort in der Liste, ein Fehler des Servers kommt als Toast
         update.change({entry, time, projectId: projectChoice === NO_PROJECT ? null : projectChoice});
-        setOpen(false);
+        close();
     };
 
     return (
-        <>
-            <RowActions>
-                <EditButton disabled={pending} onClick={() => handleOpenChange(true)} />
-                <TimeEntryDelete entry={entry} />
-            </RowActions>
-
+        <RowActions>
             <FormDialog
                 title={<>{typeLabel} bearbeiten</>}
                 description="Der Tag bleibt unverändert, die Abfolge von Kommen und Gehen wird geprüft."
-                open={open}
-                onOpenChange={handleOpenChange}
+                trigger={<EditButton disabled={pending} />}
+                onOpen={reset}
                 onSubmit={handleSubmit}
                 saving={false}
                 disabled={problem !== null}
@@ -96,6 +87,7 @@ export function EntryActions({entry}: {entry: EntryRow}) {
                 {sickNotice && <Muted>{sickNotice}</Muted>}
                 {problem && <ErrorText alert={false}>{problem}</ErrorText>}
             </FormDialog>
-        </>
+            <TimeEntryDelete entry={entry} />
+        </RowActions>
     );
 }
