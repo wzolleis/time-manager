@@ -11,17 +11,26 @@ state: resolved
 
 ## Einstellungen
 Im Avatar-Menü oben rechts gibt es den Eintrag „Einstellungen“ (Route `/user/settings`).
-Ein Klick darauf zeigt die Einstellungsseite.
-Dort steht eine Tabelle mit den Spalten „Name“, „Wert“, „gültig ab“, „Status“ und „Beschreibung“:
-* Name = der Name der Einstellung
-* Wert = der Wert der Einstellung mit Einheit, z. B. „8 Stunden“, oder „Default (8 Stunden)“ (siehe
-  [Auf den Default zurücksetzen](#auf-den-default-zurücksetzen))
-* gültig ab = ab welchem Tag der Wert gilt. Es werden nur Tage ausgewählt, der Wert gilt ab 00:00 dieses
-  Tages (Europe/Berlin).
-* Status = „aktuell“, „geplant“ oder „abgelaufen“ (siehe [Regeln](#regeln))
-* Beschreibung = zusätzliche Beschreibung der Einstellung
+Ein Klick darauf zeigt die Einstellungsseite mit dem Titel „Einstellungen“ und dem Namen des Users.
+Die Seite hat mehrere Abschnitte, jeder mit einer eigenen Tabelle:
 
-Pro Einstellung gibt es eine Zeile je Wert, also auch für ältere und geplante Werte.
+1. **„Allgemein“** oben, mit allen Einstellungen ohne Historie (siehe
+   [Einstellungen ohne Historie](#einstellungen-ohne-historie)), eine Zeile je Einstellung. Spalten:
+   * Name = der Name der Einstellung
+   * Wert = der eigene Wert oder „Default (Ja)“
+   * Beschreibung = zusätzliche Beschreibung der Einstellung
+2. **Je Einstellung mit Historie ein Abschnitt** darunter, nach Namen sortiert. Überschrift ist der Name der
+   Einstellung, darunter die Beschreibung und der Hinweis „Jeder Wert gilt ab einem Tag, ältere Werte gelten
+   für die Vergangenheit weiter.“ Spalten:
+   * Wert = der Wert der Einstellung mit Einheit, z. B. „8 Stunden“, oder „Default (8 Stunden)“ (siehe
+     [Auf den Default zurücksetzen](#auf-den-default-zurücksetzen))
+   * gültig ab = ab welchem Tag der Wert gilt. Es werden nur Tage ausgewählt, der Wert gilt ab 00:00 dieses
+     Tages (Europe/Berlin).
+   * Status = „aktuell“, „geplant“ oder „abgelaufen“ (siehe [Regeln](#regeln))
+
+   Je Wert gibt es eine Zeile, also auch für ältere und geplante Werte. Der Default steht zuerst.
+
+Alle Tabellen haben rechts die Aktionen der Zeile.
 
 ## Einstellungsmöglichkeiten
 
@@ -42,9 +51,9 @@ bleibt stehen und gilt bis zum Tag vor dem neuen „gültig ab“ weiter.
 Manche Einstellungen betreffen nur die Oberfläche von jetzt an, keine Berechnung, z. B. `show_action_bar`. Sie
 haben keine Historie (`valid_from_unit = immediately`): Ein neuer Wert gilt sofort und ersetzt den bisherigen.
 
-- Pro User höchstens ein eigener Wert. `valid_from` ist der Tag der letzten Änderung, er wird nur angezeigt.
-- Die Tabelle zeigt eine Zeile je Einstellung: den eigenen Wert oder den Default, Status immer „aktuell“.
-  Werte vom Typ `boolean` stehen als „Ja“ oder „Nein“ da.
+- Pro User höchstens ein eigener Wert. `valid_from` ist der Tag der letzten Änderung, er wird nicht angezeigt.
+- Die Tabelle „Allgemein“ zeigt eine Zeile je Einstellung: den eigenen Wert oder den Default, ohne „gültig ab“
+  und ohne Status. Werte vom Typ `boolean` stehen als „Ja“ oder „Nein“ da.
 - „Ändern“ öffnet den Dialog ohne „gültig ab“, bei `boolean` mit der Auswahl „Ja“ / „Nein“. „Auf Default
   zurücksetzen“ gilt sofort, ohne Dialog. „Bearbeiten“ und „Löschen“ gibt es nicht.
 - Statt der Regeln 3, 4, 5 und 7 gilt nur: „Default“ geht nicht, wenn schon der Default gilt.
@@ -150,6 +159,7 @@ Verstöße gegen eine Regel liefern die Meldung der Regel zurück.
   als „geplant“. Ab morgen rechnen Berichte und Urlaubsplanung mit dem Default, davor mit dem eigenen Wert.
 - Ohne eigenen Wert ist „Auf Default zurücksetzen“ gesperrt; „Default“ ohne eigenen Wert am Tag davor wird
   abgelehnt.
-- `show_action_bar` steht ohne eigenen Wert als „Ja“ in einer Zeile. Ändern auf „Nein“ braucht kein „gültig ab“,
+- Die Seite zeigt die Abschnitte „Allgemein“, „Soll“ und „Urlaubstage“, jeder mit eigener Tabelle.
+- `show_action_bar` steht ohne eigenen Wert als „Ja“ in einer Zeile unter „Allgemein“. Ändern auf „Nein“ braucht kein „gültig ab“,
   die Zeile zeigt sofort „Nein“; ein zweiter Wert überschreibt den ersten. Werte außer `true` und `false` werden
   abgelehnt.

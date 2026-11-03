@@ -1,3 +1,4 @@
+import type {ReactNode} from "react";
 import {formatDay} from "@shared/format";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {actionsColumn} from "@/components/table/actions-column";
@@ -15,7 +16,17 @@ import {PageHeader} from "@/components/page/page-header";
 const wrapOnPhone = {className: "whitespace-normal sm:whitespace-nowrap"};
 
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
-const columns: DataTableColumnDef<Row>[] = [
+
+const valueColumn: DataTableColumnDef<Row> = {
+    accessorKey: "text",
+    header: "Wert",
+    enableSorting: false,
+    meta: wrapOnPhone,
+};
+const actions = actionsColumn<Row>((row) => <UserSettingActions row={row} />);
+
+/** Einstellungen ohne Historie: eine Zeile je Einstellung, ohne „gültig ab“ und Status */
+const immediateColumns: DataTableColumnDef<Row>[] = [
     {
         id: "name",
         header: "Name",
@@ -30,15 +41,7 @@ const columns: DataTableColumnDef<Row>[] = [
             </>
         ),
     },
-    {accessorKey: "text", header: "Wert", enableSorting: false, meta: wrapOnPhone},
-    {
-        id: "validFrom",
-        header: "gültig ab",
-        enableSorting: false,
-        meta: wrapOnPhone,
-        cell: ({row}) => (row.original.validFrom ? formatDay(row.original.validFrom) : "–"),
-    },
-    {accessorKey: "status", header: "Status", enableSorting: false},
+    valueColumn,
     {
         id: "description",
         header: "Beschreibung",
@@ -47,11 +50,44 @@ const columns: DataTableColumnDef<Row>[] = [
         // TableCell ist nowrap, lange Beschreibungen brechen um
         cell: ({row}) => <div className="break-words whitespace-normal">{row.original.setting.description}</div>,
     },
-    actionsColumn((row) => <UserSettingActions row={row} />),
+    actions,
 ];
 
+/** Eine Einstellung mit Historie: Name und Beschreibung stehen in der Überschrift, je Wert eine Zeile */
+const historyColumns: DataTableColumnDef<Row>[] = [
+    valueColumn,
+    {
+        id: "validFrom",
+        header: "gültig ab",
+        enableSorting: false,
+        meta: wrapOnPhone,
+        cell: ({row}) => (row.original.validFrom ? formatDay(row.original.validFrom) : "–"),
+    },
+    {accessorKey: "status", header: "Status", enableSorting: false},
+    actions,
+];
+
+type SettingsSectionProps = {title: string; description?: string[]; children: ReactNode};
+
+/** Abschnitt der Seite: Überschrift, optional Absätze mit Beschreibung, darunter eine Tabelle */
+function SettingsSection({title, description = [], children}: SettingsSectionProps) {
+    return (
+        <section className="space-y-2">
+            <div>
+                <h2 className="text-lg font-semibold">{title}</h2>
+                {description.map((text) => (
+                    <Muted key={text}>{text}</Muted>
+                ))}
+            </div>
+            {children}
+        </section>
+    );
+}
+
+const HISTORY_HINT = "Jeder Wert gilt ab einem Tag, ältere Werte gelten für die Vergangenheit weiter.";
+
 export function UserSettingsTable() {
-    const {currentUser, rows, isPending, error, retry} = useShowUserSettings();
+    const {currentUser, immediate, histories, isPending, error, retry} = useShowUserSettings();
     const loaded = !isPending && !error;
 
     if (!currentUser) {
@@ -60,19 +96,25 @@ export function UserSettingsTable() {
 
     return (
         <>
-            <PageHeader
-                title="Einstellungen"
-                description={
-                    <>
-                        {currentUser.name} · Jeder Wert gilt ab einem Tag, ältere Werte gelten für die Vergangenheit
-                        weiter.
-                    </>
-                }
-            />
+            <PageHeader title="Einstellungen" description={currentUser.name} />
 
             {isPending && <Loading />}
             {error && <LoadError error={error} onRetry={retry} />}
-            {loaded && <DataTable columns={columns} data={rows} emptyText="Keine Einstellungen" />}
+            {loaded && immediate.length > 0 && (
+                <SettingsSection title="Allgemein">
+                    <DataTable columns={immediateColumns} data={immediate} emptyText="Keine Einstellungen" />
+                </SettingsSection>
+            )}
+            {loaded &&
+                histories.map(({setting, rows}) => (
+                    <SettingsSection
+                        key={setting.id}
+                        title={setting.name}
+                        description={[setting.description, HISTORY_HINT]}
+                    >
+                        <DataTable columns={historyColumns} data={rows} emptyText="Keine Werte" />
+                    </SettingsSection>
+                ))}
         </>
     );
 }

@@ -30,33 +30,41 @@ export function valueText(setting: Pick<UserSetting, "type" | "unit" | "defaultV
     return `${value} ${Number(value) === 1 ? unit[0] : unit[1]}`;
 }
 
-/** Der User sieht seine Einstellungen: je Einstellung den Default und alle eigenen Werte mit Status */
+/** Eine Einstellung mit Historie und ihre Zeilen: der Default und alle eigenen Werte */
+export type SettingHistoryRows = {setting: UserSetting; rows: UserSettingRow[]};
+
+/**
+ * Der User sieht seine Einstellungen: die Einstellungen ohne Historie mit je einer Zeile (immediate) und je
+ * Einstellung mit Historie den Default und alle eigenen Werte mit Status (histories), jeweils nach Namen.
+ */
 export function useShowUserSettings() {
     const {currentUser} = useCurrentUser();
     const now = useNow();
     const settings = useUserSettings(currentUser?.id);
     const today = localDay(new Date(now));
 
-    const rows = useMemo<UserSettingRow[]>(() => {
+    const {immediate, histories} = useMemo(() => {
+        const immediate: UserSettingRow[] = [];
+        const histories: SettingHistoryRows[] = [];
         const data = settings.data;
-        if (!data) return [];
-        return data.settings.flatMap((setting) => {
+        if (!data) return {immediate, histories};
+
+        for (const setting of data.settings) {
             const own = data.values
                 .filter((v) => v.settingId === setting.id)
                 .sort((a, b) => a.validFrom.localeCompare(b.validFrom));
             // Ohne Historie eine Zeile: der eigene Wert oder der Default, immer aktuell
             if (isImmediate(setting)) {
                 const value = own.at(-1) ?? null;
-                return [
-                    {
-                        key: value?.id ?? `${setting.id}-default`,
-                        setting,
-                        value,
-                        text: valueText(setting, value ? value.value : setting.defaultValue),
-                        validFrom: value?.validFrom ?? null,
-                        status: "aktuell" as const,
-                    },
-                ];
+                immediate.push({
+                    key: value?.id ?? `${setting.id}-default`,
+                    setting,
+                    value,
+                    text: valueText(setting, value ? value.value : setting.defaultValue),
+                    validFrom: value?.validFrom ?? null,
+                    status: "aktuell",
+                });
+                continue;
             }
             const history = historyOf(data, setting.id);
             const defaultRow: UserSettingRow = {
@@ -67,23 +75,28 @@ export function useShowUserSettings() {
                 validFrom: null,
                 status: settingStatus(history, null, today),
             };
-            return [
-                defaultRow,
-                ...own.map((value) => ({
-                    key: value.id,
-                    setting,
-                    value,
-                    text: valueText(setting, value.value),
-                    validFrom: value.validFrom,
-                    status: settingStatus(history, value.validFrom, today),
-                })),
-            ];
-        });
+            histories.push({
+                setting,
+                rows: [
+                    defaultRow,
+                    ...own.map((value) => ({
+                        key: value.id,
+                        setting,
+                        value,
+                        text: valueText(setting, value.value),
+                        validFrom: value.validFrom,
+                        status: settingStatus(history, value.validFrom, today),
+                    })),
+                ],
+            });
+        }
+        return {immediate, histories};
     }, [settings.data, today]);
 
     return {
         currentUser,
-        rows,
+        immediate,
+        histories,
         isPending: settings.isPending,
         error: settings.error,
         retry: () => settings.refetch(),
