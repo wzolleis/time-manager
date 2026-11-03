@@ -12,6 +12,7 @@ import type {Login} from "@shared/auth";
 import type {CurrentUser} from "@shared/user";
 import {ErrorText} from "@/components/text/error-text";
 import {FormField} from "@/components/form/form-field";
+import {PageTitle} from "@/components/page/page-title";
 
 // Ohne Session: die Optionen nennen keinen User, der Browser bietet alle Passkeys dieser Domain an
 async function passkeyLogin(): Promise<CurrentUser> {
@@ -58,7 +59,7 @@ export function LoginPage() {
             <Card className="w-full max-w-sm">
                 <CardHeader>
                     <CardTitle>
-                        <h1 className="text-2xl font-semibold">Anmelden</h1>
+                        <PageTitle>Anmelden</PageTitle>
                     </CardTitle>
                     <CardDescription>
                         Mit E-Mail und Passwort oder mit einem Passkey beim Time Manager anmelden.

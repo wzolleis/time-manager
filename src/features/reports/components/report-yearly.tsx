@@ -1,4 +1,5 @@
-import {Link, useNavigate} from "@tanstack/react-router";
+import {useNavigate} from "@tanstack/react-router";
+import {TextLink} from "@/components/text/text-link";
 import type {Year} from "@shared/date-schemas";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {useTimeFormat} from "@/lib/use-time-format";
@@ -21,9 +22,9 @@ const columnsOf = (format: TimeFormat): DataTableColumnDef<YearMonthTotals>[] =>
             header: "Monat",
             enableSorting: false,
             cell: ({row}) => (
-                <Link to="/user/reports/monthly/$month" params={{month: row.original.month}} className="underline">
+                <TextLink to="/user/reports/monthly/$month" params={{month: row.original.month}}>
                     {formatMonthName(row.original.month)}
-                </Link>
+                </TextLink>
             ),
         },
         sums.target,
@@ -72,9 +73,9 @@ export function ReportYearly({year}: {year: Year}) {
             {beforeStart ? (
                 <Muted>
                     Die Zeiterfassung beginnt {firstYear}.{" "}
-                    <Link to="/user/reports/yearly/$year" params={{year: firstYear}} className="underline">
+                    <TextLink to="/user/reports/yearly/$year" params={{year: firstYear}}>
                         Jahresbericht {firstYear}
-                    </Link>
+                    </TextLink>
                 </Muted>
             ) : (
                 <>
