@@ -5,11 +5,12 @@ import {Header} from "@/application/layout/header";
 import {navItemsOf} from "@/application/navigation/nav-items";
 import {Sidebar} from "@/application/layout/sidebar";
 import {Toaster} from "@/components/ui/sonner";
+import {ActionBarContainer} from "@/application/layout/action-bar";
 
 export default function ApplicationLayout(): React.JSX.Element {
     return (
         // minmax(0, 1fr): breiter Inhalt (Tabellen) darf das Layout und damit den Header nicht verbreitern
-        <div className="grid min-h-screen grid-cols-[minmax(0,1fr)] md:grid-cols-[250px_minmax(0,1fr)]">
+        <ActionBarContainer className="grid min-h-screen grid-cols-[minmax(0,1fr)] md:grid-cols-[250px_minmax(0,1fr)]">
             {/* 1. Wiederverwendbare Sidebar (unterhalb von md im Hamburger-Menü des Headers) */}
             <div className="hidden md:block">
                 <Sidebar items={navItemsOf("sidebar")} />
@@ -29,6 +30,6 @@ export default function ApplicationLayout(): React.JSX.Element {
             {/* Meldungen, die nach dem Schließen eines Dialogs kommen, z. B. ein abgelehnter Optimistic Write */}
             {/* theme fest auf hell: die App hat keinen Dark Mode, "system" würde sonst dunkle Toasts zeigen */}
             <Toaster theme="light" richColors position="top-center" />
-        </div>
+        </ActionBarContainer>
     );
 }
