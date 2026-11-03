@@ -1,17 +1,7 @@
 import type {DashboardAction} from "@/components/dashboard-action/types";
 import {Card, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
-import {Button, buttonVariants} from "@/components/ui/button";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import {Button} from "@/components/ui/button";
+import {ConfirmActionDialog} from "@/components/dashboard-action/confirm-action-dialog";
 import {Link} from "@tanstack/react-router";
 
 export function ActionCard({action, onConfirm}: {action: DashboardAction; onConfirm: (id: string) => void}) {
@@ -41,28 +31,11 @@ export function ActionCard({action, onConfirm}: {action: DashboardAction; onConf
                         <Link to={action.to}>{action.label}</Link>
                     </Button>
                 ) : (
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="destructive" className="w-full">
-                                {action.label}
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>{action.confirmTitle}</AlertDialogTitle>
-                                <AlertDialogDescription>{action.confirmText}</AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Abbrechen</AlertDialogCancel>
-                                <AlertDialogAction
-                                    className={buttonVariants({variant: "destructive"})}
-                                    onClick={() => onConfirm(action.id)}
-                                >
-                                    {action.confirmLabel}
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+                    <ConfirmActionDialog action={action} onConfirm={onConfirm}>
+                        <Button variant="destructive" className="w-full">
+                            {action.label}
+                        </Button>
+                    </ConfirmActionDialog>
                 )}
             </CardFooter>
         </Card>
