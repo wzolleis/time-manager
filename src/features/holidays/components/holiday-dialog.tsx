@@ -1,5 +1,4 @@
-import {type ComponentProps, useId, useState} from "react";
-import {Button} from "@/components/ui/button";
+import {type ReactElement, useId, useState} from "react";
 import {
     Dialog,
     DialogContent,
@@ -19,17 +18,16 @@ import {Muted} from "@/components/text/muted";
 import {ErrorText} from "@/components/text/error-text";
 import {FormDialogFooter} from "@/components/form/form-dialog-footer";
 import {FormField} from "@/components/form/form-field";
+import {FormRow} from "@/components/form/form-row";
 
 type Props = {
     holiday?: Holiday; // mit Feiertag: bearbeiten, ohne: neu anlegen
     userId: string | null; // beim Anlegen: null = für alle
     userName?: string;
-    label: string;
-    variant?: ComponentProps<typeof Button>["variant"];
-    size?: ComponentProps<typeof Button>["size"];
+    trigger: ReactElement; // der Button, der den Dialog öffnet, z. B. ein EditButton in der Zeile
 };
 
-export function HolidayDialog({holiday, userId, userName, label, variant = "outline", size = "sm"}: Props) {
+export function HolidayDialog({holiday, userId, userName, trigger}: Props) {
     const uid = useId();
 
     const [open, setOpen] = useState(false);
@@ -63,11 +61,7 @@ export function HolidayDialog({holiday, userId, userName, label, variant = "outl
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogTrigger asChild>
-                <Button variant={variant} size={size}>
-                    {label}
-                </Button>
-            </DialogTrigger>
+            <DialogTrigger asChild>{trigger}</DialogTrigger>
             <DialogContent>
                 <form
                     onSubmit={(e) => {
@@ -84,7 +78,7 @@ export function HolidayDialog({holiday, userId, userName, label, variant = "outl
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <FormRow>
                         <FormField label="Datum" htmlFor={`${uid}-date`}>
                             <Input
                                 id={`${uid}-date`}
@@ -103,7 +97,7 @@ export function HolidayDialog({holiday, userId, userName, label, variant = "outl
                                 required
                             />
                         </FormField>
-                    </div>
+                    </FormRow>
 
                     {problem && <ErrorText alert={false}>{problem}</ErrorText>}
                     {weekend && <Muted>Der Tag fällt auf ein Wochenende und ändert das Soll nicht.</Muted>}

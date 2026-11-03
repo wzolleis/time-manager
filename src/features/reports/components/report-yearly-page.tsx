@@ -1,9 +1,8 @@
-import {Link, useParams} from "@tanstack/react-router";
+import {useParams} from "@tanstack/react-router";
 import {localDay} from "@shared/time-rules";
 import {isValidYear, yearOf} from "@shared/week";
 import {ReportYearly} from "@features/reports/components/report-yearly";
-import {ErrorText} from "@/components/text/error-text";
-import {PageHeader} from "@/components/page/page-header";
+import {ReportInvalidPeriod} from "@features/reports/components/report-invalid-period";
 import {Page} from "@/components/page/page";
 
 /** Das Jahr kommt aus der Adresse (/user/reports/yearly/$year), ohne Angabe das laufende Jahr */
@@ -12,13 +11,12 @@ export const ReportYearlyPage = () => {
 
     if (year !== undefined && !isValidYear(year)) {
         return (
-            <Page>
-                <PageHeader title="Jahresbericht" />
-                <ErrorText>„{year}“ ist kein gültiges Jahr (JJJJ, ab 1970).</ErrorText>
-                <Link to="/user/reports/yearly" className="text-sm underline">
-                    Zum laufenden Jahr
-                </Link>
-            </Page>
+            <ReportInvalidPeriod
+                title="Jahresbericht"
+                message={<>„{year}“ ist kein gültiges Jahr (JJJJ, ab 1970).</>}
+                to="/user/reports/yearly"
+                linkLabel="Zum laufenden Jahr"
+            />
         );
     }
 

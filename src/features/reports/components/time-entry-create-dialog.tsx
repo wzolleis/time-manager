@@ -20,6 +20,7 @@ import {Muted} from "@/components/text/muted";
 import {ErrorText} from "@/components/text/error-text";
 import {FormDialogFooter} from "@/components/form/form-dialog-footer";
 import {FormField} from "@/components/form/form-field";
+import {FormRow} from "@/components/form/form-row";
 
 type EntryType = "kommen" | "gehen";
 type Mode = "stamp" | "day"; // ein Zeitstempel oder ein Zeitraum (ganzer Tag oder Arbeitszeit nach den Buchungen)
@@ -197,7 +198,7 @@ export function TimeEntryCreateDialog({
                                 </Select>
                             </FormField>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <FormRow>
                                 {dayField}
                                 <FormField label="Uhrzeit" htmlFor={`${uid}-time`}>
                                     <Input
@@ -208,14 +209,14 @@ export function TimeEntryCreateDialog({
                                         required
                                     />
                                 </FormField>
-                            </div>
+                            </FormRow>
 
                             {type === "kommen" && projectField}
                         </>
                     ) : (
                         <>
                             {dayField}
-                            <div className="grid grid-cols-2 gap-4">
+                            <FormRow>
                                 <FormField label="Beginn" htmlFor={`${uid}-start`}>
                                     <Input
                                         id={`${uid}-start`}
@@ -233,7 +234,7 @@ export function TimeEntryCreateDialog({
                                         required
                                     />
                                 </FormField>
-                            </div>
+                            </FormRow>
 
                             {earliest && <Muted>Ohne Beginn so früh wie möglich, ab {formatTime(earliest)}.</Muted>}
 

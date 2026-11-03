@@ -1,5 +1,4 @@
 import React, {useState} from "react";
-import {Button} from "@/components/ui/button";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
@@ -14,6 +13,8 @@ import {Muted} from "@/components/text/muted";
 import {ErrorText} from "@/components/text/error-text";
 import {FormDialogFooter} from "@/components/form/form-dialog-footer";
 import {FormField} from "@/components/form/form-field";
+import {RowActions} from "@/components/table/row-actions";
+import {EditButton} from "@/components/buttons/edit-button";
 
 const NO_PROJECT = "none"; // Radix Select erlaubt keinen leeren String als Wert
 
@@ -51,13 +52,11 @@ export function EntryActions({entry}: {entry: EntryRow}) {
     };
 
     return (
-        <div className="space-y-1">
-            <div className="flex justify-end gap-2">
-                <Button variant="outline" size="sm" disabled={pending} onClick={() => handleOpenChange(true)}>
-                    Bearbeiten
-                </Button>
+        <>
+            <RowActions>
+                <EditButton disabled={pending} onClick={() => handleOpenChange(true)} />
                 <TimeEntryDelete entry={entry} />
-            </div>
+            </RowActions>
 
             <Dialog open={open} onOpenChange={handleOpenChange}>
                 <DialogContent>
@@ -104,6 +103,6 @@ export function EntryActions({entry}: {entry: EntryRow}) {
                     </form>
                 </DialogContent>
             </Dialog>
-        </div>
+        </>
     );
 }

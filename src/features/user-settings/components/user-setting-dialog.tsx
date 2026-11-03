@@ -1,5 +1,4 @@
-import {type ComponentProps, useId, useState} from "react";
-import {Button} from "@/components/ui/button";
+import {type ReactElement, useId, useState} from "react";
 import {
     Dialog,
     DialogContent,
@@ -20,15 +19,14 @@ import {valueText} from "@features/user-settings/use-cases/use-show-user-setting
 import {ErrorText} from "@/components/text/error-text";
 import {FormDialogFooter} from "@/components/form/form-dialog-footer";
 import {FormField} from "@/components/form/form-field";
+import {FormRow} from "@/components/form/form-row";
 
 type Props = {
     setting: UserSetting;
     current?: UserSettingValue; // mit Wert: geplanten Wert bearbeiten, ohne: neuen Wert eintragen
     initialValue: string | null; // Vorschlag für den Wert, z. B. der aktuelle; null: „Default“
-    label: string;
+    trigger: ReactElement; // der Button, der den Dialog öffnet, z. B. ein EditButton in der Zeile, ohne eigenes disabled
     disabled?: boolean;
-    variant?: ComponentProps<typeof Button>["variant"];
-    size?: ComponentProps<typeof Button>["size"];
 };
 
 // Urlaubstage gelten ab dem 1. Januar, dafür wählt der User nur das Jahr
@@ -37,15 +35,7 @@ const byYear = (setting: UserSetting) => setting.validFromUnit === "year";
 const DEFAULT = "default"; // Auswahl „Default“: value null, ab „gültig ab“ gilt wieder der Default
 const OWN = "own";
 
-export function UserSettingDialog({
-    setting,
-    current,
-    initialValue,
-    label,
-    disabled = false,
-    variant = "outline",
-    size = "sm",
-}: Props) {
+export function UserSettingDialog({setting, current, initialValue, trigger, disabled = false}: Props) {
     const uid = useId();
     const immediate = isImmediate(setting); // ohne „gültig ab“, der Wert gilt sofort
     const add = useAddUserSetting();
@@ -88,10 +78,8 @@ export function UserSettingDialog({
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogTrigger asChild>
-                <Button variant={variant} size={size} disabled={!currentUser || disabled}>
-                    {label}
-                </Button>
+            <DialogTrigger asChild disabled={!currentUser || disabled}>
+                {trigger}
             </DialogTrigger>
             <DialogContent>
                 <form
@@ -136,7 +124,7 @@ export function UserSettingDialog({
                         </FormField>
                     )}
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <FormRow>
                         {value !== null && (
                             <FormField label="Wert" htmlFor={`${uid}-value`}>
                                 {setting.type === "boolean" ? (
@@ -188,7 +176,7 @@ export function UserSettingDialog({
                                 )}
                             </FormField>
                         )}
-                    </div>
+                    </FormRow>
 
                     {problem && <ErrorText alert={false}>{problem}</ErrorText>}
 

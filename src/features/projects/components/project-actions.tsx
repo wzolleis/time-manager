@@ -1,13 +1,13 @@
 import {useState} from "react";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import type {Project, ProjectUpdate} from "@shared/project";
 import {deleteProject, updateProject} from "@/api/projects";
-import {ErrorText} from "@/components/text/error-text";
 import {FormField} from "@/components/form/form-field";
 import {EditDialog} from "@/components/form/edit-dialog";
 import {ConfirmDeleteButton} from "@/components/buttons/confirm-delete-button";
+import {RowActions} from "@/components/table/row-actions";
+import {EditButton} from "@/components/buttons/edit-button";
 
 /** Aktionen je Zeile: Projekt bearbeiten oder löschen */
 export function ProjectActions({project}: {project: Project}) {
@@ -54,11 +54,9 @@ export function ProjectActions({project}: {project: Project}) {
     const fieldId = (field: string) => `${field}-${project.id}`;
 
     return (
-        <div className="space-y-1">
-            <div className="flex flex-wrap justify-end gap-2">
-                <Button variant="outline" size="sm" onClick={() => handleOpenChange(true)}>
-                    Bearbeiten
-                </Button>
+        <>
+            <RowActions error={remove.error}>
+                <EditButton onClick={() => handleOpenChange(true)} />
 
                 <ConfirmDeleteButton
                     title={<>{project.name} löschen?</>}
@@ -67,9 +65,7 @@ export function ProjectActions({project}: {project: Project}) {
                     onOpen={() => remove.reset()}
                     pending={remove.isPending}
                 />
-            </div>
-
-            {remove.isError && <ErrorText className="text-right">{remove.error.message}</ErrorText>}
+            </RowActions>
 
             <EditDialog
                 title="Projekt bearbeiten"
@@ -83,6 +79,6 @@ export function ProjectActions({project}: {project: Project}) {
                     <Input id={fieldId("name")} value={name} onChange={(e) => setName(e.target.value)} required />
                 </FormField>
             </EditDialog>
-        </div>
+        </>
     );
 }

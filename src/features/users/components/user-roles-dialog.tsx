@@ -1,6 +1,5 @@
 import {useState} from "react";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {Button} from "@/components/ui/button";
 import {
     Dialog,
     DialogContent,
@@ -14,6 +13,8 @@ import type {User} from "@shared/user";
 import {ErrorText} from "@/components/text/error-text";
 import {Loading} from "@/components/text/loading";
 import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {ShieldCheck} from "lucide-react";
+import {ActionButton} from "@/components/buttons/action-button";
 
 // Der Admin legt fest, welche Rollen ein User hat
 export function UserRolesDialog({user}: {user: User}) {
@@ -58,9 +59,7 @@ export function UserRolesDialog({user}: {user: User}) {
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                    Rollen
-                </Button>
+                <ActionButton icon={ShieldCheck} label="Rollen" variant="outline" />
             </DialogTrigger>
             <DialogContent>
                 <form onSubmit={handleSubmit} className="space-y-4">

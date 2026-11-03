@@ -1,6 +1,7 @@
 import {useId} from "react";
 import {Input} from "@/components/ui/input";
 import {FormField} from "@/components/form/form-field";
+import {FormRow} from "@/components/form/form-row";
 
 type Props = {
     start: string; // "JJJJ-MM-TT", leer solange nichts gewählt ist
@@ -18,7 +19,7 @@ export function DateRangeFields({start, end, onChange}: Props) {
     };
 
     return (
-        <div className="grid grid-cols-2 gap-4">
+        <FormRow>
             <FormField label="Beginn" htmlFor={`${uid}-start`}>
                 <Input
                     id={`${uid}-start`}
@@ -38,6 +39,6 @@ export function DateRangeFields({start, end, onChange}: Props) {
                     required
                 />
             </FormField>
-        </div>
+        </FormRow>
     );
 }

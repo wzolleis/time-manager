@@ -15,6 +15,7 @@ import {PageHeader} from "@/components/page/page-header";
 import {PeriodNav} from "@/components/buttons/period-nav";
 import {dash, periodColumns} from "@features/reports/components/report-columns";
 import {DiffMetric, WorkMetric} from "@features/reports/components/report-metrics";
+import {MetricGrid} from "@/components/cards/metric-grid";
 
 type DayRow = WeekDayTotals & {isToday: boolean};
 
@@ -107,7 +108,7 @@ export function ReportWeekly({anchor}: {anchor: Day}) {
                 currentDisabled={report.thisWeek}
             />
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <MetricGrid columns={4}>
                 <WorkMetric workMs={totals.workMs} running={rows.some((r) => r.running)} />
                 <MetricCard title="Pausen" value={formatDuration(totals.breakMs, timeFormat)} />
                 <MetricCard
@@ -119,7 +120,7 @@ export function ReportWeekly({anchor}: {anchor: Day}) {
                     diffMs={futureWeek ? null : totals.diffMs}
                     hint={partial && !futureWeek ? "gegen das Soll bis heute" : undefined}
                 />
-            </div>
+            </MetricGrid>
 
             {report.isPending && <Loading />}
             {report.error && <LoadError error={report.error} onRetry={report.retry} />}

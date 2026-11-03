@@ -14,6 +14,7 @@ import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
 import {PageHeader} from "@/components/page/page-header";
 import {PeriodNav} from "@/components/buttons/period-nav";
+import {Button} from "@/components/ui/button";
 
 const WEEKDAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
@@ -80,9 +81,9 @@ export function HolidayList({scope}: Props) {
                     <HolidayDialog
                         userId={scope === "global" ? null : currentUser!.id}
                         userName={currentUser?.name}
-                        label={scope === "global" ? "Feiertag eintragen" : "Eigenen Feiertag eintragen"}
-                        variant="default"
-                        size="default"
+                        trigger={
+                            <Button>{scope === "global" ? "Feiertag eintragen" : "Eigenen Feiertag eintragen"}</Button>
+                        }
                     />
                 }
             />

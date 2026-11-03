@@ -3,6 +3,7 @@ import {diffClass} from "@/lib/format";
 import {useTimeFormat} from "@/lib/use-time-format";
 import {formatDifference, formatDuration} from "@shared/format";
 import {dash} from "@features/reports/components/report-columns";
+import {MetricGrid} from "@/components/cards/metric-grid";
 
 /** Die Arbeitszeit eines Zeitraums, mit Hinweis, solange gerade gearbeitet wird */
 export function WorkMetric({workMs, running}: {workMs: number; running: boolean}) {
@@ -46,7 +47,7 @@ export function PeriodMetrics({targetMs, totals, future, partial}: PeriodMetrics
     const format = useTimeFormat();
     const toDate = partial && !future;
     return (
-        <div className="grid gap-4 sm:grid-cols-3">
+        <MetricGrid columns={3}>
             <MetricCard
                 title="Soll"
                 value={formatDuration(targetMs, format)}
@@ -54,6 +55,6 @@ export function PeriodMetrics({targetMs, totals, future, partial}: PeriodMetrics
             />
             <WorkMetric workMs={totals.workMs} running={totals.running} />
             <DiffMetric diffMs={future ? null : totals.diffMs} hint={toDate ? "gegen das Soll bis heute" : undefined} />
-        </div>
+        </MetricGrid>
     );
 }

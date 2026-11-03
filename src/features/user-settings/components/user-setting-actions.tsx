@@ -1,12 +1,19 @@
 import {formatDay} from "@shared/format";
 import {isImmediate} from "@shared/user-setting-rules";
-import {Button} from "@/components/ui/button";
 import {UserSettingDialog} from "@features/user-settings/components/user-setting-dialog";
 import type {UserSettingRow} from "@features/user-settings/use-cases/use-show-user-settings";
 import {useDeleteUserSetting} from "@features/user-settings/use-cases/use-delete-user-setting";
 import {useAddUserSetting} from "@features/user-settings/use-cases/use-add-user-setting";
-import {ErrorText} from "@/components/text/error-text";
 import {ConfirmDeleteButton} from "@/components/buttons/confirm-delete-button";
+import {RowActions} from "@/components/table/row-actions";
+import {EditButton} from "@/components/buttons/edit-button";
+import {ActionButton, type ActionButtonProps} from "@/components/buttons/action-button";
+import {RotateCcw} from "lucide-react";
+
+/** Setzt die Einstellung auf den Default zurück */
+const ResetButton = (props: Omit<ActionButtonProps, "icon" | "label">) => (
+    <ActionButton icon={RotateCcw} label="Auf Default zurücksetzen" variant="outline" {...props} />
+);
 
 /**
  * Aktionen je Zeile (Regel 7): Zum aktuellen Wert trägt der User einen neuen Wert ein, einen geplanten Wert
@@ -21,41 +28,41 @@ export function UserSettingActions({row}: {row: UserSettingRow}) {
     if (status === "aktuell") {
         const ownValue = value?.value ?? null; // null: es gilt der Default
         return (
-            <div className="flex flex-wrap justify-end gap-2">
-                <UserSettingDialog setting={setting} initialValue={ownValue ?? setting.defaultValue} label="Ändern" />
+            <RowActions>
+                <UserSettingDialog
+                    setting={setting}
+                    initialValue={ownValue ?? setting.defaultValue}
+                    trigger={<EditButton label="Ändern" />}
+                />
                 {/* Gilt schon der Default, gibt es nichts zurückzusetzen */}
                 <UserSettingDialog
                     setting={setting}
                     initialValue={null}
-                    label="Auf Default zurücksetzen"
+                    trigger={<ResetButton />}
                     disabled={ownValue === null}
                 />
-            </div>
+            </RowActions>
         );
     }
     if (status !== "geplant" || !value) return null;
 
     return (
-        <div className="space-y-1">
-            <div className="flex flex-wrap justify-end gap-2">
-                <UserSettingDialog setting={setting} current={value} initialValue={value.value} label="Bearbeiten" />
+        <RowActions error={remove.error}>
+            <UserSettingDialog setting={setting} current={value} initialValue={value.value} trigger={<EditButton />} />
 
-                <ConfirmDeleteButton
-                    title="Geplanten Wert löschen?"
-                    description={
-                        <>
-                            {setting.name} {row.text} ab dem {formatDay(value.validFrom)} wird entfernt. Danach gilt
-                            weiter der bisherige Wert.
-                        </>
-                    }
-                    onConfirm={() => remove.remove(value)}
-                    onOpen={() => remove.reset()}
-                    pending={remove.isDeleting}
-                />
-            </div>
-
-            {remove.error && <ErrorText className="text-right">{remove.error.message}</ErrorText>}
-        </div>
+            <ConfirmDeleteButton
+                title="Geplanten Wert löschen?"
+                description={
+                    <>
+                        {setting.name} {row.text} ab dem {formatDay(value.validFrom)} wird entfernt. Danach gilt weiter
+                        der bisherige Wert.
+                    </>
+                }
+                onConfirm={() => remove.remove(value)}
+                onOpen={() => remove.reset()}
+                pending={remove.isDeleting}
+            />
+        </RowActions>
     );
 }
 
@@ -66,21 +73,17 @@ function ImmediateSettingActions({row}: {row: UserSettingRow}) {
     const ownValue = row.value?.value ?? null; // null: es gilt der Default
 
     return (
-        <div className="space-y-1">
-            <div className="flex flex-wrap justify-end gap-2">
-                <UserSettingDialog setting={setting} initialValue={ownValue ?? setting.defaultValue} label="Ändern" />
-                {/* Gilt schon der Default, gibt es nichts zurückzusetzen */}
-                <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={!add.currentUser || ownValue === null || add.isSaving}
-                    onClick={() => add.add({setting, value: null})}
-                >
-                    Auf Default zurücksetzen
-                </Button>
-            </div>
-
-            {add.error && <ErrorText className="text-right">{add.error.message}</ErrorText>}
-        </div>
+        <RowActions error={add.error}>
+            <UserSettingDialog
+                setting={setting}
+                initialValue={ownValue ?? setting.defaultValue}
+                trigger={<EditButton label="Ändern" />}
+            />
+            {/* Gilt schon der Default, gibt es nichts zurückzusetzen */}
+            <ResetButton
+                disabled={!add.currentUser || ownValue === null || add.isSaving}
+                onClick={() => add.add({setting, value: null})}
+            />
+        </RowActions>
     );
 }

@@ -1,5 +1,4 @@
-import {type ComponentProps, useId, useState} from "react";
-import {Button} from "@/components/ui/button";
+import {type ReactElement, useId, useState} from "react";
 import {
     Dialog,
     DialogContent,
@@ -22,14 +21,12 @@ import {FormField} from "@/components/form/form-field";
 
 type Props = {
     sickLeave?: SickLeave; // mit Krankmeldung: bearbeiten, ohne: neu eintragen
-    label: string;
-    variant?: ComponentProps<typeof Button>["variant"];
-    size?: ComponentProps<typeof Button>["size"];
+    trigger: ReactElement; // der Button, der den Dialog öffnet, z. B. ein EditButton in der Zeile, ohne eigenes disabled
 };
 
 const dayLabel = (n: number) => (n === 1 ? "1 Krankheitstag" : `${n} Krankheitstage`);
 
-export function SickLeaveDialog({sickLeave, label, variant = "outline", size = "sm"}: Props) {
+export function SickLeaveDialog({sickLeave, trigger}: Props) {
     const uid = useId();
     const add = useAddSickLeave();
     const change = useChangeSickLeave();
@@ -71,10 +68,8 @@ export function SickLeaveDialog({sickLeave, label, variant = "outline", size = "
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogTrigger asChild>
-                <Button variant={variant} size={size} disabled={!currentUser}>
-                    {label}
-                </Button>
+            <DialogTrigger asChild disabled={!currentUser}>
+                {trigger}
             </DialogTrigger>
             <DialogContent>
                 <form
