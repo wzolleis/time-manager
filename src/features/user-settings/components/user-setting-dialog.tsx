@@ -1,12 +1,4 @@
 import {type ReactElement, useId, useState} from "react";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {addDays} from "@shared/day-range";
@@ -17,7 +9,7 @@ import {useAddUserSetting} from "@features/user-settings/use-cases/use-add-user-
 import {useChangeUserSetting} from "@features/user-settings/use-cases/use-change-user-setting";
 import {valueText} from "@features/user-settings/use-cases/use-show-user-settings";
 import {ErrorText} from "@/components/text/error-text";
-import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {FormDialog} from "@/components/form/form-dialog";
 import {FormField} from "@/components/form/form-field";
 import {FormRow} from "@/components/form/form-row";
 
@@ -77,118 +69,109 @@ export function UserSettingDialog({setting, current, initialValue, trigger, disa
             : add.problem({setting, value, validFrom});
 
     return (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogTrigger asChild disabled={!currentUser || disabled}>
-                {trigger}
-            </DialogTrigger>
-            <DialogContent>
-                <form
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        if (!problem) submit();
-                    }}
-                    className="space-y-4"
-                >
-                    <DialogHeader>
-                        <DialogTitle>
-                            {setting.name} {current ? "bearbeiten" : "ändern"}
-                        </DialogTitle>
-                        <DialogDescription>
-                            {setting.description.replace(/\.$/, "")}.{" "}
-                            {immediate ? (
-                                "Der neue Wert gilt sofort."
-                            ) : (
-                                <>
-                                    Der neue Wert gilt ab dem gewählten {byYear(setting) ? "Jahr" : "Tag"}, der
-                                    bisherige gilt für die Zeit davor weiter. Mit „Default“ gilt ab dann wieder der
-                                    Default ({valueText(setting, setting.defaultValue)}).
-                                </>
-                            )}
-                        </DialogDescription>
-                    </DialogHeader>
+        <FormDialog
+            title={
+                <>
+                    {setting.name} {current ? "bearbeiten" : "ändern"}
+                </>
+            }
+            description={
+                <>
+                    {setting.description.replace(/\.$/, "")}.{" "}
+                    {immediate ? (
+                        "Der neue Wert gilt sofort."
+                    ) : (
+                        <>
+                            Der neue Wert gilt ab dem gewählten {byYear(setting) ? "Jahr" : "Tag"}, der bisherige gilt
+                            für die Zeit davor weiter. Mit „Default“ gilt ab dann wieder der Default (
+                            {valueText(setting, setting.defaultValue)}).
+                        </>
+                    )}
+                </>
+            }
+            open={open}
+            onOpenChange={handleOpenChange}
+            onSubmit={() => {
+                if (!problem) submit();
+            }}
+            saving={save.isSaving}
+            disabled={problem !== null}
+            error={save.error}
+            trigger={trigger}
+            triggerDisabled={!currentUser || disabled}
+        >
+            {!immediate && (
+                <FormField label="Art" htmlFor={`${uid}-kind`}>
+                    <Select
+                        value={value === null ? DEFAULT : OWN}
+                        onValueChange={(kind) => setValue(kind === DEFAULT ? null : lastOwn)}
+                    >
+                        <SelectTrigger id={`${uid}-kind`}>
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value={OWN}>Eigener Wert</SelectItem>
+                            <SelectItem value={DEFAULT}>Default</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </FormField>
+            )}
 
-                    {!immediate && (
-                        <FormField label="Art" htmlFor={`${uid}-kind`}>
-                            <Select
-                                value={value === null ? DEFAULT : OWN}
-                                onValueChange={(kind) => setValue(kind === DEFAULT ? null : lastOwn)}
-                            >
-                                <SelectTrigger id={`${uid}-kind`}>
+            <FormRow>
+                {value !== null && (
+                    <FormField label="Wert" htmlFor={`${uid}-value`}>
+                        {setting.type === "boolean" ? (
+                            <Select value={value} onValueChange={setValue}>
+                                <SelectTrigger id={`${uid}-value`}>
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value={OWN}>Eigener Wert</SelectItem>
-                                    <SelectItem value={DEFAULT}>Default</SelectItem>
+                                    <SelectItem value="true">Ja</SelectItem>
+                                    <SelectItem value="false">Nein</SelectItem>
                                 </SelectContent>
                             </Select>
-                        </FormField>
-                    )}
-
-                    <FormRow>
-                        {value !== null && (
-                            <FormField label="Wert" htmlFor={`${uid}-value`}>
-                                {setting.type === "boolean" ? (
-                                    <Select value={value} onValueChange={setValue}>
-                                        <SelectTrigger id={`${uid}-value`}>
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="true">Ja</SelectItem>
-                                            <SelectItem value="false">Nein</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                ) : (
-                                    <Input
-                                        id={`${uid}-value`}
-                                        type="number"
-                                        step={1}
-                                        inputMode="numeric"
-                                        value={value}
-                                        onChange={(e) => {
-                                            setValue(e.target.value);
-                                            setLastOwn(e.target.value);
-                                        }}
-                                        required
-                                    />
-                                )}
-                            </FormField>
+                        ) : (
+                            <Input
+                                id={`${uid}-value`}
+                                type="number"
+                                step={1}
+                                inputMode="numeric"
+                                value={value}
+                                onChange={(e) => {
+                                    setValue(e.target.value);
+                                    setLastOwn(e.target.value);
+                                }}
+                                required
+                            />
                         )}
-                        {!immediate && (
-                            <FormField label="gültig ab" htmlFor={`${uid}-from`}>
-                                {byYear(setting) ? (
-                                    <Input
-                                        id={`${uid}-from`}
-                                        type="number"
-                                        step={1}
-                                        inputMode="numeric"
-                                        value={validFrom.slice(0, 4)}
-                                        onChange={(e) => setValidFrom(e.target.value ? `${e.target.value}-01-01` : "")}
-                                        required
-                                    />
-                                ) : (
-                                    <Input
-                                        id={`${uid}-from`}
-                                        type="date"
-                                        value={validFrom}
-                                        onChange={(e) => setValidFrom(e.target.value)}
-                                        required
-                                    />
-                                )}
-                            </FormField>
+                    </FormField>
+                )}
+                {!immediate && (
+                    <FormField label="gültig ab" htmlFor={`${uid}-from`}>
+                        {byYear(setting) ? (
+                            <Input
+                                id={`${uid}-from`}
+                                type="number"
+                                step={1}
+                                inputMode="numeric"
+                                value={validFrom.slice(0, 4)}
+                                onChange={(e) => setValidFrom(e.target.value ? `${e.target.value}-01-01` : "")}
+                                required
+                            />
+                        ) : (
+                            <Input
+                                id={`${uid}-from`}
+                                type="date"
+                                value={validFrom}
+                                onChange={(e) => setValidFrom(e.target.value)}
+                                required
+                            />
                         )}
-                    </FormRow>
+                    </FormField>
+                )}
+            </FormRow>
 
-                    {problem && <ErrorText alert={false}>{problem}</ErrorText>}
-
-                    {save.error && <ErrorText>{save.error.message}</ErrorText>}
-
-                    <FormDialogFooter
-                        onCancel={() => setOpen(false)}
-                        saving={save.isSaving}
-                        disabled={problem !== null}
-                    />
-                </form>
-            </DialogContent>
-        </Dialog>
+            {problem && <ErrorText alert={false}>{problem}</ErrorText>}
+        </FormDialog>
     );
 }

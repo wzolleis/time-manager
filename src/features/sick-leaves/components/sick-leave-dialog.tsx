@@ -1,12 +1,4 @@
 import {type ReactElement, useId, useState} from "react";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import type {SickLeave} from "@shared/sick-leave";
 import {bookingsInRangeMessage} from "@shared/sick-leave-rules";
@@ -15,7 +7,7 @@ import {useAddSickLeave} from "@features/sick-leaves/use-cases/use-add-sick-leav
 import {useChangeSickLeave} from "@features/sick-leaves/use-cases/use-change-sick-leave";
 import {Muted} from "@/components/text/muted";
 import {ErrorText} from "@/components/text/error-text";
-import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {FormDialog} from "@/components/form/form-dialog";
 import {DateRangeFields} from "@/components/form/date-range-fields";
 import {FormField} from "@/components/form/form-field";
 
@@ -67,61 +59,46 @@ export function SickLeaveDialog({sickLeave, trigger}: Props) {
     const entries = problem ? 0 : save.entriesInRange(range);
 
     return (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogTrigger asChild disabled={!currentUser}>
-                {trigger}
-            </DialogTrigger>
-            <DialogContent>
-                <form
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        if (!problem) submit();
-                    }}
-                    className="space-y-4"
-                >
-                    <DialogHeader>
-                        <DialogTitle>{sickLeave ? "Krankmeldung bearbeiten" : "Krankmeldung eintragen"}</DialogTitle>
-                        <DialogDescription>
-                            Für {currentUser?.name}. Das Ende ist eingeschlossen. Krankheitstage haben kein Soll,
-                            Wochenenden und Feiertage zählen nicht als Krankheitstage.
-                        </DialogDescription>
-                    </DialogHeader>
+        <FormDialog
+            title={sickLeave ? "Krankmeldung bearbeiten" : "Krankmeldung eintragen"}
+            description={
+                <>
+                    Für {currentUser?.name}. Das Ende ist eingeschlossen. Krankheitstage haben kein Soll, Wochenenden
+                    und Feiertage zählen nicht als Krankheitstage.
+                </>
+            }
+            open={open}
+            onOpenChange={handleOpenChange}
+            onSubmit={() => {
+                if (!problem) submit();
+            }}
+            saving={save.isSaving}
+            disabled={problem !== null}
+            error={save.error}
+            trigger={trigger}
+            triggerDisabled={!currentUser}
+        >
+            <DateRangeFields
+                start={start}
+                end={end}
+                onChange={(s, e) => {
+                    setStart(s);
+                    setEnd(e);
+                }}
+            />
 
-                    <DateRangeFields
-                        start={start}
-                        end={end}
-                        onChange={(s, e) => {
-                            setStart(s);
-                            setEnd(e);
-                        }}
-                    />
+            <FormField label="Notiz" htmlFor={`${uid}-note`}>
+                <Input
+                    id={`${uid}-note`}
+                    value={note}
+                    maxLength={500}
+                    placeholder="z. B. Attest liegt vor"
+                    onChange={(e) => setNote(e.target.value)}
+                />
+            </FormField>
 
-                    <FormField label="Notiz" htmlFor={`${uid}-note`}>
-                        <Input
-                            id={`${uid}-note`}
-                            value={note}
-                            maxLength={500}
-                            placeholder="z. B. Attest liegt vor"
-                            onChange={(e) => setNote(e.target.value)}
-                        />
-                    </FormField>
-
-                    {problem ? (
-                        <ErrorText alert={false}>{problem}</ErrorText>
-                    ) : (
-                        <Muted>{dayLabel(save.sickDays(range))}</Muted>
-                    )}
-                    {entries > 0 && <Muted>{bookingsInRangeMessage(entries)}</Muted>}
-
-                    {save.error && <ErrorText>{save.error.message}</ErrorText>}
-
-                    <FormDialogFooter
-                        onCancel={() => setOpen(false)}
-                        saving={save.isSaving}
-                        disabled={problem !== null}
-                    />
-                </form>
-            </DialogContent>
-        </Dialog>
+            {problem ? <ErrorText alert={false}>{problem}</ErrorText> : <Muted>{dayLabel(save.sickDays(range))}</Muted>}
+            {entries > 0 && <Muted>{bookingsInRangeMessage(entries)}</Muted>}
+        </FormDialog>
     );
 }

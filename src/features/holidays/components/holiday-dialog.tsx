@@ -1,12 +1,4 @@
 import {type ReactElement, useId, useState} from "react";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
 import {Input} from "@/components/ui/input";
 import {useAddHoliday} from "@features/holidays/use-cases/use-add-holiday";
 import {useChangeHoliday} from "@features/holidays/use-cases/use-change-holiday";
@@ -16,7 +8,7 @@ import {isValidDay} from "@shared/day-range";
 import type {Holiday} from "@shared/holiday";
 import {Muted} from "@/components/text/muted";
 import {ErrorText} from "@/components/text/error-text";
-import {FormDialogFooter} from "@/components/form/form-dialog-footer";
+import {FormDialog} from "@/components/form/form-dialog";
 import {FormField} from "@/components/form/form-field";
 import {FormRow} from "@/components/form/form-row";
 
@@ -60,57 +52,47 @@ export function HolidayDialog({holiday, userId, userName, trigger}: Props) {
     const weekend = !problem && isValidDay(date) && isWeekend(date);
 
     return (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogTrigger asChild>{trigger}</DialogTrigger>
-            <DialogContent>
-                <form
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        submit();
-                    }}
-                    className="space-y-4"
-                >
-                    <DialogHeader>
-                        <DialogTitle>{holiday ? "Feiertag bearbeiten" : "Feiertag eintragen"}</DialogTitle>
-                        <DialogDescription>
-                            {global ? "Gilt für alle User." : `Gilt nur für ${userName ?? "diesen User"}.`} An einem
-                            Feiertag ist das Soll 0, im Urlaub verbraucht er keinen Urlaubstag.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <FormRow>
-                        <FormField label="Datum" htmlFor={`${uid}-date`}>
-                            <Input
-                                id={`${uid}-date`}
-                                type="date"
-                                value={date}
-                                onChange={(e) => e.target.value && setDate(e.target.value)}
-                                required
-                            />
-                        </FormField>
-                        <FormField label="Name" htmlFor={`${uid}-name`}>
-                            <Input
-                                id={`${uid}-name`}
-                                value={name}
-                                maxLength={100}
-                                onChange={(e) => setName(e.target.value)}
-                                required
-                            />
-                        </FormField>
-                    </FormRow>
-
-                    {problem && <ErrorText alert={false}>{problem}</ErrorText>}
-                    {weekend && <Muted>Der Tag fällt auf ein Wochenende und ändert das Soll nicht.</Muted>}
-
-                    {save.error && <ErrorText>{save.error.message}</ErrorText>}
-
-                    <FormDialogFooter
-                        onCancel={() => setOpen(false)}
-                        saving={save.isSaving}
-                        disabled={problem !== null}
+        <FormDialog
+            title={holiday ? "Feiertag bearbeiten" : "Feiertag eintragen"}
+            description={
+                <>
+                    {global ? "Gilt für alle User." : `Gilt nur für ${userName ?? "diesen User"}.`} An einem Feiertag
+                    ist das Soll 0, im Urlaub verbraucht er keinen Urlaubstag.
+                </>
+            }
+            open={open}
+            onOpenChange={handleOpenChange}
+            onSubmit={() => {
+                submit();
+            }}
+            saving={save.isSaving}
+            disabled={problem !== null}
+            error={save.error}
+            trigger={trigger}
+        >
+            <FormRow>
+                <FormField label="Datum" htmlFor={`${uid}-date`}>
+                    <Input
+                        id={`${uid}-date`}
+                        type="date"
+                        value={date}
+                        onChange={(e) => e.target.value && setDate(e.target.value)}
+                        required
                     />
-                </form>
-            </DialogContent>
-        </Dialog>
+                </FormField>
+                <FormField label="Name" htmlFor={`${uid}-name`}>
+                    <Input
+                        id={`${uid}-name`}
+                        value={name}
+                        maxLength={100}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                    />
+                </FormField>
+            </FormRow>
+
+            {problem && <ErrorText alert={false}>{problem}</ErrorText>}
+            {weekend && <Muted>Der Tag fällt auf ein Wochenende und ändert das Soll nicht.</Muted>}
+        </FormDialog>
     );
 }
