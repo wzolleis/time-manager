@@ -1,10 +1,10 @@
 // scripts/features-overview.ts
 // Erzeugt generated/overview.md aus dem Frontmatter der Beschreibungen in features/ (name, type, epics, state).
 // Aufruf: node scripts/features-overview.ts
-import {mkdirSync, readdirSync, readFileSync, writeFileSync} from "node:fs";
+import {mkdirSync, writeFileSync} from "node:fs";
 import {dirname, join, relative} from "node:path";
+import {FEATURES, frontmatter, list, markdownFiles} from "./lib/features.ts";
 
-const FEATURES = "features";
 // generiert, nicht im Git (.gitignore)
 const OUTPUT = join("generated", "overview.md");
 const NO_EPIC = "(ohne Epic)";
@@ -12,34 +12,11 @@ const STATE_ORDER = ["open", "later", "resolved"];
 
 type Description = {name: string; type: string; epics: string[]; state: string; link: string};
 
-function markdownFiles(dir: string): string[] {
-    return readdirSync(dir, {withFileTypes: true}).flatMap((entry) => {
-        const path = join(dir, entry.name);
-        if (entry.isDirectory()) return markdownFiles(path);
-        return entry.name.endsWith(".md") ? [path] : [];
-    });
-}
-
-// Das Frontmatter besteht nur aus Zeilen "key: value", dafür reicht ein einfacher Parser
-function frontmatter(path: string): Record<string, string> {
-    const match = readFileSync(path, "utf8").match(/^---\r?\n([\s\S]*?)\r?\n---/);
-    if (!match) throw new Error(`${path}: kein Frontmatter`);
-    const fields: Record<string, string> = {};
-    for (const line of match[1].split(/\r?\n/)) {
-        const sep = line.indexOf(":");
-        if (sep > 0) fields[line.slice(0, sep).trim()] = line.slice(sep + 1).trim();
-    }
-    return fields;
-}
-
 function describe(path: string): Description {
     const fields = frontmatter(path);
     if (!fields.name) throw new Error(`${path}: name fehlt`);
     if (!fields.state) throw new Error(`${path}: state fehlt`);
-    const epics = (fields.epics ?? "")
-        .split(",")
-        .map((epic) => epic.trim())
-        .filter(Boolean);
+    const epics = list(fields.epics);
     return {
         name: fields.name,
         // ohne Angabe ist ein Use Case eine Story
