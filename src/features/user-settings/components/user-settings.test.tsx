@@ -140,7 +140,33 @@ afterEach(() => {
     localStorage.clear();
 });
 
+/** Die Tabelle im Abschnitt mit der Überschrift title */
+const sectionOf = (title: string) => screen.getByRole("heading", {level: 2, name: title}).closest("section")!;
+
 describe("Einstellungen", () => {
+    it("zeigt „Allgemein“ und je Einstellung mit Historie eine eigene Tabelle", async () => {
+        mockApi([value("a", "6", "2026-03-01")]);
+        renderPage();
+
+        await screen.findByText("6 Stunden");
+        const headings = screen.getAllByRole("heading", {level: 2}).map((h) => h.textContent);
+        expect(headings).toEqual(["Allgemein", "Soll", "Urlaubstage"]);
+
+        const general = sectionOf("Allgemein");
+        expect(within(general).getByText("show_action_bar")).toBeTruthy();
+        expect(within(general).queryByRole("columnheader", {name: "Status"})).toBeNull();
+        expect(within(general).queryByRole("columnheader", {name: "gültig ab"})).toBeNull();
+
+        const soll = sectionOf("Soll");
+        expect(within(soll).getByText("6 Stunden")).toBeTruthy();
+        expect(within(soll).getByText("8 Stunden")).toBeTruthy();
+        expect(within(soll).queryByText("30 Tage")).toBeNull();
+        expect(within(soll).queryByRole("columnheader", {name: "Name"})).toBeNull();
+        expect(screen.getAllByText(SETTINGS[0].description)).toHaveLength(1);
+
+        expect(within(sectionOf("Urlaubstage")).getByText("30 Tage")).toBeTruthy();
+    });
+
     it("zeigt ohne eigene Werte die Defaults als aktuell", async () => {
         mockApi([]);
         renderPage();
@@ -244,14 +270,14 @@ describe("Einstellungen", () => {
 });
 
 describe("Einstellung show_action_bar ohne Historie", () => {
-    it("zeigt eine Zeile mit „Ja“, Status aktuell und ohne gültig ab", async () => {
+    it("zeigt eine Zeile mit „Ja“, ohne Status und ohne gültig ab", async () => {
         mockApi([]);
         renderPage();
 
         const row = (await screen.findByText("show_action_bar")).closest("tr")!;
         expect(within(row).getByText("Ja")).toBeTruthy();
-        expect(within(row).getByText("aktuell")).toBeTruthy();
-        expect(within(row).getByText("–")).toBeTruthy();
+        expect(within(row).queryByText("aktuell")).toBeNull();
+        expect(within(row).queryByText("–")).toBeNull();
         expect(within(row).getByRole("button", {name: "Auf Default zurücksetzen"}).hasAttribute("disabled")).toBe(true);
         expect(screen.getAllByText("show_action_bar")).toHaveLength(1);
     });
@@ -279,7 +305,6 @@ describe("Einstellung show_action_bar ohne Historie", () => {
         });
         const updated = (await screen.findByText("Nein")).closest("tr")!;
         expect(within(updated).getByText("show_action_bar")).toBeTruthy();
-        expect(within(updated).getByText("14.10.2026")).toBeTruthy();
         expect(screen.getAllByText("show_action_bar")).toHaveLength(1);
     });
 
