@@ -1,4 +1,4 @@
-import type {ReactNode} from "react";
+import {useState, type ReactNode} from "react";
 import {IconButton, IconLink} from "@/components/buttons/icon-button";
 import {ConfirmActionDialog} from "@/components/dashboard-action/confirm-action-dialog";
 import {useLogout} from "@/components/login/use-logout";
@@ -47,19 +47,48 @@ function ActionBar() {
     return (
         <nav
             aria-label="Aktionen"
-            className="fixed inset-x-0 bottom-0 z-40 border-t bg-background pb-[env(safe-area-inset-bottom)]"
+            className="fixed inset-x-0 bottom-0 z-40 border-t bg-muted pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_8px_rgb(0_0_0/0.06)]"
         >
-            <div className="flex h-14 items-center justify-around px-2">
-                {userDashboardActions.map((action) =>
-                    action.kind === "link" ? (
-                        <IconLink key={action.id} icon={action.icon} label={action.title} to={action.to} />
-                    ) : (
-                        <ConfirmActionDialog key={action.id} action={action} onConfirm={handleConfirm}>
-                            <IconButton icon={action.icon} label={action.title} />
-                        </ConfirmActionDialog>
-                    ),
-                )}
+            {/* Der Link zur aktuellen Seite (aria-current="page", setzt der Router) ist farbig hinterlegt */}
+            <div className="flex h-14 items-center justify-around px-2 [&_a[aria-current=page]]:bg-primary [&_a[aria-current=page]]:text-primary-foreground [&_a[aria-current=page]]:hover:bg-primary">
+                {userDashboardActions.map((action) => (
+                    <PressFeedback key={action.id}>
+                        {action.kind === "link" ? (
+                            <IconLink icon={action.icon} label={action.title} to={action.to} />
+                        ) : (
+                            <ConfirmActionDialog action={action} onConfirm={handleConfirm}>
+                                <IconButton icon={action.icon} label={action.title} />
+                            </ConfirmActionDialog>
+                        )}
+                    </PressFeedback>
+                ))}
             </div>
         </nav>
+    );
+}
+
+/**
+ * Zeigt, dass ein Button gedrückt wird: Fährt die Maus darüber, wird er etwas größer (nur auf Geräten mit Maus,
+ * Tailwind setzt hover: dort ein). Solange der Finger oder die Maus drückt, wird er noch größer.
+ * Nach dem Klick läuft ein kurzer Ring um ihn herum. Bei „Bewegung reduzieren“ entfällt beides.
+ */
+function PressFeedback({children}: {children: ReactNode}) {
+    // Jeder Klick erzeugt einen neuen key, damit der Ring auch bei schnellen Klicks neu startet
+    const [clicks, setClicks] = useState(0);
+
+    return (
+        <div
+            className="relative *:transition-transform *:duration-150 *:ease-out *:motion-safe:hover:scale-110 *:motion-safe:active:scale-125"
+            onClick={() => setClicks((count) => count + 1)}
+        >
+            {children}
+            {clicks > 0 && (
+                <span
+                    key={clicks}
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 rounded-full bg-primary/25 opacity-0 motion-safe:animate-press-ripple"
+                />
+            )}
+        </div>
     );
 }
