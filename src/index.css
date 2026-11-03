@@ -48,6 +48,22 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* Kurzer Ring um einen Button der Action-Bar, der zeigt, dass er geklickt wurde */
+@theme {
+    --animate-press-ripple: press-ripple 450ms ease-out forwards;
+
+    @keyframes press-ripple {
+        from {
+            opacity: 0.6;
+            transform: scale(0.6);
+        }
+        to {
+            opacity: 0;
+            transform: scale(1.5);
+        }
+    }
+}
+
 :root {
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);

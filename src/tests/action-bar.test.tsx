@@ -133,6 +133,23 @@ describe("Action-Bar", () => {
         await vi.waitFor(() => expect(router.state.location.pathname).toBe("/user/reports/weekly"));
     });
 
+    it("markiert den Button der aktuellen Seite", async () => {
+        mockApi({settings: [BAR_SETTING], values: []});
+        const router = renderApp("/user/reports/daily");
+
+        const bar = await findBar();
+        const current = () =>
+            within(bar)
+                .getAllByRole("link")
+                .filter((l) => l.getAttribute("aria-current") === "page")
+                .map((l) => l.getAttribute("aria-label"));
+        await vi.waitFor(() => expect(current()).toEqual(["Heute"]));
+
+        fireEvent.click(within(bar).getByRole("link", {name: "Woche"}));
+        await vi.waitFor(() => expect(router.state.location.pathname).toBe("/user/reports/weekly"));
+        await vi.waitFor(() => expect(current()).toEqual(["Woche"]));
+    });
+
     it("meldet erst nach der Bestätigung ab", async () => {
         mockApi({settings: [BAR_SETTING], values: []});
         renderApp();
