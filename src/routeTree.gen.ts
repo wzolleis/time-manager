@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminApiTokensRouteImport } from './routes/admin/api-tokens'
+import { Route as AdminBackupsRouteImport } from './routes/admin/backups'
 import { Route as AdminHolidaysRouteImport } from './routes/admin/holidays'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
@@ -53,6 +54,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const AdminApiTokensRoute = AdminApiTokensRouteImport.update({
   id: '/admin/api-tokens',
   path: '/admin/api-tokens',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminBackupsRoute = AdminBackupsRouteImport.update({
+  id: '/admin/backups',
+  path: '/admin/backups',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminHolidaysRoute = AdminHolidaysRouteImport.update({
@@ -166,6 +172,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/admin/api-tokens': typeof AdminApiTokensRoute
+  '/admin/backups': typeof AdminBackupsRoute
   '/admin/holidays': typeof AdminHolidaysRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
@@ -193,6 +200,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/admin/api-tokens': typeof AdminApiTokensRoute
+  '/admin/backups': typeof AdminBackupsRoute
   '/admin/holidays': typeof AdminHolidaysRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
@@ -221,6 +229,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/admin/api-tokens': typeof AdminApiTokensRoute
+  '/admin/backups': typeof AdminBackupsRoute
   '/admin/holidays': typeof AdminHolidaysRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
@@ -250,6 +259,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/admin/api-tokens'
+    | '/admin/backups'
     | '/admin/holidays'
     | '/admin/settings'
     | '/admin/users'
@@ -277,6 +287,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/admin/api-tokens'
+    | '/admin/backups'
     | '/admin/holidays'
     | '/admin/settings'
     | '/admin/users'
@@ -304,6 +315,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/admin/api-tokens'
+    | '/admin/backups'
     | '/admin/holidays'
     | '/admin/settings'
     | '/admin/users'
@@ -332,6 +344,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
   AdminApiTokensRoute: typeof AdminApiTokensRoute
+  AdminBackupsRoute: typeof AdminBackupsRoute
   AdminHolidaysRoute: typeof AdminHolidaysRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminUsersRoute: typeof AdminUsersRoute
@@ -384,6 +397,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/api-tokens'
       fullPath: '/admin/api-tokens'
       preLoaderRoute: typeof AdminApiTokensRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/backups': {
+      id: '/admin/backups'
+      path: '/admin/backups'
+      fullPath: '/admin/backups'
+      preLoaderRoute: typeof AdminBackupsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/holidays': {
@@ -540,6 +560,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
   AdminApiTokensRoute: AdminApiTokensRoute,
+  AdminBackupsRoute: AdminBackupsRoute,
   AdminHolidaysRoute: AdminHolidaysRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminUsersRoute: AdminUsersRoute,

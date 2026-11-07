@@ -40,5 +40,11 @@ deno.lock
 # Claude Code (persönliche Einstellungen)
 .claude/settings.local.json
 
+# Zertifikat und Schlüssel des lokalen FTPS-Servers (npm run ftps:up)
+/db/docker/ftps
+
+# Sicherung vor einem Restore in die Produktion (npm run backup:restore:prod), verschlüsselt
+/backups
+
 # Screenshots von shot
 /.shots

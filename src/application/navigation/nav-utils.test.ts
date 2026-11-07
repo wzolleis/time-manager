@@ -42,6 +42,7 @@ describe("Navigationsbaum", () => {
             "/admin/users",
             "/admin/holidays",
             "/admin/api-tokens",
+            "/admin/backups",
         ]);
     });
 
@@ -68,6 +69,7 @@ describe("Navigationsbaum", () => {
             "users",
             "holidays-admin",
             "api-tokens-admin",
+            "backups",
         ]);
     });
 });

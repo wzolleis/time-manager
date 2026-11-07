@@ -232,3 +232,22 @@ export const timeEntryProjects = mysqlTable(
     },
     (t) => [index("idx_time_entry_projects_project").on(t.projectId)],
 );
+
+// Läufe des Datenbank-Backups (features/use-case/database-backup.md). Ohne Fremdschlüssel: der Dump enthält von dieser
+// Tabelle nur die Struktur, und der Lauf soll auch stehen bleiben, wenn der User gelöscht wird.
+export const backupRuns = mysqlTable(
+    "backup_runs",
+    {
+        id: char("id", {length: 36}).primaryKey(),
+        source: mysqlEnum("source", ["schedule", "manual"]).notNull(), // nächtlicher Lauf oder von Hand
+        startedBy: char("started_by", {length: 36}), // der Administrator bei "manual"
+        status: mysqlEnum("status", ["running", "succeeded", "failed"]).notNull(),
+        startedAt: datetime("started_at", {mode: "date", fsp: 0}).notNull(),
+        finishedAt: datetime("finished_at", {mode: "date", fsp: 0}),
+        fileName: varchar("file_name", {length: 100}), // gesetzt, sobald die Datei auf dem Backup-Speicher liegt
+        sizeBytes: int("size_bytes", {unsigned: true}),
+        error: varchar("error", {length: 1000}),
+        copiedAt: datetime("copied_at", {mode: "date", fsp: 0}), // zuletzt mit dem Button heruntergeladen
+    },
+    (t) => [index("idx_backup_runs_started").on(t.startedAt)],
+);

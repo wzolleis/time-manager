@@ -38,10 +38,10 @@ kostenpflichtig möglich (https://www.webhostone.de/webhosting). Fehler, die sp�
 7. **Ablage.** Der Upload per FTPS läuft erst als `<name>.tmp` und wird danach umbenannt, ein abgebrochener Upload sieht
    so nie wie ein fertiges Backup aus. Das Verzeichnis `/timemanager` im Webspace liegt außerhalb jedes
    Web-Verzeichnisses (Docroot), damit die Dateien nicht per HTTP erreichbar sind. Der Name enthält den Zeitpunkt in UTC:
-   `time_manager_2026-11-08T0200Z.sql.gz.age`.
+   `time_manager_2026-11-08T020000Z.sql.gz.age`, mit Sekunden, damit zwei Läufe in derselben Minute sich nicht überschreiben.
 8. **Zugang.** Ein eigener FTP(S)-Benutzer nur für das Backup, mit einem langen, zufälligen Passwort, das nur als
    Netlify-Secret gespeichert ist. Sein Startverzeichnis im Adminpanel ist `/timemanager`, er sieht also nur die Backups. Die
-   Verbindung ist immer TLS, unverschlüsseltes FTP ist ausgeschlossen. Das Zertifikat wird normal geprüft (Kette und
+   Verbindung ist immer TLS (höchstens 1.2, mit 1.3 brachen lokal Datenverbindungen ab), unverschlüsseltes FTP ist ausgeschlossen. Das Zertifikat wird normal geprüft (Kette und
    Hostname), weicht es ab, bricht der Upload ab, damit das Passwort nicht an einen falschen Server geht.
 9. **Aufbewahrung.** Die Function löscht alte Stände selbst und behält 7 tägliche, 4 wöchentliche und 12 monatliche.
    Sie löscht nur nach einem erfolgreichen Upload und nur Dateien, deren Name zum Muster passt. Einen reinen Schreibzugriff
@@ -119,43 +119,53 @@ README, damit sie im Notfall ohne die Story zu finden ist.
 
 - **Tabelle:** `backup_runs` in `db/schema.ts`. Das Datum der letzten Kopie steht als eigene Spalte am kopierten Lauf. Dazu eine Migration mit `npm run db:generate`, in
   derselben Migration die Einträge in `endpoint_roles` für `/api/backups`.
-- **Dump und Upload:** `netlify/functions/lib/backup.ts` (Dump als Stream, Komprimierung, Verschlüsselung),
+- **Dump und Upload:** `netlify/functions/lib/backup-file.ts` (Dump, Komprimierung, Verschlüsselung, Lesen beim Restore),
   `netlify/functions/lib/backup-ftp.ts` (Upload, Download, Rotation), `netlify/functions/lib/backup-store.ts`
   (Läufe).
 - **Endpoint:** `netlify/functions/backups.ts`: `GET /api/backups` (Läufe, Warnungen), `POST /api/backups` (Start von Hand),
   `GET /api/backups/:id/file` (Download), `POST /api/backups/:id/copied` (Datum der Kopie).
 - **Zeitplan:** `netlify/functions/backup-scheduled.ts` mit `schedule` in `config`, einmal pro Nacht. Beide Functions
-  verwenden `lib/backup.ts`, eine Function importiert keine andere.
+  verwenden `lib/backup-store.ts`, eine Function importiert keine andere.
 - **Rotation:** Die Auswahl der zu löschenden Dateien ist eine reine Funktion, `netlify/functions/lib/backup-rotation.ts`.
 - **UI:** Seite `/admin/backups` mit Karte auf dem Administrator Dashboard (`menu: "admin-dashboard"`), Liste der Läufe,
   Warnungen, Buttons „Backup jetzt erstellen“ und „Auf diesen Rechner kopieren“. View und Repository nach Skill `architecture`, Dateien nach `ui-modules`.
 - **Skript:** `scripts/backup-restore.ts` mit `npm run backup:restore` und `backup:restore:prod`, Auswahl des Ziels über
   `scripts/lib/env.ts`. Das Lesen der Datei wird getrennt gehalten, damit der Test es verwenden kann.
-- **Lokal:** Ein FTPS-Container in `compose.yaml`, nie der echte Speicher. Die Regel aus
+- **Lokal:** Ein FTPS-Container in `compose.yaml` (`npm run ftps:up`), nie der echte Speicher. `npm run dev:backup`
+  startet `netlify dev` mit `NODE_EXTRA_CA_CERTS`, damit das selbst signierte Zertifikat normal geprüft wird. Die Regel aus
   `../boundaries/local-environment.md` gilt weiter.
 - **Dependencies:** `basic-ftp` und `age-encryption`, nur im Backend.
 - **Umgebung (Netlify-Secrets):** `BACKUP_FTP_HOST`, `BACKUP_FTP_PORT`, `BACKUP_FTP_USER`, `BACKUP_FTP_PASSWORD`,
   `BACKUP_AGE_RECIPIENT`.
 
-### Vor der Umsetzung zu prüfen
+### Stand der Prüfung
 
-Die Angaben zu webhostone stammen aus der Doku, nichts davon ist getestet.
+Lokal geprüft am 2026-11-07, gegen den FTPS-Container und die lokale Datenbank:
 
-- **FTPS:** Der Server `xd5.serverdomain.org` bietet auf Port 21 TLS mit einem gültigen Zertifikat an (am 2026-11-07
-  geprüft). Anmeldung, Upload, Umbenennen und Löschen sind noch nicht getestet, auch nicht aus einer Netlify Function. Netlify
-  hat keine festen IP-Adressen, und FTPS braucht zusätzlich die passiven Datenports.
-- **Netlify:** Das aktuelle Zeitlimit für Scheduled Functions (nach bisherigem Stand etwa 30 Sekunden), und ob
-  `basic-ftp` sich bündeln lässt. Reicht die Zeit nicht, startet die Scheduled Function eine Background Function.
-  Dazu die Größenlimits für Antworten: Wird die Datei für den Download zu groß, braucht es einen Download in Teilen.
-- **Datenbank:** Sind alle Tabellen der Produktion InnoDB? Darf der Benutzer `SHOW CREATE TABLE` ausführen?
-- **Verbindung:** Der Pool hat nur eine Verbindung (`connectionLimit: 1`). Der Dump braucht eine eigene Verbindung, damit
-  die Transaktion der Anfragen nicht in die Quere kommt. Der Hoster muss die zusätzliche Verbindung erlauben.
+- **Ablauf:** Backup von Hand in etwa 3 Sekunden, Upload als `.tmp` und Umbenennen, Rotation, Download über den
+  Browser mit gleicher Größe, Datum der Kopie gespeichert. Zwei gleichzeitige Starts: einer läuft, der andere bekommt 409.
+- **Fehler:** Ohne gültiges Zertifikat schlägt der Lauf fehl und steht mit Meldung in der Liste.
+- **Rundreise:** Mit `npm run backup:restore` nach `time_manager_restore` eingespielt, alle Tabellen mit gleicher
+  `CHECKSUM TABLE` wie das Original, auch Umlaute, `ß`, `€`, `'` und `\`. Falscher Schlüssel, abgeschnittene Datei und
+  nicht lokale Datenbank brechen vor der ersten Änderung ab.
+- **Restore von Hand:** Entschlüsselter Dump mit dem Client `mariadb` eingespielt, gleiche Zeilenzahlen und Checksummen.
+  Die Kommandozeile von `age` und phpMyAdmin sind dabei nicht getestet.
+- **Rechte:** `scripts/api-walkthrough.sh` prüft, dass ein User ohne Administrator-Rolle alle vier Endpoints mit 403
+  abgewiesen bekommt.
+
+Noch offen, erst mit der Produktion zu prüfen:
+
+- **webhostone:** Anmeldung per FTPS aus einer Netlify Function (keine festen IP-Adressen, passive Datenports), Upload,
+  Umbenennen und Löschen im Startverzeichnis `/timemanager`.
+- **Netlify:** Eine Scheduled Function hat 30 Sekunden, der Download als Stream bis 20 MB. Reicht das nicht, startet die
+  Scheduled Function eine Background Function, und der Download braucht Teile.
+- **Datenbank:** Alle Tabellen InnoDB, `SHOW CREATE TABLE` erlaubt und eine zweite Verbindung neben dem Pool.
 
 ## Tests
 
 - `netlify/functions/lib/backup-rotation.test.ts`: Welche Stände bleiben (7/4/12), fremde Dateien und `.tmp` werden nicht
   angefasst.
-- `netlify/functions/lib/backup.test.ts`: Datumswerte, `NULL`, Umlaute, `ß`, `€`, Anführungszeichen und Binärdaten werden
+- `netlify/functions/lib/backup-file.test.ts`: Datumswerte, `NULL`, Umlaute, `ß`, `€`, Anführungszeichen und Binärdaten werden
   richtig in SQL geschrieben; `sessions` ohne Daten.
 - **Rundreise gegen die lokale Datenbank:** Dump aus der lokalen Datenbank erstellen, mit `npm run backup:restore` in
   `time_manager_restore` einspielen und jede Tabelle mit dem Original vergleichen.
