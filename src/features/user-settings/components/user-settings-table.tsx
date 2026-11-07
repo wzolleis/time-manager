@@ -12,16 +12,13 @@ import {Loading} from "@/components/text/loading";
 import {LoadError} from "@/components/text/load-error";
 import {PageHeader} from "@/components/page/page-header";
 
-// Auf schmalen Bildschirmen dürfen kurze Spalten umbrechen, damit die Tabelle ohne Scrollen passt
-const wrapOnPhone = {className: "whitespace-normal sm:whitespace-nowrap"};
-
 // Außerhalb der Komponente, damit die Spalten stabil bleiben
 
 const valueColumn: DataTableColumnDef<Row> = {
     accessorKey: "text",
     header: "Wert",
     enableSorting: false,
-    meta: wrapOnPhone,
+    meta: {onSmallScreens: "wrap"},
 };
 const actions = actionsColumn<Row>((row) => <UserSettingActions row={row} />);
 
@@ -46,7 +43,7 @@ const immediateColumns: DataTableColumnDef<Row>[] = [
         id: "description",
         header: "Beschreibung",
         enableSorting: false,
-        meta: {className: "hidden sm:table-cell"},
+        meta: {onSmallScreens: "hide"},
         // TableCell ist nowrap, lange Beschreibungen brechen um
         cell: ({row}) => <div className="break-words whitespace-normal">{row.original.setting.description}</div>,
     },
@@ -60,7 +57,7 @@ const historyColumns: DataTableColumnDef<Row>[] = [
         id: "validFrom",
         header: "gültig ab",
         enableSorting: false,
-        meta: wrapOnPhone,
+        meta: {onSmallScreens: "wrap"},
         cell: ({row}) => (row.original.validFrom ? formatDay(row.original.validFrom) : "–"),
     },
     {accessorKey: "status", header: "Status", enableSorting: false},

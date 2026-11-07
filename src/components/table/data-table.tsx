@@ -24,9 +24,18 @@ const features = tableFeatures({
         basic: sortFn_basic, // Zahlen und Sonstiges
         datetime: sortFn_datetime, // Datumswerte (Date)
     },
-    // className gilt für Kopf- und Datenzellen der Spalte, z.B. zum Ausblenden auf kleinen Bildschirmen
-    columnMeta: metaHelper<{className?: string}>(),
+    // Wie sich Kopf- und Datenzellen der Spalte auf kleinen Bildschirmen verhalten
+    columnMeta: metaHelper<{onSmallScreens?: SmallScreens}>(),
 });
+
+/** hide: Spalte ausblenden, wrap: Text darf umbrechen, damit die Tabelle ohne Scrollen passt */
+type SmallScreens = "hide" | "wrap";
+const SMALL_SCREEN_CLASSES: Record<SmallScreens, string> = {
+    hide: "hidden sm:table-cell",
+    wrap: "whitespace-normal sm:whitespace-nowrap",
+};
+const cellClass = (meta?: {onSmallScreens?: SmallScreens}) =>
+    meta?.onSmallScreens && SMALL_SCREEN_CLASSES[meta.onSmallScreens];
 
 // Diesen Typ verwenden die Spaltendefinitionen der einzelnen Tabellen
 export type DataTableColumnDef<TData extends RowData> = ColumnDef<typeof features, TData>;
@@ -60,7 +69,7 @@ export function DataTable<TData extends RowData>({
                                 const canSort = header.column.getCanSort();
                                 const sorted = header.column.getIsSorted();
                                 return (
-                                    <TableHead key={header.id} className={header.column.columnDef.meta?.className}>
+                                    <TableHead key={header.id} className={cellClass(header.column.columnDef.meta)}>
                                         {header.isPlaceholder ? null : canSort ? (
                                             <button
                                                 type="button"
@@ -86,7 +95,7 @@ export function DataTable<TData extends RowData>({
                         rows.map((row) => (
                             <TableRow key={row.id}>
                                 {row.getVisibleCells().map((cell) => (
-                                    <TableCell key={cell.id} className={cell.column.columnDef.meta?.className}>
+                                    <TableCell key={cell.id} className={cellClass(cell.column.columnDef.meta)}>
                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                     </TableCell>
                                 ))}
