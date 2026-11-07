@@ -26,5 +26,26 @@ services:
             interval: 5s
             retries: 20
 
+    # Lokaler Backup-Speicher per FTPS, nie der echte (features/use-case/database-backup.md).
+    # Nur mit npm run ftps:up, das Profil hält ihn aus db:up heraus. Das Image gibt es nur für amd64.
+    ftps:
+        image: stilliard/pure-ftpd:latest
+        platform: linux/amd64
+        container_name: time-manager-ftps
+        profiles: [backup]
+        restart: unless-stopped
+        environment:
+            PUBLICHOST: 127.0.0.1
+            FTP_USER_NAME: ${BACKUP_FTP_USER:-backup}
+            FTP_USER_PASS: ${BACKUP_FTP_PASSWORD:-} # Pflicht für ftps:up, aber nicht für db:up
+            FTP_USER_HOME: /home/backup
+            FTP_PASSIVE_PORTS: "30000:30009"
+            ADDED_FLAGS: --tls=3 # nur mit TLS, wie die Produktion verlangt
+        ports:
+            - "127.0.0.1:${BACKUP_FTP_PORT:-2121}:21"
+            - "127.0.0.1:30000-30009:30000-30009"
+        volumes:
+            - ./db/docker/ftps/pure-ftpd.pem:/etc/ssl/private/pure-ftpd.pem:ro
+
 volumes:
     time-manager-mariadb:

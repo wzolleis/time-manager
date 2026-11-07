@@ -18,6 +18,7 @@ const HEADINGS: Record<string, string> = {
     "/admin/settings": "Einstellungen",
     "/admin/holidays": "Feiertage für alle",
     "/admin/api-tokens": "Agent-Zugänge",
+    "/admin/backups": "Backups",
     "/user": "User Dashboard",
     "/user/reports": "Report",
     "/user/reports/daily": "Heute",
@@ -78,6 +79,7 @@ function mockApi() {
             if (pathname === "/api/holidays" || pathname === `${user}/holidays`) return Response.json([]);
             if (pathname === "/api/api-tokens" || pathname === "/api/admin/api-tokens") return Response.json([]);
             if (pathname === "/api/passkeys") return Response.json([]);
+            if (pathname === "/api/backups") return Response.json({runs: [], lastCopiedAt: null, configured: true});
 
             // Nicht gemockte Aufrufe fallen auf, statt still zu scheitern
             if (pathname === `/api/users/${TEST_USER.id}/settings`) return Response.json({settings: [], values: []}); // nur Defaults

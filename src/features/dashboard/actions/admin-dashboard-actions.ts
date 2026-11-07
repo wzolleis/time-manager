@@ -1,4 +1,4 @@
-import {CalendarHeart, KeyRound, Settings, User} from "lucide-react";
+import {CalendarHeart, DatabaseBackup, KeyRound, Settings, User} from "lucide-react";
 import type {DashboardAction} from "@/components/dashboard-action/types";
 
 // Die Seiten unter /admin, die in keinem Menü stehen (menu: "admin-dashboard" in nav-items.ts)
@@ -38,5 +38,14 @@ export const adminDashboardActions: DashboardAction[] = [
         label: "Zu den Agent-Zugängen",
         icon: KeyRound,
         to: "/admin/api-tokens",
+    },
+    {
+        id: "backups",
+        kind: "link",
+        title: "Backups",
+        description: "Backups der Datenbank prüfen, erstellen und auf den Rechner kopieren",
+        label: "Zu den Backups",
+        icon: DatabaseBackup,
+        to: "/admin/backups",
     },
 ];

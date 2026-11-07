@@ -47,6 +47,47 @@ Token selbst, sondern eine Variable: `"headers": {"Authorization": "Bearer ${TIM
 Andere Clients (Claude API, claude.ai, Claude Desktop): siehe „Einbinden in Claude“ in
 `features/boundaries/mcp-enable.md`.
 
+## Backup der Datenbank
+
+Jede Nacht und auf Knopfdruck unter Administration → Backups entsteht ein SQL-Dump. Er wird mit gzip komprimiert,
+mit `age` verschlüsselt und per FTPS abgelegt. „Auf diesen Rechner kopieren“ lädt das neueste Backup herunter.
+Beschreibung: `features/use-case/database-backup.md`.
+
+Netlify-Variablen (nur Production): `BACKUP_FTP_HOST`, `BACKUP_FTP_PORT` (Standard 21), `BACKUP_FTP_USER`,
+`BACKUP_FTP_PASSWORD` (Secret), `BACKUP_AGE_RECIPIENT` (öffentlicher Schlüssel `age1…`). Den privaten Schlüssel
+hat nur der Administrator.
+
+Lokal läuft ein FTPS-Container statt des echten Speichers:
+
+```bash
+npm run ftps:up            # Container time-manager-ftps auf 127.0.0.1:2121, Zertifikat beim ersten Mal
+npm run dev:backup         # wie npx netlify dev, vertraut dem lokalen Zertifikat
+```
+
+### Restore per Skript
+
+```bash
+npm run backup:restore -- <datei> <schlüsseldatei>        # lokal, nach time_manager_restore
+npm run backup:restore:prod -- <datei> <schlüsseldatei>   # Produktion, nur im Notfall
+```
+
+Das Skript prüft die Datei vor der ersten Änderung, vergleicht danach die Zeilen je Tabelle und verlangt für die
+Produktion den Namen der Datenbank. Vorher sichert es den aktuellen Stand verschlüsselt nach `backups/`.
+
+### Restore von Hand
+
+Für den Fall, dass das Skript nicht läuft, z. B. auf einem Rechner ohne das Projekt:
+
+1. Die neueste Datei vom Backup-Speicher oder aus der lokalen Kopie nehmen.
+2. Entschlüsseln und entpacken, dafür muss `age` installiert sein (`brew install age`):
+   `age -d -i <schlüsseldatei> <datei> | gunzip > dump.sql`
+3. Vor dem Einspielen in die Produktion den aktuellen Stand sichern, mit „Backup jetzt erstellen“ oder in phpMyAdmin.
+4. Einspielen mit `mariadb -h <host> -P <port> -u <user> -p <datenbank> < dump.sql` oder in phpMyAdmin unter
+   „Importieren“. Der Dump löscht und erstellt die Tabellen neu.
+5. Wurde seit dem Backup migriert: `npm run db:migrate:prod`.
+6. Prüfen: Zeilenzahlen (die zweite Zeile im Dump, `-- rows {…}`), Umlaute, Anmeldung. Alle User melden sich neu an.
+7. `dump.sql` löschen, die Datei ist unverschlüsselt.
+
 ## React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

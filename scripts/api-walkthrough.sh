@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # API-Walkthrough: Anmeldung, Rollen, Users, Projekte, Zeitbuchungen, Projektzuordnung, Urlaub, Krankmeldung,
-# Überstunden, Feiertage, Rechte auf die Daten eines Users, Agent-Tokens, Passkeys, MCP-Server.
+# Überstunden, Feiertage, Rechte auf die Daten eines Users, Agent-Tokens, Passkeys, MCP-Server, Rechte auf Backups.
 # Läuft mit einem Wegwerf-User "vitest" und räumt hinterher auf.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -154,6 +154,12 @@ wt_step "'vitest' darf kein Passwort zurücksetzen" 403 "notwendigen Rechte" POS
 
 wt_step "'vitest' darf sich nicht selbst zum Administrator machen" 403 "notwendigen Rechte" \
   PUT "/api/users/$USER_ID/roles" "{\"roleIds\":[\"$ADMIN_ROLE_ID\",\"$USER_ROLE_ID\"]}"
+
+# Backups nur für Administratoren (features/use-case/database-backup.md), die Id muss dafür nicht existieren
+wt_step "'vitest' sieht keine Backups" 403 "notwendigen Rechte" GET /api/backups
+wt_step "'vitest' startet kein Backup" 403 "notwendigen Rechte" POST /api/backups
+wt_step "'vitest' lädt kein Backup herunter" 403 "notwendigen Rechte" GET "/api/backups/$UNKNOWN_ID/file"
+wt_step "'vitest' meldet keine Kopie" 403 "notwendigen Rechte" POST "/api/backups/$UNKNOWN_ID/copied"
 
 WT_COOKIES="$ADMIN_COOKIES"
 wt_step "Admin macht 'vitest' zum Administrator" 200 '"Administrator"' PUT "/api/users/$USER_ID/roles" \
