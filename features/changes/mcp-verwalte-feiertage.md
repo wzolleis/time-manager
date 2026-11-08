@@ -63,5 +63,5 @@ Die Tools kommen in eine neue Datei `netlify/functions/lib/mcp-tools/holidays.ts
   globalen oder fremden Feiertags.
 - Die Tool-Liste in `features/boundaries/mcp-enable.md` und im README ist ergänzt.
 
-Geändert wird nach dem Skill `architecture` (`../../.claude/skills/architecture`), zuerst
-`../../.claude/skills/architecture/use-case.md` lesen.
+Geändert wird nach dem Skill `architecture`, zuerst
+dessen `use-case.md` lesen.

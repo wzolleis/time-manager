@@ -15,8 +15,7 @@ mit den Aktionen, die der User am häufigsten braucht. Später legt der User in 
 fest, welche Aktionen er sehen möchte. Dafür gibt es ein eigenes Feature, hier sind die Aktionen fest
 vorgegeben.
 
-Umgesetzt wird nach den Skills `architecture` (`../../.claude/skills/architecture`, zuerst
-`../../.claude/skills/architecture/use-case.md` lesen) und `ui-modules`.
+Umgesetzt wird nach den Skills `architecture` (zuerst dessen `use-case.md` lesen) und `ui-modules`.
 
 ## Wo das Dashboard erscheint
 

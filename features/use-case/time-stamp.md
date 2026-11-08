@@ -24,8 +24,8 @@ Regeln nicht verletzen. Wo gestempelt wird und wie die Buchungen angezeigt werde
 - Services `../../shared/time-rules.ts`, Schema `../../shared/time-entry.ts`, Function
   `../../netlify/functions/time-entries.ts`, Store `../../netlify/functions/lib/time-entries-store.ts`
 
-Geändert wird nach dem Skill `architecture` (`../../.claude/skills/architecture`), zuerst
-`../../.claude/skills/architecture/use-case.md` lesen.
+Geändert wird nach dem Skill `architecture`, zuerst
+dessen `use-case.md` lesen.
 
 ## Begriffe
 
