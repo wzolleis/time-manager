@@ -31,7 +31,7 @@ Fachliche Grundlage, vor der Umsetzung lesen:
 Voraussetzung: die Agent-Tokens aus `mcp-token.md`, insbesondere `withToken`. Sie werden zuerst
 umgesetzt.
 
-Technische Grundlage: Skill `authorization` (`../../.claude/skills/`), Function
+Technische Grundlage: Skill `authorization`, Function
 `../../netlify/functions/time-entries.ts`, Services in `../../shared/`.
 
 ## Entscheidungen

@@ -5,7 +5,7 @@ description: Kopiert alle Skills aus .claude/skills in das Repository common-ski
   unter <skill>-timemanager nur die projektspezifischen Ergänzungen stehen.
 type: setup
 epics: entwicklung
-state: open
+state: resolved
 ---
 
 # Common Skills
@@ -113,17 +113,17 @@ Passt kein Beispiel aus der Todo-Liste, mach einen Vorschlag und frag nach.
 ## Fertig, wenn
 
 Pro Skill:
-- [ ] Der Skill liegt in common-skills und ist nach `~/.claude/skills/` verlinkt.
-- [ ] Der allgemeine Skill verweist auf andere Skills nur per Name.
-- [ ] Der Projekt-Skill heißt `<skill>-timemanager`, verweist auf `<skill>` und enthält nur Ergänzungen,
+- [x] Der Skill liegt in common-skills und ist nach `~/.claude/skills/` verlinkt.
+- [x] Der allgemeine Skill verweist auf andere Skills nur per Name.
+- [x] Der Projekt-Skill heißt `<skill>-timemanager`, verweist auf `<skill>` und enthält nur Ergänzungen,
       oder er entfällt, weil es keine gibt.
 
 Für das Feature:
-- [ ] Alle Skills aus „Welche Skills“ sind übernommen.
-- [ ] `grep -riE 'time-?manager|zeiteintr|stempel|überstunden|netlify|mariadb' ~/IdeaProjects/common-skills --exclude-dir=.git`
+- [x] Alle Skills aus „Welche Skills“ sind übernommen.
+- [x] `grep -riE 'time-?manager|zeiteintr|stempel|überstunden|netlify|mariadb' ~/IdeaProjects/common-skills --exclude-dir=.git`
       findet nichts.
-- [ ] Im time-manager verweist nichts mehr auf die alten Skill-Namen ohne `-timemanager`, außer auf
+- [x] Im time-manager verweist nichts mehr auf die alten Skill-Namen ohne `-timemanager`, außer auf
       die allgemeinen Skills.
-- [ ] `CLAUDE.md` im time-manager verbindet `<skill>` und `<skill>-timemanager` und beschreibt den Stack.
-- [ ] common-skills ist gepusht, der time-manager committet.
-- [ ] Das Feature steht auf `resolved`.
+- [x] `CLAUDE.md` im time-manager verbindet `<skill>` und `<skill>-timemanager` und beschreibt den Stack.
+- [x] common-skills ist gepusht, der time-manager committet.
+- [x] Das Feature steht auf `resolved`.
