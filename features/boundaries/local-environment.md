@@ -158,6 +158,21 @@ npm run db:seed                       # Administrator aus scripts/.env.local in 
 npm run db:seed:test                  # und in time_manager_test
 npx netlify dev
 ```
+
+### Skills aus common-skills
+
+Einmal pro Rechner, macht der Entwickler. Die allgemeinen Skills (z. B. `commit`, `architecture`, `shot`,
+`handoff`) liegen nicht im time-manager, sondern im Repository common-skills. Im Projekt stehen nur die
+Ergänzungen `<skill>-timemanager` (siehe `CLAUDE.md`). Ohne diesen Schritt fehlen dem Agent die allgemeinen Regeln.
+
+```bash
+gh repo clone wzolleis/common-skills ~/IdeaProjects/common-skills
+~/IdeaProjects/common-skills/link.sh   # verlinkt jeden Skill nach ~/.claude/skills/<skill>
+```
+
+Nach einem `git pull` in common-skills `link.sh` erneut ausführen, damit neue Skills verlinkt und gelöschte
+entfernt werden.
+
 ### Orbstack starten
 ```bash
 open -a OrbStack
