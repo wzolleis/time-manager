@@ -88,11 +88,11 @@ describe("dailyReport", () => {
         expect(structured.entries[0].bookedAt).toBe("2026-10-19T08:00:00+02:00");
     });
 
-    it("markiert Buchungen an Krankheitstagen, sie zählen nicht", () => {
+    // Dass Krankheitstage nicht zählen, prüft time-report.test.ts, hier nur die Kennzeichnung
+    it("markiert Buchungen an Krankheitstagen", () => {
         const sick = data({sickLeaves: [{startDate: day("2026-10-19"), endDate: day("2026-10-19")}]});
         const {structured, text} = dailyReport(sick, day("2026-10-19"), NOW);
         expect(structured.kindText).toBe("krank");
-        expect(structured.workMinutes).toBe(0);
         expect(structured.entries.every((e) => e.ignored)).toBe(true);
         expect(text).toContain("## Montag, 19.10.2026 · krank");
         expect(text).toContain("Kommen · zählt nicht (krank)");
