@@ -19,10 +19,10 @@ const RULES =
     "Ein neuer Wert gilt frühestens ab morgen, nur der erste eigene Wert einer Einstellung darf auch rückwirkend " +
     "gelten. Urlaubstage gelten immer ab dem 1. Januar. Nur ganze Zahlen, Soll 1 bis 10 Stunden. value null " +
     "setzt auf den Default zurück: ab validFrom gilt wieder der Default, auch wenn er sich später ändert. Das " +
-    "geht nur, wenn am Tag davor ein eigener Wert gilt. show_action_bar (true oder false) hat keine Historie: " +
+    "geht nur, wenn am Tag davor ein eigener Wert gilt. Action Bar (true oder false) hat keine Historie: " +
     "ohne validFrom, der neue Wert ersetzt den bisherigen und gilt sofort.";
 
-const VALUE = "ganze Zahl, bei show_action_bar true oder false, oder null für „Default“";
+const VALUE = "ganze Zahl, bei Action Bar true oder false, oder null für „Default“";
 
 export function registerUserSettingTools(server: McpServer, user: SessionUser): void {
     server.registerTool(
@@ -30,7 +30,7 @@ export function registerUserSettingTools(server: McpServer, user: SessionUser): 
         {
             title: "Einstellungen",
             description:
-                "Einstellungen des Users (Soll in Stunden pro Tag, Urlaubstage pro Jahr, show_action_bar) mit Default, eigenen " +
+                "Einstellungen des Users (Soll in Stunden pro Tag, Urlaubstage pro Jahr, Action Bar) mit Default, eigenen " +
                 "Werten, gültig ab und Status (aktuell, geplant, abgelaufen). Abgelaufene Werte gelten für die " +
                 "Vergangenheit weiter.",
             outputSchema: UserSettingsReportSchema,

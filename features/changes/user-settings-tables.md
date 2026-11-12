@@ -13,7 +13,7 @@ state: resolved
 
 Heute zeigt `/user/settings` eine einzige Tabelle mit den Spalten Name, Wert, gültig ab, Status und
 Beschreibung. Darin stehen die Werte von Soll und Urlaubstage mit ihrer Historie und die eine Zeile von
-`show_action_bar`. Bei einer Einstellung ohne Historie sagen „gültig ab“ und Status nichts aus, bei einer
+`Action Bar`. Bei einer Einstellung ohne Historie sagen „gültig ab“ und Status nichts aus, bei einer
 mit Historie wiederholen sich Name und Beschreibung in jeder Zeile. Mit jeder neuen Einstellung wird das
 unübersichtlicher.
 
@@ -46,7 +46,7 @@ Keine Änderung an Datenbank, API und MCP.
 ## Fertig, wenn
 
 - **Komponenten-Test** in `../../src/features/user-settings/components/user-settings.test.tsx`: Die Seite zeigt
-  die Abschnitte „Allgemein“, „Soll“ und „Urlaubstage“. `show_action_bar` steht in „Allgemein“ ohne Status und
+  die Abschnitte „Allgemein“, „Soll“ und „Urlaubstage“. `Action Bar` steht in „Allgemein“ ohne Status und
   ohne „gültig ab“, die Werte von Soll stehen in der Tabelle „Soll“, die Beschreibung von Soll erscheint einmal.
 - `../use-case/user-settings.md` beschreibt die Ansicht mit den getrennten Tabellen.
 - Typprüfung, Lint und `npx vitest run` laufen durch.

@@ -255,10 +255,10 @@ describe("Wertwechsel in den Berechnungen (Regeln 8 und 9)", () => {
     });
 });
 
-describe("Einstellung ohne Historie (show_action_bar)", () => {
+describe("Einstellung ohne Historie (Action Bar)", () => {
     const BAR: UserSetting = {
         id: SHOW_ACTION_BAR_SETTING_ID,
-        name: "show_action_bar",
+        name: "Action Bar",
         description: "Zeige die Action-Bar an",
         type: "boolean",
         unit: null,
@@ -275,7 +275,7 @@ describe("Einstellung ohne Historie (show_action_bar)", () => {
     });
 
     it("andere Werte werden abgelehnt", () => {
-        for (const v of ["ja", "1", ""]) expect(check(v)).toBe("show_action_bar: bitte true oder false angeben");
+        for (const v of ["ja", "1", ""]) expect(check(v)).toBe("Action Bar: bitte true oder false angeben");
     });
 
     it("gültig ab heute oder in der Vergangenheit ist auch mit eigenem Wert kein Problem", () => {
@@ -286,12 +286,12 @@ describe("Einstellung ohne Historie (show_action_bar)", () => {
     });
 
     it("„Default“, wenn schon der Default gilt, wird abgelehnt", () => {
-        expect(check(null)).toBe("show_action_bar: es gilt schon der Default");
-        expect(check(null, [p("a", "2026-10-01", null)])).toBe("show_action_bar: es gilt schon der Default");
+        expect(check(null)).toBe("Action Bar: es gilt schon der Default");
+        expect(check(null, [p("a", "2026-10-01", null)])).toBe("Action Bar: es gilt schon der Default");
     });
 
     it("lässt sich nicht bearbeiten oder löschen, nur neu eintragen", () => {
-        expect(checkImmediateEdit(BAR)).toBe("show_action_bar: bitte einen neuen Wert eintragen");
+        expect(checkImmediateEdit(BAR)).toBe("Action Bar: bitte einen neuen Wert eintragen");
         expect(checkImmediateEdit(SOLL)).toBeNull();
     });
 

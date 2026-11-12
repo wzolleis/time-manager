@@ -13,7 +13,7 @@ import {LOGOUT_ACTION_ID, userDashboardActions} from "@features/dashboard/action
 const ACTION_BAR_SPACE = "pb-[calc(3.5rem+env(safe-area-inset-bottom))]";
 
 /**
- * Ob die Action-Bar zu sehen ist (Einstellung show_action_bar). Erst wenn die Einstellungen geladen sind,
+ * Ob die Action-Bar zu sehen ist (Einstellung Action Bar). Erst wenn die Einstellungen geladen sind,
  * damit sie bei einem User, der sie ausgeschaltet hat, nicht kurz aufblitzt.
  */
 function useShowActionBar(): boolean {

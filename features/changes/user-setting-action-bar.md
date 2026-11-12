@@ -1,6 +1,6 @@
 ---
 name: user-setting-action-bar
-description: Neue Einstellung show_action_bar (boolean, Default true), mit der der User die Action-Bar ein- und ausblendet. Sie hat keine Historie und kein „gültig ab“, ein neuer Wert gilt sofort (valid_from_unit immediately).
+description: Neue Einstellung Action Bar (boolean, Default true), mit der der User die Action-Bar ein- und ausblendet. Sie hat keine Historie und kein „gültig ab“, ein neuer Wert gilt sofort (valid_from_unit immediately).
 type: change
 changes: user-settings
 epics: einstellungen, navigation
@@ -16,7 +16,7 @@ Einstellung auf der Einstellungsseite (`/user/settings`):
 
 | Name              | Typ     | Einheit | Default | gültig ab | Erlaubte Werte  | Beschreibung              |
 |-------------------|---------|---------|---------|-----------|-----------------|---------------------------|
-| `show_action_bar` | boolean | –       | true    | sofort    | `true`, `false` | Zeige die Action-Bar an   |
+| `Action Bar` | boolean | –       | true    | sofort    | `true`, `false` | Zeige die Action-Bar an   |
 
 Beschreibung der Einstellungen: `../use-case/user-settings.md`.
 
@@ -36,10 +36,10 @@ Wert braucht es nicht. Der User erwartet, dass die Action-Bar sofort verschwinde
    und nicht geprüft.
 3. **Für diese Einstellung entfallen** Regel 3 („gültig ab“ in der Zukunft), Regel 4 und Regel 5. Regel 7
    wird ersetzt: Der aktuelle Wert lässt sich direkt ändern.
-4. **Gültige Werte (Regel 6):** nur `true` oder `false`, sonst „show_action_bar: bitte true oder false
+4. **Gültige Werte (Regel 6):** nur `true` oder `false`, sonst „Action Bar: bitte true oder false
    angeben“. Oder „Default“ (`null`): Dann gilt sofort wieder der Default. Gilt schon der Default, ist
    „Auf Default zurücksetzen“ gesperrt und wird vom Server abgelehnt
-   („show_action_bar: es gilt schon der Default“).
+   („Action Bar: es gilt schon der Default“).
 5. **Anzeige in der Tabelle:** genau eine Zeile für die Einstellung, nicht Default und eigene Werte
    getrennt.
    - Wert: „Ja“ oder „Nein“, bei „Default“ „Default (Ja)“
@@ -73,6 +73,10 @@ Neue Migration `0017_user_setting_show_action_bar.sql` in `../../db/migrations/`
 
 - `user_setting_values` bleibt unverändert. Der Wert steht als `"true"` oder `"false"` in `value`,
   `null` ist „Default“.
+
+Die Migration 0017 hat die Einstellung abweichend als `show_action_bar` angelegt. `0020_user_setting_action_bar_name.sql`
+benennt sie in „Action Bar“ um.
+
 - Ändert sich das Format, das `GET /api/users/:id/settings` liefert (neue Werte in `type` und
   `validFromUnit`), muss `buster` in `../../src/query-client.ts` erhöht werden
   (`../../.claude/skills/architecture/repository.md`, „Cache im localStorage“).
@@ -83,8 +87,8 @@ Neue Migration `0017_user_setting_show_action_bar.sql` in `../../db/migrations/`
 |-----|-------|----------|
 | Schema | `../../shared/user-setting.ts` | `SHOW_ACTION_BAR_SETTING_ID` und `DEFAULT_SHOW_ACTION_BAR = true`. `validFrom` in Create optional, für `immediately` setzt der Server den Tag. |
 | Service | `../../shared/user-setting-rules.ts` | `checkSettingValue` prüft für `boolean` nur `true`/`false` und für `immediately` nicht die Regeln 3 bis 5, bei „Default“ nur, ob schon der Default gilt. Neu: `booleanSettingOf(data, settingId)` liefert den aktuellen Wert (eigener Wert oder Default), ohne `historyOf`, das nur Zahlen kennt. `historyOf` und `valueOn` bleiben für Soll und Urlaubstage unverändert. |
-| Backend | `../../netlify/functions/lib/user-settings-store.ts` | `addSettingValue`: bei `immediately` den vorhandenen Wert des Users überschreiben oder neu anlegen, `validFrom` = heute, in der Transaktion mit `lockUser`. `changeSettingValue` und `deleteSettingValue` lehnen Werte dieser Einstellung ab („show_action_bar: bitte einen neuen Wert eintragen“). |
-| MCP | `../../netlify/functions/lib/mcp-tools/user-settings.ts`, `user-settings-view.ts` | `set_user_setting`: `value` als `number \| boolean \| null`, `validFrom` optional, in `RULES` die Einstellung `show_action_bar` (sofort gültig, `true`/`false`). `list_user_settings` zeigt sie mit „Ja“/„Nein“. |
+| Backend | `../../netlify/functions/lib/user-settings-store.ts` | `addSettingValue`: bei `immediately` den vorhandenen Wert des Users überschreiben oder neu anlegen, `validFrom` = heute, in der Transaktion mit `lockUser`. `changeSettingValue` und `deleteSettingValue` lehnen Werte dieser Einstellung ab („Action Bar: bitte einen neuen Wert eintragen“). |
+| MCP | `../../netlify/functions/lib/mcp-tools/user-settings.ts`, `user-settings-view.ts` | `set_user_setting`: `value` als `number \| boolean \| null`, `validFrom` optional, in `RULES` die Einstellung `Action Bar` (sofort gültig, `true`/`false`). `list_user_settings` zeigt sie mit „Ja“/„Nein“. |
 | Use Case | `../../src/features/user-settings/use-cases/` | `use-show-user-settings.ts`: für `immediately` eine Zeile statt Default und eigene Werte, `valueText` für `boolean` „Ja“/„Nein“. `use-add-user-setting.ts` speichert ohne „gültig ab“. |
 | Komponenten | `../../src/features/user-settings/components/` | `user-setting-dialog.tsx`: bei `boolean` Auswahl „Ja“/„Nein“ mit dem vorhandenen `Select` statt `Input`, bei `immediately` kein Feld „gültig ab“. `user-setting-actions.tsx`: „Auf Default zurücksetzen“ speichert sofort, ohne Dialog mit Datum. |
 | Use Case Action-Bar | – | Liest die Einstellung über `booleanSettingOf(…, SHOW_ACTION_BAR_SETTING_ID)`. Die Action-Bar selbst gehört zu `../use-case/action-bar.md`, nicht zu diesem Change. |
@@ -102,16 +106,16 @@ Geändert wird nach dem Skill `architecture` (`../../.claude/skills/architecture
 ## Fertig, wenn
 
 - **Service-Tests** in `../../shared/user-setting-rules.test.ts`:
-  - `show_action_bar` mit `true`, `false` und „Default“ ist erlaubt, `ja`, `1` und leer werden abgelehnt.
+  - `Action Bar` mit `true`, `false` und „Default“ ist erlaubt, `ja`, `1` und leer werden abgelehnt.
   - „gültig ab“ heute oder in der Vergangenheit wird für `immediately` nicht abgelehnt, auch wenn es schon
     einen eigenen Wert gibt.
   - „Default“, wenn schon der Default gilt, wird abgelehnt.
   - `booleanSettingOf` liefert ohne Daten und ohne eigenen Wert `true`, mit eigenem Wert diesen, nach
     „Default“ wieder den Default.
 - **Komponenten-Test** in `../../src/features/user-settings/components/user-settings.test.tsx`: Die Tabelle
-  zeigt „show_action_bar“ mit „Ja“ und Status „aktuell“. Ändern auf „Nein“ ohne „gültig ab“ zeigt sofort
+  zeigt „Action Bar“ mit „Ja“ und Status „aktuell“. Ändern auf „Nein“ ohne „gültig ab“ zeigt sofort
   „Nein“ in derselben Zeile; „Auf Default zurücksetzen“ zeigt „Default (Ja)“.
-- **MCP-Test:** `set_user_setting` mit `name: "show_action_bar"`, `value: false` ohne `validFrom` speichert,
+- **MCP-Test:** `set_user_setting` mit `name: "Action Bar"`, `value: false` ohne `validFrom` speichert,
   ein zweiter Aufruf mit `true` überschreibt den Wert, `list_user_settings` zeigt einen Wert.
 - `../use-case/user-settings.md` beschreibt die neue Einstellung: Tabelle der Einstellungsmöglichkeiten,
   `type` `boolean`, `valid_from_unit` `immediately`, die Ausnahmen bei den Regeln 3 bis 7 und neue

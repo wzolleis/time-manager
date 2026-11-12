@@ -37,7 +37,7 @@ const SETTINGS = [
     },
     {
         id: SHOW_ACTION_BAR_SETTING_ID,
-        name: "show_action_bar",
+        name: "Action Bar",
         description: "Zeige die Action-Bar an",
         type: "boolean",
         unit: null,
@@ -154,7 +154,7 @@ describe("Einstellungen", () => {
         expect(headings).toEqual(["Allgemein", "Soll", "Urlaubstage"]);
 
         const general = sectionOf("Allgemein");
-        expect(within(general).getByText("show_action_bar")).toBeTruthy();
+        expect(within(general).getByText("Action Bar")).toBeTruthy();
         expect(within(general).queryByRole("columnheader", {name: "Status"})).toBeNull();
         expect(within(general).queryByRole("columnheader", {name: "gültig ab"})).toBeNull();
 
@@ -270,24 +270,24 @@ describe("Einstellungen", () => {
     });
 });
 
-describe("Einstellung show_action_bar ohne Historie", () => {
+describe("Einstellung Action Bar ohne Historie", () => {
     it("zeigt eine Zeile mit „Ja“, ohne Status und ohne gültig ab", async () => {
         mockApi([]);
         renderPage();
 
-        const row = await findRowOf("show_action_bar");
+        const row = await findRowOf("Action Bar");
         expect(within(row).getByText("Ja")).toBeTruthy();
         expect(within(row).queryByText("aktuell")).toBeNull();
         expect(within(row).queryByText("–")).toBeNull();
         expect(within(row).getByRole("button", {name: "Auf Default zurücksetzen"}).hasAttribute("disabled")).toBe(true);
-        expect(screen.getAllByText("show_action_bar")).toHaveLength(1);
+        expect(screen.getAllByText("Action Bar")).toHaveLength(1);
     });
 
     it("ändert auf „Nein“ ohne gültig ab, die Zeile zeigt sofort „Nein“", async () => {
         const fetchMock = mockApi([]);
         renderPage();
 
-        const row = await findRowOf("show_action_bar");
+        const row = await findRowOf("Action Bar");
         fireEvent.click(within(row).getByRole("button", {name: "Ändern"}));
         await screen.findByLabelText("Wert");
         expect(screen.queryByLabelText("gültig ab")).toBeNull();
@@ -305,8 +305,8 @@ describe("Einstellung show_action_bar ohne Historie", () => {
             });
         });
         const updated = await findRowOf("Nein");
-        expect(within(updated).getByText("show_action_bar")).toBeTruthy();
-        expect(screen.getAllByText("show_action_bar")).toHaveLength(1);
+        expect(within(updated).getByText("Action Bar")).toBeTruthy();
+        expect(screen.getAllByText("Action Bar")).toHaveLength(1);
     });
 
     it("setzt sofort auf den Default zurück", async () => {

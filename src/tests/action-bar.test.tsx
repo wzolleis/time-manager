@@ -18,7 +18,7 @@ const USER = {
 
 const BAR_SETTING = {
     id: SHOW_ACTION_BAR_SETTING_ID,
-    name: "show_action_bar",
+    name: "Action Bar",
     description: "Zeige die Action-Bar an",
     type: "boolean",
     unit: null,
@@ -104,7 +104,7 @@ describe("Action-Bar", () => {
         expect(within(bar).getByRole("button", {name: "Abmelden"}).getAttribute("title")).toBe("Abmelden");
     });
 
-    it("ist mit show_action_bar = false nicht zu sehen", async () => {
+    it("ist mit Action Bar = false nicht zu sehen", async () => {
         mockApi({settings: [BAR_SETTING], values: [barValue("false")]});
         renderApp();
 
