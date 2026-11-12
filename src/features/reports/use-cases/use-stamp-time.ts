@@ -62,6 +62,9 @@ export function useStampTime() {
         isLoaded: entries.isSuccess,
         loadError: entries.error,
         stamp: (stamp: Stamp) => save.mutate({...stamp, bookedAt: new Date()}),
-        isStamping: save.isPending, // nur gegen Doppelklick, der neue Status steht schon im Cache
+        // Stempeln geht schon, bevor die Buchungen geladen sind: dann ist es ein Kommen. Lehnt der Server ab
+        // (z. B. weil der User schon eingestempelt ist), zeigt der Optimistic Write den Fehler.
+        // isPending sperrt nur gegen Doppelklick, der neue Status steht schon im Cache.
+        canStamp: !entries.error && !save.isPending,
     };
 }

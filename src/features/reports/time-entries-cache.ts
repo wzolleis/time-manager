@@ -38,6 +38,7 @@ export const withRemoved = (entries: Entries, id: string, pair: boolean): Entrie
 /**
  * Optionen für useMutation: onMutate setzt den neuen Stand in den Cache, onError stellt den alten wieder her
  * und zeigt den Fehler als Toast (der Dialog ist dann schon zu), onSettled lädt die Buchungen neu.
+ * Sind die Buchungen noch nicht geladen (Stempeln gleich beim Öffnen), gilt bis zum Neuladen eine leere Liste.
  */
 export function optimisticTimeEntries<T>(
     qc: QueryClient,
@@ -50,11 +51,13 @@ export function optimisticTimeEntries<T>(
         onMutate: async (input: T) => {
             await qc.cancelQueries({queryKey: key});
             const previous = qc.getQueryData<Entries>(key);
-            if (previous) qc.setQueryData<Entries>(key, apply(previous, input));
+            qc.setQueryData<Entries>(key, apply(previous ?? [], input));
             return {previous};
         },
         onError: (err: Error, _input: T, ctx: {previous?: Entries} | undefined) => {
+            // Ohne alten Stand zurück auf „nicht geladen“, das Neuladen startet sofort
             if (ctx?.previous) qc.setQueryData(key, ctx.previous);
+            else void qc.resetQueries({queryKey: key, exact: true});
             notifyError(err.message);
         },
         onSettled: () => qc.invalidateQueries({queryKey: ["time-entries"]}),
