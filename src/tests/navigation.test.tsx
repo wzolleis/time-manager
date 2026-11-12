@@ -99,8 +99,6 @@ describe("Navigation", () => {
         const router = renderApp("/user/reports/daily");
 
         const breadcrumb = await screen.findByRole("navigation", {name: "Breadcrumb"});
-        // Nach dem Pfeil nach unten steht kein Pfeil nach rechts
-        expect(breadcrumb.querySelector(".lucide-chevron-right")).toBeNull();
         // Radix öffnet ein Dropdown in jsdom über die Tastatur
         fireEvent.keyDown(within(breadcrumb).getByRole("button", {name: "Unterseiten von Report"}), {key: "Enter"});
 

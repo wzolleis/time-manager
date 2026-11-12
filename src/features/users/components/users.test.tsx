@@ -62,7 +62,7 @@ function renderPage(path = "/admin/users") {
 }
 
 // Die Namen stehen auch im Benutzermenü, die E-Mail nur in der Tabelle
-const rowOf = (email: string) => screen.getByText(email).closest("tr")!;
+const rowOf = (text: string) => screen.getByRole("row", {name: (name) => name.includes(text)});
 const emails = () =>
     screen
         .getAllByRole("row")

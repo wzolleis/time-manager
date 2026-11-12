@@ -49,7 +49,7 @@ function renderPage(path: string) {
     );
 }
 
-const rowOf = (text: string) => screen.getByText(text).closest("tr")!;
+const rowOf = (text: string) => screen.getByRole("row", {name: (name) => name.includes(text)});
 
 beforeEach(() => {
     // Nur Date fälschen, Timer laufen normal weiter (React Query, findBy*)

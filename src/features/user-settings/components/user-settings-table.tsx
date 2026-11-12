@@ -1,4 +1,4 @@
-import type {ReactNode} from "react";
+import {type ReactNode, useId} from "react";
 import {formatDay} from "@shared/format";
 import {DataTable, type DataTableColumnDef} from "@/components/table/data-table";
 import {actionsColumn} from "@/components/table/actions-column";
@@ -68,10 +68,13 @@ type SettingsSectionProps = {title: string; description?: string[]; children: Re
 
 /** Abschnitt der Seite: Überschrift, optional Absätze mit Beschreibung, darunter eine Tabelle */
 function SettingsSection({title, description = [], children}: SettingsSectionProps) {
+    const headingId = useId(); // benennt den Abschnitt nach der Überschrift, für Screenreader und Tests
     return (
-        <section className="space-y-2">
+        <section className="space-y-2" aria-labelledby={headingId}>
             <div>
-                <h2 className="text-lg font-semibold">{title}</h2>
+                <h2 id={headingId} className="text-lg font-semibold">
+                    {title}
+                </h2>
                 {description.map((text) => (
                     <Muted key={text}>{text}</Muted>
                 ))}
