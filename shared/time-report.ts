@@ -63,8 +63,14 @@ export function periodTotals({work, breaks}: CountedPeriods, range: {start: Date
         .filter((b) => b.from.getTime() >= start && b.from.getTime() < end)
         .reduce((sum, b) => sum + (b.to!.getTime() - b.from.getTime()), 0);
 
-    return {workMs, breakMs, running, missingGehen};
+    // Ein Tag zählt nur ganze Minuten: Arbeitszeit, Differenz, Summen und Saldo passen so zur Anzeige
+    return {workMs: wholeMinutesMs(workMs), breakMs, running, missingGehen};
 }
+
+const MINUTE_MS = 60_000;
+
+/** Auf ganze Minuten abgerundet: 7:57:18 → 7:57:00 */
+export const wholeMinutesMs = (ms: number): number => Math.floor(ms / MINUTE_MS) * MINUTE_MS;
 
 /**
  * Differenz eines Tages ("JJJJ-MM-TT") gegen das Soll. null: der Tag liegt nach heute, oder er hat weder

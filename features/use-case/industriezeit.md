@@ -64,11 +64,13 @@ und gespeicherte Daten ändern sich nicht.
 2. **Format.** Zwei Nachkommastellen mit Komma und der Einheit „h“, z. B. „8,50 h“, „0,25 h“, „0,00 h“.
 3. **Differenz und Saldo** mit Vorzeichen wie bisher: „+0,50 h“, „−1,25 h“ (Minus als „−“, U+2212). Unter
    einer Minute „±0,00 h“. Der Saldo der Überstunden ist ohne Minuten „+0,00 h“ wie bisher „+0:00 h“.
-4. **Rundung.** Wie bisher zählen ganze Minuten, der Betrag wird abgerundet. Die Minuten werden dann in
-   Stunden umgerechnet und auf zwei Stellen gerundet (ab 5 aufrunden): 8:20 → 8,33 h, 0:01 → 0,02 h,
-   0:59 → 0,98 h.
-5. **Summen** werden wie bisher aus den Millisekunden berechnet und erst bei der Anzeige umgerechnet. Die
-   Summe der angezeigten Tageswerte kann deshalb um 0,01 h von der angezeigten Summe abweichen.
+4. **Rundung.** Die Arbeitszeit eines Tages zählt nur in ganzen Minuten, abgerundet (Change
+   `../changes/whole-minutes-per-day.md`). Die Minuten werden dann in Stunden umgerechnet und auf zwei Stellen
+   gerundet (ab 5 aufrunden): 8:20 → 8,33 h, 0:01 → 0,02 h, 0:59 → 0,98 h.
+5. **Summen** werden aus den ganzen Minuten der Tage berechnet und erst bei der Anzeige umgerechnet. Die
+   Differenz ist deshalb genau Arbeitszeit − Soll in Minuten (8,00 h − 7,95 h = −0,05 h). Weil jeder Wert
+   für sich auf zwei Stellen gerundet wird, kann die Summe der angezeigten Tageswerte in Industriezeit
+   trotzdem um 0,01 h von der angezeigten Summe abweichen.
 6. **Eingaben bleiben in Stunden und Minuten.** Formulare, z. B. Buchungen nachtragen oder der Korrekturwert
    der Überstunden, sind von der Einstellung nicht betroffen.
 7. **Nur die UI.** Die MCP-Tools laufen auf dem Server und kennen die Einstellung im Browser nicht. Ihre

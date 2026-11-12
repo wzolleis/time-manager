@@ -279,3 +279,29 @@ describe("yearTotals", () => {
         expect(t.months[9].targetMs).toBe(13 * 8 * HOUR); // 14.10. bis 31.10.
     });
 });
+
+describe("ganze Minuten je Tag", () => {
+    // 02.11.2026: 07:58:13–12:12:25 und 13:06:02–16:49:08, zusammen 7:57:18
+    const nov2 = day("2026-11-02");
+    const seconds = [
+        b("1", "kommen", "2026-11-02T06:58:13Z"),
+        b("2", "gehen", "2026-11-02T11:12:25Z"),
+        b("3", "kommen", "2026-11-02T12:06:02Z"),
+        b("4", "gehen", "2026-11-02T15:49:08Z"),
+    ];
+    const now = new Date("2026-11-02T20:00:00Z");
+    const MIN = 60_000;
+
+    it("rundet die Arbeitszeit des Tages auf ganze Minuten ab", () => {
+        expect(dayTotals(seconds, localDayRange(nov2), [], now).workMs).toBe(477 * MIN); // 7:57 = 7,95 h
+    });
+
+    it("die Differenz passt zur angezeigten Arbeitszeit: 8:00 − 7:57 = −0:03 (−0,05 h)", () => {
+        const days = weekDays(nov2);
+        const t = weekTotals([...started, ...seconds], days, [], [], [], SOLL, nov2, now);
+        const row = t.days.find((d) => d.day === nov2)!;
+        expect(row.diffMs).toBe(-3 * MIN);
+        expect(t.workMs).toBe(477 * MIN);
+        expect(t.diffMs).toBe(-3 * MIN);
+    });
+});
