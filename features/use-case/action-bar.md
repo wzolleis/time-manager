@@ -44,7 +44,7 @@ Darum können auch nur bereits existierende Aktionen in der Action-Bar hinterleg
 
 # Konfiguration
 Der User kann in den Einstellungen die Action-Bar einblenden oder ausblenden. Dafür
-gibt es die Einstellung `show_action_bar` (siehe user-settings.md und user-setting-action-bar.md).
+gibt es die Einstellung `Action Bar` (siehe user-settings.md und user-setting-action-bar.md).
 Per Default ist die Action-Bar sichtbar.
 
 Die Leiste erscheint erst, wenn die Einstellungen geladen sind. So blitzt sie bei einem User, der sie
@@ -67,9 +67,9 @@ Die Umsetzung erfolgt mit einer eigenen Komponente, die shadcn-Komponenten verwe
 - Tests: `../../src/tests/action-bar.test.tsx`.
 
 # Wann ist das Feature umgesetzt ?
-- Die Einstellung `show_action_bar` ist vorhanden (erledigt mit user-setting-action-bar).
+- Die Einstellung `Action Bar` ist vorhanden (erledigt mit user-setting-action-bar).
 - Tests für die Action-Bar sind grün:
-  - Ohne eigenen Wert ist die Leiste sichtbar, mit `show_action_bar = false` nicht.
+  - Ohne eigenen Wert ist die Leiste sichtbar, mit `Action Bar = false` nicht.
   - Solange die Einstellungen laden, ist die Leiste nicht zu sehen.
   - Ein Klick auf „Heute“ öffnet `/user/reports/daily`, „Woche“ `/user/reports/weekly`, „Einstellungen“
     `/user/settings`.

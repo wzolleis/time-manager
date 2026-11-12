@@ -20,7 +20,7 @@ const ValueSchema = z.union([z.number(), z.boolean()]);
 export const UserSettingsReportSchema = z.object({
     settings: z.array(
         z.object({
-            name: z.string().describe("Name für set_user_setting, z. B. Soll, Urlaubstage oder show_action_bar"),
+            name: z.string().describe("Name für set_user_setting, z. B. Soll, Urlaubstage oder Action Bar"),
             description: z.string(),
             unit: z.enum(["hour", "day"]).nullable(),
             validFromUnit: z

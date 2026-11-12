@@ -59,10 +59,10 @@ describe("userSettingsReport", () => {
     });
 });
 
-describe("userSettingsReport mit show_action_bar", () => {
+describe("userSettingsReport mit Action Bar", () => {
     const bar = {
         id: SHOW_ACTION_BAR_SETTING_ID,
-        name: "show_action_bar",
+        name: "Action Bar",
         description: "Zeige die Action-Bar an",
         type: "boolean" as const,
         unit: null,
@@ -85,7 +85,7 @@ describe("userSettingsReport mit show_action_bar", () => {
         const r = report();
         expect(UserSettingsReportSchema.parse(r.structured)).toEqual(r.structured);
         expect(r.structured.settings[0]).toMatchObject({current: true, defaultValue: true, defaultStatus: "aktuell"});
-        expect(r.text).toContain("| show_action_bar | Ja | – | aktuell |  |");
+        expect(r.text).toContain("| Action Bar | Ja | – | aktuell |  |");
     });
 
     it("zeigt den eigenen Wert in einer Zeile, ohne Zeile für den Default", () => {
@@ -95,11 +95,11 @@ describe("userSettingsReport mit show_action_bar", () => {
             defaultStatus: "abgelaufen",
             values: [{id: "x", value: false, validFrom: "2026-10-20", status: "aktuell"}],
         });
-        expect(r.text).toContain("| show_action_bar | Nein | 20.10.2026 | aktuell | x |");
-        expect(r.text.match(/show_action_bar/g)).toHaveLength(1);
+        expect(r.text).toContain("| Action Bar | Nein | 20.10.2026 | aktuell | x |");
+        expect(r.text.match(/Action Bar/g)).toHaveLength(1);
     });
 
     it("„Default“ zeigt den Default", () => {
-        expect(report(null).text).toContain("| show_action_bar | Default (Ja) | 20.10.2026 | aktuell | x |");
+        expect(report(null).text).toContain("| Action Bar | Default (Ja) | 20.10.2026 | aktuell | x |");
     });
 });

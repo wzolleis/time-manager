@@ -7,7 +7,7 @@ import {DaySchema} from "./date-schemas";
 // nur über die id auf sie. Die Defaults hier gelten nur, solange die Einstellungen noch nicht geladen sind.
 export const SOLL_SETTING_ID = "fcf78946-28c3-4152-9abb-35af0c50cb8f"; // "Soll", Stunden pro Tag
 export const VACATION_DAYS_SETTING_ID = "6fdfc98d-8096-4e64-92be-638b938929ed"; // "Urlaubstage" pro Jahr
-export const SHOW_ACTION_BAR_SETTING_ID = "e2e48edb-c612-466e-a886-03c72466e4f3"; // "show_action_bar", sofort gültig
+export const SHOW_ACTION_BAR_SETTING_ID = "e2e48edb-c612-466e-a886-03c72466e4f3"; // "Action Bar", sofort gültig
 export const DEFAULT_SOLL_HOURS = 8;
 export const DEFAULT_VACATION_DAYS = 30;
 export const DEFAULT_SHOW_ACTION_BAR = true;

@@ -38,7 +38,7 @@ Alle Tabellen haben rechts die Aktionen der Zeile.
 |-------------|--------|---------|---------|------------------|-------------------|------------------------------------------------------------------------------|
 | Soll        | number | hour    | 8       | ein Tag          | ganze Zahl 1–10   | Die Anzahl der Stunden, die pro Tag gearbeitet wird. Das heißt auch Soll.   |
 | Urlaubstage | number | day     | 30      | 1. Januar        | ganze Zahl ≥ 0    | Die Anzahl der Urlaubstage pro Jahr                                          |
-| show_action_bar | boolean | –   | true    | sofort           | `true`, `false`   | Zeige die Action-Bar an (`action-bar.md`)                                    |
+| Action Bar | boolean | –   | true    | sofort           | `true`, `false`   | Zeige die Action-Bar an (`action-bar.md`)                                    |
 
 Hat der User keine eigenen Werte eingetragen, wird der Default angezeigt. Der Default hat kein „gültig ab“, er gilt ab dem ersten Eintrag in der Zeiterfassung.
 
@@ -48,7 +48,7 @@ bleibt stehen und gilt bis zum Tag vor dem neuen „gültig ab“ weiter.
 
 ## Einstellungen ohne Historie
 
-Manche Einstellungen betreffen nur die Oberfläche von jetzt an, keine Berechnung, z. B. `show_action_bar`. Sie
+Manche Einstellungen betreffen nur die Oberfläche von jetzt an, keine Berechnung, z. B. `Action Bar`. Sie
 haben keine Historie (`valid_from_unit = immediately`): Ein neuer Wert gilt sofort und ersetzt den bisherigen.
 
 - Pro User höchstens ein eigener Wert. `valid_from` ist der Tag der letzten Änderung, er wird nicht angezeigt.
@@ -138,7 +138,7 @@ Der Agent kann die Einstellungen über MCP-Tools nutzen, mit denselben Regeln wi
 | Tool                   | Inhalt                                                                  |
 |------------------------|-------------------------------------------------------------------------|
 | `list_user_settings`   | alle Einstellungen mit ihren Werten, „gültig ab“ und Status            |
-| `set_user_setting`     | neuen Wert mit „gültig ab“ eintragen (Name der Einstellung, Wert, Tag); Wert `null`: „Default“. Bei Einstellungen ohne Historie ohne Tag, Wert bei `show_action_bar` `true` oder `false` |
+| `set_user_setting`     | neuen Wert mit „gültig ab“ eintragen (Name der Einstellung, Wert, Tag); Wert `null`: „Default“. Bei Einstellungen ohne Historie ohne Tag, Wert bei `Action Bar` `true` oder `false` |
 | `change_user_setting`  | geplanten Wert ändern (Regel 7), auch auf `null`                        |
 | `delete_user_setting`  | geplanten Wert löschen (Regel 7)                                        |
 
@@ -160,6 +160,6 @@ Verstöße gegen eine Regel liefern die Meldung der Regel zurück.
 - Ohne eigenen Wert ist „Auf Default zurücksetzen“ gesperrt; „Default“ ohne eigenen Wert am Tag davor wird
   abgelehnt.
 - Die Seite zeigt die Abschnitte „Allgemein“, „Soll“ und „Urlaubstage“, jeder mit eigener Tabelle.
-- `show_action_bar` steht ohne eigenen Wert als „Ja“ in einer Zeile unter „Allgemein“. Ändern auf „Nein“ braucht kein „gültig ab“,
+- `Action Bar` steht ohne eigenen Wert als „Ja“ in einer Zeile unter „Allgemein“. Ändern auf „Nein“ braucht kein „gültig ab“,
   die Zeile zeigt sofort „Nein“; ein zweiter Wert überschreibt den ersten. Werte außer `true` und `false` werden
   abgelehnt.
