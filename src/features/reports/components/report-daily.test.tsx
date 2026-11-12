@@ -123,22 +123,26 @@ describe("Optimistic Write", () => {
     const KOMMEN = {id: "k1", userId: USER.id, type: "kommen", bookedAt: "2026-10-14T06:00:00.000Z", projectId: null};
     const GEHEN = {id: "g1", userId: USER.id, type: "gehen", bookedAt: "2026-10-14T08:00:00.000Z", projectId: null};
 
-    /** Buchungen liefern, schreibende Requests an write geben; alles andere wie mockApi */
-    function mockTimeEntries(entries: object[], write: () => Promise<Response>) {
+    /** Buchungen liefern (read), schreibende Requests an write geben; alles andere wie mockApi */
+    function mockTimeEntries(
+        entries: object[],
+        write: () => Promise<Response>,
+        read = async () => Response.json(entries),
+    ) {
         const fallback = globalThis.fetch;
         vi.stubGlobal(
             "fetch",
             vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
                 const {pathname} = new URL(String(input), "http://localhost");
                 if (!pathname.startsWith(ENTRIES_PATH)) return fallback(input, init);
-                return init?.method ? write() : Response.json(entries);
+                return init?.method ? write() : read();
             }),
         );
     }
 
     const never = () => new Promise<Response>(() => {});
 
-    /** Kommen stempeln, sobald die Buchungen geladen sind (vorher ist der Button gesperrt) */
+    /** Kommen stempeln, sobald der Button frei ist */
     async function stampKommen() {
         const button = await screen.findByRole("button", {name: "Kommen"});
         await waitFor(() => expect((button as HTMLButtonElement).disabled).toBe(false));
@@ -166,6 +170,34 @@ describe("Optimistic Write", () => {
         expect(await screen.findByText("Abgelehnt vom Server")).toBeTruthy();
         await screen.findByRole("button", {name: "Kommen"});
         expect(screen.queryByText(/Eingestempelt/)).toBeNull();
+    });
+
+    it("stempelt Kommen, bevor die Buchungen geladen sind", async () => {
+        mockTimeEntries([], never, never);
+        renderPage();
+        await screen.findByText("Lade Status…");
+        await stampKommen();
+
+        expect(await screen.findByText(/Eingestempelt seit 12:00 Uhr/)).toBeTruthy();
+        expect(screen.getByRole("button", {name: "Gehen"})).toBeTruthy();
+    });
+
+    it("nimmt ein Kommen vor dem Laden bei Ablehnung zurück und zeigt die geladenen Buchungen", async () => {
+        // Der User war schon eingestempelt, die Buchungen kommen erst nach der Ablehnung
+        let rejected = false;
+        const read = async () => (rejected ? Response.json([KOMMEN]) : never());
+        const write = async () => {
+            rejected = true;
+            return Response.json({error: "Schon eingestempelt"}, {status: 422});
+        };
+        mockTimeEntries([], write, read);
+        renderPage();
+        await screen.findByText("Lade Status…");
+        await stampKommen();
+
+        expect(await screen.findByText("Schon eingestempelt")).toBeTruthy();
+        expect(await screen.findByText(/Eingestempelt seit 08:00 Uhr/)).toBeTruthy();
+        expect(screen.getByRole("button", {name: "Gehen"})).toBeTruthy();
     });
 
     it("entfernt eine gelöschte Buchung sofort und stellt sie bei Ablehnung wieder her", async () => {

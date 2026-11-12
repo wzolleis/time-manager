@@ -91,7 +91,7 @@ export function StampCard() {
                             className="w-full"
                             size="lg"
                             variant={isIn ? "destructive" : "default"}
-                            disabled={!stamping.isLoaded || stamping.isStamping}
+                            disabled={!stamping.canStamp}
                             onClick={stamp}
                         >
                             {isIn ? "Gehen" : "Kommen"}
