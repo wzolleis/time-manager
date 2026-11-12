@@ -167,7 +167,7 @@ describe("Optimistic Write", () => {
         renderPage();
         await stampKommen();
 
-        expect(await screen.findByText("Abgelehnt vom Server")).toBeTruthy();
+        expect(await screen.findByText("12:00 Uhr: Abgelehnt vom Server")).toBeTruthy();
         await screen.findByRole("button", {name: "Kommen"});
         expect(screen.queryByText(/Eingestempelt/)).toBeNull();
     });
@@ -195,7 +195,7 @@ describe("Optimistic Write", () => {
         await screen.findByText("Lade Status…");
         await stampKommen();
 
-        expect(await screen.findByText("Schon eingestempelt")).toBeTruthy();
+        expect(await screen.findByText("12:00 Uhr: Schon eingestempelt")).toBeTruthy();
         expect(await screen.findByText(/Eingestempelt seit 08:00 Uhr/)).toBeTruthy();
         expect(screen.getByRole("button", {name: "Gehen"})).toBeTruthy();
     });
@@ -211,7 +211,7 @@ describe("Optimistic Write", () => {
         await screen.findByText("Heute noch keine Buchungen.");
 
         answer(Response.json({error: "Abgelehnt vom Server"}, {status: 422}));
-        expect(await screen.findByText("Abgelehnt vom Server")).toBeTruthy();
+        expect(await screen.findByText("12:00 Uhr: Abgelehnt vom Server")).toBeTruthy();
         expect(await screen.findAllByRole("button", {name: "Löschen"})).toHaveLength(2);
     });
 });
