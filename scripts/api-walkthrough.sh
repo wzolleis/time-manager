@@ -285,10 +285,8 @@ VAC1=$(wt_id "$WT_BODY")
 wt_step "Überschneidung wird abgelehnt (10.06. bis 15.06.)" 422 "Überschneidet sich" POST $VAC \
   "$(vacation 2026-06-10 2026-06-15)"
 
-wt_step "Überschneidung am letzten Tag wird abgelehnt (12.06.)" 422 "Überschneidet sich" POST $VAC \
-  "$(vacation 2026-06-12 2026-06-12)"
-
-wt_step "Direkt angrenzender Urlaub ist erlaubt (13.06. bis 14.06.)" 201 '"endDate":"2026-06-14"' POST $VAC \
+# Grenzfälle der Überschneidung (am Rand, direkt angrenzend) prüft findOverlap in shared/vacation-rules.test.ts
+wt_step "Zweiten Urlaub 13.06. bis 14.06. anlegen" 201 '"endDate":"2026-06-14"' POST $VAC \
   "$(vacation 2026-06-13 2026-06-14)"
 VAC2=$(wt_id "$WT_BODY")
 

@@ -45,7 +45,7 @@ describe("overtimeReport", () => {
         expect(r.text).toBe("Überstunden: +6:30 h\nKorrektur am 12.10.2026: +3:30 h");
     });
 
-    it("rechnet ohne Korrektur ab Beginn der Zeiterfassung", () => {
+    it("zeigt ohne Korrektur „Keine Korrektur“ und den Saldo ab Beginn der Zeiterfassung", () => {
         const r = overtimeReport(data, null, NOW);
         expect(r.structured.balanceMinutes).toBe(3 * 60);
         expect(r.structured.correction).toBeNull();

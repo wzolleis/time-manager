@@ -20,11 +20,8 @@ describe("isApiPath", () => {
         expect(isApiPath(u(`/.netlify/functions/users/${ID}`), "users")).toBe(true);
     });
 
+    // Alle Endungen der Wiederholungen prüft stripRetrySuffix, hier nur, dass isApiPath sie verwendet
     it("akzeptiert die Wiederholungen von Netlify wie das Original", () => {
-        expect(isApiPath(u("/api/users.html?userId=1"), "users")).toBe(true);
-        expect(isApiPath(u("/api/users.htm"), "users")).toBe(true);
-        expect(isApiPath(u("/api/users/index.html"), "users")).toBe(true);
-        expect(isApiPath(u(`/api/users/${ID}.html`), "users")).toBe(true);
         expect(isApiPath(u(`/api/users/${ID}/index.htm`), "users")).toBe(true);
     });
 
@@ -50,10 +47,7 @@ describe("isRoutePath", () => {
     });
 
     it("akzeptiert die Wiederholungen von Netlify wie das Original", () => {
-        expect(isRoutePath(u(`/api/users/${ID}/vacations.html`), routes)).toBe(true);
-        expect(isRoutePath(u(`/api/users/${ID}/vacations/index.htm`), routes)).toBe(true);
         expect(isRoutePath(u(`/api/users/${ID}/vacations/${ID}.html`), routes)).toBe(true);
-        expect(isRoutePath(u(`/api/users/${ID}/vacations/${ID}/index.html`), routes)).toBe(true);
     });
 
     it("lehnt die alten Pfade, andere Endungen und zusätzliche Segmente ab", () => {
@@ -67,6 +61,8 @@ describe("isRoutePath", () => {
 });
 
 describe("stripRetrySuffix", () => {
+    // Die einzige Stelle, die alle Endungen prüft. isApiPath, isRoutePath, pathParams, IdSchema und endpointPath
+    // (roles.test.ts) verwenden stripRetrySuffix und prüfen je nur einen Fall.
     it("entfernt die Endungen der Wiederholungen", () => {
         expect(stripRetrySuffix("/api/users.html")).toBe("/api/users");
         expect(stripRetrySuffix("/api/users.htm")).toBe("/api/users");
@@ -97,9 +93,7 @@ describe("pathParams", () => {
         expect(pathParams(u("/api/vacations"), routes)).toEqual({});
     });
 
-    it("liest die ID auch aus den Wiederholungen von Netlify", () => {
-        expect(pathParams(u(`/api/vacations/${ID}.html`), routes)).toEqual({id: ID});
-        expect(pathParams(u(`/api/vacations/${ID}/index.htm`), routes)).toEqual({id: ID});
+    it("liest die Parameter auch aus den Wiederholungen von Netlify, mit einem Muster als String", () => {
         expect(pathParams(u("/api/auth/reset-password/index.html"), "/api/auth/:action")).toEqual({
             action: "reset-password",
         });

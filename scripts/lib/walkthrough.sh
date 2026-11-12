@@ -34,7 +34,8 @@ Aufruf: <skript> [-s | -f | -a] [-h]
   -h, --help         Diese Hilfe
 
 Umgebungsvariablen: API_USER (E-Mail), API_PASSWORD, BASE_URL (Standard http://localhost:8889, die Testdatenbank
-über npm run dev:test; http://localhost:8888 ist npx netlify dev mit der lokalen Datenbank)
+über npm run dev:test; http://localhost:8888 ist npx netlify dev mit der lokalen Datenbank). Andere Adressen als
+localhost lehnt das Skript ab, damit es nie gegen die Produktion läuft.
 API_USER und API_PASSWORD können auch in .env.local neben dem Skript stehen (Zeilen KEY=VALUE),
 gesetzte Umgebungsvariablen gehen vor. Fehlt beides, fragt das Skript nach.
 Während einer Pause: beliebige Taste = weiter, q = beenden (mit Aufräumen)
@@ -60,6 +61,11 @@ wt_init() {
   if [ "$WT_MODE" = "step" ]; then WT_STEPPING=1; else WT_STEPPING=0; fi
 
   WT_BASE="${BASE_URL:-http://localhost:8889}" # npm run dev:test, Testdatenbank
+  # Der Walkthrough legt User an und löscht Daten: nur gegen einen lokalen Server, nie gegen die Produktion
+  case "$WT_BASE" in
+    http://localhost:*|http://127.0.0.1:*) ;;
+    *) wt_abort "BASE_URL muss ein lokaler Server sein (http://localhost:<port>), nicht $WT_BASE" ;;
+  esac
   wt_load_env_local "$(dirname "$0")/.env.local"
   WT_AUTH_USER="${API_USER:-}"
   WT_AUTH_PASSWORD="${API_PASSWORD:-}"

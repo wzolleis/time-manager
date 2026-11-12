@@ -14,10 +14,8 @@ describe("endpointPath", () => {
         expect(endpointPath(`http://localhost/.netlify/functions/users/${ID}`)).toBe(`/api/users/${ID}`);
     });
 
+    // Alle Endungen prüft stripRetrySuffix in id.test.ts
     it("bildet die Wiederholungen von Netlify auf das Original ab", () => {
-        expect(endpointPath("http://localhost/api/users.html")).toBe("/api/users");
-        expect(endpointPath("http://localhost/api/users.htm")).toBe("/api/users");
-        expect(endpointPath("http://localhost/api/users/index.html")).toBe("/api/users");
         expect(endpointPath(`http://localhost/api/users/${ID}/roles/index.htm`)).toBe(`/api/users/${ID}/roles`);
     });
 });

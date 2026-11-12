@@ -24,8 +24,8 @@ describe("generateApiToken", () => {
 });
 
 describe("hashApiToken", () => {
+    // Ein anderes Verfahren machte alle gespeicherten Tokens ungültig, deshalb ein fester Wert (shasum -a 256)
     it("liefert den SHA-256 als Hex, wie ihn die Spalte token_hash speichert", () => {
-        expect(hashApiToken("tm_abc")).toMatch(/^[0-9a-f]{64}$/);
-        expect(hashApiToken("tm_abc")).toBe(hashApiToken("tm_abc"));
+        expect(hashApiToken("tm_abc")).toBe("d57b1e80b8e5fd7fec810e1574cc5ae9c4ca3f9cef18b9eead633b613cd66ee3");
     });
 });
