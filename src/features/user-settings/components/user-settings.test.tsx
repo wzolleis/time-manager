@@ -105,7 +105,8 @@ function renderPage() {
     );
 }
 
-const rowOf = (text: string) => screen.getByText(text).closest("tr")!;
+const rowOf = (text: string) => screen.getByRole("row", {name: (name) => name.includes(text)});
+const findRowOf = (text: string) => screen.findByRole("row", {name: (name) => name.includes(text)});
 
 /** Body des ersten POST an die API */
 const postedBody = (fetchMock: ReturnType<typeof mockApi>) => {
@@ -141,7 +142,7 @@ afterEach(() => {
 });
 
 /** Die Tabelle im Abschnitt mit der Überschrift title */
-const sectionOf = (title: string) => screen.getByRole("heading", {level: 2, name: title}).closest("section")!;
+const sectionOf = (title: string) => screen.getByRole("region", {name: title});
 
 describe("Einstellungen", () => {
     it("zeigt „Allgemein“ und je Einstellung mit Historie eine eigene Tabelle", async () => {
@@ -253,7 +254,7 @@ describe("Einstellungen", () => {
         mockApi([value("a", "6", "2026-03-01"), value("d", null, "2026-10-15")]);
         renderPage();
 
-        const planned = (await screen.findByText("Default (8 Stunden)")).closest("tr")!;
+        const planned = await findRowOf("Default (8 Stunden)");
         expect(within(planned).getByText("geplant")).toBeTruthy();
         expect(within(planned).getByText("15.10.2026")).toBeTruthy();
         expect(within(planned).getByRole("button", {name: "Löschen"})).toBeTruthy();
@@ -274,7 +275,7 @@ describe("Einstellung show_action_bar ohne Historie", () => {
         mockApi([]);
         renderPage();
 
-        const row = (await screen.findByText("show_action_bar")).closest("tr")!;
+        const row = await findRowOf("show_action_bar");
         expect(within(row).getByText("Ja")).toBeTruthy();
         expect(within(row).queryByText("aktuell")).toBeNull();
         expect(within(row).queryByText("–")).toBeNull();
@@ -286,7 +287,7 @@ describe("Einstellung show_action_bar ohne Historie", () => {
         const fetchMock = mockApi([]);
         renderPage();
 
-        const row = (await screen.findByText("show_action_bar")).closest("tr")!;
+        const row = await findRowOf("show_action_bar");
         fireEvent.click(within(row).getByRole("button", {name: "Ändern"}));
         await screen.findByLabelText("Wert");
         expect(screen.queryByLabelText("gültig ab")).toBeNull();
@@ -303,7 +304,7 @@ describe("Einstellung show_action_bar ohne Historie", () => {
                 value: "false",
             });
         });
-        const updated = (await screen.findByText("Nein")).closest("tr")!;
+        const updated = await findRowOf("Nein");
         expect(within(updated).getByText("show_action_bar")).toBeTruthy();
         expect(screen.getAllByText("show_action_bar")).toHaveLength(1);
     });
@@ -312,7 +313,7 @@ describe("Einstellung show_action_bar ohne Historie", () => {
         const fetchMock = mockApi([actionBarValue("false")]);
         renderPage();
 
-        const row = (await screen.findByText("Nein")).closest("tr")!;
+        const row = await findRowOf("Nein");
         fireEvent.click(within(row).getByRole("button", {name: "Auf Default zurücksetzen"}));
 
         await screen.findByText("Default (Ja)");

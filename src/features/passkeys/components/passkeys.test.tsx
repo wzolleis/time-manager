@@ -84,12 +84,14 @@ afterEach(() => {
     browser.startRegistration.mockReset();
 });
 
+const findRowOf = (text: string) => screen.findByRole("row", {name: (name) => name.includes(text)});
+
 describe("PasskeysPage", () => {
     it("zeigt die Passkeys mit Synchronisierung und letzter Nutzung", async () => {
         mockApi();
         renderPage();
 
-        const row = (await screen.findByText("MacBook")).closest("tr")!;
+        const row = await findRowOf("MacBook");
         expect(within(row).getByText("ja")).toBeTruthy();
         expect(within(row).getByText("nie")).toBeTruthy();
     });
@@ -131,7 +133,7 @@ describe("PasskeysPage", () => {
         const fetchMock = mockApi();
         renderPage();
 
-        const row = (await screen.findByText("MacBook")).closest("tr")!;
+        const row = await findRowOf("MacBook");
         fireEvent.click(within(row).getByRole("button", {name: "Löschen"}));
         expect(calls(fetchMock, "DELETE", "/api/passkeys/p1")).toHaveLength(0);
 

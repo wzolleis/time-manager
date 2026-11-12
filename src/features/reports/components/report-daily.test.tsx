@@ -257,12 +257,12 @@ describe("Zeitraum nachtragen", () => {
         await waitFor(() => expect(workTime.value).toBe("06:00"));
     });
 
-    it("zeigt an einem Tag mit Buchungen den frühesten Beginn, der der Arbeitszeit folgt", async () => {
+    // Wann eine Pause nötig ist und wie früh der Beginn sein darf, prüft earliestStart in time-rules.test.ts
+    it("passt den Beginn an die Arbeitszeit an, ein eigener Beginn bleibt stehen", async () => {
         const workTime = await openPeriod(ENTRIES);
         const start = screen.getByLabelText("Beginn") as HTMLInputElement;
-        // 2 h + 6 h = 8 h am Tag: 30 min Pause nach dem Gehen um 10:00
-        await waitFor(() => expect(start.value).toBe("10:30"));
-        // 2 h + 1 h = 3 h: keine Pause, 1 min nach dem Gehen
+        await waitFor(() => expect(start.value).not.toBe(""));
+        // Frühester Beginn nach dem Gehen um 10:00
         fireEvent.change(workTime, {target: {value: "01:00"}});
         expect(start.value).toBe("10:01");
         // Ein eigener Beginn bleibt stehen

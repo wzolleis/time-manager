@@ -120,30 +120,18 @@ describe("Urlaubsseite", () => {
         expect(screen.getAllByText("0 Tage")).toHaveLength(2); // genommen und ungeplant
     });
 
-    it("Feiertage im Urlaub verbrauchen keinen Urlaubstag", async () => {
-        mockApi(
-            [{id: "a", userId: USER.id, startDate: "2026-09-28", endDate: "2026-10-02"}], // Mo bis Fr
-            [{id: "h", userId: null, date: "2026-10-02", name: "Feiertag"}], // Freitag
-        );
-        renderPage();
-
-        await screen.findByText("Genommen");
-        expect(screen.getByText("4")).toBeTruthy(); // Urlaubstage in der Tabelle
-        expect(screen.getByText("4 Tage")).toBeTruthy(); // geplant
-        expect(screen.getByText("26 Tage")).toBeTruthy(); // ungeplant
-    });
-
-    it("Krankheitstage im Urlaub verbrauchen keinen Urlaubstag", async () => {
+    // Die Regel prüft vacation-rules.test.ts, hier nur, dass die Seite Feiertage und Krankmeldungen mitgibt
+    it("rechnet Feiertage und Krankheitstage im Urlaub nicht als Urlaubstage", async () => {
         mockApi(
             [{id: "a", userId: USER.id, startDate: "2026-10-12", endDate: "2026-10-23"}], // 10 Arbeitstage
-            [],
+            [{id: "h", userId: null, date: "2026-10-20", name: "Feiertag"}], // Dienstag
             [{id: "k", userId: USER.id, startDate: "2026-10-14", endDate: "2026-10-16", note: null}], // Mi bis Fr
         );
         renderPage();
 
         await screen.findByText("Genommen");
-        expect(screen.getByText("7")).toBeTruthy(); // Urlaubstage in der Tabelle
-        expect(screen.getByText("7 Tage")).toBeTruthy(); // geplant
-        expect(screen.getByText("23 Tage")).toBeTruthy(); // ungeplant
+        expect(screen.getByText("6")).toBeTruthy(); // Urlaubstage in der Tabelle
+        expect(screen.getByText("6 Tage")).toBeTruthy(); // geplant
+        expect(screen.getByText("24 Tage")).toBeTruthy(); // ungeplant
     });
 });

@@ -75,14 +75,16 @@ afterEach(() => {
     vi.unstubAllGlobals();
 });
 
+const findRowOf = (text: string) => screen.findByRole("row", {name: (name) => name.includes(text)});
+
 describe("ApiTokensPage", () => {
     it("markiert abgelaufene Tokens und zeigt Tokens ohne Ablauf", async () => {
         mockApi();
         renderPage();
 
-        const laptop = (await screen.findByText("Laptop")).closest("tr")!;
+        const laptop = await findRowOf("Laptop");
         expect(within(laptop).getByText(/abgelaufen/)).toBeTruthy();
-        const server = screen.getByText("Server").closest("tr")!;
+        const server = await findRowOf("Server");
         expect(within(server).getByText("kein Ablauf")).toBeTruthy();
     });
 
@@ -108,7 +110,7 @@ describe("ApiTokensPage", () => {
         const fetchMock = mockApi();
         renderPage();
 
-        const server = (await screen.findByText("Server")).closest("tr")!;
+        const server = await findRowOf("Server");
         fireEvent.click(within(server).getByRole("button", {name: "Widerrufen"}));
         expect(calls(fetchMock, "DELETE")).toHaveLength(0);
 

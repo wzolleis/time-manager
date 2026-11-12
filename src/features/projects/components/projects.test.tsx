@@ -66,7 +66,7 @@ function renderPage(path = "/user/projects") {
     );
 }
 
-const rowOf = (text: string) => screen.getByText(text).closest("tr")!;
+const rowOf = (text: string) => screen.getByRole("row", {name: (name) => name.includes(text)});
 const names = () =>
     screen
         .getAllByRole("row")
@@ -125,8 +125,7 @@ describe("Projekte", () => {
         );
         renderPage();
 
-        const empty = await screen.findByText("Keine Projekte vorhanden.");
-        expect(empty.closest("td")).toBeTruthy();
+        expect(await screen.findByRole("cell", {name: "Keine Projekte vorhanden."})).toBeTruthy();
     });
 
     it("löscht ein Projekt erst nach Bestätigung", async () => {
