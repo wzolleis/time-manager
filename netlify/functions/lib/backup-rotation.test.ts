@@ -52,17 +52,19 @@ describe("backupsToDelete", () => {
         expect(backupsToDelete(names)).toEqual([]);
     });
 
-    it("löscht nie fremde Dateien oder unfertige Uploads", () => {
+    it("löscht unfertige Uploads, auch neben wenigen Backups", () => {
+        const tmp = `${file("2026-11-07T02:00:00Z")}.tmp`;
+        expect(backupsToDelete([...nightly("2026-11-01", 6), tmp])).toEqual([tmp]);
+    });
+
+    it("löscht nie fremde Dateien", () => {
         const names = [
             ...nightly("2026-01-01", 365),
-            "time_manager_2026-01-01T020000Z.sql.gz.age.tmp",
+            "notizen.tmp",
+            "time_manager_2026-01-01.sql.gz.age.tmp",
             "notizen.txt",
             "time_manager_2026-01-01.sql.gz.age",
         ];
-        const deleted = backupsToDelete(names);
-        expect(deleted).not.toContain("time_manager_2026-01-01T020000Z.sql.gz.age.tmp");
-        expect(deleted).not.toContain("notizen.txt");
-        expect(deleted).not.toContain("time_manager_2026-01-01.sql.gz.age");
-        expect(deleted.every(isBackupFileName)).toBe(true);
+        expect(backupsToDelete(names).every(isBackupFileName)).toBe(true);
     });
 });
