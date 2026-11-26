@@ -3,7 +3,7 @@ name: database-backup
 description: Der Administrator sichert die Datenbank der Produktion. Das Programm erstellt jede Nacht oder auf Knopfdruck einen verschlüsselten SQL-Dump auf dem Backup-Speicher. In der UI sieht er das Ergebnis und kopiert das neueste Backup auf seinen Rechner.
 type: story
 epics: betrieb
-state: open
+state: resolved
 ---
 
 # Database Backup
@@ -44,7 +44,10 @@ kostenpflichtig möglich (https://www.webhostone.de/webhosting). Fehler, die sp�
    Verbindung ist immer TLS (höchstens 1.2, mit 1.3 brachen lokal Datenverbindungen ab), unverschlüsseltes FTP ist ausgeschlossen. Das Zertifikat wird normal geprüft (Kette und
    Hostname), weicht es ab, bricht der Upload ab, damit das Passwort nicht an einen falschen Server geht.
 9. **Aufbewahrung.** Die Function löscht alte Stände selbst und behält 7 tägliche, 4 wöchentliche und 12 monatliche.
-   Sie löscht nur nach einem erfolgreichen Upload und nur Dateien, deren Name zum Muster passt. Einen reinen Schreibzugriff
+   Sie löscht nur nach einem erfolgreichen Upload und nur Dateien, deren Name zum Muster passt. Unfertige Uploads
+   (`<name>.tmp`) löscht sie immer: Aufgeräumt wird nur im Lauf, der die Sperre hat, ein anderer Upload läuft dann
+   nicht. Zu jeder gelöschten Datei löscht sie auch den Lauf in `backup_runs`, außer dem Lauf mit der letzten Kopie,
+   denn an ihm hängt das Datum der letzten Kopie (Regel 12). Einen reinen Schreibzugriff
    beschreibt die Doku des Hosters nicht. Mit den Netlify-Secrets ließen sich Backups also auch löschen.
 10. **Fehler fallen auf.** Jeder Lauf speichert Zeitpunkt, Auslöser, Ergebnis, Dateigröße und die Fehlermeldung (ohne
     Zugangsdaten). Die Administration warnt, wenn der letzte Lauf fehlgeschlagen oder der letzte Erfolg älter als
@@ -64,9 +67,9 @@ kostenpflichtig möglich (https://www.webhostone.de/webhosting). Fehler, die sp�
 
 | Situation                                       | Ergebnis                                                        |
 |-------------------------------------------------|-----------------------------------------------------------------|
-| Nächtlicher Lauf klappt                         | Neue Datei auf dem Backup-Speicher, alte Stände sind rotiert    |
+| Nächtlicher Lauf klappt                         | Neue Datei auf dem Backup-Speicher, alte Stände und ihre Läufe sind gelöscht |
 | FTPS-Server nicht erreichbar                    | Lauf fehlgeschlagen, Warnung, vorhandene Backups bleiben stehen |
-| Upload bricht ab                                | Nur eine `.tmp`-Datei, sie zählt nicht als Backup               |
+| Upload bricht ab                                | Nur eine `.tmp`-Datei, sie zählt nicht als Backup und wird beim nächsten Lauf gelöscht |
 | Zertifikat ungültig oder Hostname falsch        | Kein Upload, Lauf fehlgeschlagen                                |
 | Zwei Administratoren starten gleichzeitig       | Der zweite bekommt die Meldung, dass ein Backup läuft           |
 | Nächtlicher Lauf wurde nicht ausgelöst          | Nach 26 Stunden ohne Erfolg erscheint die Warnung               |
@@ -163,8 +166,8 @@ Noch offen, erst mit der Produktion zu prüfen:
 
 ## Tests
 
-- `netlify/functions/lib/backup-rotation.test.ts`: Welche Stände bleiben (7/4/12), fremde Dateien und `.tmp` werden nicht
-  angefasst.
+- `netlify/functions/lib/backup-rotation.test.ts`: Welche Stände bleiben (7/4/12), unfertige Uploads werden gelöscht,
+  fremde Dateien nicht angefasst.
 - `netlify/functions/lib/backup-file.test.ts`: Datumswerte, `NULL`, Umlaute, `ß`, `€`, Anführungszeichen und Binärdaten werden
   richtig in SQL geschrieben; `sessions` ohne Daten.
 - **Rundreise gegen die lokale Datenbank:** Dump aus der lokalen Datenbank erstellen, mit `npm run backup:restore` in

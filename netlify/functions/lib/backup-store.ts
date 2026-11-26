@@ -1,7 +1,7 @@
 // netlify/functions/lib/backup-store.ts
 // Ein Lauf des Datenbank-Backups und die gespeicherten Läufe (features/use-case/database-backup.md)
 import {randomUUID} from "node:crypto";
-import {desc, eq, isNotNull, and, max} from "drizzle-orm";
+import {and, desc, eq, inArray, isNotNull, isNull, lt, max, or} from "drizzle-orm";
 import mysql, {type Connection} from "mysql2/promise";
 import {backupRuns} from "../../../db/schema";
 import type {BackupOverview, BackupRun, BackupSource} from "@shared/backup";
@@ -108,7 +108,9 @@ async function finishRun(
             await uploadBackup(client, fileName, file);
             const uploaded = {fileName, sizeBytes: file.byteLength};
             try {
-                await rotateBackups(client); // erst nach dem erfolgreichen Upload
+                const {removed, error} = await rotateBackups(client); // erst nach dem erfolgreichen Upload
+                await forgetBackupFiles(removed);
+                if (error) throw error;
                 return {...uploaded, status: "succeeded", error: null};
             } catch (err) {
                 return {
@@ -129,6 +131,23 @@ async function finishRun(
         .set({...result, finishedAt: finished.finishedAt})
         .where(eq(backupRuns.id, run.id));
     return finished;
+}
+
+/**
+ * Löscht die Läufe, deren Datei beim Aufräumen gelöscht wurde. Der Lauf mit der letzten Kopie bleibt, denn sein
+ * copiedAt ist das Datum der letzten Kopie (backupOverview), sonst hieße es "noch nie kopiert".
+ */
+async function forgetBackupFiles(fileNames: string[]): Promise<void> {
+    if (fileNames.length === 0) return;
+    const [{lastCopiedAt}] = await db.select({lastCopiedAt: max(backupRuns.copiedAt)}).from(backupRuns);
+    await db
+        .delete(backupRuns)
+        .where(
+            and(
+                inArray(backupRuns.fileName, fileNames),
+                lastCopiedAt ? or(isNull(backupRuns.copiedAt), lt(backupRuns.copiedAt, lastCopiedAt)) : undefined,
+            ),
+        );
 }
 
 /** Die letzten Läufe und das Datum der letzten Kopie */

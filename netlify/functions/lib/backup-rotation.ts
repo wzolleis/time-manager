@@ -19,6 +19,9 @@ export function backupFileName(at: Date): string {
 
 export const isBackupFileName = (name: string) => BACKUP_FILE.test(name);
 
+// Ein abgebrochener Upload eines Backups (uploadBackup), nicht irgendeine .tmp-Datei
+const isUnfinishedUpload = (name: string) => name.endsWith(".tmp") && isBackupFileName(name.slice(0, -".tmp".length));
+
 // Der Montag der Woche als "JJJJ-MM-TT", in UTC wie der Dateiname
 function weekKey(year: number, month: number, day: number): string {
     const date = new Date(Date.UTC(year, month - 1, day));
@@ -28,7 +31,8 @@ function weekKey(year: number, month: number, day: number): string {
 
 /**
  * Die Backups, die beim Aufräumen gelöscht werden. Es bleiben je das neueste Backup der letzten 7 Tage, 4 Wochen und
- * 12 Monate, an denen es Backups gibt. Andere Dateien, auch unfertige Uploads (.tmp), werden nie gelöscht.
+ * 12 Monate, an denen es Backups gibt. Unfertige Uploads (.tmp) eines Backups werden immer gelöscht: Aufgeräumt
+ * wird nur im Lauf, der die Sperre hat, ein anderer Upload läuft dann nicht. Andere Dateien werden nie gelöscht.
  */
 export function backupsToDelete(names: string[]): string[] {
     const backups = names
@@ -51,5 +55,6 @@ export function backupsToDelete(names: string[]): string[] {
     keepNewestPer(KEEP_WEEKLY, ([, y, m, d]) => weekKey(Number(y), Number(m), Number(d)));
     keepNewestPer(KEEP_MONTHLY, ([, y, m]) => `${y}-${m}`);
 
-    return backups.filter((b) => !keep.has(b.name)).map((b) => b.name);
+    const unfinished = names.filter(isUnfinishedUpload);
+    return [...backups.filter((b) => !keep.has(b.name)).map((b) => b.name), ...unfinished];
 }

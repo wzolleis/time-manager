@@ -39,12 +39,22 @@ export async function uploadBackup(client: Client, name: string, data: Uint8Arra
     await client.rename(tmp, name);
 }
 
-/** Löscht die alten Backups nach backupsToDelete und liefert ihre Namen */
-export async function rotateBackups(client: Client): Promise<string[]> {
-    const names = (await client.list()).filter((f) => f.isFile).map((f) => f.name);
-    const obsolete = backupsToDelete(names);
-    for (const name of obsolete) await client.remove(name);
-    return obsolete;
+/**
+ * Löscht die alten Backups nach backupsToDelete. Liefert die gelöschten Namen auch dann, wenn das Löschen
+ * mittendrin fehlschlägt, damit der Aufrufer ihre Läufe trotzdem entfernen kann.
+ */
+export async function rotateBackups(client: Client): Promise<{removed: string[]; error: unknown}> {
+    const removed: string[] = [];
+    try {
+        const names = (await client.list()).filter((f) => f.isFile).map((f) => f.name);
+        for (const name of backupsToDelete(names)) {
+            await client.remove(name);
+            removed.push(name);
+        }
+        return {removed, error: null};
+    } catch (error) {
+        return {removed, error};
+    }
 }
 
 /**
